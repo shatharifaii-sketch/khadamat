@@ -2,7 +2,7 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Camera, Music, Wrench, Truck, Palette, TrendingUp, Code, Shirt, Printer, Plus, Search, Star, Users, CheckCircle } from 'lucide-react';
+import { Camera, Music, Wrench, Truck, Palette, TrendingUp, Code, Shirt, Printer, Plus, Search, Star, Users, CheckCircle, Home } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 
 const Index = () => {
