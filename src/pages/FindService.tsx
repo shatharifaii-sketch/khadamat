@@ -78,8 +78,8 @@ const FindService = () => {
   const filteredProviders = serviceProviders.filter(provider => {
     const matchesSearch = provider.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          provider.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = !selectedCategory || provider.category === selectedCategory;
-    const matchesLocation = !selectedLocation || provider.location === selectedLocation;
+    const matchesCategory = !selectedCategory || selectedCategory === 'all-categories' || provider.category === selectedCategory;
+    const matchesLocation = !selectedLocation || selectedLocation === 'all-locations' || provider.location === selectedLocation;
     
     return matchesSearch && matchesCategory && matchesLocation;
   });
@@ -122,7 +122,7 @@ const FindService = () => {
                     <SelectValue placeholder="جميع الفئات" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">جميع الفئات</SelectItem>
+                    <SelectItem value="all-categories">جميع الفئات</SelectItem>
                     {serviceCategories.map((category) => (
                       <SelectItem key={category.value} value={category.value}>
                         {category.label}
@@ -139,7 +139,7 @@ const FindService = () => {
                     <SelectValue placeholder="جميع المناطق" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">جميع المناطق</SelectItem>
+                    <SelectItem value="all-locations">جميع المناطق</SelectItem>
                     {locations.map((location) => (
                       <SelectItem key={location} value={location}>
                         {location}
