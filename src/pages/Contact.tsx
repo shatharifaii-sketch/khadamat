@@ -254,15 +254,15 @@ const Contact = () => {
             </p>
             <div className="grid md:grid-cols-3 gap-6">
               <div className="text-center">
-                <div className="text-3xl font-bold text-primary mb-2">< 1 ساعة</div>
+                <div className="text-3xl font-bold text-primary mb-2">أقل من ساعة</div>
                 <div className="text-large text-muted-foreground">المشاكل التقنية العاجلة</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-primary mb-2">< 4 ساعات</div>
+                <div className="text-3xl font-bold text-primary mb-2">أقل من 4 ساعات</div>
                 <div className="text-large text-muted-foreground">الاستفسارات العامة</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-primary mb-2">< 24 ساعة</div>
+                <div className="text-3xl font-bold text-primary mb-2">أقل من 24 ساعة</div>
                 <div className="text-large text-muted-foreground">طلبات الشراكة</div>
               </div>
             </div>
