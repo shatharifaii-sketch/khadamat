@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,9 +6,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Camera, Music, Wrench, Truck, Palette, TrendingUp, Code, Shirt, Printer, Upload, CreditCard } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 
 const PostService = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     title: '',
     category: '',
@@ -39,8 +40,8 @@ const PostService = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // This would normally show subscription payment modal
-    alert('سيتم تحويلك لصفحة الدفع للاشتراك الشهري (10 شيكل)');
+    // Navigate to checkout page with service data
+    navigate('/checkout', { state: { serviceData: formData } });
   };
 
   return (
