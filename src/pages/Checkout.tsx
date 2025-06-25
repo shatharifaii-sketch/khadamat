@@ -5,7 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { CreditCard, CheckCircle, ArrowRight, ArrowLeft } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { CreditCard, CheckCircle, ArrowRight, ArrowLeft, Smartphone, Wallet } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 
@@ -14,6 +15,7 @@ const Checkout = () => {
   const location = useLocation();
   const serviceData = location.state?.serviceData;
 
+  const [paymentMethod, setPaymentMethod] = useState('card');
   const [paymentData, setPaymentData] = useState({
     cardNumber: '',
     expiryDate: '',
@@ -66,18 +68,9 @@ const Checkout = () => {
               </div>
               
               <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span>الاشتراك الشهري</span>
-                  <span>10.00 شيكل</span>
-                </div>
-                <div className="flex justify-between text-muted-foreground">
-                  <span>ضريبة القيمة المضافة</span>
-                  <span>1.60 شيكل</span>
-                </div>
-                <Separator />
                 <div className="flex justify-between font-bold text-lg">
                   <span>المجموع</span>
-                  <span>11.60 شيكل</span>
+                  <span>10.00 شيكل</span>
                 </div>
               </div>
 
@@ -103,69 +96,125 @@ const Checkout = () => {
           {/* Payment Form */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-xl">معلومات الدفع</CardTitle>
+              <CardTitle className="text-xl">طريقة الدفع</CardTitle>
               <CardDescription>
-                أدخل معلومات بطاقتك الائتمانية
+                اختر طريقة الدفع المناسبة لك
               </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handlePayment} className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="cardholderName" className="text-large font-semibold">اسم حامل البطاقة *</Label>
-                  <Input
-                    id="cardholderName"
-                    placeholder="الاسم كما يظهر على البطاقة"
-                    value={paymentData.cardholderName}
-                    onChange={(e) => handleInputChange('cardholderName', e.target.value)}
-                    className="text-large"
-                    required
-                  />
+                {/* Payment Method Selection */}
+                <div className="space-y-4">
+                  <Label className="text-large font-semibold">اختر طريقة الدفع</Label>
+                  <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
+                    <div className="flex items-center space-x-2 p-3 border rounded-lg">
+                      <RadioGroupItem value="card" id="card" />
+                      <Label htmlFor="card" className="flex items-center gap-2 cursor-pointer">
+                        <CreditCard size={20} />
+                        <span>بطاقة ائتمانية</span>
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2 p-3 border rounded-lg">
+                      <RadioGroupItem value="paypal" id="paypal" />
+                      <Label htmlFor="paypal" className="flex items-center gap-2 cursor-pointer">
+                        <Wallet size={20} />
+                        <span>PayPal</span>
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2 p-3 border rounded-lg">
+                      <RadioGroupItem value="mobile" id="mobile" />
+                      <Label htmlFor="mobile" className="flex items-center gap-2 cursor-pointer">
+                        <Smartphone size={20} />
+                        <span>الدفع عبر الهاتف المحمول</span>
+                      </Label>
+                    </div>
+                  </RadioGroup>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="cardNumber" className="text-large font-semibold">رقم البطاقة *</Label>
-                  <div className="relative">
-                    <Input
-                      id="cardNumber"
-                      placeholder="1234 5678 9012 3456"
-                      value={paymentData.cardNumber}
-                      onChange={(e) => handleInputChange('cardNumber', e.target.value)}
-                      className="text-large pl-12"
-                      required
-                    />
-                    <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={20} />
+                <Separator />
+
+                {/* Card Payment Form */}
+                {paymentMethod === 'card' && (
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="cardholderName" className="text-large font-semibold">اسم حامل البطاقة *</Label>
+                      <Input
+                        id="cardholderName"
+                        placeholder="الاسم كما يظهر على البطاقة"
+                        value={paymentData.cardholderName}
+                        onChange={(e) => handleInputChange('cardholderName', e.target.value)}
+                        className="text-large"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="cardNumber" className="text-large font-semibold">رقم البطاقة *</Label>
+                      <div className="relative">
+                        <Input
+                          id="cardNumber"
+                          placeholder="1234 5678 9012 3456"
+                          value={paymentData.cardNumber}
+                          onChange={(e) => handleInputChange('cardNumber', e.target.value)}
+                          className="text-large pl-12"
+                          required
+                        />
+                        <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={20} />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="expiryDate" className="text-large font-semibold">تاريخ الانتهاء *</Label>
+                        <Input
+                          id="expiryDate"
+                          placeholder="MM/YY"
+                          value={paymentData.expiryDate}
+                          onChange={(e) => handleInputChange('expiryDate', e.target.value)}
+                          className="text-large"
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="cvv" className="text-large font-semibold">CVV *</Label>
+                        <Input
+                          id="cvv"
+                          placeholder="123"
+                          value={paymentData.cvv}
+                          onChange={(e) => handleInputChange('cvv', e.target.value)}
+                          className="text-large"
+                          required
+                        />
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="expiryDate" className="text-large font-semibold">تاريخ الانتهاء *</Label>
+                {/* PayPal Payment */}
+                {paymentMethod === 'paypal' && (
+                  <div className="text-center p-6 border rounded-lg bg-blue-50">
+                    <Wallet className="mx-auto mb-4 text-blue-600" size={48} />
+                    <p className="text-lg mb-4">سيتم توجيهك إلى PayPal لإتمام الدفع</p>
+                  </div>
+                )}
+
+                {/* Mobile Payment */}
+                {paymentMethod === 'mobile' && (
+                  <div className="text-center p-6 border rounded-lg bg-green-50">
+                    <Smartphone className="mx-auto mb-4 text-green-600" size={48} />
+                    <p className="text-lg mb-4">سيتم إرسال رسالة نصية لإتمام الدفع</p>
                     <Input
-                      id="expiryDate"
-                      placeholder="MM/YY"
-                      value={paymentData.expiryDate}
-                      onChange={(e) => handleInputChange('expiryDate', e.target.value)}
+                      placeholder="رقم الهاتف المحمول"
                       className="text-large"
                       required
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="cvv" className="text-large font-semibold">CVV *</Label>
-                    <Input
-                      id="cvv"
-                      placeholder="123"
-                      value={paymentData.cvv}
-                      onChange={(e) => handleInputChange('cvv', e.target.value)}
-                      className="text-large"
-                      required
-                    />
-                  </div>
-                </div>
+                )}
 
                 <div className="space-y-4 pt-4">
                   <Button type="submit" size="lg" className="w-full text-xl py-6">
                     <ArrowRight className="ml-2" size={20} />
-                    إتمام الدفع (11.60 شيكل)
+                    إتمام الدفع (10.00 شيكل)
                   </Button>
                   
                   <Button 
