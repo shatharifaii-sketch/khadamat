@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Camera, Music, Wrench, Truck, Palette, TrendingUp, Code, Shirt, Printer, Search, MapPin, Phone, Mail, Star } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Camera, Music, Wrench, Truck, Palette, TrendingUp, Code, Shirt, Printer, Search, MapPin, Phone, Mail, Star, Copy, PhoneCall } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 
 const FindService = () => {
@@ -83,6 +84,16 @@ const FindService = () => {
     
     return matchesSearch && matchesCategory && matchesLocation;
   });
+
+  const handleCopyPhone = (phoneNumber: string) => {
+    navigator.clipboard.writeText(phoneNumber);
+    // You could add a toast notification here
+    console.log('Phone number copied:', phoneNumber);
+  };
+
+  const handleCallDirect = (phoneNumber: string) => {
+    window.location.href = `tel:${phoneNumber}`;
+  };
 
   return (
     <div className="min-h-screen bg-background arabic">
@@ -194,10 +205,38 @@ const FindService = () => {
                   </div>
 
                   <div className="pt-4 space-y-2">
-                    <Button className="w-full text-large" size="lg">
-                      <Phone size={18} className="ml-2" />
-                      اتصل الآن
-                    </Button>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button className="w-full text-large" size="lg">
+                          <Phone size={18} className="ml-2" />
+                          اتصل الآن
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-56">
+                        <div className="space-y-2">
+                          <Button
+                            className="w-full justify-start"
+                            variant="ghost"
+                            onClick={() => handleCallDirect(provider.phone)}
+                          >
+                            <PhoneCall size={16} className="ml-2" />
+                            اتصل مباشرة
+                          </Button>
+                          <Button
+                            className="w-full justify-start"
+                            variant="ghost"
+                            onClick={() => handleCopyPhone(provider.phone)}
+                          >
+                            <Copy size={16} className="ml-2" />
+                            نسخ الرقم
+                          </Button>
+                          <div className="px-2 py-1 text-sm text-muted-foreground">
+                            {provider.phone}
+                          </div>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                    
                     <Button variant="outline" className="w-full text-large" size="lg">
                       <Mail size={18} className="ml-2" />
                       أرسل رسالة
