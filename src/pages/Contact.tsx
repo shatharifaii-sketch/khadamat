@@ -6,7 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Mail, Phone, MapPin, Clock, MessageCircle, Send } from 'lucide-react';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Mail, Phone, MapPin, Clock, Send } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 
 const Contact = () => {
@@ -73,6 +74,25 @@ const Contact = () => {
     { value: 'feedback', label: 'اقتراح أو ملاحظة' }
   ];
 
+  const faqs = [
+    {
+      question: 'كيف أنشر خدمة جديدة؟',
+      answer: 'لنشر خدمة جديدة، اتبع الخطوات التالية:\n1. سجل دخولك إلى حسابك\n2. اضغط على "انشر خدمتك" من القائمة الرئيسية\n3. املأ تفاصيل الخدمة مثل العنوان والوصف والسعر\n4. أضف صور توضيحية لأعمالك السابقة\n5. حدد الفئة المناسبة لخدمتك\n6. اضغط على "نشر الخدمة"\n\nملاحظة: يجب أن يكون لديك اشتراك نشط (10 شيكل شهرياً) لنشر الخدمات.'
+    },
+    {
+      question: 'ما هي تكلفة الاشتراك؟',
+      answer: 'تكلفة الاشتراك للمقدمين الخدمات هي 10 شيكل شهرياً فقط.\nهذا الاشتراك يتيح لك:\n• نشر خدمات غير محدودة\n• الوصول إلى لوحة التحكم الكاملة\n• إحصائيات مفصلة عن خدماتك\n• التواصل المباشر مع العملاء\n• دعم فني على مدار الساعة\n\nبالنسبة للباحثين عن الخدمات، التسجيل والبحث مجاني تماماً.'
+    },
+    {
+      question: 'كيف أغير معلومات حسابي؟',
+      answer: 'لتعديل معلومات حسابك:\n1. اذهب إلى "حسابي" من القائمة الرئيسية\n2. اضغط على تبويب "الملف الشخصي"\n3. يمكنك تعديل:\n   • الاسم ومعلومات الاتصال\n   • الصورة الشخصية\n   • الوصف المهني\n   • مهاراتك وخبراتك\n   • عينات من أعمالك\n4. احفظ التغييرات\n\nإذا كنت تريد تغيير البريد الإلكتروني أو كلمة المرور، تواصل معنا عبر الدعم الفني.'
+    },
+    {
+      question: 'طرق الدفع المتاحة',
+      answer: 'نوفر طرق دفع متعددة لراحتك:\n\nللاشتراك الشهري (مقدمي الخدمات):\n• الدفع بالبطاقة الائتمانية (فيزا/ماستركارد)\n• PayPal\n• التحويل البنكي المحلي\n• الدفع عبر الهاتف المحمول\n\nبين العملاء ومقدمي الخدمات:\n• الدفع النقدي عند التسليم\n• التحويل البنكي\n• محافظ إلكترونية محلية\n• يمكن الاتفاق على طريقة الدفع مع مقدم الخدمة مباشرة\n\nجميع المعاملات آمنة ومحمية.'
+    }
+  ];
+
   return (
     <div className="min-h-screen bg-background arabic">
       <Navigation />
@@ -116,28 +136,27 @@ const Contact = () => {
               </CardContent>
             </Card>
 
-            {/* FAQ Quick Links */}
+            {/* FAQ Section */}
             <Card className="mt-6">
               <CardHeader>
                 <CardTitle className="text-xl">الأسئلة الشائعة</CardTitle>
+                <CardDescription>
+                  إجابات سريعة على الأسئلة الأكثر شيوعاً
+                </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <Button variant="ghost" className="w-full justify-start text-large p-3 h-auto">
-                  <MessageCircle size={18} className="ml-2" />
-                  كيف أنشر خدمة جديدة؟
-                </Button>
-                <Button variant="ghost" className="w-full justify-start text-large p-3 h-auto">
-                  <MessageCircle size={18} className="ml-2" />
-                  ما هي تكلفة الاشتراك؟
-                </Button>
-                <Button variant="ghost" className="w-full justify-start text-large p-3 h-auto">
-                  <MessageCircle size={18} className="ml-2" />
-                  كيف أغير معلومات حسابي؟
-                </Button>
-                <Button variant="ghost" className="w-full justify-start text-large p-3 h-auto">
-                  <MessageCircle size={18} className="ml-2" />
-                  طرق الدفع المتاحة
-                </Button>
+              <CardContent>
+                <Accordion type="single" collapsible className="w-full">
+                  {faqs.map((faq, index) => (
+                    <AccordionItem key={index} value={`item-${index}`}>
+                      <AccordionTrigger className="text-right text-large font-semibold">
+                        {faq.question}
+                      </AccordionTrigger>
+                      <AccordionContent className="text-right whitespace-pre-line text-muted-foreground leading-relaxed">
+                        {faq.answer}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
               </CardContent>
             </Card>
           </div>
