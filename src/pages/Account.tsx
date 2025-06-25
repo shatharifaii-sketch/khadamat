@@ -1,11 +1,11 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { User, Mail, Lock, LogIn, UserPlus, CreditCard, Shield } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { User, Mail, Lock, LogIn, UserPlus, CreditCard, Shield, Eye, MessageSquare, Edit3, Settings, BarChart3, FileText, Calendar } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 
 const Account = () => {
@@ -19,9 +19,51 @@ const Account = () => {
     userType: 'client' // 'client' or 'provider'
   });
 
+  // Mock data for dashboard
+  const subscriptionHistory = [
+    { id: 1, date: '2024-12-25', amount: '10 شيكل', plan: 'مقدم خدمة', status: 'مدفوع' },
+    { id: 2, date: '2024-11-25', amount: '10 شيكل', plan: 'مقدم خدمة', status: 'مدفوع' },
+    { id: 3, date: '2024-10-25', amount: '10 شيكل', plan: 'مقدم خدمة', status: 'مدفوع' },
+  ];
+
+  const services = [
+    { 
+      id: 1, 
+      title: 'تصوير الأفراح والمناسبات', 
+      status: 'منشور', 
+      views: 245, 
+      chats: 8, 
+      price: '300-600 شيكل',
+      publishedDate: '2024-12-01'
+    },
+    { 
+      id: 2, 
+      title: 'تصوير المنتجات التجارية', 
+      status: 'مسودة', 
+      views: 0, 
+      chats: 0, 
+      price: '150-300 شيكل',
+      publishedDate: null
+    },
+    { 
+      id: 3, 
+      title: 'تصوير البورتريه الشخصي', 
+      status: 'منشور', 
+      views: 89, 
+      chats: 3, 
+      price: '100-200 شيكل',
+      publishedDate: '2024-11-15'
+    },
+  ];
+
+  const chats = [
+    { id: 1, clientName: 'سارة أحمد', serviceName: 'تصوير الأفراح', lastMessage: 'هل يمكن تحديد موعد للتصوير؟', time: '10 دقائق', unread: true },
+    { id: 2, clientName: 'محمد خالد', serviceName: 'تصوير الأفراح', lastMessage: 'شكراً لك، سأتواصل معك قريباً', time: '2 ساعات', unread: false },
+    { id: 3, clientName: 'ليلى عثمان', serviceName: 'تصوير البورتريه', lastMessage: 'ما هي الأسعار المتاحة؟', time: '1 يوم', unread: true },
+  ];
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // In real app, this would authenticate with backend
     setIsLoggedIn(true);
     console.log('Login attempt:', loginData);
   };
@@ -32,13 +74,11 @@ const Account = () => {
       alert('كلمات المرور غير متطابقة');
       return;
     }
-    // In real app, this would create account
     setIsLoggedIn(true);
     console.log('Signup attempt:', signupData);
   };
 
   const handleGoogleAuth = () => {
-    // In real app, this would handle Google OAuth
     setIsLoggedIn(true);
     console.log('Google authentication');
   };
@@ -54,114 +94,419 @@ const Account = () => {
       <div className="min-h-screen bg-background arabic">
         <Navigation />
         
-        <div className="max-w-4xl mx-auto py-12 px-4">
+        <div className="max-w-7xl mx-auto py-8 px-4">
           <div className="text-center mb-8">
             <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              حسابي
+              لوحة التحكم
             </h1>
             <p className="text-xl text-muted-foreground">
-              مرحباً بك في لوحة التحكم الخاصة بك
+              إدارة حسابك وخدماتك من مكان واحد
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* Profile Info */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-xl">
-                  <User size={24} />
-                  المعلومات الشخصية
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label className="text-large font-semibold">الاسم الكامل</Label>
-                  <Input value="أحمد محمد" className="text-large mt-2" />
-                </div>
-                <div>
-                  <Label className="text-large font-semibold">البريد الإلكتروني</Label>
-                  <Input value="ahmed@example.com" className="text-large mt-2" />
-                </div>
-                <div>
-                  <Label className="text-large font-semibold">رقم الهاتف</Label>
-                  <Input value="0599123456" className="text-large mt-2" />
-                </div>
-                <Button className="w-full text-large">
-                  حفظ التغييرات
-                </Button>
-              </CardContent>
-            </Card>
+          <Tabs defaultValue="overview" className="w-full">
+            <TabsList className="grid w-full grid-cols-6 mb-8">
+              <TabsTrigger value="overview" className="text-sm">نظرة عامة</TabsTrigger>
+              <TabsTrigger value="services" className="text-sm">خدماتي</TabsTrigger>
+              <TabsTrigger value="chats" className="text-sm">المحادثات</TabsTrigger>
+              <TabsTrigger value="subscription" className="text-sm">الاشتراك</TabsTrigger>
+              <TabsTrigger value="analytics" className="text-sm">الإحصائيات</TabsTrigger>
+              <TabsTrigger value="profile" className="text-sm">الملف الشخصي</TabsTrigger>
+            </TabsList>
 
-            {/* Subscription Status */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-xl">
-                  <CreditCard size={24} />
-                  حالة الاشتراك
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="bg-primary/10 p-4 rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-large font-semibold">النوع:</span>
-                    <span className="text-primary font-bold">مقدم خدمة</span>
-                  </div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-large font-semibold">الاشتراك:</span>
-                    <span className="text-green-600 font-bold">نشط</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-large font-semibold">التجديد:</span>
-                    <span className="text-large">15 يناير 2025</span>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Button className="w-full text-large">
-                    إدارة الاشتراك
-                  </Button>
-                  <Button variant="outline" className="w-full text-large">
-                    تاريخ الدفعات
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* My Services */}
-            <Card className="md:col-span-2">
-              <CardHeader>
-                <CardTitle className="text-xl">خدماتي المنشورة</CardTitle>
-                <CardDescription className="text-large">
-                  إدارة وتعديل الخدمات التي تقدمها
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="border rounded-lg p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <h4 className="text-xl font-semibold">تصوير الأفراح والمناسبات</h4>
-                      <div className="flex gap-2">
-                        <Button size="sm" variant="outline">تعديل</Button>
-                        <Button size="sm" variant="destructive">حذف</Button>
+            {/* Overview Tab */}
+            <TabsContent value="overview" className="space-y-6">
+              <div className="grid md:grid-cols-4 gap-6">
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-primary/10 p-3 rounded-lg">
+                        <FileText className="h-6 w-6 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold">3</p>
+                        <p className="text-muted-foreground">خدمات منشورة</p>
                       </div>
                     </div>
-                    <p className="text-muted-foreground text-large mb-2">
-                      تصوير احترافي للأفراح والمناسبات الخاصة مع خبرة 7 سنوات
-                    </p>
-                    <div className="flex items-center gap-4 text-large">
-                      <span className="text-primary font-semibold">300-600 شيكل</span>
-                      <span className="text-muted-foreground">رام الله</span>
-                      <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">نشط</span>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-blue-100 p-3 rounded-lg">
+                        <Eye className="h-6 w-6 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold">334</p>
+                        <p className="text-muted-foreground">إجمالي المشاهدات</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-green-100 p-3 rounded-lg">
+                        <MessageSquare className="h-6 w-6 text-green-600" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold">11</p>
+                        <p className="text-muted-foreground">محادثات جديدة</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-purple-100 p-3 rounded-lg">
+                        <CreditCard className="h-6 w-6 text-purple-600" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold">نشط</p>
+                        <p className="text-muted-foreground">حالة الاشتراك</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>الخدمات الأكثر مشاهدة</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {services.filter(s => s.status === 'منشور').map((service) => (
+                        <div key={service.id} className="flex justify-between items-center">
+                          <div>
+                            <p className="font-medium">{service.title}</p>
+                            <p className="text-sm text-muted-foreground">{service.price}</p>
+                          </div>
+                          <div className="text-left">
+                            <p className="font-bold">{service.views}</p>
+                            <p className="text-xs text-muted-foreground">مشاهدة</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>المحادثات الأخيرة</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {chats.slice(0, 3).map((chat) => (
+                        <div key={chat.id} className="flex items-start gap-3">
+                          <div className="bg-primary/10 p-2 rounded-full">
+                            <User className="h-4 w-4" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex justify-between items-center mb-1">
+                              <p className="font-medium text-sm">{chat.clientName}</p>
+                              <span className="text-xs text-muted-foreground">{chat.time}</span>
+                            </div>
+                            <p className="text-sm text-muted-foreground">{chat.lastMessage}</p>
+                            {chat.unread && <div className="w-2 h-2 bg-primary rounded-full mt-1"></div>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            {/* Services Tab */}
+            <TabsContent value="services" className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold">إدارة الخدمات</h2>
+                <Button>
+                  <FileText className="ml-2 h-4 w-4" />
+                  إضافة خدمة جديدة
+                </Button>
+              </div>
+
+              <Card>
+                <CardContent className="p-0">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>اسم الخدمة</TableHead>
+                        <TableHead>الحالة</TableHead>
+                        <TableHead>السعر</TableHead>
+                        <TableHead>المشاهدات</TableHead>
+                        <TableHead>المحادثات</TableHead>
+                        <TableHead>تاريخ النشر</TableHead>
+                        <TableHead>الإجراءات</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {services.map((service) => (
+                        <TableRow key={service.id}>
+                          <TableCell className="font-medium">{service.title}</TableCell>
+                          <TableCell>
+                            <span className={`px-2 py-1 rounded-full text-xs ${
+                              service.status === 'منشور' 
+                                ? 'bg-green-100 text-green-800' 
+                                : 'bg-yellow-100 text-yellow-800'
+                            }`}>
+                              {service.status}
+                            </span>
+                          </TableCell>
+                          <TableCell>{service.price}</TableCell>
+                          <TableCell>{service.views}</TableCell>
+                          <TableCell>{service.chats}</TableCell>
+                          <TableCell>{service.publishedDate || 'غير منشور'}</TableCell>
+                          <TableCell>
+                            <div className="flex gap-2">
+                              <Button size="sm" variant="outline">
+                                <Edit3 className="h-4 w-4" />
+                              </Button>
+                              <Button size="sm" variant="outline">
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Chats Tab */}
+            <TabsContent value="chats" className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold">المحادثات</h2>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm">الكل</Button>
+                  <Button variant="outline" size="sm">غير مقروءة</Button>
+                </div>
+              </div>
+
+              <div className="grid gap-4">
+                {chats.map((chat) => (
+                  <Card key={chat.id} className={chat.unread ? 'border-primary' : ''}>
+                    <CardContent className="p-4">
+                      <div className="flex items-start gap-4">
+                        <div className="bg-primary/10 p-3 rounded-full">
+                          <User className="h-6 w-6" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex justify-between items-center mb-2">
+                            <h4 className="font-semibold">{chat.clientName}</h4>
+                            <span className="text-sm text-muted-foreground">{chat.time}</span>
+                          </div>
+                          <p className="text-sm text-muted-foreground mb-2">{chat.serviceName}</p>
+                          <p className="text-sm">{chat.lastMessage}</p>
+                          {chat.unread && (
+                            <div className="flex items-center gap-2 mt-2">
+                              <div className="w-2 h-2 bg-primary rounded-full"></div>
+                              <span className="text-xs text-primary font-medium">رسالة جديدة</span>
+                            </div>
+                          )}
+                        </div>
+                        <Button size="sm">رد</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+
+            {/* Subscription Tab */}
+            <TabsContent value="subscription" className="space-y-6">
+              <div className="grid md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <CreditCard size={24} />
+                      حالة الاشتراك
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="bg-primary/10 p-4 rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-semibold">النوع:</span>
+                        <span className="text-primary font-bold">مقدم خدمة</span>
+                      </div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-semibold">الاشتراك:</span>
+                        <span className="text-green-600 font-bold">نشط</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold">التجديد:</span>
+                        <span>15 يناير 2025</span>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Button className="w-full">إدارة الاشتراك</Button>
+                      <Button variant="outline" className="w-full">تغيير الخطة</Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>تاريخ الدفعات</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {subscriptionHistory.map((payment) => (
+                        <div key={payment.id} className="flex justify-between items-center py-2 border-b">
+                          <div>
+                            <p className="font-medium">{payment.plan}</p>
+                            <p className="text-sm text-muted-foreground">{payment.date}</p>
+                          </div>
+                          <div className="text-left">
+                            <p className="font-semibold">{payment.amount}</p>
+                            <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                              {payment.status}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            {/* Analytics Tab */}
+            <TabsContent value="analytics" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 size={24} />
+                    إحصائيات الأداء
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid md:grid-cols-3 gap-6">
+                    <div className="text-center">
+                      <p className="text-3xl font-bold text-primary">334</p>
+                      <p className="text-muted-foreground">إجمالي المشاهدات</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-3xl font-bold text-blue-600">11</p>
+                      <p className="text-muted-foreground">المحادثات الشهر الحالي</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-3xl font-bold text-green-600">67%</p>
+                      <p className="text-muted-foreground">معدل التفاعل</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>أداء الخدمات</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {services.filter(s => s.status === 'منشور').map((service) => (
+                      <div key={service.id} className="flex justify-between items-center p-4 border rounded-lg">
+                        <div>
+                          <h4 className="font-semibold">{service.title}</h4>
+                          <p className="text-sm text-muted-foreground">منشور في {service.publishedDate}</p>
+                        </div>
+                        <div className="flex gap-6 text-center">
+                          <div>
+                            <p className="font-bold text-primary">{service.views}</p>
+                            <p className="text-xs text-muted-foreground">مشاهدة</p>
+                          </div>
+                          <div>
+                            <p className="font-bold text-blue-600">{service.chats}</p>
+                            <p className="text-xs text-muted-foreground">محادثة</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Profile Tab */}
+            <TabsContent value="profile" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <User size={24} />
+                    تعديل الملف الشخصي
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <Label className="font-semibold">الاسم الكامل</Label>
+                      <Input defaultValue="أحمد محمد" className="mt-2" />
+                    </div>
+                    <div>
+                      <Label className="font-semibold">البريد الإلكتروني</Label>
+                      <Input defaultValue="ahmed@example.com" className="mt-2" />
                     </div>
                   </div>
                   
-                  <Button className="w-full text-large" size="lg">
-                    إضافة خدمة جديدة
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <Label className="font-semibold">رقم الهاتف</Label>
+                      <Input defaultValue="0599123456" className="mt-2" />
+                    </div>
+                    <div>
+                      <Label className="font-semibold">المدينة</Label>
+                      <Input defaultValue="رام الله" className="mt-2" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="font-semibold">نبذة عني</Label>
+                    <Input 
+                      defaultValue="مصور محترف مع خبرة 7 سنوات في تصوير الأفراح والمناسبات" 
+                      className="mt-2" 
+                    />
+                  </div>
+
+                  <Button className="w-full">حفظ التغييرات</Button>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Lock size={24} />
+                    تغيير كلمة المرور
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label>كلمة المرور الحالية</Label>
+                    <Input type="password" className="mt-2" />
+                  </div>
+                  <div>
+                    <Label>كلمة المرور الجديدة</Label>
+                    <Input type="password" className="mt-2" />
+                  </div>
+                  <div>
+                    <Label>تأكيد كلمة المرور الجديدة</Label>
+                    <Input type="password" className="mt-2" />
+                  </div>
+                  <Button className="w-full">تغيير كلمة المرور</Button>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
 
           {/* Logout */}
           <div className="text-center mt-8">
@@ -169,7 +514,6 @@ const Account = () => {
               onClick={handleLogout}
               variant="outline" 
               size="lg"
-              className="text-large"
             >
               تسجيل الخروج
             </Button>
