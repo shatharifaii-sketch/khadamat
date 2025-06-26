@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -5,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Camera, Music, Wrench, Truck, Palette, TrendingUp, Code, Shirt, Printer, Upload, CreditCard } from 'lucide-react';
+import { Camera, Music, Wrench, Truck, Palette, TrendingUp, Code, Shirt, Printer, Upload, CreditCard, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 
@@ -64,9 +65,20 @@ const PostService = () => {
                 <CreditCard className="text-primary" size={24} />
                 <span className="text-xl font-semibold text-primary">اشتراك شهري: 10 شيكل فقط</span>
               </div>
-              <p className="text-muted-foreground text-large">
+              <p className="text-muted-foreground text-large mb-4">
                 يشمل الاشتراك: نشر خدمات غير محدودة، تواصل مباشر مع العملاء، وإظهار متقدم في نتائج البحث
               </p>
+              
+              {/* Service Limit Notice */}
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertCircle className="text-yellow-600" size={20} />
+                  <span className="font-semibold text-yellow-800">حد الخدمات</span>
+                </div>
+                <p className="text-yellow-700">
+                  يحق لك نشر خدمتين (2) فقط لكل اشتراك. إذا كنت تريد نشر خدمات إضافية، ستحتاج لدفع 10 شيكل إضافية لكل خدمتين.
+                </p>
+              </div>
             </CardContent>
           </Card>
         </div>

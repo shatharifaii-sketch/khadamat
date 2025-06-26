@@ -63,7 +63,7 @@ const Checkout = () => {
                 <CheckCircle className="text-primary" size={24} />
                 <div>
                   <h3 className="font-semibold text-lg">اشتراك شهري</h3>
-                  <p className="text-muted-foreground">نشر خدمات غير محدود</p>
+                  <p className="text-muted-foreground">نشر خدمتين شهرياً</p>
                 </div>
               </div>
               
@@ -77,11 +77,19 @@ const Checkout = () => {
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                 <h4 className="font-semibold text-green-800 mb-2">يشمل الاشتراك:</h4>
                 <ul className="text-green-700 space-y-1">
-                  <li>• نشر خدمات غير محدودة</li>
+                  <li>• نشر خدمتين شهرياً</li>
                   <li>• تواصل مباشر مع العملاء</li>
                   <li>• إظهار متقدم في البحث</li>
                   <li>• دعم فني على مدار الساعة</li>
                 </ul>
+              </div>
+
+              {/* Service Limit Warning */}
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <h4 className="font-semibold text-yellow-800 mb-2">حد الخدمات:</h4>
+                <p className="text-yellow-700 text-sm">
+                  يسمح لك بنشر خدمتين فقط. للخدمات الإضافية، ستحتاج لدفع 10 شيكل إضافية لكل خدمتين.
+                </p>
               </div>
 
               {serviceData && (
