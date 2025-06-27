@@ -6,13 +6,17 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Camera, Music, Wrench, Truck, Palette, TrendingUp, Code, Shirt, Printer, Search, MapPin, Phone, Mail, Star, Copy, PhoneCall } from 'lucide-react';
+import { Camera, Music, Wrench, Truck, Palette, TrendingUp, Code, Shirt, Printer, Search, MapPin, Phone, Mail, Star, Copy, PhoneCall, Loader2 } from 'lucide-react';
 import Navigation from '@/components/Navigation';
+import { usePublicServices } from '@/hooks/usePublicServices';
+import { toast } from 'sonner';
 
 const FindService = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
+
+  const { data: services = [], isLoading, error } = usePublicServices();
 
   const serviceCategories = [
     { icon: Camera, value: 'photography', label: 'التصوير الفوتوغرافي' },
@@ -30,70 +34,54 @@ const FindService = () => {
     'رام الله', 'نابلس', 'الخليل', 'بيت لحم', 'جنين', 'طولكرم', 'قلقيلية', 'سلفيت', 'أريحا', 'طوباس'
   ];
 
-  // Sample service providers (in real app, this would come from backend)
-  const serviceProviders = [
-    {
-      id: 1,
-      name: 'أحمد محمد',
-      service: 'تصوير الأفراح والمناسبات',
-      category: 'photography',
-      location: 'رام الله',
-      price: '300-600 شيكل',
-      rating: 4.8,
-      reviews: 45,
-      phone: '0599123456',
-      email: 'ahmed@example.com',
-      experience: '7 سنوات',
-      image: '/api/placeholder/300/200'
-    },
-    {
-      id: 2,
-      name: 'فاطمة أحمد',
-      service: 'تصميم جرافيكي وهوية بصرية',
-      category: 'graphic-design',
-      location: 'نابلس',
-      price: '150-400 شيكل',
-      rating: 4.9,
-      reviews: 67,
-      phone: '0598765432',
-      email: 'fatima@example.com',
-      experience: '5 سنوات',
-      image: '/api/placeholder/300/200'
-    },
-    {
-      id: 3,
-      name: 'خالد سالم',
-      service: 'سباكة وصيانة منزلية',
-      category: 'plumbing',
-      location: 'الخليل',
-      price: '80-200 شيكل',
-      rating: 4.7,
-      reviews: 89,
-      phone: '0597654321',
-      email: 'khaled@example.com',
-      experience: '10 سنوات',
-      image: '/api/placeholder/300/200'
-    },
-  ];
-
-  const filteredProviders = serviceProviders.filter(provider => {
-    const matchesSearch = provider.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         provider.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = !selectedCategory || selectedCategory === 'all-categories' || provider.category === selectedCategory;
-    const matchesLocation = !selectedLocation || selectedLocation === 'all-locations' || provider.location === selectedLocation;
+  const filteredProviders = services.filter(service => {
+    const matchesSearch = service.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         service.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (service.profiles?.full_name || '').toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = !selectedCategory || selectedCategory === 'all-categories' || service.category === selectedCategory;
+    const matchesLocation = !selectedLocation || selectedLocation === 'all-locations' || service.location === selectedLocation;
     
     return matchesSearch && matchesCategory && matchesLocation;
   });
 
   const handleCopyPhone = (phoneNumber: string) => {
     navigator.clipboard.writeText(phoneNumber);
-    // You could add a toast notification here
-    console.log('Phone number copied:', phoneNumber);
+    toast.success('تم نسخ رقم الهاتف');
   };
 
   const handleCallDirect = (phoneNumber: string) => {
     window.location.href = `tel:${phoneNumber}`;
   };
+
+  const handleEmailContact = (email: string) => {
+    window.location.href = `mailto:${email}`;
+  };
+
+  const getCategoryIcon = (category: string) => {
+    const categoryData = serviceCategories.find(cat => cat.value === category);
+    return categoryData ? categoryData.icon : Camera;
+  };
+
+  const getCategoryLabel = (category: string) => {
+    const categoryData = serviceCategories.find(cat => cat.value === category);
+    return categoryData ? categoryData.label : category;
+  };
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background arabic">
+        <Navigation />
+        <div className="max-w-7xl mx-auto py-12 px-4">
+          <Card className="p-12 text-center">
+            <h3 className="text-2xl font-semibold mb-2 text-red-600">حدث خطأ في تحميل الخدمات</h3>
+            <p className="text-large text-muted-foreground">
+              يرجى المحاولة مرة أخرى لاحقاً
+            </p>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background arabic">
@@ -163,93 +151,124 @@ const FindService = () => {
           </CardContent>
         </Card>
 
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex justify-center items-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin" />
+            <span className="mr-2 text-large">جاري تحميل الخدمات...</span>
+          </div>
+        )}
+
         {/* Results */}
-        <div className="mb-6">
-          <p className="text-large text-muted-foreground">
-            تم العثور على {filteredProviders.length} نتيجة
-          </p>
-        </div>
+        {!isLoading && (
+          <div className="mb-6">
+            <p className="text-large text-muted-foreground">
+              تم العثور على {filteredProviders.length} نتيجة
+            </p>
+          </div>
+        )}
 
         {/* Service Providers Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProviders.map((provider) => (
-            <Card key={provider.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="aspect-video bg-muted rounded-lg mb-4 flex items-center justify-center">
-                  <Camera size={48} className="text-muted-foreground" />
-                </div>
-                <CardTitle className="text-xl-large">{provider.service}</CardTitle>
-                <div className="flex items-center justify-between">
-                  <p className="text-large font-semibold text-primary">{provider.name}</p>
-                  <div className="flex items-center gap-1">
-                    <Star size={16} className="text-yellow-500 fill-current" />
-                    <span className="text-large font-semibold">{provider.rating}</span>
-                    <span className="text-muted-foreground">({provider.reviews})</span>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <MapPin size={16} />
-                    <span className="text-large">{provider.location}</span>
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <Badge variant="secondary" className="text-large">
-                      {provider.price}
-                    </Badge>
-                    <span className="text-muted-foreground text-large">
-                      خبرة {provider.experience}
-                    </span>
-                  </div>
+        {!isLoading && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredProviders.map((service) => {
+              const CategoryIcon = getCategoryIcon(service.category);
+              return (
+                <Card key={service.id} className="hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <div className="aspect-video bg-muted rounded-lg mb-4 flex items-center justify-center">
+                      <CategoryIcon size={48} className="text-muted-foreground" />
+                    </div>
+                    <CardTitle className="text-xl-large">{service.title}</CardTitle>
+                    <div className="flex items-center justify-between">
+                      <p className="text-large font-semibold text-primary">
+                        {service.profiles?.full_name || 'مقدم خدمة'}
+                      </p>
+                      <div className="flex items-center gap-1">
+                        <Star size={16} className="text-yellow-500 fill-current" />
+                        <span className="text-large font-semibold">جديد</span>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <p className="text-muted-foreground text-sm line-clamp-2">
+                        {service.description}
+                      </p>
+                      
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <MapPin size={16} />
+                        <span className="text-large">{service.location}</span>
+                      </div>
+                      
+                      <div className="flex justify-between items-center">
+                        <Badge variant="secondary" className="text-large">
+                          {service.price_range}
+                        </Badge>
+                        <Badge variant="outline" className="text-large">
+                          {getCategoryLabel(service.category)}
+                        </Badge>
+                      </div>
 
-                  <div className="pt-4 space-y-2">
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button className="w-full text-large" size="lg">
-                          <Phone size={18} className="ml-2" />
-                          اتصل الآن
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-56">
-                        <div className="space-y-2">
-                          <Button
-                            className="w-full justify-start"
-                            variant="ghost"
-                            onClick={() => handleCallDirect(provider.phone)}
-                          >
-                            <PhoneCall size={16} className="ml-2" />
-                            اتصل مباشرة
-                          </Button>
-                          <Button
-                            className="w-full justify-start"
-                            variant="ghost"
-                            onClick={() => handleCopyPhone(provider.phone)}
-                          >
-                            <Copy size={16} className="ml-2" />
-                            نسخ الرقم
-                          </Button>
-                          <div className="px-2 py-1 text-sm text-muted-foreground">
-                            {provider.phone}
-                          </div>
+                      {service.experience && (
+                        <div className="text-muted-foreground text-large">
+                          خبرة {service.experience}
                         </div>
-                      </PopoverContent>
-                    </Popover>
-                    
-                    <Button variant="outline" className="w-full text-large" size="lg">
-                      <Mail size={18} className="ml-2" />
-                      أرسل رسالة
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                      )}
+
+                      <div className="pt-4 space-y-2">
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button className="w-full text-large" size="lg">
+                              <Phone size={18} className="ml-2" />
+                              اتصل الآن
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-56">
+                            <div className="space-y-2">
+                              <Button
+                                className="w-full justify-start"
+                                variant="ghost"
+                                onClick={() => handleCallDirect(service.phone)}
+                              >
+                                <PhoneCall size={16} className="ml-2" />
+                                اتصل مباشرة
+                              </Button>
+                              <Button
+                                className="w-full justify-start"
+                                variant="ghost"
+                                onClick={() => handleCopyPhone(service.phone)}
+                              >
+                                <Copy size={16} className="ml-2" />
+                                نسخ الرقم
+                              </Button>
+                              <div className="px-2 py-1 text-sm text-muted-foreground">
+                                {service.phone}
+                              </div>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                        
+                        <Button 
+                          variant="outline" 
+                          className="w-full text-large" 
+                          size="lg"
+                          onClick={() => handleEmailContact(service.email)}
+                        >
+                          <Mail size={18} className="ml-2" />
+                          أرسل رسالة
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
 
         {/* No Results */}
-        {filteredProviders.length === 0 && (
+        {!isLoading && filteredProviders.length === 0 && (
           <Card className="p-12 text-center">
             <Search size={64} className="mx-auto text-muted-foreground mb-4" />
             <h3 className="text-2xl font-semibold mb-2">لم يتم العثور على نتائج</h3>
