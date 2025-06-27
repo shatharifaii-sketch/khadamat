@@ -35,28 +35,168 @@ export type Database = {
       }
       profiles: {
         Row: {
+          bio: string | null
           created_at: string
+          experience_years: number | null
           full_name: string | null
           id: string
+          is_service_provider: boolean | null
           location: string | null
           phone: string | null
+          profile_image_url: string | null
           updated_at: string
         }
         Insert: {
+          bio?: string | null
           created_at?: string
+          experience_years?: number | null
           full_name?: string | null
           id: string
+          is_service_provider?: boolean | null
           location?: string | null
           phone?: string | null
+          profile_image_url?: string | null
           updated_at?: string
         }
         Update: {
+          bio?: string | null
           created_at?: string
+          experience_years?: number | null
           full_name?: string | null
           id?: string
+          is_service_provider?: boolean | null
           location?: string | null
           phone?: string | null
+          profile_image_url?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      service_images: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          image_name: string | null
+          image_url: string
+          service_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          image_name?: string | null
+          image_url: string
+          service_id: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          image_name?: string | null
+          image_url?: string
+          service_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_images_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      services: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          email: string
+          experience: string | null
+          id: string
+          location: string
+          phone: string
+          price_range: string
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+          views: number
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description: string
+          email: string
+          experience?: string | null
+          id?: string
+          location: string
+          phone: string
+          price_range: string
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+          views?: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          email?: string
+          experience?: string | null
+          id?: string
+          location?: string
+          phone?: string
+          price_range?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+          views?: number
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          amount: number
+          billing_cycle: string
+          created_at: string
+          currency: string
+          expires_at: string
+          id: string
+          plan_type: string
+          started_at: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          billing_cycle?: string
+          created_at?: string
+          currency?: string
+          expires_at?: string
+          id?: string
+          plan_type?: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          billing_cycle?: string
+          created_at?: string
+          currency?: string
+          expires_at?: string
+          id?: string
+          plan_type?: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

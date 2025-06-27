@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,9 +8,15 @@ import { Label } from '@/components/ui/label';
 import { Camera, Music, Wrench, Truck, Palette, TrendingUp, Code, Shirt, Printer, Upload, CreditCard, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
+import { useServices } from '@/hooks/useServices';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 const PostService = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { createService, isCreating } = useServices();
+  
   const [formData, setFormData] = useState({
     title: '',
     category: '',
@@ -19,7 +24,7 @@ const PostService = () => {
     price: '',
     location: '',
     phone: '',
-    email: '',
+    email: user?.email || '',
     experience: '',
   });
 
@@ -35,14 +40,41 @@ const PostService = () => {
     { icon: Printer, value: 'printing', label: 'خدمات الطباعة' },
   ];
 
+  // Redirect to auth if not logged in
+  if (!user) {
+    navigate('/auth');
+    return null;
+  }
+
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Navigate to checkout page with service data
-    navigate('/checkout', { state: { serviceData: formData } });
+    
+    if (!formData.title || !formData.category || !formData.description || !formData.price || !formData.location || !formData.phone) {
+      toast.error('يرجى ملء جميع الحقول المطلوبة');
+      return;
+    }
+
+    try {
+      await createService.mutateAsync({
+        title: formData.title,
+        category: formData.category,
+        description: formData.description,
+        price_range: formData.price,
+        location: formData.location,
+        phone: formData.phone,
+        email: formData.email,
+        experience: formData.experience
+      });
+      
+      // Navigate to account page to see the service
+      navigate('/account');
+    } catch (error) {
+      console.error('Error submitting service:', error);
+    }
   };
 
   return (
@@ -222,8 +254,13 @@ const PostService = () => {
 
               {/* Submit Button */}
               <div className="pt-6">
-                <Button type="submit" size="lg" className="w-full text-xl py-6">
-                  انشر الخدمة والاشتراك (10 شيكل/شهر)
+                <Button 
+                  type="submit" 
+                  size="lg" 
+                  className="w-full text-xl py-6"
+                  disabled={isCreating}
+                >
+                  {isCreating ? 'جاري النشر...' : 'انشر الخدمة والاشتراك (10 شيكل/شهر)'}
                 </Button>
                 <p className="text-center text-muted-foreground mt-4 text-large">
                   ستحصل على 7 أيام تجربة مجانية
