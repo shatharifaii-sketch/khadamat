@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,7 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Camera, Music, Wrench, Truck, Palette, TrendingUp, Code, Shirt, Printer, Search, MapPin, Phone, Mail, Star, Copy, PhoneCall, Loader2 } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Camera, Music, Wrench, Truck, Palette, TrendingUp, Code, Shirt, Printer, Search, MapPin, Phone, Mail, Star, Copy, PhoneCall, Loader2, AlertTriangle, X } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import { usePublicServices } from '@/hooks/usePublicServices';
 import { toast } from 'sonner';
@@ -15,8 +15,11 @@ const FindService = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
+  const [showError, setShowError] = useState(true);
 
   const { data: services = [], isLoading, error } = usePublicServices();
+
+  console.log('FindService render - services:', services, 'isLoading:', isLoading, 'error:', error);
 
   const serviceCategories = [
     { icon: Camera, value: 'photography', label: 'التصوير الفوتوغرافي' },
@@ -67,22 +70,6 @@ const FindService = () => {
     return categoryData ? categoryData.label : category;
   };
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-background arabic">
-        <Navigation />
-        <div className="max-w-7xl mx-auto py-12 px-4">
-          <Card className="p-12 text-center">
-            <h3 className="text-2xl font-semibold mb-2 text-red-600">حدث خطأ في تحميل الخدمات</h3>
-            <p className="text-large text-muted-foreground">
-              يرجى المحاولة مرة أخرى لاحقاً
-            </p>
-          </Card>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-background arabic">
       <Navigation />
@@ -96,6 +83,27 @@ const FindService = () => {
             اعثر على أفضل مقدمي الخدمات في منطقتك
           </p>
         </div>
+
+        {/* Error Alert */}
+        {error && showError && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle className="flex items-center justify-between">
+              حدث خطأ في تحميل الخدمات
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowError(false)}
+                className="h-auto p-1"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </AlertTitle>
+            <AlertDescription>
+              يرجى المحاولة مرة أخرى لاحقاً أو تحديث الصفحة
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Search and Filters */}
         <Card className="mb-8">
@@ -160,7 +168,7 @@ const FindService = () => {
         )}
 
         {/* Results */}
-        {!isLoading && (
+        {!isLoading && !error && (
           <div className="mb-6">
             <p className="text-large text-muted-foreground">
               تم العثور على {filteredProviders.length} نتيجة
@@ -169,7 +177,7 @@ const FindService = () => {
         )}
 
         {/* Service Providers Grid */}
-        {!isLoading && (
+        {!isLoading && !error && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProviders.map((service) => {
               const CategoryIcon = getCategoryIcon(service.category);
@@ -268,7 +276,7 @@ const FindService = () => {
         )}
 
         {/* No Results */}
-        {!isLoading && filteredProviders.length === 0 && (
+        {!isLoading && !error && filteredProviders.length === 0 && (
           <Card className="p-12 text-center">
             <Search size={64} className="mx-auto text-muted-foreground mb-4" />
             <h3 className="text-2xl font-semibold mb-2">لم يتم العثور على نتائج</h3>

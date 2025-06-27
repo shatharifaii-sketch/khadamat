@@ -24,6 +24,8 @@ export const usePublicServices = () => {
   return useQuery({
     queryKey: ['public-services'],
     queryFn: async () => {
+      console.log('Fetching public services...');
+      
       const { data, error } = await supabase
         .from('services')
         .select(`
@@ -36,8 +38,15 @@ export const usePublicServices = () => {
         .eq('status', 'published')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching services:', error);
+        throw error;
+      }
+
+      console.log('Fetched services:', data);
       return data as PublicService[];
-    }
+    },
+    retry: 1,
+    staleTime: 30000, // 30 seconds
   });
 };
