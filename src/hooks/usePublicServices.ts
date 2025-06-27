@@ -30,7 +30,7 @@ export const usePublicServices = () => {
         .from('services')
         .select(`
           *,
-          profiles:user_id (
+          profiles!inner (
             full_name,
             profile_image_url
           )
