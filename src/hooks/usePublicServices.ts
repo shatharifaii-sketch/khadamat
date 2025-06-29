@@ -26,11 +26,21 @@ export const usePublicServices = () => {
     queryFn: async () => {
       console.log('Fetching public services...');
       
+      // First, let's try to get all services without join to see if they exist
+      const { data: allServices, error: allServicesError } = await supabase
+        .from('services')
+        .select('*')
+        .eq('status', 'published')
+        .order('created_at', { ascending: false });
+
+      console.log('All services (without join):', allServices, 'Error:', allServicesError);
+
+      // Now try with the join
       const { data, error } = await supabase
         .from('services')
         .select(`
           *,
-          profiles!inner (
+          profiles (
             full_name,
             profile_image_url
           )
@@ -39,11 +49,19 @@ export const usePublicServices = () => {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching services:', error);
+        console.error('Error fetching services with profiles:', error);
+        // Fallback to services without profile join if join fails
+        if (allServices && !allServicesError) {
+          console.log('Using fallback services without profile data');
+          return allServices.map(service => ({
+            ...service,
+            profiles: null
+          })) as PublicService[];
+        }
         throw error;
       }
 
-      console.log('Fetched services:', data);
+      console.log('Fetched services with profiles:', data);
       return data as PublicService[];
     },
     retry: 1,
