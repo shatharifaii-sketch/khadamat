@@ -82,10 +82,10 @@ export const useConversations = () => {
           })
         );
 
-        return conversationsWithProfiles as Conversation[];
+        return conversationsWithProfiles;
       }
 
-      return data as Conversation[];
+      return data || [];
     },
     enabled: !!user
   });
