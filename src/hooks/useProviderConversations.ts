@@ -50,7 +50,7 @@ export const useProviderConversations = () => {
 
             return {
               ...conversation,
-              profiles: profileData
+              profiles: profileData || { full_name: 'عميل' }
             };
           })
         );
@@ -58,7 +58,7 @@ export const useProviderConversations = () => {
         return conversationsWithProfiles;
       }
 
-      // Map the data to ensure proper typing
+      // Map the data to ensure proper typing and handle null profiles
       return (data || []).map((item): Conversation => ({
         id: item.id,
         service_id: item.service_id,
@@ -69,7 +69,7 @@ export const useProviderConversations = () => {
         created_at: item.created_at,
         updated_at: item.updated_at,
         services: item.services,
-        profiles: item.profiles
+        profiles: item.profiles || { full_name: 'عميل' }
       }));
     },
     enabled: !!user

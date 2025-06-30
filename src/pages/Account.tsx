@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,7 +23,7 @@ const Account = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const { profile, updateProfile, isLoading: profileLoading } = useProfile();
-  const { getUserServices, isLoading: servicesLoading } = useServices();
+  const { getUserServices } = useServices();
   const { getUserSubscription } = useSubscription();
   const { data: providerConversations = [] } = useProviderConversations();
   const { data: unreadCount = 0 } = useUnreadMessages();
@@ -39,7 +40,7 @@ const Account = () => {
   const [isUpdating, setIsUpdating] = useState(false);
 
   // Get services and subscription data
-  const { data: services = [] } = getUserServices;
+  const { data: services = [], isLoading: servicesLoading } = getUserServices;
   const { data: subscription } = getUserSubscription;
 
   useEffect(() => {
