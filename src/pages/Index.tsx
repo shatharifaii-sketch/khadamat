@@ -1,3 +1,4 @@
+
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -174,7 +175,7 @@ const Index = () => {
             <div className="bg-primary text-primary-foreground p-2 rounded-lg">
               <Home size={24} />
             </div>
-            <span className="text-2xl font-bold text-primary">خدمتك</span>
+            <span className="text-2xl font-bold text-primary">khadamat</span>
           </div>
           <p className="text-muted-foreground text-large mb-6">
             منصتك للخدمات المهنية في فلسطين
@@ -185,7 +186,7 @@ const Index = () => {
             <Link to="/account" className="text-muted-foreground hover:text-primary">حسابي</Link>
           </div>
           <div className="mt-8 pt-8 border-t border-border text-muted-foreground">
-            © 2024 خدمتك. جميع الحقوق محفوظة.
+            © 2024 khadamat. جميع الحقوق محفوظة.
           </div>
         </div>
       </footer>
