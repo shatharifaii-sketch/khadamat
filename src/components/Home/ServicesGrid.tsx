@@ -13,15 +13,28 @@ interface ServicesGridProps {
 const ServicesGrid = ({ categoriesWithServices, isLoading }: ServicesGridProps) => {
   // Icon mapping for different service categories
   const categoryIcons: Record<string, any> = {
-    'التصوير الفوتوغرافي': Camera,
-    'دي جي': Music,
-    'السباكة': Wrench,
-    'النقل والشحن': Truck,
-    'التصميم الجرافيكي': Palette,
-    'التسويق الرقمي': TrendingUp,
-    'تطوير المواقع': Code,
-    'التطريز': Shirt,
-    'خدمات الطباعة': Printer,
+    'photography': Camera,
+    'digital-marketing': TrendingUp,
+    'web-development': Code,
+    'graphic-design': Palette,
+    'plumbing': Wrench,
+    'transportation': Truck,
+    'music': Music,
+    'tailoring': Shirt,
+    'printing': Printer,
+  };
+
+  // Arabic translations for categories
+  const categoryTranslations: Record<string, string> = {
+    'photography': 'التصوير الفوتوغرافي',
+    'digital-marketing': 'التسويق الرقمي',
+    'web-development': 'تطوير المواقع',
+    'graphic-design': 'التصميم الجرافيكي',
+    'plumbing': 'السباكة',
+    'transportation': 'النقل والشحن',
+    'music': 'الموسيقى',
+    'tailoring': 'التطريز',
+    'printing': 'خدمات الطباعة',
   };
 
   if (isLoading) {
@@ -90,13 +103,15 @@ const ServicesGrid = ({ categoriesWithServices, isLoading }: ServicesGridProps) 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {categoriesWithServices.map((service, index) => {
             const Icon = categoryIcons[service.category] || Briefcase;
+            const displayName = categoryTranslations[service.category] || service.category;
+            
             return (
               <Card key={index} className="hover:shadow-lg transition-shadow cursor-pointer group">
                 <CardHeader className="text-center">
                   <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4 mx-auto group-hover:bg-primary/20 transition-colors">
                     <Icon size={32} className="text-primary" />
                   </div>
-                  <CardTitle className="text-xl">{service.category}</CardTitle>
+                  <CardTitle className="text-xl">{displayName}</CardTitle>
                   <CardDescription className="text-large">
                     {service.count} {service.count === 1 ? 'خدمة' : 'خدمة'}
                   </CardDescription>
