@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Camera, Music, Wrench, Truck, Palette, TrendingUp, Code, Shirt, Printer, Search, MapPin, Phone, Mail, Star, Copy, PhoneCall, Loader2, AlertTriangle, X } from 'lucide-react';
+import { Camera, Music, Wrench, Truck, Palette, TrendingUp, Code, Shirt, Printer, Search, MapPin, Phone, Mail, Star, Copy, PhoneCall, Loader2, AlertTriangle, X, Baby, MoreHorizontal } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import { usePublicServices } from '@/hooks/usePublicServices';
 import { toast } from 'sonner';
@@ -31,6 +31,8 @@ const FindService = () => {
     { icon: Code, value: 'web-development', label: 'تطوير المواقع' },
     { icon: Shirt, value: 'tatreez', label: 'التطريز' },
     { icon: Printer, value: 'printing', label: 'خدمات الطباعة' },
+    { icon: Baby, value: 'nanny', label: 'مربية أطفال' },
+    { icon: MoreHorizontal, value: 'other', label: 'أخرى' },
   ];
 
   const locations = [

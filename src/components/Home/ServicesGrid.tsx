@@ -1,6 +1,5 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Camera, Music, Wrench, Truck, Palette, TrendingUp, Code, Shirt, Printer, Briefcase } from 'lucide-react';
+import { Camera, Music, Wrench, Truck, Palette, TrendingUp, Code, Shirt, Printer, Briefcase, Baby, MoreHorizontal } from 'lucide-react';
 
 interface ServicesGridProps {
   categoriesWithServices: Array<{
@@ -22,6 +21,8 @@ const ServicesGrid = ({ categoriesWithServices, isLoading }: ServicesGridProps) 
     'music': Music,
     'tailoring': Shirt,
     'printing': Printer,
+    'nanny': Baby,
+    'other': MoreHorizontal,
   };
 
   // Arabic translations for categories
@@ -35,6 +36,8 @@ const ServicesGrid = ({ categoriesWithServices, isLoading }: ServicesGridProps) 
     'music': 'الموسيقى',
     'tailoring': 'التطريز',
     'printing': 'خدمات الطباعة',
+    'nanny': 'مربية أطفال',
+    'other': 'أخرى',
   };
 
   if (isLoading) {
