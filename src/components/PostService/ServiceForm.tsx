@@ -15,12 +15,30 @@ import ServiceExperience from './ServiceExperience';
 import ServicePortfolio from './ServicePortfolio';
 import ServiceFormSubmit from './ServiceFormSubmit';
 
-const ServiceForm = () => {
+interface Service {
+  id: string;
+  title: string;
+  category: string;
+  description: string;
+  price_range: string;
+  location: string;
+  phone: string;
+  email: string;
+  experience: string;
+}
+
+interface ServiceFormProps {
+  serviceToEdit?: Service | null;
+}
+
+const ServiceForm = ({ serviceToEdit }: ServiceFormProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { createService, isCreating } = useServices();
+  const { createService, updateService, isCreating } = useServices();
   const { canPostService } = useSubscription();
   const { pendingService, savePendingService, clearPendingService } = usePendingService();
+  
+  const isEditMode = !!serviceToEdit;
   
   const [formData, setFormData] = useState({
     title: '',
@@ -33,20 +51,32 @@ const ServiceForm = () => {
     experience: '',
   });
 
-  // Load pending service data when component mounts
+  // Load service data for editing or pending service data
   useEffect(() => {
-    if (pendingService) {
+    if (serviceToEdit) {
+      console.log('Loading service data for editing');
+      setFormData({
+        title: serviceToEdit.title,
+        category: serviceToEdit.category,
+        description: serviceToEdit.description,
+        price: serviceToEdit.price_range,
+        location: serviceToEdit.location,
+        phone: serviceToEdit.phone,
+        email: serviceToEdit.email,
+        experience: serviceToEdit.experience || '',
+      });
+    } else if (pendingService && !isEditMode) {
       console.log('Loading pending service data into form');
       setFormData(pendingService);
     }
-  }, [pendingService]);
+  }, [serviceToEdit, pendingService, isEditMode]);
 
   // Update email when user changes
   useEffect(() => {
-    if (user?.email && !formData.email) {
+    if (user?.email && !formData.email && !isEditMode) {
       setFormData(prev => ({ ...prev, email: user.email || '' }));
     }
-  }, [user?.email]);
+  }, [user?.email, isEditMode]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -60,7 +90,31 @@ const ServiceForm = () => {
       return;
     }
 
-    // Check if user can post more services
+    // If we're editing, update the service
+    if (isEditMode && serviceToEdit) {
+      try {
+        await updateService.mutateAsync({
+          id: serviceToEdit.id,
+          title: formData.title,
+          category: formData.category,
+          description: formData.description,
+          price_range: formData.price,
+          location: formData.location,
+          phone: formData.phone,
+          email: formData.email,
+          experience: formData.experience
+        });
+        
+        toast.success('تم تحديث الخدمة بنجاح');
+        navigate('/account');
+      } catch (error) {
+        console.error('Error updating service:', error);
+        toast.error('فشل في تحديث الخدمة');
+      }
+      return;
+    }
+
+    // Check if user can post more services (for new services only)
     if (!canPostService()) {
       // Save the service data before redirecting to payment
       savePendingService(formData);
@@ -100,10 +154,12 @@ const ServiceForm = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-2xl">تفاصيل الخدمة</CardTitle>
+        <CardTitle className="text-2xl">
+          {isEditMode ? 'تعديل الخدمة' : 'تفاصيل الخدمة'}
+        </CardTitle>
         <CardDescription className="text-large">
-          املأ المعلومات التالية لنشر خدمتك
-          {pendingService && (
+          {isEditMode ? 'قم بتعديل معلومات خدمتك' : 'املأ المعلومات التالية لنشر خدمتك'}
+          {pendingService && !isEditMode && (
             <span className="block mt-2 text-green-600 font-medium">
               ✓ تم استرداد بياناتك المحفوظة
             </span>
@@ -147,7 +203,8 @@ const ServiceForm = () => {
 
           <ServiceFormSubmit
             isCreating={isCreating}
-            canPostService={canPostService()}
+            canPostService={isEditMode || canPostService()}
+            isEditMode={isEditMode}
           />
         </form>
       </CardContent>

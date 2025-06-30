@@ -4,9 +4,10 @@ import { Button } from '@/components/ui/button';
 interface ServiceFormSubmitProps {
   isCreating: boolean;
   canPostService: boolean;
+  isEditMode?: boolean;
 }
 
-const ServiceFormSubmit = ({ isCreating, canPostService }: ServiceFormSubmitProps) => {
+const ServiceFormSubmit = ({ isCreating, canPostService, isEditMode = false }: ServiceFormSubmitProps) => {
   return (
     <div className="pt-6">
       <Button 
@@ -15,10 +16,13 @@ const ServiceFormSubmit = ({ isCreating, canPostService }: ServiceFormSubmitProp
         className="w-full text-xl py-6"
         disabled={isCreating}
       >
-        {isCreating ? 'جاري النشر...' : 
-         canPostService ? 'انشر الخدمة' : 'ادفع وانشر الخدمة (10 شيكل)'}
+        {isCreating ? 
+          (isEditMode ? 'جاري التحديث...' : 'جاري النشر...') : 
+          (isEditMode ? 'حفظ التعديلات' : 
+           canPostService ? 'انشر الخدمة' : 'ادفع وانشر الخدمة (10 شيكل)')
+        }
       </Button>
-      {!canPostService && (
+      {!canPostService && !isEditMode && (
         <p className="text-center text-muted-foreground mt-4 text-large">
           سيتم توجيهك لصفحة الدفع أولاً
         </p>

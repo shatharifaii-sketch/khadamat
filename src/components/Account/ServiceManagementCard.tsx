@@ -2,7 +2,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye, MapPin, Phone, Calendar } from 'lucide-react';
+import { Eye, MapPin, Phone, Calendar, Edit } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface Service {
   id: string;
@@ -21,6 +22,8 @@ interface ServiceManagementCardProps {
 }
 
 const ServiceManagementCard = ({ service }: ServiceManagementCardProps) => {
+  const navigate = useNavigate();
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'published': return 'default';
@@ -37,6 +40,10 @@ const ServiceManagementCard = ({ service }: ServiceManagementCardProps) => {
       case 'inactive': return 'غير نشطة';
       default: return status;
     }
+  };
+
+  const handleEditService = () => {
+    navigate(`/post-service?edit=${service.id}`);
   };
 
   return (
@@ -75,12 +82,15 @@ const ServiceManagementCard = ({ service }: ServiceManagementCardProps) => {
           </div>
         </div>
         
-        <div className="flex gap-2 mt-4">
-          <Button variant="outline" size="sm" className="flex-1">
-            تعديل
-          </Button>
-          <Button variant="outline" size="sm" className="flex-1">
-            إدارة
+        <div className="mt-4">
+          <Button 
+            onClick={handleEditService}
+            variant="outline" 
+            size="sm" 
+            className="w-full"
+          >
+            <Edit size={16} className="mr-2" />
+            تعديل الخدمة
           </Button>
         </div>
       </CardContent>
