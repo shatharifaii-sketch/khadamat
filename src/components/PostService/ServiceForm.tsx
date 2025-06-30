@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
@@ -34,7 +33,7 @@ interface ServiceFormProps {
 const ServiceForm = ({ serviceToEdit }: ServiceFormProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { createService, updateService, isCreating } = useServices();
+  const { createService, updateService, isCreating, isUpdating } = useServices();
   const { canPostService } = useSubscription();
   const { pendingService, savePendingService, clearPendingService } = usePendingService();
   
@@ -105,11 +104,9 @@ const ServiceForm = ({ serviceToEdit }: ServiceFormProps) => {
           experience: formData.experience
         });
         
-        toast.success('تم تحديث الخدمة بنجاح');
         navigate('/account');
       } catch (error) {
         console.error('Error updating service:', error);
-        toast.error('فشل في تحديث الخدمة');
       }
       return;
     }
@@ -202,7 +199,7 @@ const ServiceForm = ({ serviceToEdit }: ServiceFormProps) => {
           <ServicePortfolio />
 
           <ServiceFormSubmit
-            isCreating={isCreating}
+            isCreating={isCreating || isUpdating}
             canPostService={isEditMode || canPostService()}
             isEditMode={isEditMode}
           />

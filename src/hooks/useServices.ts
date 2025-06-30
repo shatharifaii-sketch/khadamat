@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -148,6 +147,54 @@ export const useServices = () => {
     }
   });
 
+  const updateService = useMutation({
+    mutationFn: async (serviceData: Service & { id: string }) => {
+      if (!user) {
+        console.error('No user found when trying to update service');
+        throw new Error('يجب تسجيل الدخول أولاً');
+      }
+      
+      console.log('Updating service:', serviceData.id);
+      console.log('Service data:', serviceData);
+      
+      const { data, error } = await supabase
+        .from('services')
+        .update({
+          title: serviceData.title,
+          category: serviceData.category,
+          description: serviceData.description,
+          price_range: serviceData.price_range,
+          location: serviceData.location,
+          phone: serviceData.phone,
+          email: serviceData.email,
+          experience: serviceData.experience,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', serviceData.id)
+        .eq('user_id', user.id) // Ensure user can only update their own services
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error updating service:', error);
+        throw new Error('فشل في تحديث الخدمة: ' + error.message);
+      }
+      
+      console.log('Service updated successfully:', data);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['services'] });
+      queryClient.invalidateQueries({ queryKey: ['user-services'] });
+      queryClient.invalidateQueries({ queryKey: ['public-services'] });
+      toast.success('تم تحديث الخدمة بنجاح!');
+    },
+    onError: (error: any) => {
+      console.error('Error updating service:', error);
+      toast.error(error.message || 'حدث خطأ في تحديث الخدمة');
+    }
+  });
+
   const getUserServices = useQuery({
     queryKey: ['user-services', user?.id],
     queryFn: async () => {
@@ -177,7 +224,9 @@ export const useServices = () => {
 
   return {
     createService,
+    updateService,
     getUserServices,
-    isCreating: createService.isPending
+    isCreating: createService.isPending,
+    isUpdating: updateService.isPending
   };
 };
