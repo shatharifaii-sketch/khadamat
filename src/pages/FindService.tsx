@@ -1,5 +1,6 @@
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
 import Navigation from '@/components/Navigation';
@@ -10,11 +11,20 @@ import EmptyState from '@/components/FindService/EmptyState';
 import LoadingGrid from '@/components/FindService/LoadingGrid';
 
 const FindService = () => {
+  const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedLocation, setSelectedLocation] = useState<string>('all');
 
   const { data: services, isLoading, error } = usePublicServices();
+
+  // Set initial category from URL parameters
+  useEffect(() => {
+    const categoryFromUrl = searchParams.get('category');
+    if (categoryFromUrl) {
+      setSelectedCategory(categoryFromUrl);
+    }
+  }, [searchParams]);
 
   const filteredServices = useMemo(() => {
     if (!services) return [];

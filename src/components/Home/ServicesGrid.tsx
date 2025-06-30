@@ -1,5 +1,7 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Camera, Music, Wrench, Truck, Palette, TrendingUp, Code, Shirt, Printer, Briefcase, Baby, MoreHorizontal } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface ServicesGridProps {
   categoriesWithServices: Array<{
@@ -109,17 +111,19 @@ const ServicesGrid = ({ categoriesWithServices, isLoading }: ServicesGridProps) 
             const displayName = categoryTranslations[service.category] || service.category;
             
             return (
-              <Card key={index} className="hover:shadow-lg transition-shadow cursor-pointer group">
-                <CardHeader className="text-center">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4 mx-auto group-hover:bg-primary/20 transition-colors">
-                    <Icon size={32} className="text-primary" />
-                  </div>
-                  <CardTitle className="text-xl">{displayName}</CardTitle>
-                  <CardDescription className="text-large">
-                    {service.count} {service.count === 1 ? 'خدمة' : 'خدمة'}
-                  </CardDescription>
-                </CardHeader>
-              </Card>
+              <Link key={index} to={`/find-service?category=${service.category}`}>
+                <Card className="hover:shadow-lg transition-shadow cursor-pointer group h-full">
+                  <CardHeader className="text-center">
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4 mx-auto group-hover:bg-primary/20 transition-colors">
+                      <Icon size={32} className="text-primary" />
+                    </div>
+                    <CardTitle className="text-xl">{displayName}</CardTitle>
+                    <CardDescription className="text-large">
+                      {service.count} {service.count === 1 ? 'خدمة' : 'خدمة'}
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </Link>
             );
           })}
         </div>
