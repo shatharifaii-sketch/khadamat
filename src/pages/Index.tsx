@@ -1,28 +1,18 @@
-
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Camera, Music, Wrench, Truck, Palette, TrendingUp, Code, Shirt, Printer, Plus, Search, Star, Users, CheckCircle, Home } from 'lucide-react';
+import { Plus, Search, Home } from 'lucide-react';
 import Navigation from '@/components/Navigation';
+import { useHomeStats } from '@/hooks/useHomeStats';
+import StatsSection from '@/components/Home/StatsSection';
+import ServicesGrid from '@/components/Home/ServicesGrid';
 
 const Index = () => {
-  const services = [
-    { icon: Camera, name: 'التصوير الفوتوغرافي', count: '45+ خدمة' },
-    { icon: Music, name: 'دي جي', count: '23+ خدمة' },
-    { icon: Wrench, name: 'السباكة', count: '67+ خدمة' },
-    { icon: Truck, name: 'النقل والشحن', count: '34+ خدمة' },
-    { icon: Palette, name: 'التصميم الجرافيكي', count: '89+ خدمة' },
-    { icon: TrendingUp, name: 'التسويق الرقمي', count: '56+ خدمة' },
-    { icon: Code, name: 'تطوير المواقع', count: '72+ خدمة' },
-    { icon: Shirt, name: 'التطريز', count: '28+ خدمة' },
-    { icon: Printer, name: 'خدمات الطباعة', count: '41+ خدمة' },
-  ];
+  const { data: homeStats, isLoading, error } = useHomeStats();
 
-  const stats = [
-    { icon: Users, value: '2,500+', label: 'مقدم خدمة' },
-    { icon: CheckCircle, value: '15,000+', label: 'خدمة مكتملة' },
-    { icon: Star, value: '4.9', label: 'تقييم متوسط' },
-  ];
+  if (error) {
+    console.error('Error loading home stats:', error);
+  }
 
   return (
     <div className="min-h-screen bg-background arabic">
@@ -56,55 +46,17 @@ const Index = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 px-4 bg-card">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {stats.map((stat, index) => {
-              const Icon = stat.icon;
-              return (
-                <div key={index} className="text-center">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4">
-                    <Icon size={32} className="text-primary" />
-                  </div>
-                  <div className="text-3xl font-bold text-foreground mb-2">{stat.value}</div>
-                  <div className="text-large text-muted-foreground">{stat.label}</div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+      <StatsSection
+        serviceProvidersCount={homeStats?.serviceProvidersCount || 0}
+        publishedServicesCount={homeStats?.publishedServicesCount || 0}
+        isLoading={isLoading}
+      />
 
       {/* Services Grid */}
-      <section className="py-20 px-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              الخدمات المتاحة
-            </h2>
-            <p className="text-xl text-muted-foreground">
-              اكتشف مجموعة واسعة من الخدمات المهنية
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {services.map((service, index) => {
-              const Icon = service.icon;
-              return (
-                <Card key={index} className="hover:shadow-lg transition-shadow cursor-pointer group">
-                  <CardHeader className="text-center">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4 mx-auto group-hover:bg-primary/20 transition-colors">
-                      <Icon size={32} className="text-primary" />
-                    </div>
-                    <CardTitle className="text-xl-large">{service.name}</CardTitle>
-                    <CardDescription className="text-large">{service.count}</CardDescription>
-                  </CardHeader>
-                </Card>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+      <ServicesGrid
+        categoriesWithServices={homeStats?.categoriesWithServices || []}
+        isLoading={isLoading}
+      />
 
       {/* How it Works */}
       <section className="py-20 px-4 bg-muted/50">
@@ -194,8 +146,11 @@ const Index = () => {
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
             هل أنت مستعد للبدء؟
           </h2>
-          <p className="text-xl-large mb-8 opacity-90">
-            انضم إلى آلاف الأشخاص الذين يستخدمون خدمتك يومياً
+          <p className="text-xl mb-8 opacity-90">
+            {homeStats?.serviceProvidersCount && homeStats.serviceProvidersCount > 0 
+              ? `انضم إلى ${homeStats.serviceProvidersCount}+ من مقدمي الخدمات المحترفين`
+              : 'كن من أوائل مقدمي الخدمات على منصتنا'
+            }
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/post-service">
@@ -222,7 +177,7 @@ const Index = () => {
             <span className="text-2xl font-bold text-primary">خدمتك</span>
           </div>
           <p className="text-muted-foreground text-large mb-6">
-            منصتك الأولى للخدمات المهنية في فلسطين
+            منصتك للخدمات المهنية في فلسطين
           </p>
           <div className="flex flex-wrap justify-center gap-6 text-large">
             <Link to="/about" className="text-muted-foreground hover:text-primary">من نحن</Link>
