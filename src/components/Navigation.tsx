@@ -27,7 +27,7 @@ const Navigation = () => {
             <div className="bg-primary text-primary-foreground p-2 rounded-lg">
               <Home size={20} />
             </div>
-            <span className="text-lg font-bold text-primary">khadamat</span>
+            <span className="text-lg font-bold text-primary">خدمات</span>
           </Link>
 
           {/* Desktop Navigation */}
