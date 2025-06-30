@@ -39,7 +39,12 @@ export const useConversations = () => {
   const getConversations = useQuery({
     queryKey: ['conversations', user?.id],
     queryFn: async (): Promise<Conversation[]> => {
-      if (!user) return [];
+      console.log('🔍 Fetching conversations for user:', user?.id);
+      
+      if (!user) {
+        console.log('❌ No user found, returning empty array');
+        return [];
+      }
 
       const { data, error } = await supabase
         .from('conversations')
@@ -51,26 +56,38 @@ export const useConversations = () => {
         .order('last_message_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching conversations:', error);
+        console.error('❌ Error fetching conversations:', error);
         throw error;
       }
+
+      console.log('✅ Raw conversations data:', data);
 
       // Manually fetch profile data for each conversation (provider data)
       const conversationsWithProfiles = await Promise.all(
         (data || []).map(async (conversation): Promise<Conversation> => {
-          const { data: profileData } = await supabase
+          console.log('🔍 Fetching provider profile for conversation:', conversation.id);
+          
+          const { data: profileData, error: profileError } = await supabase
             .from('profiles')
             .select('full_name')
             .eq('id', conversation.provider_id)
             .maybeSingle();
 
-          return {
+          if (profileError) {
+            console.error('⚠️ Error fetching provider profile:', profileError);
+          }
+
+          const result = {
             ...conversation,
             profiles: profileData || { full_name: 'مقدم الخدمة' }
           };
+
+          console.log('✅ Conversation with profile:', result);
+          return result;
         })
       );
 
+      console.log('✅ Final conversations with profiles:', conversationsWithProfiles);
       return conversationsWithProfiles;
     },
     enabled: !!user
@@ -78,10 +95,21 @@ export const useConversations = () => {
 
   const createConversation = useMutation({
     mutationFn: async ({ serviceId, providerId }: { serviceId: string; providerId: string }) => {
-      if (!user) throw new Error('User not authenticated');
+      console.log('🚀 Creating conversation:', { serviceId, providerId, userId: user?.id });
+
+      if (!user) {
+        console.error('❌ User not authenticated');
+        throw new Error('User not authenticated');
+      }
+
+      if (!serviceId || !providerId) {
+        console.error('❌ Missing required parameters:', { serviceId, providerId });
+        throw new Error('Missing service ID or provider ID');
+      }
 
       // Check if conversation already exists
-      const { data: existing } = await supabase
+      console.log('🔍 Checking for existing conversation...');
+      const { data: existing, error: existingError } = await supabase
         .from('conversations')
         .select('id')
         .eq('service_id', serviceId)
@@ -89,31 +117,55 @@ export const useConversations = () => {
         .eq('provider_id', providerId)
         .maybeSingle();
 
+      if (existingError) {
+        console.error('❌ Error checking existing conversation:', existingError);
+        throw existingError;
+      }
+
       if (existing) {
+        console.log('✅ Found existing conversation:', existing);
         return existing;
       }
 
       // Create new conversation
+      console.log('🔨 Creating new conversation...');
+      const conversationData = {
+        service_id: serviceId,
+        client_id: user.id,
+        provider_id: providerId
+      };
+      
+      console.log('📤 Inserting conversation data:', conversationData);
+      
       const { data, error } = await supabase
         .from('conversations')
-        .insert({
-          service_id: serviceId,
-          client_id: user.id,
-          provider_id: providerId
-        })
+        .insert(conversationData)
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Error creating conversation:', error);
+        console.error('❌ Error details:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint
+        });
+        throw error;
+      }
+
+      console.log('✅ Successfully created conversation:', data);
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('🎉 Conversation creation successful:', data);
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
       queryClient.invalidateQueries({ queryKey: ['provider-conversations'] });
+      toast.success('تم إنشاء المحادثة بنجاح');
     },
     onError: (error: any) => {
-      console.error('Error creating conversation:', error);
-      toast.error('فشل في إنشاء المحادثة');
+      console.error('💥 Conversation creation failed:', error);
+      toast.error(`فشل في إنشاء المحادثة: ${error.message}`);
     }
   });
 

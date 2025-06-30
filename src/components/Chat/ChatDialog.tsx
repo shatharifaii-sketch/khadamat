@@ -26,6 +26,14 @@ const ChatDialog = ({ open, onOpenChange, conversationId, serviceName, providerN
 
   const messages = getMessages.data || [];
 
+  console.log('💬 ChatDialog state:', {
+    open,
+    conversationId,
+    messagesCount: messages.length,
+    isLoading: getMessages.isLoading,
+    error: getMessages.error
+  });
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -35,13 +43,22 @@ const ChatDialog = ({ open, onOpenChange, conversationId, serviceName, providerN
   }, [messages]);
 
   const handleSendMessage = async () => {
-    if (!messageText.trim() || isSending) return;
+    if (!messageText.trim() || isSending) {
+      console.log('⚠️ Cannot send message:', { 
+        hasText: !!messageText.trim(), 
+        isSending 
+      });
+      return;
+    }
 
+    console.log('📤 Sending message:', messageText);
+    
     try {
       await sendMessage.mutateAsync({ content: messageText });
       setMessageText('');
+      console.log('✅ Message sent successfully');
     } catch (error) {
-      console.error('Failed to send message:', error);
+      console.error('💥 Failed to send message:', error);
     }
   };
 
@@ -51,6 +68,11 @@ const ChatDialog = ({ open, onOpenChange, conversationId, serviceName, providerN
       handleSendMessage();
     }
   };
+
+  // Show error state if there's an error
+  if (getMessages.error) {
+    console.error('💥 Messages query error:', getMessages.error);
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -69,6 +91,12 @@ const ChatDialog = ({ open, onOpenChange, conversationId, serviceName, providerN
             {getMessages.isLoading ? (
               <div className="flex justify-center">
                 <Loader2 className="h-6 w-6 animate-spin" />
+                <span className="mr-2 text-sm text-muted-foreground">جاري تحميل الرسائل...</span>
+              </div>
+            ) : getMessages.error ? (
+              <div className="text-center text-red-500 py-8">
+                <p>حدث خطأ في تحميل الرسائل</p>
+                <p className="text-xs mt-2">{getMessages.error.message}</p>
               </div>
             ) : messages.length === 0 ? (
               <div className="text-center text-muted-foreground py-8">
@@ -108,12 +136,12 @@ const ChatDialog = ({ open, onOpenChange, conversationId, serviceName, providerN
             onChange={(e) => setMessageText(e.target.value)}
             placeholder="اكتب رسالتك..."
             onKeyPress={handleKeyPress}
-            disabled={isSending}
+            disabled={isSending || !conversationId}
             className="text-right"
           />
           <Button
             onClick={handleSendMessage}
-            disabled={!messageText.trim() || isSending}
+            disabled={!messageText.trim() || isSending || !conversationId}
             size="icon"
           >
             {isSending ? (

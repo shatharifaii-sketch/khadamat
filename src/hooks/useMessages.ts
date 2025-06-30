@@ -13,7 +13,12 @@ export const useMessages = (conversationId: string | null) => {
   const getMessages = useQuery({
     queryKey: ['messages', conversationId],
     queryFn: async () => {
-      if (!conversationId) return [];
+      console.log('🔍 Fetching messages for conversation:', conversationId);
+      
+      if (!conversationId) {
+        console.log('❌ No conversation ID provided');
+        return [];
+      }
 
       const { data, error } = await supabase
         .from('messages')
@@ -22,10 +27,17 @@ export const useMessages = (conversationId: string | null) => {
         .order('created_at', { ascending: true });
 
       if (error) {
-        console.error('Error fetching messages:', error);
+        console.error('❌ Error fetching messages:', error);
+        console.error('❌ Error details:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint
+        });
         throw error;
       }
 
+      console.log('✅ Fetched messages:', data);
       return data as Message[];
     },
     enabled: !!conversationId
@@ -33,35 +45,64 @@ export const useMessages = (conversationId: string | null) => {
 
   const sendMessage = useMutation({
     mutationFn: async ({ content }: { content: string }) => {
-      if (!user || !conversationId) throw new Error('Missing required data');
+      console.log('🚀 Sending message:', { content, conversationId, userId: user?.id });
+
+      if (!user || !conversationId) {
+        console.error('❌ Missing required data:', { user: !!user, conversationId });
+        throw new Error('Missing required data');
+      }
+
+      if (!content.trim()) {
+        console.error('❌ Empty message content');
+        throw new Error('Message content cannot be empty');
+      }
+
+      const messageData = {
+        conversation_id: conversationId,
+        sender_id: user.id,
+        content: content.trim(),
+        message_type: 'text'
+      };
+
+      console.log('📤 Inserting message data:', messageData);
 
       const { data, error } = await supabase
         .from('messages')
-        .insert({
-          conversation_id: conversationId,
-          sender_id: user.id,
-          content: content.trim(),
-          message_type: 'text'
-        })
+        .insert(messageData)
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Error sending message:', error);
+        console.error('❌ Error details:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint
+        });
+        throw error;
+      }
+
+      console.log('✅ Successfully sent message:', data);
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('🎉 Message sent successfully:', data);
       queryClient.invalidateQueries({ queryKey: ['messages', conversationId] });
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      queryClient.invalidateQueries({ queryKey: ['provider-conversations'] });
     },
     onError: (error: any) => {
-      console.error('Error sending message:', error);
-      toast.error('فشل في إرسال الرسالة');
+      console.error('💥 Message sending failed:', error);
+      toast.error(`فشل في إرسال الرسالة: ${error.message}`);
     }
   });
 
   // Set up real-time subscription for messages
   useEffect(() => {
     if (!conversationId) return;
+
+    console.log('🔄 Setting up real-time subscription for conversation:', conversationId);
 
     const channel = supabase
       .channel(`messages-${conversationId}`)
@@ -73,13 +114,17 @@ export const useMessages = (conversationId: string | null) => {
           table: 'messages',
           filter: `conversation_id=eq.${conversationId}`
         },
-        () => {
+        (payload) => {
+          console.log('📨 Real-time message received:', payload);
           queryClient.invalidateQueries({ queryKey: ['messages', conversationId] });
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('📡 Real-time subscription status:', status);
+      });
 
     return () => {
+      console.log('🔌 Cleaning up real-time subscription');
       supabase.removeChannel(channel);
     };
   }, [conversationId, queryClient]);

@@ -23,6 +23,7 @@ const ContactOptions = ({ serviceId, providerId, serviceName, providerName, emai
   const { createConversation, isCreating } = useConversations();
 
   const handleEmailContact = () => {
+    console.log('📧 Opening email client for service:', serviceName);
     const subject = encodeURIComponent(`استفسار حول: ${serviceName}`);
     const body = encodeURIComponent(`مرحباً،\n\nأود الاستفسار حول خدمة "${serviceName}".\n\nشكراً لك.`);
     window.open(`mailto:${email}?subject=${subject}&body=${body}`);
@@ -30,25 +31,33 @@ const ContactOptions = ({ serviceId, providerId, serviceName, providerName, emai
   };
 
   const handleChatContact = async () => {
+    console.log('💬 Initiating chat contact:', { serviceId, providerId, serviceName });
+
     if (!user) {
+      console.error('❌ User not authenticated');
       toast.error('يجب تسجيل الدخول أولاً');
       return;
     }
 
     if (user.id === providerId) {
+      console.error('❌ User trying to chat with themselves');
       toast.error('لا يمكنك محادثة نفسك');
       return;
     }
 
+    console.log('🚀 Creating conversation...');
     try {
       const conversation = await createConversation.mutateAsync({
         serviceId,
         providerId
       });
+      
+      console.log('✅ Conversation created, opening chat:', conversation);
       setConversationId(conversation.id);
       setShowChat(true);
     } catch (error) {
-      console.error('Failed to create conversation:', error);
+      console.error('💥 Failed to create conversation:', error);
+      // Error toast is already handled in the mutation
     }
   };
 
