@@ -25,9 +25,13 @@ export const useServices = () => {
 
   const createService = useMutation({
     mutationFn: async (serviceData: Service) => {
-      if (!user) throw new Error('User must be authenticated');
+      if (!user) {
+        console.error('No user found when trying to create service');
+        throw new Error('يجب تسجيل الدخول أولاً');
+      }
       
       console.log('Creating service for user:', user.id);
+      console.log('Service data:', serviceData);
       
       // Check user's service quota before creating
       console.log('Checking service quota...');
@@ -35,46 +39,55 @@ export const useServices = () => {
         .from('subscriptions')
         .select('services_allowed, services_used')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (subError && subError.code !== 'PGRST116') {
+      if (subError) {
         console.error('Error checking subscription:', subError);
-        throw new Error('خطأ في التحقق من الاشتراك');
+        throw new Error('خطأ في التحقق من الاشتراك: ' + subError.message);
       }
+
+      console.log('Subscription data:', subscription);
 
       // If no subscription exists or quota exceeded, throw error
       if (!subscription || subscription.services_used >= subscription.services_allowed) {
-        throw new Error('لقد استنفدت حصتك من الخدمات. يرجى الدفع لنشر المزيد من الخدمات.');
+        const message = !subscription 
+          ? 'لا يوجد اشتراك نشط. يرجى الدفع لنشر الخدمات.'
+          : 'لقد استنفدت حصتك من الخدمات. يرجى الدفع لنشر المزيد من الخدمات.';
+        throw new Error(message);
       }
       
       // First, ensure the user has a profile
+      console.log('Checking user profile...');
       const { data: existingProfile, error: profileCheckError } = await supabase
         .from('profiles')
         .select('id')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
       
-      if (profileCheckError && profileCheckError.code === 'PGRST116') {
+      if (profileCheckError) {
+        console.error('Error checking profile:', profileCheckError);
+        throw new Error('خطأ في التحقق من الملف الشخصي: ' + profileCheckError.message);
+      }
+
+      if (!existingProfile) {
         // Profile doesn't exist, create it
         console.log('Creating profile for user:', user.id);
         const { error: profileCreateError } = await supabase
           .from('profiles')
           .insert({
             id: user.id,
-            full_name: user.email?.split('@')[0] || 'User',
+            full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
             is_service_provider: true
           });
         
         if (profileCreateError) {
           console.error('Error creating profile:', profileCreateError);
-          throw new Error('Failed to create user profile');
+          throw new Error('فشل في إنشاء الملف الشخصي: ' + profileCreateError.message);
         }
-      } else if (profileCheckError) {
-        console.error('Error checking profile:', profileCheckError);
-        throw profileCheckError;
       }
 
       // Now create the service
+      console.log('Creating service...');
       const { data, error } = await supabase
         .from('services')
         .insert({
@@ -87,7 +100,7 @@ export const useServices = () => {
 
       if (error) {
         console.error('Error creating service:', error);
-        throw error;
+        throw new Error('فشل في إنشاء الخدمة: ' + error.message);
       }
       
       // Update services_used count
@@ -103,6 +116,7 @@ export const useServices = () => {
       if (updateError) {
         console.error('Error updating services_used:', updateError);
         // Don't throw error here as service was created successfully
+        console.warn('Service created but quota count update failed');
       }
       
       console.log('Service created successfully:', data);
@@ -124,7 +138,10 @@ export const useServices = () => {
   const getUserServices = useQuery({
     queryKey: ['user-services', user?.id],
     queryFn: async () => {
-      if (!user) return [];
+      if (!user) {
+        console.log('No user for getUserServices');
+        return [];
+      }
       
       console.log('Fetching user services for:', user.id);
       
@@ -139,8 +156,8 @@ export const useServices = () => {
         throw error;
       }
       
-      console.log('User services fetched:', data);
-      return data;
+      console.log('User services fetched:', data?.length, 'services');
+      return data || [];
     },
     enabled: !!user
   });

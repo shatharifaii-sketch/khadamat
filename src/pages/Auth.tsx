@@ -1,279 +1,180 @@
 
 import { useState } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Mail, Lock, UserPlus, LogIn, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
-import Navigation from '@/components/Navigation';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { toast } from 'sonner';
+import { Home } from 'lucide-react';
 
 const Auth = () => {
-  const { user, signUp, signIn, loading } = useAuth();
+  const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const location = useLocation();
 
-  const [loginData, setLoginData] = useState({
-    email: '',
-    password: ''
-  });
-
-  const [signupData, setSignupData] = useState({
-    fullName: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
-  });
-
-  // Redirect if already authenticated
-  useEffect(() => {
-    if (user && !loading) {
-      navigate('/');
-    }
-  }, [user, loading, navigate]);
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setIsLoading(true);
-
-    const { error } = await signIn(loginData.email, loginData.password);
-    
-    if (error) {
-      setError(error.message);
-    }
-    
-    setIsLoading(false);
-  };
-
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
-
-    if (signupData.password !== signupData.confirmPassword) {
-      setError('كلمات المرور غير متطابقة');
-      return;
-    }
-
-    if (signupData.password.length < 6) {
-      setError('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
-      return;
-    }
-
-    setIsLoading(true);
-
-    const { error } = await signUp(
-      signupData.email, 
-      signupData.password, 
-      signupData.fullName
-    );
-    
-    if (error) {
-      setError(error.message);
-    } else {
-      setSuccess('تم إرسال رابط التفعيل إلى بريدك الإلكتروني');
-    }
-    
-    setIsLoading(false);
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background arabic flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p>جاري التحميل...</p>
-        </div>
-      </div>
-    );
+  // Redirect if already logged in
+  if (user) {
+    const from = location.state?.from?.pathname || '/';
+    navigate(from, { replace: true });
+    return null;
   }
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password) {
+      toast.error('يرجى ملء جميع الحقول المطلوبة');
+      return;
+    }
+
+    if (!isLogin && !fullName) {
+      toast.error('يرجى إدخال الاسم الكامل');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      if (isLogin) {
+        const { error } = await signIn(email, password);
+        if (error) {
+          console.error('Sign in error:', error);
+          if (error.message.includes('Invalid login credentials')) {
+            toast.error('بيانات الدخول غير صحيحة');
+          } else if (error.message.includes('Email not confirmed')) {
+            toast.error('يرجى تأكيد البريد الإلكتروني أولاً');
+          } else {
+            toast.error('حدث خطأ في تسجيل الدخول: ' + error.message);
+          }
+        } else {
+          toast.success('تم تسجيل الدخول بنجاح');
+          const from = location.state?.from?.pathname || '/';
+          navigate(from, { replace: true });
+        }
+      } else {
+        const { error } = await signUp(email, password, fullName);
+        if (error) {
+          console.error('Sign up error:', error);
+          if (error.message.includes('User already registered')) {
+            toast.error('هذا البريد الإلكتروني مسجل مسبقاً');
+          } else if (error.message.includes('Password should be')) {
+            toast.error('كلمة المرور يجب أن تحتوي على 6 أحرف على الأقل');
+          } else {
+            toast.error('حدث خطأ في إنشاء الحساب: ' + error.message);
+          }
+        } else {
+          toast.success('تم إنشاء الحساب بنجاح! يرجى تفقد بريدك الإلكتروني لتأكيد الحساب');
+          setIsLogin(true);
+        }
+      }
+    } catch (error: any) {
+      console.error('Auth error:', error);
+      toast.error('حدث خطأ غير متوقع');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-background arabic">
-      <Navigation />
-      
-      <div className="max-w-md mx-auto py-12 px-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4 arabic">
+      <div className="w-full max-w-md">
+        {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            مرحباً بك
-          </h1>
-          <p className="text-xl text-muted-foreground">
-            سجل دخولك أو أنشئ حساباً جديداً للوصول إلى خدماتنا
-          </p>
+          <Link to="/" className="inline-flex items-center space-x-2 space-x-reverse mb-6">
+            <div className="bg-primary text-primary-foreground p-2 rounded-lg">
+              <Home size={24} />
+            </div>
+            <span className="text-2xl font-bold text-primary">خدمات</span>
+          </Link>
         </div>
 
-        {error && (
-          <Alert className="mb-6 border-red-200 bg-red-50">
-            <AlertCircle className="h-4 w-4 text-red-600" />
-            <AlertDescription className="text-red-800">
-              {error}
-            </AlertDescription>
-          </Alert>
-        )}
+        <Card>
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">
+              {isLogin ? 'تسجيل الدخول' : 'إنشاء حساب جديد'}
+            </CardTitle>
+            <CardDescription>
+              {isLogin 
+                ? 'أدخل بياناتك لتسجيل الدخول إلى حسابك'
+                : 'أنشئ حساباً جديداً للبدء في استخدام المنصة'
+              }
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {!isLogin && (
+                <div className="space-y-2">
+                  <Label htmlFor="fullName">الاسم الكامل</Label>
+                  <Input
+                    id="fullName"
+                    type="text"
+                    placeholder="أدخل اسمك الكامل"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    required={!isLogin}
+                  />
+                </div>
+              )}
+              
+              <div className="space-y-2">
+                <Label htmlFor="email">البريد الإلكتروني</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="example@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="password">كلمة المرور</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="أدخل كلمة المرور"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
 
-        {success && (
-          <Alert className="mb-6 border-green-200 bg-green-50">
-            <AlertCircle className="h-4 w-4 text-green-600" />
-            <AlertDescription className="text-green-800">
-              {success}
-            </AlertDescription>
-          </Alert>
-        )}
+              <Button 
+                type="submit" 
+                className="w-full" 
+                size="lg"
+                disabled={loading}
+              >
+                {loading 
+                  ? 'جاري المعالجة...' 
+                  : isLogin 
+                    ? 'تسجيل الدخول' 
+                    : 'إنشاء الحساب'
+                }
+              </Button>
+            </form>
 
-        <Tabs defaultValue="login" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-8">
-            <TabsTrigger value="login" className="text-large">تسجيل الدخول</TabsTrigger>
-            <TabsTrigger value="signup" className="text-large">حساب جديد</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="login">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl text-center">تسجيل الدخول</CardTitle>
-                <CardDescription className="text-large text-center">
-                  ادخل بياناتك للوصول إلى حسابك
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleLogin} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="login-email" className="text-large">البريد الإلكتروني</Label>
-                    <Input
-                      id="login-email"
-                      type="email"
-                      placeholder="your@email.com"
-                      value={loginData.email}
-                      onChange={(e) => setLoginData(prev => ({ ...prev, email: e.target.value }))}
-                      className="text-large"
-                      required
-                      disabled={isLoading}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="login-password" className="text-large">كلمة المرور</Label>
-                    <Input
-                      id="login-password"
-                      type="password"
-                      value={loginData.password}
-                      onChange={(e) => setLoginData(prev => ({ ...prev, password: e.target.value }))}
-                      className="text-large"
-                      required
-                      disabled={isLoading}
-                    />
-                  </div>
-                  <Button 
-                    type="submit" 
-                    className="w-full text-large" 
-                    size="lg"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        جاري تسجيل الدخول...
-                      </>
-                    ) : (
-                      <>
-                        <LogIn size={18} className="ml-2" />
-                        تسجيل الدخول
-                      </>
-                    )}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="signup">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl text-center">إنشاء حساب جديد</CardTitle>
-                <CardDescription className="text-large text-center">
-                  املأ البيانات لإنشاء حسابك
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSignup} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-name" className="text-large">الاسم الكامل</Label>
-                    <Input
-                      id="signup-name"
-                      placeholder="الاسم الكامل"
-                      value={signupData.fullName}
-                      onChange={(e) => setSignupData(prev => ({ ...prev, fullName: e.target.value }))}
-                      className="text-large"
-                      required
-                      disabled={isLoading}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email" className="text-large">البريد الإلكتروني</Label>
-                    <Input
-                      id="signup-email"
-                      type="email"
-                      placeholder="your@email.com"
-                      value={signupData.email}
-                      onChange={(e) => setSignupData(prev => ({ ...prev, email: e.target.value }))}
-                      className="text-large"
-                      required
-                      disabled={isLoading}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password" className="text-large">كلمة المرور</Label>
-                    <Input
-                      id="signup-password"
-                      type="password"
-                      value={signupData.password}
-                      onChange={(e) => setSignupData(prev => ({ ...prev, password: e.target.value }))}
-                      className="text-large"
-                      required
-                      disabled={isLoading}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="confirm-password" className="text-large">تأكيد كلمة المرور</Label>
-                    <Input
-                      id="confirm-password"
-                      type="password"
-                      value={signupData.confirmPassword}
-                      onChange={(e) => setSignupData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                      className="text-large"
-                      required
-                      disabled={isLoading}
-                    />
-                  </div>
-
-                  <Button 
-                    type="submit" 
-                    className="w-full text-large" 
-                    size="lg"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        جاري إنشاء الحساب...
-                      </>
-                    ) : (
-                      <>
-                        <UserPlus size={18} className="ml-2" />
-                        إنشاء الحساب
-                      </>
-                    )}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+            <div className="mt-6 text-center">
+              <p className="text-sm text-muted-foreground">
+                {isLogin ? 'ليس لديك حساب؟' : 'لديك حساب بالفعل؟'}
+                <button
+                  type="button"
+                  onClick={() => setIsLogin(!isLogin)}
+                  className="text-primary hover:underline mr-2"
+                >
+                  {isLogin ? 'إنشاء حساب جديد' : 'تسجيل الدخول'}
+                </button>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

@@ -2,11 +2,13 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, User, Plus, Search, Info, Mail, Home } from 'lucide-react';
+import { Menu, X, User, Plus, Search, Info, Mail, Home, LogIn, LogOut } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const { user, signOut } = useAuth();
 
   const navItems = [
     { href: '/', label: 'الرئيسية', icon: Home },
@@ -17,6 +19,11 @@ const Navigation = () => {
   ];
 
   const isActive = (path: string) => location.pathname === path;
+
+  const handleSignOut = async () => {
+    await signOut();
+    setIsMenuOpen(false);
+  };
 
   return (
     <nav className="bg-card border-b border-border sticky top-0 z-50 arabic">
@@ -52,13 +59,33 @@ const Navigation = () => {
           </div>
 
           {/* Account Button */}
-          <div className="hidden md:flex">
-            <Link to="/account">
-              <Button variant="outline" className="flex items-center space-x-2 space-x-reverse text-sm">
-                <User size={16} />
-                <span>حسابي</span>
-              </Button>
-            </Link>
+          <div className="hidden md:flex items-center space-x-2 space-x-reverse">
+            {user ? (
+              <>
+                <Link to="/account">
+                  <Button variant="outline" className="flex items-center space-x-2 space-x-reverse text-sm">
+                    <User size={16} />
+                    <span>حسابي</span>
+                  </Button>
+                </Link>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={handleSignOut}
+                  className="flex items-center space-x-2 space-x-reverse text-sm"
+                >
+                  <LogOut size={16} />
+                  <span>تسجيل خروج</span>
+                </Button>
+              </>
+            ) : (
+              <Link to="/auth">
+                <Button className="flex items-center space-x-2 space-x-reverse text-sm">
+                  <LogIn size={16} />
+                  <span>تسجيل دخول</span>
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -95,14 +122,35 @@ const Navigation = () => {
                   </Link>
                 );
               })}
-              <Link
-                to="/account"
-                className="flex items-center space-x-3 space-x-reverse px-3 py-3 rounded-md text-base text-foreground hover:bg-accent hover:text-accent-foreground"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <User size={18} />
-                <span>حسابي</span>
-              </Link>
+              
+              {user ? (
+                <>
+                  <Link
+                    to="/account"
+                    className="flex items-center space-x-3 space-x-reverse px-3 py-3 rounded-md text-base text-foreground hover:bg-accent hover:text-accent-foreground"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <User size={18} />
+                    <span>حسابي</span>
+                  </Link>
+                  <button
+                    onClick={handleSignOut}
+                    className="flex items-center space-x-3 space-x-reverse px-3 py-3 rounded-md text-base text-foreground hover:bg-accent hover:text-accent-foreground w-full text-right"
+                  >
+                    <LogOut size={18} />
+                    <span>تسجيل خروج</span>
+                  </button>
+                </>
+              ) : (
+                <Link
+                  to="/auth"
+                  className="flex items-center space-x-3 space-x-reverse px-3 py-3 rounded-md text-base text-foreground hover:bg-accent hover:text-accent-foreground"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <LogIn size={18} />
+                  <span>تسجيل دخول</span>
+                </Link>
+              )}
             </div>
           </div>
         )}
