@@ -32,11 +32,6 @@ export interface Message {
   created_at: string;
 }
 
-// Type guard to check if profiles data is valid
-const isValidProfile = (profiles: any): profiles is { full_name: string } => {
-  return profiles && typeof profiles === 'object' && typeof profiles.full_name === 'string';
-};
-
 export const useConversations = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -50,59 +45,33 @@ export const useConversations = () => {
         .from('conversations')
         .select(`
           *,
-          services (title),
-          profiles!conversations_provider_id_fkey (full_name)
+          services (title)
         `)
+        .eq('client_id', user.id)
         .order('last_message_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching conversations:', error);
-        
-        // Fallback query without profiles join if the foreign key doesn't exist
-        const { data: fallbackData, error: fallbackError } = await supabase
-          .from('conversations')
-          .select(`
-            *,
-            services (title)
-          `)
-          .order('last_message_at', { ascending: false });
-
-        if (fallbackError) {
-          throw fallbackError;
-        }
-
-        // Manually fetch profile data for each conversation
-        const conversationsWithProfiles = await Promise.all(
-          (fallbackData || []).map(async (conversation): Promise<Conversation> => {
-            const { data: profileData } = await supabase
-              .from('profiles')
-              .select('full_name')
-              .eq('id', conversation.provider_id)
-              .maybeSingle();
-
-            return {
-              ...conversation,
-              profiles: profileData
-            };
-          })
-        );
-
-        return conversationsWithProfiles;
+        throw error;
       }
 
-      // Filter and transform the data to ensure type safety
-      return (data || []).map((item): Conversation => ({
-        id: item.id,
-        service_id: item.service_id,
-        client_id: item.client_id,
-        provider_id: item.provider_id,
-        status: item.status,
-        last_message_at: item.last_message_at,
-        created_at: item.created_at,
-        updated_at: item.updated_at,
-        services: item.services,
-        profiles: isValidProfile(item.profiles) ? item.profiles : null
-      }));
+      // Manually fetch profile data for each conversation (provider data)
+      const conversationsWithProfiles = await Promise.all(
+        (data || []).map(async (conversation): Promise<Conversation> => {
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('full_name')
+            .eq('id', conversation.provider_id)
+            .maybeSingle();
+
+          return {
+            ...conversation,
+            profiles: profileData || { full_name: 'مقدم الخدمة' }
+          };
+        })
+      );
+
+      return conversationsWithProfiles;
     },
     enabled: !!user
   });
@@ -140,6 +109,7 @@ export const useConversations = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      queryClient.invalidateQueries({ queryKey: ['provider-conversations'] });
     },
     onError: (error: any) => {
       console.error('Error creating conversation:', error);
