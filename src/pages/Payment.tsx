@@ -70,10 +70,22 @@ const Payment = () => {
           discount_applied: appliedCoupon.discount_amount
         });
 
+      // Get current coupon data and increment used count
+      const { data: couponData, error: fetchError } = await supabase
+        .from('coupons')
+        .select('used_count')
+        .eq('id', couponId)
+        .single();
+
+      if (fetchError) {
+        console.error('Error fetching coupon:', fetchError);
+        return;
+      }
+
       // Update coupon used count
       await supabase
         .from('coupons')
-        .update({ used_count: supabase.sql`used_count + 1` })
+        .update({ used_count: (couponData.used_count || 0) + 1 })
         .eq('id', couponId);
     } catch (error) {
       console.error('Error recording coupon usage:', error);
