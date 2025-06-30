@@ -1,18 +1,18 @@
 
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { Upload } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useServices } from '@/hooks/useServices';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { useSubscription } from '@/hooks/useSubscription';
-import { serviceCategories } from './ServiceCategoryData';
+import ServiceBasicInfo from './ServiceBasicInfo';
+import ServicePricing from './ServicePricing';
+import ServiceLocation from './ServiceLocation';
+import ServiceContact from './ServiceContact';
+import ServiceExperience from './ServiceExperience';
+import ServicePortfolio from './ServicePortfolio';
+import ServiceFormSubmit from './ServiceFormSubmit';
 
 const ServiceForm = () => {
   const navigate = useNavigate();
@@ -84,151 +84,43 @@ const ServiceForm = () => {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Service Title */}
-          <div className="space-y-2">
-            <Label htmlFor="title" className="text-large font-semibold">عنوان الخدمة *</Label>
-            <Input
-              id="title"
-              placeholder="مثال: تصوير الأفراح والمناسبات"
-              value={formData.title}
-              onChange={(e) => handleInputChange('title', e.target.value)}
-              className="text-large"
-              required
-            />
-          </div>
+          <ServiceBasicInfo
+            title={formData.title}
+            category={formData.category}
+            description={formData.description}
+            onTitleChange={(value) => handleInputChange('title', value)}
+            onCategoryChange={(value) => handleInputChange('category', value)}
+            onDescriptionChange={(value) => handleInputChange('description', value)}
+          />
 
-          {/* Category */}
-          <div className="space-y-2">
-            <Label htmlFor="category" className="text-large font-semibold">فئة الخدمة *</Label>
-            <Select onValueChange={(value) => handleInputChange('category', value)} required>
-              <SelectTrigger className="text-large">
-                <SelectValue placeholder="اختر فئة الخدمة" />
-              </SelectTrigger>
-              <SelectContent>
-                {serviceCategories.map((category) => {
-                  const Icon = category.icon;
-                  return (
-                    <SelectItem key={category.value} value={category.value}>
-                      <div className="flex items-center gap-2">
-                        <Icon size={18} />
-                        <span>{category.label}</span>
-                      </div>
-                    </SelectItem>
-                  );
-                })}
-              </SelectContent>
-            </Select>
-          </div>
+          <ServicePricing
+            price={formData.price}
+            onPriceChange={(value) => handleInputChange('price', value)}
+          />
 
-          {/* Description */}
-          <div className="space-y-2">
-            <Label htmlFor="description" className="text-large font-semibold">وصف تفصيلي للخدمة *</Label>
-            <Textarea
-              id="description"
-              placeholder="اكتب وصفاً مفصلاً عن خدمتك، خبرتك، والمميزات التي تقدمها..."
-              value={formData.description}
-              onChange={(e) => handleInputChange('description', e.target.value)}
-              className="text-large min-h-32"
-              required
-            />
-          </div>
+          <ServiceLocation
+            location={formData.location}
+            onLocationChange={(value) => handleInputChange('location', value)}
+          />
 
-          {/* Price Range */}
-          <div className="space-y-2">
-            <Label htmlFor="price" className="text-large font-semibold">نطاق الأسعار *</Label>
-            <Input
-              id="price"
-              placeholder="مثال: 200-500 شيكل"
-              value={formData.price}
-              onChange={(e) => handleInputChange('price', e.target.value)}
-              className="text-large"
-              required
-            />
-          </div>
+          <ServiceContact
+            phone={formData.phone}
+            email={formData.email}
+            onPhoneChange={(value) => handleInputChange('phone', value)}
+            onEmailChange={(value) => handleInputChange('email', value)}
+          />
 
-          {/* Location */}
-          <div className="space-y-2">
-            <Label htmlFor="location" className="text-large font-semibold">المنطقة/المحافظة *</Label>
-            <Input
-              id="location"
-              placeholder="مثال: رام الله، نابلس، غزة..."
-              value={formData.location}
-              onChange={(e) => handleInputChange('location', e.target.value)}
-              className="text-large"
-              required
-            />
-          </div>
+          <ServiceExperience
+            experience={formData.experience}
+            onExperienceChange={(value) => handleInputChange('experience', value)}
+          />
 
-          {/* Contact Info */}
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="phone" className="text-large font-semibold">رقم الهاتف *</Label>
-              <Input
-                id="phone"
-                type="tel"
-                placeholder="0599123456"
-                value={formData.phone}
-                onChange={(e) => handleInputChange('phone', e.target.value)}
-                className="text-large"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-large font-semibold">البريد الإلكتروني *</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="example@email.com"
-                value={formData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
-                className="text-large"
-                required
-              />
-            </div>
-          </div>
+          <ServicePortfolio />
 
-          {/* Experience */}
-          <div className="space-y-2">
-            <Label htmlFor="experience" className="text-large font-semibold">سنوات الخبرة</Label>
-            <Input
-              id="experience"
-              placeholder="مثال: 5 سنوات"
-              value={formData.experience}
-              onChange={(e) => handleInputChange('experience', e.target.value)}
-              className="text-large"
-            />
-          </div>
-
-          {/* Portfolio Upload */}
-          <div className="space-y-2">
-            <Label className="text-large font-semibold">صور من أعمالك السابقة</Label>
-            <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
-              <Upload size={48} className="mx-auto text-muted-foreground mb-4" />
-              <p className="text-large text-muted-foreground mb-2">اسحب الصور هنا أو اضغط للرفع</p>
-              <p className="text-muted-foreground">PNG, JPG حتى 10MB</p>
-              <Button variant="outline" className="mt-4" type="button">
-                اختر الصور
-              </Button>
-            </div>
-          </div>
-
-          {/* Submit Button */}
-          <div className="pt-6">
-            <Button 
-              type="submit" 
-              size="lg" 
-              className="w-full text-xl py-6"
-              disabled={isCreating}
-            >
-              {isCreating ? 'جاري النشر...' : 
-               canPostService() ? 'انشر الخدمة' : 'ادفع وانشر الخدمة (10 شيكل)'}
-            </Button>
-            {!canPostService() && (
-              <p className="text-center text-muted-foreground mt-4 text-large">
-                سيتم توجيهك لصفحة الدفع أولاً
-              </p>
-            )}
-          </div>
+          <ServiceFormSubmit
+            isCreating={isCreating}
+            canPostService={canPostService()}
+          />
         </form>
       </CardContent>
     </Card>
