@@ -2,8 +2,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, Target, Heart, Shield, Award, CheckCircle } from 'lucide-react';
 import Navigation from '@/components/Navigation';
+import { useHomeStats } from '@/hooks/useHomeStats';
 
 const About = () => {
+  const { data: homeStats, isLoading, error } = useHomeStats();
+
   const features = [
     {
       icon: Shield,
@@ -27,12 +30,41 @@ const About = () => {
     }
   ];
 
-  const stats = [
-    { number: '2,500+', label: 'مقدم خدمة' },
-    { number: '15,000+', label: 'خدمة مكتملة' },
-    { number: '50+', label: 'نوع خدمة' },
-    { number: '4.9/5', label: 'تقييم العملاء' }
-  ];
+  // Create dynamic stats based on real data
+  const getDynamicStats = () => {
+    if (isLoading) {
+      return [
+        { number: '...', label: 'مقدم خدمة' },
+        { number: '...', label: 'خدمة متاحة' },
+        { number: '...', label: 'فئة خدمة' },
+      ];
+    }
+
+    const serviceProvidersCount = homeStats?.serviceProvidersCount || 0;
+    const publishedServicesCount = homeStats?.publishedServicesCount || 0;
+    const categoriesCount = homeStats?.categoriesWithServices?.length || 0;
+
+    // Show encouraging message for new platform
+    const isNewPlatform = serviceProvidersCount < 10 && publishedServicesCount < 20;
+
+    return [
+      { 
+        number: serviceProvidersCount === 0 ? 'قريباً' : `${serviceProvidersCount}+`, 
+        label: 'مقدم خدمة' 
+      },
+      { 
+        number: publishedServicesCount === 0 ? 'قريباً' : `${publishedServicesCount}+`, 
+        label: 'خدمة متاحة' 
+      },
+      { 
+        number: categoriesCount === 0 ? 'قريباً' : `${categoriesCount}+`, 
+        label: 'فئة خدمة' 
+      },
+    ];
+  };
+
+  const stats = getDynamicStats();
+  const isNewPlatform = !isLoading && (homeStats?.serviceProvidersCount || 0) < 10 && (homeStats?.publishedServicesCount || 0) < 20;
 
   return (
     <div className="min-h-screen bg-background arabic">
@@ -82,8 +114,17 @@ const About = () => {
 
         {/* Stats Section */}
         <div className="bg-card py-16 px-8 rounded-lg mb-16">
-          <h2 className="text-3xl font-bold text-center mb-12">أرقامنا تتحدث</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <h2 className="text-3xl font-bold text-center mb-12">
+            {isNewPlatform ? 'منصة جديدة في نمو مستمر' : 'أرقامنا تتحدث'}
+          </h2>
+          
+          {isNewPlatform && (
+            <p className="text-center text-muted-foreground mb-8 text-large">
+              انضم إلينا في بداية رحلتنا وكن جزءاً من مجتمع الخدمات المهنية الفلسطيني
+            </p>
+          )}
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {stats.map((stat, index) => (
               <div key={index} className="text-center">
                 <div className="text-3xl md:text-4xl font-bold text-primary mb-2">
@@ -135,7 +176,10 @@ const About = () => {
               من هنا ولدت فكرة إنشاء منصة إلكترونية تجمع بين الطرفين، تتميز بسهولة الاستخدام والأمان والجودة. نحن نؤمن بأن التكنولوجيا يمكن أن تكون جسراً يربط بين الحاجات والحلول، وأن المواهب الفلسطينية تستحق منصة تليق بها.
             </p>
             <p className="text-xl-large text-muted-foreground">
-              اليوم، نحن فخورون بخدمة آلاف المستخدمين ودعم مئات المهنيين في تحقيق دخل مستدام من خلال مهاراتهم وخبراتهم.
+              {isNewPlatform 
+                ? 'نحن في بداية رحلتنا ونتطلع لخدمة مجتمعنا ودعم المهنيين الفلسطينيين في تحقيق دخل مستدام من خلال مهاراتهم وخبراتهم.'
+                : 'اليوم، نحن فخورون بخدمة آلاف المستخدمين ودعم مئات المهنيين في تحقيق دخل مستدام من خلال مهاراتهم وخبراتهم.'
+              }
             </p>
           </CardContent>
         </Card>
