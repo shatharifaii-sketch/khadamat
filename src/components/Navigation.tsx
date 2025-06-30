@@ -3,7 +3,8 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
-import { Menu, User, MessageCircle, LogOut, Settings, PlusCircle, Search, Info, Phone } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Menu, User, MessageCircle, LogOut, PlusCircle, Search, Info } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
@@ -38,15 +39,18 @@ const Navigation = () => {
     </Link>
   );
 
-  const MessagesButton = ({ mobile = false }: { mobile?: boolean }) => (
-    <NavLink to="/messages" onClick={mobile ? () => setIsOpen(false) : undefined}>
+  const AccountButton = ({ mobile = false }: { mobile?: boolean }) => (
+    <NavLink to="/account" onClick={mobile ? () => setIsOpen(false) : undefined}>
       <div className="flex items-center gap-2">
-        <MessageCircle size={mobile ? 20 : 16} />
-        <span>الرسائل</span>
+        <User size={mobile ? 20 : 16} />
+        <span>حسابي</span>
         {unreadCount > 0 && (
-          <Badge variant="destructive" className="h-5 w-5 p-0 flex items-center justify-center text-xs">
-            {unreadCount > 99 ? '99+' : unreadCount}
-          </Badge>
+          <div className="relative">
+            <MessageCircle size={mobile ? 16 : 14} className="text-destructive" />
+            <Badge variant="destructive" className="absolute -top-2 -right-2 h-4 w-4 p-0 flex items-center justify-center text-xs">
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </Badge>
+          </div>
         )}
       </div>
     </NavLink>
@@ -81,29 +85,23 @@ const Navigation = () => {
                 من نحن
               </div>
             </NavLink>
-            <NavLink to="/contact">
-              <div className="flex items-center gap-2">
-                <Phone size={16} />
-                اتصل بنا
-              </div>
-            </NavLink>
-            {user && <MessagesButton />}
           </div>
 
           {/* Auth Section */}
           <div className="hidden md:flex items-center space-x-4 space-x-reverse">
             {user ? (
               <div className="flex items-center space-x-4 space-x-reverse">
-                <NavLink to="/account">
-                  <div className="flex items-center gap-2">
-                    <User size={16} />
-                    حسابي
-                  </div>
-                </NavLink>
-                <Button variant="ghost" size="sm" onClick={handleSignOut}>
-                  <LogOut size={16} className="ml-2" />
-                  تسجيل الخروج
-                </Button>
+                <AccountButton />
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="sm" onClick={handleSignOut}>
+                      <LogOut size={16} />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>تسجيل الخروج</p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
             ) : (
               <Link to="/auth">
@@ -140,23 +138,11 @@ const Navigation = () => {
                       من نحن
                     </div>
                   </NavLink>
-                  <NavLink to="/contact" onClick={() => setIsOpen(false)}>
-                    <div className="flex items-center gap-2 text-lg">
-                      <Phone size={20} />
-                      اتصل بنا
-                    </div>
-                  </NavLink>
-                  {user && <MessagesButton mobile />}
                   
                   <div className="border-t pt-4">
                     {user ? (
                       <div className="space-y-4">
-                        <NavLink to="/account" onClick={() => setIsOpen(false)}>
-                          <div className="flex items-center gap-2 text-lg">
-                            <User size={20} />
-                            حسابي
-                          </div>
-                        </NavLink>
+                        <AccountButton mobile />
                         <Button variant="ghost" size="sm" onClick={handleSignOut} className="w-full justify-start">
                           <LogOut size={20} className="ml-2" />
                           تسجيل الخروج

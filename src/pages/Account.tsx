@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { User, Settings, CreditCard, MessageCircle, TrendingUp, Eye, Calendar, Loader2, Search } from 'lucide-react';
 import Navigation from '@/components/Navigation';
+import Footer from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { useServices } from '@/hooks/useServices';
@@ -319,6 +320,8 @@ const Account = () => {
           </Card>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 };
