@@ -58,7 +58,19 @@ export const useProviderConversations = () => {
         return conversationsWithProfiles;
       }
 
-      return data || [];
+      // Map the data to ensure proper typing
+      return (data || []).map((item): Conversation => ({
+        id: item.id,
+        service_id: item.service_id,
+        client_id: item.client_id,
+        provider_id: item.provider_id,
+        status: item.status,
+        last_message_at: item.last_message_at,
+        created_at: item.created_at,
+        updated_at: item.updated_at,
+        services: item.services,
+        profiles: item.profiles
+      }));
     },
     enabled: !!user
   });

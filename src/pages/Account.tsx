@@ -22,8 +22,8 @@ const Account = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const { profile, updateProfile, isLoading: profileLoading } = useProfile();
-  const { services, isLoading: servicesLoading } = useServices();
-  const { subscription } = useSubscription();
+  const { getUserServices, isLoading: servicesLoading } = useServices();
+  const { getUserSubscription } = useSubscription();
   const { data: providerConversations = [] } = useProviderConversations();
   const { data: unreadCount = 0 } = useUnreadMessages();
   
@@ -37,6 +37,10 @@ const Account = () => {
   });
 
   const [isUpdating, setIsUpdating] = useState(false);
+
+  // Get services and subscription data
+  const { data: services = [] } = getUserServices;
+  const { data: subscription } = getUserSubscription;
 
   useEffect(() => {
     if (profile) {
