@@ -52,7 +52,37 @@ export const useConversations = () => {
 
       if (error) {
         console.error('Error fetching conversations:', error);
-        throw error;
+        
+        // Fallback query without profiles join if the foreign key doesn't exist
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('conversations')
+          .select(`
+            *,
+            services (title)
+          `)
+          .order('last_message_at', { ascending: false });
+
+        if (fallbackError) {
+          throw fallbackError;
+        }
+
+        // Manually fetch profile data for each conversation
+        const conversationsWithProfiles = await Promise.all(
+          (fallbackData || []).map(async (conversation) => {
+            const { data: profileData } = await supabase
+              .from('profiles')
+              .select('full_name')
+              .eq('id', conversation.provider_id)
+              .maybeSingle();
+
+            return {
+              ...conversation,
+              profiles: profileData
+            };
+          })
+        );
+
+        return conversationsWithProfiles as Conversation[];
       }
 
       return data as Conversation[];
