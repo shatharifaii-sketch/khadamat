@@ -15,6 +15,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import PaymentOrderSummary from '@/components/Payment/PaymentOrderSummary';
 import PaymentMethodSelector from '@/components/Payment/PaymentMethodSelector';
 import PaymentMethodForms from '@/components/Payment/PaymentMethodForms';
+import CouponInput, { AppliedCoupon } from '@/components/Payment/CouponInput';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const Payment = () => {
   const navigate = useNavigate();
@@ -24,9 +27,10 @@ const Payment = () => {
   
   const serviceData = location.state?.serviceData;
   const servicesNeeded = location.state?.servicesNeeded || 2;
-  const amount = servicesNeeded * 5; // 5 NIS per service (10 NIS for 2 services)
+  const baseAmount = servicesNeeded * 5; // 5 NIS per service
 
   const [paymentMethod, setPaymentMethod] = useState('reflect');
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
   const [paymentData, setPaymentData] = useState({
     cardNumber: '',
     expiryDate: '',
@@ -44,30 +48,111 @@ const Payment = () => {
 
   const subscription = getUserSubscription.data;
 
+  // Calculate final amount after coupon
+  const finalAmount = appliedCoupon 
+    ? Math.max(0, baseAmount - appliedCoupon.discount_amount)
+    : baseAmount;
+
   const handleInputChange = (field: string, value: string) => {
     setPaymentData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const recordCouponUsage = async (couponId: string, transactionId?: string) => {
+    if (!appliedCoupon) return;
+
+    try {
+      await supabase
+        .from('coupon_usage')
+        .insert({
+          user_id: user.id,
+          coupon_id: couponId,
+          transaction_id: transactionId,
+          discount_applied: appliedCoupon.discount_amount
+        });
+
+      // Update coupon used count
+      await supabase.rpc('increment', {
+        table_name: 'coupons',
+        column_name: 'used_count',
+        id: couponId
+      });
+    } catch (error) {
+      console.error('Error recording coupon usage:', error);
+    }
+  };
+
+  const handleFreeSubscription = async () => {
+    if (!appliedCoupon || appliedCoupon.type !== 'first_month_free') return;
+
+    try {
+      // Create subscription directly without payment
+      const expiresAt = new Date();
+      expiresAt.setMonth(expiresAt.getMonth() + 1);
+
+      const { error } = await supabase
+        .from('subscriptions')
+        .upsert({
+          user_id: user.id,
+          services_allowed: servicesNeeded,
+          services_used: 0,
+          amount: 0,
+          payment_method: 'coupon',
+          status: 'active',
+          expires_at: expiresAt.toISOString()
+        });
+
+      if (error) throw error;
+
+      await recordCouponUsage(appliedCoupon.id);
+      toast.success('تم تفعيل اشتراكك المجاني! يمكنك الآن نشر خدماتك.');
+      navigate('/account');
+    } catch (error) {
+      console.error('Error creating free subscription:', error);
+      toast.error('حدث خطأ في تفعيل الاشتراك المجاني');
+    }
   };
 
   const handlePayment = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Handle free subscription for FIRSTFREE coupon
+    if (appliedCoupon?.type === 'first_month_free') {
+      await handleFreeSubscription();
+      return;
+    }
+    
     try {
+      // Determine services quota based on coupon
+      let servicesQuota = servicesNeeded;
+      let subscriptionMonths = 1;
+      
+      if (appliedCoupon?.type === 'three_months_for_one') {
+        subscriptionMonths = 3;
+      }
+
       // Create payment transaction
       const transaction = await createPaymentTransaction.mutateAsync({
-        amount,
+        amount: finalAmount,
         currency: 'ILS',
         payment_method: paymentMethod,
-        services_quota: servicesNeeded,
+        services_quota: servicesQuota,
         status: 'pending',
-        payment_data: paymentData
+        payment_data: {
+          ...paymentData,
+          coupon_code: appliedCoupon?.code,
+          subscription_months: subscriptionMonths
+        }
       });
+
+      // Record coupon usage
+      if (appliedCoupon) {
+        await recordCouponUsage(appliedCoupon.id, transaction.id);
+      }
 
       // Simulate payment processing based on method
       if (paymentMethod === 'reflect') {
-        // Redirect to Reflect payment gateway
-        window.open(`https://reflect.ps/payment?amount=${amount}&reference=${transaction.id}`, '_blank');
+        window.open(`https://reflect.ps/payment?amount=${finalAmount}&reference=${transaction.id}`, '_blank');
         
-        // For demo purposes, we'll simulate successful payment after a delay
         setTimeout(async () => {
           await completePayment.mutateAsync({ 
             transactionId: transaction.id,
@@ -77,10 +162,8 @@ const Payment = () => {
         }, 5000);
         
       } else if (paymentMethod === 'jawwal_pay') {
-        // Simulate Jawwal Pay USSD or app integration
         alert(`سيتم إرسال رسالة نصية إلى ${paymentData.phoneNumber} لتأكيد الدفع`);
         
-        // Simulate successful payment
         setTimeout(async () => {
           await completePayment.mutateAsync({ 
             transactionId: transaction.id,
@@ -90,10 +173,8 @@ const Payment = () => {
         }, 3000);
         
       } else if (paymentMethod === 'credit_card') {
-        // Process credit card through local gateway
         alert('سيتم معالجة الدفع عبر البطاقة الائتمانية...');
         
-        // Simulate processing
         setTimeout(async () => {
           await completePayment.mutateAsync({ 
             transactionId: transaction.id,
@@ -103,7 +184,6 @@ const Payment = () => {
         }, 4000);
         
       } else if (paymentMethod === 'bank_transfer') {
-        // Show bank details for transfer
         alert('سيتم توجيهك لتفاصيل التحويل البنكي');
         navigate('/bank-transfer', { state: { transaction } });
       }
@@ -132,8 +212,10 @@ const Payment = () => {
           <PaymentOrderSummary 
             subscription={subscription}
             servicesNeeded={servicesNeeded}
-            amount={amount}
+            amount={baseAmount}
             serviceData={serviceData}
+            appliedCoupon={appliedCoupon}
+            finalAmount={finalAmount}
           />
 
           {/* Payment Form */}
@@ -141,25 +223,41 @@ const Payment = () => {
             <CardHeader>
               <CardTitle className="text-xl">طريقة الدفع</CardTitle>
               <CardDescription>
-                اختر طريقة الدفع المناسبة لك
+                {appliedCoupon?.type === 'first_month_free' 
+                  ? 'اشتراكك مجاني! اضغط على زر التفعيل أدناه'
+                  : 'اختر طريقة الدفع المناسبة لك'
+                }
               </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handlePayment} className="space-y-6">
-                {/* Payment Method Selection */}
-                <PaymentMethodSelector 
-                  paymentMethod={paymentMethod}
-                  onPaymentMethodChange={setPaymentMethod}
+                {/* Coupon Input */}
+                <CouponInput 
+                  onCouponApplied={setAppliedCoupon}
+                  appliedCoupon={appliedCoupon}
                 />
 
                 <Separator />
 
-                {/* Payment Method Specific Forms */}
-                <PaymentMethodForms 
-                  paymentMethod={paymentMethod}
-                  paymentData={paymentData}
-                  onInputChange={handleInputChange}
-                />
+                {/* Show payment method selection only if not free */}
+                {appliedCoupon?.type !== 'first_month_free' && (
+                  <>
+                    {/* Payment Method Selection */}
+                    <PaymentMethodSelector 
+                      paymentMethod={paymentMethod}
+                      onPaymentMethodChange={setPaymentMethod}
+                    />
+
+                    <Separator />
+
+                    {/* Payment Method Specific Forms */}
+                    <PaymentMethodForms 
+                      paymentMethod={paymentMethod}
+                      paymentData={paymentData}
+                      onInputChange={handleInputChange}
+                    />
+                  </>
+                )}
 
                 <div className="space-y-4 pt-4">
                   <Button 
@@ -169,7 +267,12 @@ const Payment = () => {
                     disabled={createPaymentTransaction.isPending}
                   >
                     <ArrowRight className="ml-2" size={20} />
-                    {createPaymentTransaction.isPending ? 'جاري المعالجة...' : `ادفع ${amount} شيكل`}
+                    {createPaymentTransaction.isPending 
+                      ? 'جاري المعالجة...' 
+                      : appliedCoupon?.type === 'first_month_free'
+                        ? 'تفعيل الاشتراك المجاني'
+                        : `ادفع ${finalAmount} شيكل`
+                    }
                   </Button>
                   
                   <Button 

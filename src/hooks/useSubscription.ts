@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -99,6 +98,19 @@ export const useSubscription = () => {
     mutationFn: async ({ transactionId, externalTransactionId }: { transactionId: string, externalTransactionId?: string }) => {
       console.log('Completing payment:', transactionId);
       
+      // Get transaction details to check for coupon info
+      const { data: transaction, error: transactionError } = await supabase
+        .from('payment_transactions')
+        .select('*')
+        .eq('id', transactionId)
+        .single();
+
+      if (transactionError) {
+        console.error('Error fetching transaction:', transactionError);
+        throw transactionError;
+      }
+
+      // Update transaction status
       const { data, error } = await supabase
         .from('payment_transactions')
         .update({ 
@@ -113,6 +125,24 @@ export const useSubscription = () => {
       if (error) {
         console.error('Error completing payment:', error);
         throw error;
+      }
+
+      // Handle special subscription periods for coupons
+      const paymentData = transaction.payment_data as any;
+      const subscriptionMonths = paymentData?.subscription_months || 1;
+      
+      if (subscriptionMonths > 1) {
+        // Update subscription expiry for extended periods (like 3FOR1 coupon)
+        const expiresAt = new Date();
+        expiresAt.setMonth(expiresAt.getMonth() + subscriptionMonths);
+        
+        await supabase
+          .from('subscriptions')
+          .update({ 
+            expires_at: expiresAt.toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', user?.id);
       }
       
       console.log('Payment completed:', data);
