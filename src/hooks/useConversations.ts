@@ -16,10 +16,10 @@ export interface Conversation {
   updated_at: string;
   services?: {
     title: string;
-  };
+  } | null;
   profiles?: {
     full_name: string;
-  };
+  } | null;
 }
 
 export interface Message {

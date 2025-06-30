@@ -14,6 +14,7 @@ export interface PublicService {
   experience?: string;
   views: number;
   created_at: string;
+  user_id: string;
   profiles?: {
     full_name?: string;
     profile_image_url?: string;
