@@ -1,11 +1,12 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import { useServices } from '@/hooks/useServices';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { useSubscription } from '@/hooks/useSubscription';
+import { usePendingService } from '@/hooks/usePendingService';
 import ServiceBasicInfo from './ServiceBasicInfo';
 import ServicePricing from './ServicePricing';
 import ServiceLocation from './ServiceLocation';
@@ -19,6 +20,7 @@ const ServiceForm = () => {
   const { user } = useAuth();
   const { createService, isCreating } = useServices();
   const { canPostService } = useSubscription();
+  const { pendingService, savePendingService, clearPendingService } = usePendingService();
   
   const [formData, setFormData] = useState({
     title: '',
@@ -30,6 +32,21 @@ const ServiceForm = () => {
     email: user?.email || '',
     experience: '',
   });
+
+  // Load pending service data when component mounts
+  useEffect(() => {
+    if (pendingService) {
+      console.log('Loading pending service data into form');
+      setFormData(pendingService);
+    }
+  }, [pendingService]);
+
+  // Update email when user changes
+  useEffect(() => {
+    if (user?.email && !formData.email) {
+      setFormData(prev => ({ ...prev, email: user.email || '' }));
+    }
+  }, [user?.email]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -45,6 +62,9 @@ const ServiceForm = () => {
 
     // Check if user can post more services
     if (!canPostService()) {
+      // Save the service data before redirecting to payment
+      savePendingService(formData);
+      
       // Redirect to payment page
       navigate('/payment', { 
         state: { 
@@ -67,6 +87,9 @@ const ServiceForm = () => {
         experience: formData.experience
       });
       
+      // Clear pending service data after successful creation
+      clearPendingService();
+      
       // Navigate to account page to see the service
       navigate('/account');
     } catch (error) {
@@ -80,6 +103,11 @@ const ServiceForm = () => {
         <CardTitle className="text-2xl">تفاصيل الخدمة</CardTitle>
         <CardDescription className="text-large">
           املأ المعلومات التالية لنشر خدمتك
+          {pendingService && (
+            <span className="block mt-2 text-green-600 font-medium">
+              ✓ تم استرداد بياناتك المحفوظة
+            </span>
+          )}
         </CardDescription>
       </CardHeader>
       <CardContent>
