@@ -25,26 +25,26 @@ const Navigation = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 space-x-reverse">
             <div className="bg-primary text-primary-foreground p-2 rounded-lg">
-              <Home size={24} />
+              <Home size={20} />
             </div>
-            <span className="text-xl font-bold text-primary">خدمتك</span>
+            <span className="text-lg font-bold text-primary">خدمتك</span>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8 space-x-reverse">
+          <div className="hidden md:flex items-center space-x-6 space-x-reverse">
             {navItems.map((item) => {
               const Icon = item.icon;
               return (
                 <Link
                   key={item.href}
                   to={item.href}
-                  className={`flex items-center space-x-2 space-x-reverse px-3 py-2 rounded-md text-large transition-colors ${
+                  className={`flex items-center space-x-2 space-x-reverse px-3 py-2 rounded-md text-sm transition-colors ${
                     isActive(item.href)
                       ? 'bg-primary text-primary-foreground'
                       : 'text-foreground hover:bg-accent hover:text-accent-foreground'
                   }`}
                 >
-                  <Icon size={18} />
+                  <Icon size={16} />
                   <span>{item.label}</span>
                 </Link>
               );
@@ -54,8 +54,8 @@ const Navigation = () => {
           {/* Account Button */}
           <div className="hidden md:flex">
             <Link to="/account">
-              <Button variant="outline" className="flex items-center space-x-2 space-x-reverse text-large">
-                <User size={18} />
+              <Button variant="outline" className="flex items-center space-x-2 space-x-reverse text-sm">
+                <User size={16} />
                 <span>حسابي</span>
               </Button>
             </Link>
@@ -68,7 +68,7 @@ const Navigation = () => {
               size="sm"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
-              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </Button>
           </div>
         </div>
@@ -83,24 +83,24 @@ const Navigation = () => {
                   <Link
                     key={item.href}
                     to={item.href}
-                    className={`flex items-center space-x-3 space-x-reverse px-3 py-3 rounded-md text-large transition-colors ${
+                    className={`flex items-center space-x-3 space-x-reverse px-3 py-3 rounded-md text-base transition-colors ${
                       isActive(item.href)
                         ? 'bg-primary text-primary-foreground'
                         : 'text-foreground hover:bg-accent hover:text-accent-foreground'
                     }`}
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    <Icon size={20} />
+                    <Icon size={18} />
                     <span>{item.label}</span>
                   </Link>
                 );
               })}
               <Link
                 to="/account"
-                className="flex items-center space-x-3 space-x-reverse px-3 py-3 rounded-md text-large text-foreground hover:bg-accent hover:text-accent-foreground"
+                className="flex items-center space-x-3 space-x-reverse px-3 py-3 rounded-md text-base text-foreground hover:bg-accent hover:text-accent-foreground"
                 onClick={() => setIsMenuOpen(false)}
               >
-                <User size={20} />
+                <User size={18} />
                 <span>حسابي</span>
               </Link>
             </div>
