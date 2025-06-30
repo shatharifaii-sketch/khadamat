@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { User, Settings, CreditCard, MessageCircle, TrendingUp, Eye, Calendar, Loader2 } from 'lucide-react';
+import { User, Settings, CreditCard, MessageCircle, TrendingUp, Eye, Calendar, Loader2, Search } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
@@ -18,6 +17,7 @@ import { useProviderConversations } from '@/hooks/useProviderConversations';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useConversations } from '@/hooks/useConversations';
 
 const Account = () => {
   const { user, loading } = useAuth();
@@ -26,6 +26,7 @@ const Account = () => {
   const { getUserServices } = useServices();
   const { getUserSubscription } = useSubscription();
   const { data: providerConversations = [] } = useProviderConversations();
+  const { getConversations } = useConversations();
   const { data: unreadCount = 0 } = useUnreadMessages();
   
   const [formData, setFormData] = useState({
@@ -42,6 +43,10 @@ const Account = () => {
   // Get services and subscription data
   const { data: services = [], isLoading: servicesLoading } = getUserServices;
   const { data: subscription } = getUserSubscription;
+  const clientConversations = getConversations.data || [];
+
+  // Calculate total conversations
+  const totalConversations = providerConversations.length + clientConversations.length;
 
   useEffect(() => {
     if (profile) {
@@ -145,7 +150,7 @@ const Account = () => {
                 <MessageCircle className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{providerConversations.length}</div>
+                <div className="text-2xl font-bold">{totalConversations}</div>
                 <p className="text-xs text-muted-foreground">
                   {unreadCount > 0 && `${unreadCount} غير مقروءة`}
                 </p>
@@ -184,10 +189,10 @@ const Account = () => {
                     أضف خدمة جديدة
                   </Button>
                 </Link>
-                <Link to="/provider-inbox">
+                <Link to="/messages">
                   <Button variant="outline" className="w-full">
                     <MessageCircle className="h-4 w-4 ml-2" />
-                    رسائل العملاء
+                    الرسائل
                     {unreadCount > 0 && (
                       <Badge variant="destructive" className="mr-2">
                         {unreadCount}
@@ -201,10 +206,10 @@ const Account = () => {
                     تجديد الاشتراك
                   </Button>
                 </Link>
-                <Link to="/inbox">
+                <Link to="/find-service">
                   <Button variant="outline" className="w-full">
-                    <MessageCircle className="h-4 w-4 ml-2" />
-                    رسائلي
+                    <Search className="h-4 w-4 ml-2" />
+                    ابحث عن خدمة
                   </Button>
                 </Link>
               </div>

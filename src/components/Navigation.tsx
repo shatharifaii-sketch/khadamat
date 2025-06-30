@@ -38,8 +38,8 @@ const Navigation = () => {
     </Link>
   );
 
-  const InboxButton = ({ mobile = false }: { mobile?: boolean }) => (
-    <NavLink to="/inbox" onClick={mobile ? () => setIsOpen(false) : undefined}>
+  const MessagesButton = ({ mobile = false }: { mobile?: boolean }) => (
+    <NavLink to="/messages" onClick={mobile ? () => setIsOpen(false) : undefined}>
       <div className="flex items-center gap-2">
         <MessageCircle size={mobile ? 20 : 16} />
         <span>الرسائل</span>
@@ -81,7 +81,7 @@ const Navigation = () => {
                 أضف خدمة
               </div>
             </NavLink>
-            {user && <InboxButton />}
+            {user && <MessagesButton />}
           </div>
 
           {/* Auth Section */}
@@ -134,7 +134,7 @@ const Navigation = () => {
                       أضف خدمة
                     </div>
                   </NavLink>
-                  {user && <InboxButton mobile />}
+                  {user && <MessagesButton mobile />}
                   
                   <div className="border-t pt-4">
                     {user ? (

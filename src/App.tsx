@@ -13,8 +13,7 @@ import Auth from "./pages/Auth";
 import Account from "./pages/Account";
 import Payment from "./pages/Payment";
 import Checkout from "./pages/Checkout";
-import Inbox from "./pages/Inbox";
-import ProviderInbox from "./pages/ProviderInbox";
+import Messages from "./pages/Messages";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,8 +35,7 @@ function App() {
               <Route path="/account" element={<Account />} />
               <Route path="/payment" element={<Payment />} />
               <Route path="/checkout" element={<Checkout />} />
-              <Route path="/inbox" element={<Inbox />} />
-              <Route path="/provider-inbox" element={<ProviderInbox />} />
+              <Route path="/messages" element={<Messages />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
