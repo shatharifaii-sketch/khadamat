@@ -33,6 +33,48 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_transactions: {
+        Row: {
+          amount: number
+          created_at: string | null
+          currency: string
+          id: string
+          payment_data: Json | null
+          payment_method: string
+          services_quota: number
+          status: string
+          transaction_id: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string | null
+          currency?: string
+          id?: string
+          payment_data?: Json | null
+          payment_method: string
+          services_quota?: number
+          status?: string
+          transaction_id?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          currency?: string
+          id?: string
+          payment_data?: Json | null
+          payment_method?: string
+          services_quota?: number
+          status?: string
+          transaction_id?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           bio: string | null
@@ -169,12 +211,16 @@ export type Database = {
       subscriptions: {
         Row: {
           amount: number
+          auto_renew: boolean | null
           billing_cycle: string
           created_at: string
           currency: string
           expires_at: string
           id: string
+          payment_method: string | null
           plan_type: string
+          services_allowed: number | null
+          services_used: number | null
           started_at: string
           status: string
           updated_at: string
@@ -182,12 +228,16 @@ export type Database = {
         }
         Insert: {
           amount?: number
+          auto_renew?: boolean | null
           billing_cycle?: string
           created_at?: string
           currency?: string
           expires_at?: string
           id?: string
+          payment_method?: string | null
           plan_type?: string
+          services_allowed?: number | null
+          services_used?: number | null
           started_at?: string
           status?: string
           updated_at?: string
@@ -195,12 +245,16 @@ export type Database = {
         }
         Update: {
           amount?: number
+          auto_renew?: boolean | null
           billing_cycle?: string
           created_at?: string
           currency?: string
           expires_at?: string
           id?: string
+          payment_method?: string | null
           plan_type?: string
+          services_allowed?: number | null
+          services_used?: number | null
           started_at?: string
           status?: string
           updated_at?: string

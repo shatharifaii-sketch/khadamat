@@ -29,6 +29,24 @@ export const useServices = () => {
       
       console.log('Creating service for user:', user.id);
       
+      // Check user's service quota before creating
+      console.log('Checking service quota...');
+      const { data: subscription, error: subError } = await supabase
+        .from('subscriptions')
+        .select('services_allowed, services_used')
+        .eq('user_id', user.id)
+        .single();
+
+      if (subError && subError.code !== 'PGRST116') {
+        console.error('Error checking subscription:', subError);
+        throw new Error('خطأ في التحقق من الاشتراك');
+      }
+
+      // If no subscription exists or quota exceeded, throw error
+      if (!subscription || subscription.services_used >= subscription.services_allowed) {
+        throw new Error('لقد استنفدت حصتك من الخدمات. يرجى الدفع لنشر المزيد من الخدمات.');
+      }
+      
       // First, ensure the user has a profile
       const { data: existingProfile, error: profileCheckError } = await supabase
         .from('profiles')
@@ -72,6 +90,21 @@ export const useServices = () => {
         throw error;
       }
       
+      // Update services_used count
+      console.log('Updating services_used count...');
+      const { error: updateError } = await supabase
+        .from('subscriptions')
+        .update({ 
+          services_used: subscription.services_used + 1,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', user.id);
+
+      if (updateError) {
+        console.error('Error updating services_used:', updateError);
+        // Don't throw error here as service was created successfully
+      }
+      
       console.log('Service created successfully:', data);
       return data;
     },
@@ -79,11 +112,12 @@ export const useServices = () => {
       queryClient.invalidateQueries({ queryKey: ['services'] });
       queryClient.invalidateQueries({ queryKey: ['user-services'] });
       queryClient.invalidateQueries({ queryKey: ['public-services'] });
+      queryClient.invalidateQueries({ queryKey: ['user-subscription'] });
       toast.success('تم نشر الخدمة بنجاح!');
     },
     onError: (error: any) => {
       console.error('Error creating service:', error);
-      toast.error('حدث خطأ في نشر الخدمة: ' + error.message);
+      toast.error(error.message || 'حدث خطأ في نشر الخدمة');
     }
   });
 
