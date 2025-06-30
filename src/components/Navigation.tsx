@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
-import { Menu, User, MessageCircle, LogOut, Settings, PlusCircle, Search, Home } from 'lucide-react';
+import { Menu, User, MessageCircle, LogOut, Settings, PlusCircle, Search, Info, Phone } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
@@ -63,12 +63,6 @@ const Navigation = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8 space-x-reverse">
-            <NavLink to="/">
-              <div className="flex items-center gap-2">
-                <Home size={16} />
-                الرئيسية
-              </div>
-            </NavLink>
             <NavLink to="/find-service">
               <div className="flex items-center gap-2">
                 <Search size={16} />
@@ -79,6 +73,18 @@ const Navigation = () => {
               <div className="flex items-center gap-2">
                 <PlusCircle size={16} />
                 أضف خدمة
+              </div>
+            </NavLink>
+            <NavLink to="/about">
+              <div className="flex items-center gap-2">
+                <Info size={16} />
+                من نحن
+              </div>
+            </NavLink>
+            <NavLink to="/contact">
+              <div className="flex items-center gap-2">
+                <Phone size={16} />
+                اتصل بنا
               </div>
             </NavLink>
             {user && <MessagesButton />}
@@ -116,12 +122,6 @@ const Navigation = () => {
               </SheetTrigger>
               <SheetContent side="right" className="w-[300px] sm:w-[400px]">
                 <div className="flex flex-col space-y-4 mt-8">
-                  <NavLink to="/" onClick={() => setIsOpen(false)}>
-                    <div className="flex items-center gap-2 text-lg">
-                      <Home size={20} />
-                      الرئيسية
-                    </div>
-                  </NavLink>
                   <NavLink to="/find-service" onClick={() => setIsOpen(false)}>
                     <div className="flex items-center gap-2 text-lg">
                       <Search size={20} />
@@ -132,6 +132,18 @@ const Navigation = () => {
                     <div className="flex items-center gap-2 text-lg">
                       <PlusCircle size={20} />
                       أضف خدمة
+                    </div>
+                  </NavLink>
+                  <NavLink to="/about" onClick={() => setIsOpen(false)}>
+                    <div className="flex items-center gap-2 text-lg">
+                      <Info size={20} />
+                      من نحن
+                    </div>
+                  </NavLink>
+                  <NavLink to="/contact" onClick={() => setIsOpen(false)}>
+                    <div className="flex items-center gap-2 text-lg">
+                      <Phone size={20} />
+                      اتصل بنا
                     </div>
                   </NavLink>
                   {user && <MessagesButton mobile />}
