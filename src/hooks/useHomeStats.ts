@@ -18,7 +18,7 @@ export const useHomeStats = () => {
       console.log('Fetching home statistics...');
       
       // Get count of service providers (profiles with is_service_provider = true)
-      const { data: serviceProviders, error: providersError } = await supabase
+      const { count: serviceProvidersCount, error: providersError } = await supabase
         .from('profiles')
         .select('id', { count: 'exact', head: true })
         .eq('is_service_provider', true);
@@ -28,7 +28,7 @@ export const useHomeStats = () => {
       }
 
       // Get count of published services
-      const { data: publishedServices, error: servicesError } = await supabase
+      const { count: publishedServicesCount, error: servicesError } = await supabase
         .from('services')
         .select('id', { count: 'exact', head: true })
         .eq('status', 'published');
@@ -59,8 +59,8 @@ export const useHomeStats = () => {
       }));
 
       const stats: HomeStats = {
-        serviceProvidersCount: serviceProviders?.length || 0,
-        publishedServicesCount: publishedServices?.length || 0,
+        serviceProvidersCount: serviceProvidersCount || 0,
+        publishedServicesCount: publishedServicesCount || 0,
         categoriesWithServices
       };
 

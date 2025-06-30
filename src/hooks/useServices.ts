@@ -60,7 +60,7 @@ export const useServices = () => {
       console.log('Checking user profile...');
       const { data: existingProfile, error: profileCheckError } = await supabase
         .from('profiles')
-        .select('id')
+        .select('id, is_service_provider')
         .eq('id', user.id)
         .maybeSingle();
       
@@ -70,7 +70,7 @@ export const useServices = () => {
       }
 
       if (!existingProfile) {
-        // Profile doesn't exist, create it
+        // Profile doesn't exist, create it as a service provider
         console.log('Creating profile for user:', user.id);
         const { error: profileCreateError } = await supabase
           .from('profiles')
@@ -83,6 +83,18 @@ export const useServices = () => {
         if (profileCreateError) {
           console.error('Error creating profile:', profileCreateError);
           throw new Error('فشل في إنشاء الملف الشخصي: ' + profileCreateError.message);
+        }
+      } else if (!existingProfile.is_service_provider) {
+        // Profile exists but is not marked as service provider, update it
+        console.log('Updating profile to mark as service provider:', user.id);
+        const { error: profileUpdateError } = await supabase
+          .from('profiles')
+          .update({ is_service_provider: true })
+          .eq('id', user.id);
+        
+        if (profileUpdateError) {
+          console.error('Error updating profile:', profileUpdateError);
+          throw new Error('فشل في تحديث الملف الشخصي: ' + profileUpdateError.message);
         }
       }
 
@@ -127,6 +139,7 @@ export const useServices = () => {
       queryClient.invalidateQueries({ queryKey: ['user-services'] });
       queryClient.invalidateQueries({ queryKey: ['public-services'] });
       queryClient.invalidateQueries({ queryKey: ['user-subscription'] });
+      queryClient.invalidateQueries({ queryKey: ['home-stats'] });
       toast.success('تم نشر الخدمة بنجاح!');
     },
     onError: (error: any) => {
