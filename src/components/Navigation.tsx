@@ -1,159 +1,166 @@
 
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, User, Plus, Search, Info, Mail, Home, LogIn, LogOut } from 'lucide-react';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Badge } from '@/components/ui/badge';
+import { Menu, User, MessageCircle, LogOut, Settings, PlusCircle, Search, Home } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 
 const Navigation = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const { user, signOut } = useAuth();
-
-  const navItems = [
-    { href: '/', label: 'الرئيسية', icon: Home },
-    { href: '/post-service', label: 'انشر خدمة', icon: Plus },
-    { href: '/find-service', label: 'ابحث عن خدمة', icon: Search },
-    { href: '/about', label: 'من نحن', icon: Info },
-    { href: '/contact', label: 'تواصل معنا', icon: Mail },
-  ];
+  const { data: unreadCount = 0 } = useUnreadMessages();
 
   const isActive = (path: string) => location.pathname === path;
 
-  const handleSignOut = async () => {
-    await signOut();
-    setIsMenuOpen(false);
+  const handleSignOut = () => {
+    signOut();
+    setIsOpen(false);
   };
 
+  const NavLink = ({ to, children, className = "", onClick }: { 
+    to: string; 
+    children: React.ReactNode; 
+    className?: string;
+    onClick?: () => void;
+  }) => (
+    <Link 
+      to={to} 
+      className={`text-sm font-medium transition-colors hover:text-primary ${
+        isActive(to) ? 'text-primary' : 'text-muted-foreground'
+      } ${className}`}
+      onClick={onClick}
+    >
+      {children}
+    </Link>
+  );
+
+  const InboxButton = ({ mobile = false }: { mobile?: boolean }) => (
+    <NavLink to="/inbox" onClick={mobile ? () => setIsOpen(false) : undefined}>
+      <div className="flex items-center gap-2">
+        <MessageCircle size={mobile ? 20 : 16} />
+        <span>الرسائل</span>
+        {unreadCount > 0 && (
+          <Badge variant="destructive" className="h-5 w-5 p-0 flex items-center justify-center text-xs">
+            {unreadCount > 99 ? '99+' : unreadCount}
+          </Badge>
+        )}
+      </div>
+    </NavLink>
+  );
+
   return (
-    <nav className="bg-card border-b border-border sticky top-0 z-50 arabic">
+    <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2 space-x-reverse">
-            <div className="bg-primary text-primary-foreground p-2 rounded-lg">
-              <Home size={20} />
-            </div>
-            <span className="text-lg font-bold text-primary">خدمات</span>
+          <Link to="/" className="flex items-center space-x-2">
+            <span className="text-xl font-bold text-primary">خدمات</span>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-6 space-x-reverse">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.href}
-                  to={item.href}
-                  className={`flex items-center space-x-2 space-x-reverse px-3 py-2 rounded-md text-sm transition-colors ${
-                    isActive(item.href)
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-foreground hover:bg-accent hover:text-accent-foreground'
-                  }`}
-                >
-                  <Icon size={16} />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
+          <div className="hidden md:flex items-center space-x-8 space-x-reverse">
+            <NavLink to="/">
+              <div className="flex items-center gap-2">
+                <Home size={16} />
+                الرئيسية
+              </div>
+            </NavLink>
+            <NavLink to="/find-service">
+              <div className="flex items-center gap-2">
+                <Search size={16} />
+                البحث عن خدمة
+              </div>
+            </NavLink>
+            <NavLink to="/post-service">
+              <div className="flex items-center gap-2">
+                <PlusCircle size={16} />
+                أضف خدمة
+              </div>
+            </NavLink>
+            {user && <InboxButton />}
           </div>
 
-          {/* Account Button */}
-          <div className="hidden md:flex items-center space-x-2 space-x-reverse">
+          {/* Auth Section */}
+          <div className="hidden md:flex items-center space-x-4 space-x-reverse">
             {user ? (
-              <>
-                <Link to="/account">
-                  <Button variant="outline" className="flex items-center space-x-2 space-x-reverse text-sm">
+              <div className="flex items-center space-x-4 space-x-reverse">
+                <NavLink to="/account">
+                  <div className="flex items-center gap-2">
                     <User size={16} />
-                    <span>حسابي</span>
-                  </Button>
-                </Link>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={handleSignOut}
-                  className="flex items-center space-x-2 space-x-reverse text-sm"
-                >
-                  <LogOut size={16} />
-                  <span>تسجيل خروج</span>
+                    حسابي
+                  </div>
+                </NavLink>
+                <Button variant="ghost" size="sm" onClick={handleSignOut}>
+                  <LogOut size={16} className="ml-2" />
+                  تسجيل الخروج
                 </Button>
-              </>
+              </div>
             ) : (
               <Link to="/auth">
-                <Button className="flex items-center space-x-2 space-x-reverse text-sm">
-                  <LogIn size={16} />
-                  <span>تسجيل دخول</span>
-                </Button>
+                <Button>تسجيل الدخول</Button>
               </Link>
             )}
           </div>
 
           {/* Mobile menu button */}
           <div className="md:hidden">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
-            </Button>
+            <Sheet open={isOpen} onOpenChange={setIsOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  <Menu size={20} />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+                <div className="flex flex-col space-y-4 mt-8">
+                  <NavLink to="/" onClick={() => setIsOpen(false)}>
+                    <div className="flex items-center gap-2 text-lg">
+                      <Home size={20} />
+                      الرئيسية
+                    </div>
+                  </NavLink>
+                  <NavLink to="/find-service" onClick={() => setIsOpen(false)}>
+                    <div className="flex items-center gap-2 text-lg">
+                      <Search size={20} />
+                      البحث عن خدمة
+                    </div>
+                  </NavLink>
+                  <NavLink to="/post-service" onClick={() => setIsOpen(false)}>
+                    <div className="flex items-center gap-2 text-lg">
+                      <PlusCircle size={20} />
+                      أضف خدمة
+                    </div>
+                  </NavLink>
+                  {user && <InboxButton mobile />}
+                  
+                  <div className="border-t pt-4">
+                    {user ? (
+                      <div className="space-y-4">
+                        <NavLink to="/account" onClick={() => setIsOpen(false)}>
+                          <div className="flex items-center gap-2 text-lg">
+                            <User size={20} />
+                            حسابي
+                          </div>
+                        </NavLink>
+                        <Button variant="ghost" size="sm" onClick={handleSignOut} className="w-full justify-start">
+                          <LogOut size={20} className="ml-2" />
+                          تسجيل الخروج
+                        </Button>
+                      </div>
+                    ) : (
+                      <Link to="/auth" onClick={() => setIsOpen(false)}>
+                        <Button className="w-full">تسجيل الدخول</Button>
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
-
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-border">
-            <div className="flex flex-col space-y-2">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Link
-                    key={item.href}
-                    to={item.href}
-                    className={`flex items-center space-x-3 space-x-reverse px-3 py-3 rounded-md text-base transition-colors ${
-                      isActive(item.href)
-                        ? 'bg-primary text-primary-foreground'
-                        : 'text-foreground hover:bg-accent hover:text-accent-foreground'
-                    }`}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <Icon size={18} />
-                    <span>{item.label}</span>
-                  </Link>
-                );
-              })}
-              
-              {user ? (
-                <>
-                  <Link
-                    to="/account"
-                    className="flex items-center space-x-3 space-x-reverse px-3 py-3 rounded-md text-base text-foreground hover:bg-accent hover:text-accent-foreground"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <User size={18} />
-                    <span>حسابي</span>
-                  </Link>
-                  <button
-                    onClick={handleSignOut}
-                    className="flex items-center space-x-3 space-x-reverse px-3 py-3 rounded-md text-base text-foreground hover:bg-accent hover:text-accent-foreground w-full text-right"
-                  >
-                    <LogOut size={18} />
-                    <span>تسجيل خروج</span>
-                  </button>
-                </>
-              ) : (
-                <Link
-                  to="/auth"
-                  className="flex items-center space-x-3 space-x-reverse px-3 py-3 rounded-md text-base text-foreground hover:bg-accent hover:text-accent-foreground"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <LogIn size={18} />
-                  <span>تسجيل دخول</span>
-                </Link>
-              )}
-            </div>
-          </div>
-        )}
       </div>
     </nav>
   );
