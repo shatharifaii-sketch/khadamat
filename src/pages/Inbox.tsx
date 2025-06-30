@@ -70,6 +70,11 @@ const Inbox = () => {
 
   const selectedConv = conversations.find(c => c.id === selectedConversation);
 
+  // Helper function to safely get provider name
+  const getProviderName = (conversation: typeof conversations[0]) => {
+    return conversation.profiles?.full_name || 'مستخدم';
+  };
+
   return (
     <div className="min-h-screen bg-background arabic">
       <Navigation />
@@ -125,7 +130,7 @@ const Inbox = () => {
                         {conversation.services?.title || 'خدمة محذوفة'}
                       </CardTitle>
                       <div className="flex items-center gap-2 justify-end text-sm text-muted-foreground mb-2">
-                        <span>مع: {conversation.profiles?.full_name || 'مستخدم'}</span>
+                        <span>مع: {getProviderName(conversation)}</span>
                         <User size={14} />
                       </div>
                       <div className="flex items-center gap-2 justify-end text-sm text-muted-foreground">
@@ -158,7 +163,7 @@ const Inbox = () => {
           onOpenChange={setShowChat}
           conversationId={selectedConversation}
           serviceName={selectedConv.services?.title || 'خدمة محذوفة'}
-          providerName={selectedConv.profiles?.full_name || 'مستخدم'}
+          providerName={getProviderName(selectedConv)}
         />
       )}
     </div>

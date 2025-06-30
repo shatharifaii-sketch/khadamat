@@ -32,13 +32,18 @@ export interface Message {
   created_at: string;
 }
 
+// Type guard to check if profiles data is valid
+const isValidProfile = (profiles: any): profiles is { full_name: string } => {
+  return profiles && typeof profiles === 'object' && typeof profiles.full_name === 'string';
+};
+
 export const useConversations = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
   const getConversations = useQuery({
     queryKey: ['conversations', user?.id],
-    queryFn: async () => {
+    queryFn: async (): Promise<Conversation[]> => {
       if (!user) return [];
 
       const { data, error } = await supabase
@@ -68,7 +73,7 @@ export const useConversations = () => {
 
         // Manually fetch profile data for each conversation
         const conversationsWithProfiles = await Promise.all(
-          (fallbackData || []).map(async (conversation) => {
+          (fallbackData || []).map(async (conversation): Promise<Conversation> => {
             const { data: profileData } = await supabase
               .from('profiles')
               .select('full_name')
@@ -85,7 +90,19 @@ export const useConversations = () => {
         return conversationsWithProfiles;
       }
 
-      return data || [];
+      // Filter and transform the data to ensure type safety
+      return (data || []).map((item): Conversation => ({
+        id: item.id,
+        service_id: item.service_id,
+        client_id: item.client_id,
+        provider_id: item.provider_id,
+        status: item.status,
+        last_message_at: item.last_message_at,
+        created_at: item.created_at,
+        updated_at: item.updated_at,
+        services: item.services,
+        profiles: isValidProfile(item.profiles) ? item.profiles : null
+      }));
     },
     enabled: !!user
   });
