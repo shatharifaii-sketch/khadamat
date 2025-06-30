@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +7,7 @@ import { categories } from './ServiceCategories';
 import { PublicService } from '@/hooks/usePublicServices';
 import ContactOptions from '@/components/Chat/ContactOptions';
 import { toast } from 'sonner';
+import { useServiceViews } from '@/hooks/useServiceViews';
 
 interface ServiceCardProps {
   service: PublicService;
@@ -16,14 +16,19 @@ interface ServiceCardProps {
 const ServiceCard = ({ service }: ServiceCardProps) => {
   const CategoryIcon = categories.find(cat => cat.value === service.category)?.icon || Star;
   const providerName = service.profiles?.full_name || 'مقدم الخدمة';
+  const { incrementView } = useServiceViews();
 
   const copyToClipboard = (text: string, message: string) => {
     navigator.clipboard.writeText(text);
     toast.success(message);
   };
 
+  const handleViewService = () => {
+    incrementView(service.id);
+  };
+
   return (
-    <Card className="hover:shadow-lg transition-shadow">
+    <Card className="hover:shadow-lg transition-shadow" onClick={handleViewService}>
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="flex-1">

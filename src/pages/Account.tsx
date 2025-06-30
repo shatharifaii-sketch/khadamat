@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,6 +18,8 @@ import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useConversations } from '@/hooks/useConversations';
+import ServiceManagementCard from '@/components/Account/ServiceManagementCard';
+import SubscriptionHistoryTable from '@/components/Account/SubscriptionHistoryTable';
 
 const Account = () => {
   const { user, loading } = useAuth();
@@ -78,6 +79,13 @@ const Account = () => {
     }
   };
 
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   if (loading || profileLoading) {
     return (
       <div className="min-h-screen bg-background arabic">
@@ -115,10 +123,13 @@ const Account = () => {
           </p>
         </div>
 
-        <div className="grid gap-6">
-          {/* Statistics Cards */}
+        <div className="grid gap-8">
+          {/* Interactive Statistics Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card>
+            <Card 
+              className="cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => scrollToSection('my-services')}
+            >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">الخدمات المنشورة</CardTitle>
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
@@ -131,7 +142,10 @@ const Account = () => {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card 
+              className="cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => scrollToSection('my-services')}
+            >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">إجمالي المشاهدات</CardTitle>
                 <Eye className="h-4 w-4 text-muted-foreground" />
@@ -144,7 +158,10 @@ const Account = () => {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card 
+              className="cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => navigate('/messages')}
+            >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">المحادثات</CardTitle>
                 <MessageCircle className="h-4 w-4 text-muted-foreground" />
@@ -157,7 +174,10 @@ const Account = () => {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card 
+              className="cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => scrollToSection('subscription-history')}
+            >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">الاشتراك</CardTitle>
                 <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -173,50 +193,62 @@ const Account = () => {
             </Card>
           </div>
 
-          {/* Quick Actions */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                إجراءات سريعة
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Link to="/post-service">
-                  <Button className="w-full">
-                    <TrendingUp className="h-4 w-4 ml-2" />
-                    أضف خدمة جديدة
-                  </Button>
-                </Link>
-                <Link to="/messages">
-                  <Button variant="outline" className="w-full">
-                    <MessageCircle className="h-4 w-4 ml-2" />
-                    الرسائل
-                    {unreadCount > 0 && (
-                      <Badge variant="destructive" className="mr-2">
-                        {unreadCount}
-                      </Badge>
-                    )}
-                  </Button>
-                </Link>
-                <Link to="/payment">
-                  <Button variant="outline" className="w-full">
-                    <CreditCard className="h-4 w-4 ml-2" />
-                    تجديد الاشتراك
-                  </Button>
-                </Link>
-                <Link to="/find-service">
-                  <Button variant="outline" className="w-full">
-                    <Search className="h-4 w-4 ml-2" />
-                    ابحث عن خدمة
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
+          {/* My Published Services Section */}
+          <div id="my-services">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <TrendingUp className="h-5 w-5" />
+                      خدماتي المنشورة
+                    </CardTitle>
+                    <CardDescription>
+                      إدارة ومتابعة أداء خدماتك
+                    </CardDescription>
+                  </div>
+                  <Link to="/post-service">
+                    <Button>
+                      إضافة خدمة جديدة
+                    </Button>
+                  </Link>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {servicesLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin" />
+                  </div>
+                ) : services && services.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {services.map((service) => (
+                      <ServiceManagementCard key={service.id} service={service} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <TrendingUp className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-medium mb-2">لا توجد خدمات منشورة</h3>
+                    <p className="text-muted-foreground mb-4">
+                      ابدأ بنشر خدمتك الأولى للوصول إلى العملاء
+                    </p>
+                    <Link to="/post-service">
+                      <Button>
+                        نشر خدمة جديدة
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
 
-          {/* Profile Form */}
+          {/* Subscription History Section */}
+          <div id="subscription-history">
+            <SubscriptionHistoryTable />
+          </div>
+
+          {/* Profile Settings */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
