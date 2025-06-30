@@ -127,23 +127,39 @@ export const useSubscription = () => {
         throw error;
       }
 
-      // Handle special subscription periods for coupons
+      // Create or update subscription after successful payment
+      console.log('Creating subscription for completed payment:', transaction);
+      
       const paymentData = transaction.payment_data as any;
       const subscriptionMonths = paymentData?.subscription_months || 1;
       
-      if (subscriptionMonths > 1) {
-        // Update subscription expiry for extended periods (like 3FOR1 coupon)
-        const expiresAt = new Date();
-        expiresAt.setMonth(expiresAt.getMonth() + subscriptionMonths);
-        
-        await supabase
-          .from('subscriptions')
-          .update({ 
-            expires_at: expiresAt.toISOString(),
-            updated_at: new Date().toISOString()
-          })
-          .eq('user_id', user?.id);
+      // Calculate expiration date
+      const expiresAt = new Date();
+      expiresAt.setMonth(expiresAt.getMonth() + subscriptionMonths);
+      
+      // Create or update subscription
+      const { error: subscriptionError } = await supabase
+        .from('subscriptions')
+        .upsert({
+          user_id: user?.id,
+          services_allowed: transaction.services_quota,
+          services_used: 0, // Reset to 0 for new subscription
+          amount: transaction.amount,
+          currency: transaction.currency,
+          payment_method: transaction.payment_method,
+          status: 'active',
+          expires_at: expiresAt.toISOString(),
+          updated_at: new Date().toISOString()
+        }, { 
+          onConflict: 'user_id' 
+        });
+
+      if (subscriptionError) {
+        console.error('Error creating subscription:', subscriptionError);
+        throw subscriptionError;
       }
+
+      console.log('Subscription created successfully for user:', user?.id);
       
       console.log('Payment completed:', data);
       return data;
