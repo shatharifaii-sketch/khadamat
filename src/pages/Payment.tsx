@@ -71,11 +71,10 @@ const Payment = () => {
         });
 
       // Update coupon used count
-      await supabase.rpc('increment', {
-        table_name: 'coupons',
-        column_name: 'used_count',
-        id: couponId
-      });
+      await supabase
+        .from('coupons')
+        .update({ used_count: supabase.sql`used_count + 1` })
+        .eq('id', couponId);
     } catch (error) {
       console.error('Error recording coupon usage:', error);
     }
