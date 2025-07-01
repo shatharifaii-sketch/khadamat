@@ -1,17 +1,20 @@
 
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { serviceCategories } from './ServiceCategoryData';
+import FormField from '@/components/ui/form-field';
 
 interface ServiceBasicInfoProps {
   title: string;
   category: string;
   description: string;
   onTitleChange: (value: string) => void;
-  onCategoryChange: (value: string) => void;
+  onCategoryChange: (value: string) => void;  
   onDescriptionChange: (value: string) => void;
+  onTitleBlur?: () => void;
+  onDescriptionBlur?: () => void;
+  titleError?: string;
+  categoryError?: string;
+  descriptionError?: string;
 }
 
 const ServiceBasicInfo = ({
@@ -20,28 +23,34 @@ const ServiceBasicInfo = ({
   description,
   onTitleChange,
   onCategoryChange,
-  onDescriptionChange
+  onDescriptionChange,
+  onTitleBlur,
+  onDescriptionBlur,
+  titleError,
+  categoryError,
+  descriptionError
 }: ServiceBasicInfoProps) => {
   return (
     <>
       {/* Service Title */}
-      <div className="space-y-2">
-        <Label htmlFor="title" className="text-large font-semibold">عنوان الخدمة *</Label>
-        <Input
-          id="title"
-          placeholder="مثال: تصوير الأفراح والمناسبات"
-          value={title}
-          onChange={(e) => onTitleChange(e.target.value)}
-          className="text-large"
-          required
-        />
-      </div>
+      <FormField
+        label="عنوان الخدمة"
+        id="title"
+        placeholder="مثال: تصوير الأفراح والمناسبات"
+        value={title}
+        onChange={onTitleChange}
+        onBlur={onTitleBlur}
+        error={titleError}
+        required
+      />
 
       {/* Category */}
       <div className="space-y-2">
-        <Label htmlFor="category" className="text-large font-semibold">فئة الخدمة *</Label>
-        <Select onValueChange={onCategoryChange} required>
-          <SelectTrigger className="text-large">
+        <label className="text-large font-semibold text-foreground">
+          فئة الخدمة *
+        </label>
+        <Select onValueChange={onCategoryChange} value={category} required>
+          <SelectTrigger className={`text-large ${categoryError ? 'border-destructive' : ''}`}>
             <SelectValue placeholder="اختر فئة الخدمة" />
           </SelectTrigger>
           <SelectContent>
@@ -58,20 +67,25 @@ const ServiceBasicInfo = ({
             })}
           </SelectContent>
         </Select>
+        {categoryError && (
+          <p className="text-sm text-destructive font-medium" role="alert">
+            {categoryError}
+          </p>
+        )}
       </div>
 
       {/* Description */}
-      <div className="space-y-2">
-        <Label htmlFor="description" className="text-large font-semibold">وصف تفصيلي للخدمة *</Label>
-        <Textarea
-          id="description"
-          placeholder="اكتب وصفاً مفصلاً عن خدمتك، خبرتك، والمميزات التي تقدمها..."
-          value={description}
-          onChange={(e) => onDescriptionChange(e.target.value)}
-          className="text-large min-h-32"
-          required
-        />
-      </div>
+      <FormField
+        label="وصف تفصيلي للخدمة"
+        id="description"
+        type="textarea"
+        placeholder="اكتب وصفاً مفصلاً عن خدمتك، خبرتك، والمميزات التي تقدمها..."
+        value={description}
+        onChange={onDescriptionChange}
+        onBlur={onDescriptionBlur}
+        error={descriptionError}
+        required
+      />
     </>
   );
 };

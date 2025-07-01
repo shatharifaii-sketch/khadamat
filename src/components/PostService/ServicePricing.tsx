@@ -1,25 +1,30 @@
 
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
+import FormField from '@/components/ui/form-field';
 
 interface ServicePricingProps {
   price: string;
   onPriceChange: (value: string) => void;
+  onPriceBlur?: () => void;
+  priceError?: string;
 }
 
-const ServicePricing = ({ price, onPriceChange }: ServicePricingProps) => {
+const ServicePricing = ({
+  price,
+  onPriceChange,
+  onPriceBlur,
+  priceError
+}: ServicePricingProps) => {
   return (
-    <div className="space-y-2">
-      <Label htmlFor="price" className="text-large font-semibold">نطاق الأسعار *</Label>
-      <Input
-        id="price"
-        placeholder="مثال: 200-500 شيكل"
-        value={price}
-        onChange={(e) => onPriceChange(e.target.value)}
-        className="text-large"
-        required
-      />
-    </div>
+    <FormField
+      label="نطاق الأسعار"
+      id="price"
+      placeholder="مثال: 200-500 شيكل"
+      value={price}
+      onChange={onPriceChange}
+      onBlur={onPriceBlur}
+      error={priceError}
+      required
+    />
   );
 };
 

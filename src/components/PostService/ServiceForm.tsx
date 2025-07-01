@@ -31,11 +31,13 @@ const ServiceForm = ({ serviceToEdit }: ServiceFormProps) => {
     formData,
     handleInputChange,
     handleSubmit,
+    handleFieldBlur,
     isEditMode,
     isCreating,
     isUpdating,
     canPostService,
-    pendingService
+    pendingService,
+    getFieldError
   } = useServiceForm(serviceToEdit);
 
   return (
@@ -53,16 +55,25 @@ const ServiceForm = ({ serviceToEdit }: ServiceFormProps) => {
             onTitleChange={(value) => handleInputChange('title', value)}
             onCategoryChange={(value) => handleInputChange('category', value)}
             onDescriptionChange={(value) => handleInputChange('description', value)}
+            onTitleBlur={() => handleFieldBlur('title')}
+            onDescriptionBlur={() => handleFieldBlur('description')}
+            titleError={getFieldError('title')}
+            categoryError={getFieldError('category')}
+            descriptionError={getFieldError('description')}
           />
 
           <ServicePricing
             price={formData.price}
             onPriceChange={(value) => handleInputChange('price', value)}
+            onPriceBlur={() => handleFieldBlur('price')}
+            priceError={getFieldError('price')}
           />
 
           <ServiceLocation
             location={formData.location}
             onLocationChange={(value) => handleInputChange('location', value)}
+            onLocationBlur={() => handleFieldBlur('location')}
+            locationError={getFieldError('location')}
           />
 
           <ServiceContact
@@ -70,6 +81,10 @@ const ServiceForm = ({ serviceToEdit }: ServiceFormProps) => {
             email={formData.email}
             onPhoneChange={(value) => handleInputChange('phone', value)}
             onEmailChange={(value) => handleInputChange('email', value)}
+            onPhoneBlur={() => handleFieldBlur('phone')}
+            onEmailBlur={() => handleFieldBlur('email')}
+            phoneError={getFieldError('phone')}
+            emailError={getFieldError('email')}
           />
 
           <ServiceExperience

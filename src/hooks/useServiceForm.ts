@@ -5,6 +5,14 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useServices } from '@/hooks/useServices';
 import { useSubscription } from '@/hooks/useSubscription';
 import { usePendingService } from '@/hooks/usePendingService';
+import { useFormValidation } from '@/hooks/useFormValidation';
+import { 
+  validateEmail, 
+  validatePhone, 
+  validateRequired, 
+  validateTitle, 
+  validateDescription 
+} from '@/utils/formValidation';
 import { toast } from 'sonner';
 
 interface Service {
@@ -36,6 +44,7 @@ export const useServiceForm = (serviceToEdit?: Service | null) => {
   const { createService, updateService, isCreating, isUpdating } = useServices();
   const { canPostService } = useSubscription();
   const { pendingService, savePendingService, clearPendingService } = usePendingService();
+  const { validateField, setFieldTouched, hasErrors, getFieldError } = useFormValidation();
   
   const isEditMode = !!serviceToEdit;
   
@@ -81,11 +90,61 @@ export const useServiceForm = (serviceToEdit?: Service | null) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleFieldBlur = (field: string) => {
+    setFieldTouched(field);
+    
+    switch (field) {
+      case 'title':
+        validateField(field, validateTitle(formData.title));
+        break;
+      case 'description':
+        validateField(field, validateDescription(formData.description));
+        break;
+      case 'email':
+        validateField(field, validateEmail(formData.email));
+        break;
+      case 'phone':
+        validateField(field, validatePhone(formData.phone));
+        break;
+      case 'location':
+        validateField(field, validateRequired(formData.location, 'المنطقة'));
+        break;
+      case 'price':
+        validateField(field, validateRequired(formData.price, 'نطاق الأسعار'));
+        break;
+      case 'category':
+        validateField(field, validateRequired(formData.category, 'فئة الخدمة'));
+        break;
+    }
+  };
+
+  const validateAllFields = () => {
+    const validations = [
+      { field: 'title', validation: validateTitle(formData.title) },
+      { field: 'category', validation: validateRequired(formData.category, 'فئة الخدمة') },
+      { field: 'description', validation: validateDescription(formData.description) },
+      { field: 'price', validation: validateRequired(formData.price, 'نطاق الأسعار') },
+      { field: 'location', validation: validateRequired(formData.location, 'المنطقة') },
+      { field: 'phone', validation: validatePhone(formData.phone) },
+      { field: 'email', validation: validateEmail(formData.email) }
+    ];
+
+    let isValid = true;
+    validations.forEach(({ field, validation }) => {
+      if (!validateField(field, validation)) {
+        isValid = false;
+      }
+      setFieldTouched(field);
+    });
+
+    return isValid;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.title || !formData.category || !formData.description || !formData.price || !formData.location || !formData.phone) {
-      toast.error('يرجى ملء جميع الحقول المطلوبة');
+    if (!validateAllFields()) {
+      toast.error('يرجى تصحيح الأخطاء في النموذج');
       return;
     }
 
@@ -152,10 +211,13 @@ export const useServiceForm = (serviceToEdit?: Service | null) => {
     formData,
     handleInputChange,
     handleSubmit,
+    handleFieldBlur,
     isEditMode,
     isCreating,
     isUpdating,
     canPostService: isEditMode || canPostService(),
-    pendingService
+    pendingService,
+    getFieldError,
+    hasValidationErrors: hasErrors
   };
 };

@@ -1,25 +1,30 @@
 
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
+import FormField from '@/components/ui/form-field';
 
 interface ServiceLocationProps {
   location: string;
   onLocationChange: (value: string) => void;
+  onLocationBlur?: () => void;
+  locationError?: string;
 }
 
-const ServiceLocation = ({ location, onLocationChange }: ServiceLocationProps) => {
+const ServiceLocation = ({
+  location,
+  onLocationChange,
+  onLocationBlur,
+  locationError
+}: ServiceLocationProps) => {
   return (
-    <div className="space-y-2">
-      <Label htmlFor="location" className="text-large font-semibold">المنطقة/المحافظة *</Label>
-      <Input
-        id="location"
-        placeholder="مثال: رام الله، نابلس، غزة..."
-        value={location}
-        onChange={(e) => onLocationChange(e.target.value)}
-        className="text-large"
-        required
-      />
-    </div>
+    <FormField
+      label="المنطقة/المحافظة"
+      id="location"
+      placeholder="مثال: رام الله، نابلس، غزة..."
+      value={location}
+      onChange={onLocationChange}
+      onBlur={onLocationBlur}
+      error={locationError}
+      required
+    />
   );
 };
 

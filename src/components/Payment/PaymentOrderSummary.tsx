@@ -1,38 +1,25 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { CheckCircle, Tag } from 'lucide-react';
-import { Subscription } from '@/hooks/useSubscription';
-import { AppliedCoupon } from './CouponInput';
+import { Badge } from '@/components/ui/badge';
+import { CheckCircle, Calendar, CreditCard } from 'lucide-react';
 
 interface PaymentOrderSummaryProps {
-  subscription: Subscription | null;
+  subscription: any;
   servicesNeeded: number;
   amount: number;
-  serviceData?: any;
-  appliedCoupon?: AppliedCoupon | null;
-  finalAmount?: number;
+  serviceData: any;
+  appliedCoupon: any;
+  finalAmount: number;
 }
 
-const PaymentOrderSummary = ({ 
-  subscription, 
-  servicesNeeded, 
-  amount, 
+const PaymentOrderSummary = ({
+  subscription,
+  servicesNeeded,
+  amount,
   serviceData,
   appliedCoupon,
-  finalAmount = amount
+  finalAmount
 }: PaymentOrderSummaryProps) => {
-  const getCouponBenefit = (coupon: AppliedCoupon) => {
-    switch (coupon.type) {
-      case 'first_month_free':
-        return 'خدماتك الأولى مجاناً';
-      case 'three_months_for_one':
-        return 'احصل على 3 أشهر بدلاً من شهر واحد';
-      default:
-        return `خصم ${coupon.discount_amount} شيكل`;
-    }
-  };
-
   return (
     <Card>
       <CardHeader>
@@ -41,93 +28,73 @@ const PaymentOrderSummary = ({
       <CardContent className="space-y-4">
         {/* Current Subscription Status */}
         {subscription && (
-          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <h4 className="font-semibold text-blue-800 mb-2">اشتراكك الحالي:</h4>
-            <p className="text-blue-700">
-              استخدمت {subscription.services_used} من {subscription.services_allowed} خدمات
-            </p>
+          <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="flex items-center gap-2 mb-2">
+              <CheckCircle className="text-blue-600" size={20} />
+              <span className="font-medium text-blue-900">اشتراكك الحالي</span>
+            </div>
+            <div className="text-sm text-blue-700 space-y-1">
+              <p>الخدمات المتاحة: {subscription.services_allowed}</p>
+              <p>الخدمات المستخدمة: {subscription.services_used}</p>
+              <div className="flex items-center gap-1">
+                <Calendar size={14} />
+                <span>ينتهي في: {new Date(subscription.expires_at).toLocaleDateString('ar')}</span>
+              </div>
+            </div>
           </div>
         )}
 
-        <div className="flex items-center gap-3 p-4 bg-primary/5 rounded-lg">
-          <CheckCircle className="text-primary" size={24} />
-          <div>
-            <h3 className="font-semibold text-lg">
-              {servicesNeeded === 2 ? 'باقة جديدة' : 'خدمات إضافية'}
-            </h3>
-            <p className="text-muted-foreground">
-              {servicesNeeded} خدمات جديدة
-            </p>
+        {/* Service Info */}
+        {serviceData && (
+          <div className="space-y-2">
+            <h4 className="font-medium">تفاصيل الخدمة</h4>
+            <div className="p-3 bg-gray-50 rounded-lg text-sm">
+              <p className="font-medium">{serviceData.title}</p>
+              <p className="text-gray-600">{serviceData.category}</p>
+            </div>
           </div>
-        </div>
-        
+        )}
+
+        {/* Package Details */}
         <div className="space-y-2">
-          <div className="flex justify-between">
-            <span>عدد الخدمات:</span>
-            <span>{servicesNeeded}</span>
+          <h4 className="font-medium">تفاصيل الباقة</h4>
+          <div className="flex items-center justify-between">
+            <span>عدد الخدمات</span>
+            <Badge variant="secondary">{servicesNeeded}</Badge>
           </div>
-          <div className="flex justify-between">
-            <span>السعر لكل خدمة:</span>
+          <div className="flex items-center justify-between">
+            <span>السعر لكل خدمة</span>
             <span>5 شيكل</span>
           </div>
-          <div className="flex justify-between">
-            <span>المجموع الفرعي:</span>
+        </div>
+
+        {/* Pricing */}
+        <div className="border-t pt-4 space-y-2">
+          <div className="flex items-center justify-between">
+            <span>المجموع الفرعي</span>
             <span>{amount} شيكل</span>
           </div>
           
           {appliedCoupon && (
-            <>
-              <div className="flex justify-between text-green-600">
-                <div className="flex items-center gap-1">
-                  <Tag size={16} />
-                  <span>خصم ({appliedCoupon.code})</span>
-                </div>
-                <span>-{appliedCoupon.discount_amount} شيكل</span>
-              </div>
-            </>
+            <div className="flex items-center justify-between text-green-600">
+              <span>خصم الكوبون ({appliedCoupon.code})</span>
+              <span>-{appliedCoupon.discount_amount} شيكل</span>
+            </div>
           )}
           
-          <Separator />
-          <div className="flex justify-between font-bold text-lg">
-            <span>المجموع النهائي:</span>
-            <span className={appliedCoupon ? 'text-green-600' : ''}>
-              {finalAmount} شيكل
-            </span>
-          </div>
-        </div>
-
-        {/* Coupon Benefits */}
-        {appliedCoupon && (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Tag className="text-green-600" size={20} />
-              <span className="font-semibold text-green-800">مزايا كود الخصم:</span>
+          <div className="flex items-center justify-between font-bold text-lg border-t pt-2">
+            <span>المجموع النهائي</span>
+            <div className="flex items-center gap-1">
+              <CreditCard size={16} />
+              <span>{finalAmount} شيكل</span>
             </div>
-            <p className="text-green-700 font-medium">
-              {getCouponBenefit(appliedCoupon)}
-            </p>
           </div>
-        )}
-
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-          <h4 className="font-semibold text-green-800 mb-2">ما ستحصل عليه:</h4>
-          <ul className="text-green-700 space-y-1">
-            <li>• إمكانية نشر {servicesNeeded} خدمات جديدة</li>
-            <li>• تواصل مباشر مع العملاء</li>
-            <li>• إظهار متقدم في البحث</li>
-            <li>• دعم فني</li>
-            {appliedCoupon?.type === 'three_months_for_one' && (
-              <li className="font-semibold">• صالح لمدة 3 أشهر كاملة</li>
-            )}
-          </ul>
         </div>
 
-        {serviceData && (
-          <div className="border rounded-lg p-4">
-            <h4 className="font-semibold mb-2">الخدمة المراد نشرها:</h4>
-            <p className="text-muted-foreground">{serviceData.title}</p>
-          </div>
-        )}
+        {/* Payment Note */}
+        <div className="text-xs text-gray-500 text-center">
+          سيتم تجديد اشتراكك تلقائياً كل شهر
+        </div>
       </CardContent>
     </Card>
   );
