@@ -92,7 +92,10 @@ const ServiceForm = ({ serviceToEdit }: ServiceFormProps) => {
             onExperienceChange={(value) => handleInputChange('experience', value)}
           />
 
-          <ServicePortfolio />
+          <ServicePortfolio onImagesChange={(images) => {
+            // Store images in form data for potential future use
+            console.log('Portfolio images updated:', images.length);
+          }} />
 
           <ServiceFormSubmit
             isCreating={isCreating || isUpdating}
