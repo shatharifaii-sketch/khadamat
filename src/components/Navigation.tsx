@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Menu, User, MessageCircle, LogOut, PlusCircle, Search, Info } from 'lucide-react';
+import { Menu, User, MessageCircle, LogOut, PlusCircle, Search, Info, Shield } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
@@ -14,6 +14,8 @@ const Navigation = () => {
   const location = useLocation();
   const { user, signOut } = useAuth();
   const { data: unreadCount = 0 } = useUnreadMessages();
+  
+  const isAdmin = user?.email === 'shatharifaii@gmail.com';
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -85,6 +87,14 @@ const Navigation = () => {
                 من نحن
               </div>
             </NavLink>
+            {isAdmin && (
+              <NavLink to="/admin">
+                <div className="flex items-center gap-2">
+                  <Shield size={16} />
+                  لوحة الإدارة
+                </div>
+              </NavLink>
+            )}
           </div>
 
           {/* Auth Section */}
@@ -138,6 +148,14 @@ const Navigation = () => {
                       من نحن
                     </div>
                   </NavLink>
+                  {isAdmin && (
+                    <NavLink to="/admin" onClick={() => setIsOpen(false)}>
+                      <div className="flex items-center gap-2 text-lg">
+                        <Shield size={20} />
+                        لوحة الإدارة
+                      </div>
+                    </NavLink>
+                  )}
                   
                   <div className="border-t pt-4">
                     {user ? (
