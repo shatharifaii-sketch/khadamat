@@ -184,7 +184,10 @@ export const useSubscription = () => {
   const canPostService = () => {
     const subscription = getUserSubscription.data;
     if (!subscription) return false;
-    return subscription.services_used < subscription.services_allowed;
+    
+    // For new subscription model: 1 service per subscription
+    // If user has any active services, they need to pay for additional ones
+    return subscription.services_allowed > 0;
   };
 
   return {

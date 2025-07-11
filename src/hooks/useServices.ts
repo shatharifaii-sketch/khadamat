@@ -47,8 +47,22 @@ export const useServices = () => {
 
       console.log('Subscription data:', subscription);
 
-      // If no subscription exists or quota exceeded, throw error
-      if (!subscription || subscription.services_used >= subscription.services_allowed) {
+      // For new subscription model: Check actual service count vs allowed
+      const { data: userServices, error: servicesError } = await supabase
+        .from('services')
+        .select('id')
+        .eq('user_id', user.id);
+        
+      if (servicesError) {
+        console.error('Error checking user services:', servicesError);
+        throw new Error('خطأ في التحقق من الخدمات: ' + servicesError.message);
+      }
+      
+      const currentServiceCount = userServices?.length || 0;
+      console.log('Current service count:', currentServiceCount, 'Allowed:', subscription?.services_allowed || 0);
+      
+      // If no subscription exists or user already has services equal to or more than allowed
+      if (!subscription || currentServiceCount >= (subscription.services_allowed || 0)) {
         const message = !subscription 
           ? 'لا يوجد اشتراك نشط. يرجى الدفع لنشر الخدمات.'
           : 'لقد استنفدت حصتك من الخدمات. يرجى الدفع لنشر المزيد من الخدمات.';
@@ -114,12 +128,12 @@ export const useServices = () => {
         throw new Error('فشل في إنشاء الخدمة: ' + error.message);
       }
       
-      // Update services_used count
+      // Update services_used count to reflect actual service count
       console.log('Updating services_used count...');
       const { error: updateError } = await supabase
         .from('subscriptions')
         .update({ 
-          services_used: subscription.services_used + 1,
+          services_used: currentServiceCount + 1,
           updated_at: new Date().toISOString()
         })
         .eq('user_id', user.id);
