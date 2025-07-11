@@ -12,14 +12,15 @@ interface PaymentOrderSummaryProps {
   subscriptionTier: string;
 }
 
-const PaymentOrderSummary = ({ 
-  subscription, 
-  servicesNeeded, 
-  amount, 
-  serviceData,
-  finalAmount,
-  subscriptionTier
-}: PaymentOrderSummaryProps) => {
+const PaymentOrderSummary = (props: PaymentOrderSummaryProps) => {
+  const { 
+    subscription, 
+    servicesNeeded, 
+    amount, 
+    serviceData,
+    finalAmount,
+    subscriptionTier
+  } = props;
   return (
     <Card>
       <CardHeader>

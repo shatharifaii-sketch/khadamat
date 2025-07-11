@@ -44,7 +44,7 @@ const Payment = () => {
           {/* Order Summary */}
           <PaymentOrderSummary 
             subscription={subscription}
-             servicesNeeded={servicesNeeded}
+            servicesNeeded={servicesNeeded}
             amount={baseAmount}
             serviceData={serviceData}
             finalAmount={finalAmount}
