@@ -16,6 +16,7 @@ import Admin from "./pages/Admin";
 import Account from "./pages/Account";
 import Payment from "./pages/Payment";
 import Checkout from "./pages/Checkout";
+import SubscriptionPlans from "./pages/SubscriptionPlans";
 import Messages from "./pages/Messages";
 import NotFound from "./pages/NotFound";
 import FAQ from "./pages/FAQ";
@@ -42,6 +43,7 @@ function App() {
                   <Route path="/account" element={<Account />} />
                   <Route path="/payment" element={<Payment />} />
                   <Route path="/checkout" element={<Checkout />} />
+                  <Route path="/subscription-plans" element={<SubscriptionPlans />} />
                   <Route path="/messages" element={<Messages />} />
                   <Route path="/faq" element={<FAQ />} />
                   <Route path="/admin" element={<Admin />} />

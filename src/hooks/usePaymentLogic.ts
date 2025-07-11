@@ -14,8 +14,9 @@ export const usePaymentLogic = () => {
   const { processPayment, isCreatingTransaction } = usePaymentProcessing();
   
   const serviceData = location.state?.serviceData;
-  const servicesNeeded = location.state?.servicesNeeded || 2;
-  const baseAmount = servicesNeeded * 5; // 5 NIS per service
+  const subscriptionTier = location.state?.subscriptionTier || 'monthly';
+  const servicesNeeded = 1; // Always 1 service per subscription
+  const baseAmount = subscriptionTier === 'yearly' ? 100 : 10; // 100 NIS for yearly, 10 NIS for monthly
 
   // Redirect to auth if not logged in
   if (!user) {
@@ -38,7 +39,8 @@ export const usePaymentLogic = () => {
       paymentState.paymentData,
       paymentState.appliedCoupon,
       finalAmount,
-      servicesNeeded
+      servicesNeeded,
+      subscriptionTier
     );
   };
 
@@ -47,6 +49,7 @@ export const usePaymentLogic = () => {
     servicesNeeded,
     baseAmount,
     finalAmount,
+    subscriptionTier,
     ...paymentState,
     handlePayment,
     subscription,

@@ -3,10 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { usePaymentHistory } from '@/hooks/usePaymentHistory';
+import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
 
 const SubscriptionHistoryTable = () => {
   const { paymentHistory, isLoading } = usePaymentHistory();
+  const { user } = useAuth();
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -28,8 +30,32 @@ const SubscriptionHistoryTable = () => {
       case 'jawwal_pay': return 'جوال باي';
       case 'ooredoo': return 'أوريدو';
       case 'bank_transfer': return 'تحويل بنكي';
+      case 'free_trial': return 'تجربة مجانية';
       default: return method;
     }
+  };
+
+  const getSubscriptionTierText = (tier: string) => {
+    switch (tier) {
+      case 'yearly': return 'سنوي';
+      case 'monthly': return 'شهري';
+      default: return tier || 'شهري';
+    }
+  };
+
+  const formatAmount = (payment: any) => {
+    if (payment.amount === 0) {
+      return 'مجاني';
+    }
+    
+    let displayText = `${payment.amount} ${payment.currency}`;
+    
+    if (payment.discount_applied && payment.discount_applied > 0) {
+      const originalAmount = payment.original_amount || payment.amount + payment.discount_applied;
+      displayText += ` (خصم ${payment.discount_applied} من ${originalAmount})`;
+    }
+    
+    return displayText;
   };
 
   if (isLoading) {
@@ -64,24 +90,30 @@ const SubscriptionHistoryTable = () => {
                 <TableHead className="text-right">التاريخ</TableHead>
                 <TableHead className="text-right">المبلغ</TableHead>
                 <TableHead className="text-right">طريقة الدفع</TableHead>
-                <TableHead className="text-right">عدد الخدمات</TableHead>
+                <TableHead className="text-right">نوع الاشتراك</TableHead>
+                <TableHead className="text-right">مدة الخدمة</TableHead>
                 <TableHead className="text-right">الحالة</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paymentHistory.map((payment) => (
+              {paymentHistory.map((payment: any) => (
                 <TableRow key={payment.id}>
                   <TableCell>
                     {new Date(payment.created_at).toLocaleDateString('ar')}
                   </TableCell>
                   <TableCell>
-                    {payment.amount} {payment.currency}
+                    {formatAmount(payment)}
                   </TableCell>
                   <TableCell>
                     {getPaymentMethodText(payment.payment_method)}
                   </TableCell>
                   <TableCell>
-                    {payment.services_quota} خدمة
+                    <Badge variant="outline">
+                      {getSubscriptionTierText(payment.subscription_tier)}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {payment.subscription_tier === 'yearly' ? '12 شهر' : '1 شهر'}
                   </TableCell>
                   <TableCell>
                     {getStatusBadge(payment.status)}

@@ -15,7 +15,8 @@ export const usePaymentProcessing = () => {
     paymentData: PaymentFormData,
     appliedCoupon: AppliedCoupon | null,
     finalAmount: number,
-    servicesNeeded: number
+    servicesNeeded: number,
+    subscriptionTier: string = 'monthly'
   ) => {
     // Handle free subscription for FIRSTFREE coupon
     if (appliedCoupon?.type === 'first_month_free') {
@@ -27,12 +28,13 @@ export const usePaymentProcessing = () => {
     }
     
     try {
-      // Determine services quota based on coupon
-      let servicesQuota = servicesNeeded;
-      let subscriptionMonths = 1;
+      // Determine services quota based on subscription tier and coupon
+      let servicesQuota = subscriptionTier === 'yearly' ? 12 : 1;
+      let subscriptionMonths = subscriptionTier === 'yearly' ? 12 : 1;
       
       if (appliedCoupon?.type === 'three_months_for_one') {
         subscriptionMonths = 3;
+        servicesQuota = 3;
       }
 
       // Create payment transaction
@@ -42,6 +44,9 @@ export const usePaymentProcessing = () => {
         payment_method: paymentMethod,
         services_quota: servicesQuota,
         status: 'pending',
+        subscription_tier: subscriptionTier,
+        discount_applied: appliedCoupon?.discount_amount || 0,
+        original_amount: subscriptionTier === 'yearly' ? 120 : 10, // Original price before discount
         payment_data: {
           ...paymentData,
           coupon_code: appliedCoupon?.code,

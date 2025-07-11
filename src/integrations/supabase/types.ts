@@ -242,11 +242,14 @@ export type Database = {
           amount: number
           created_at: string | null
           currency: string
+          discount_applied: number | null
           id: string
+          original_amount: number | null
           payment_data: Json | null
           payment_method: string
           services_quota: number
           status: string
+          subscription_tier: string | null
           transaction_id: string | null
           updated_at: string | null
           user_id: string
@@ -255,11 +258,14 @@ export type Database = {
           amount?: number
           created_at?: string | null
           currency?: string
+          discount_applied?: number | null
           id?: string
+          original_amount?: number | null
           payment_data?: Json | null
           payment_method: string
           services_quota?: number
           status?: string
+          subscription_tier?: string | null
           transaction_id?: string | null
           updated_at?: string | null
           user_id: string
@@ -268,11 +274,14 @@ export type Database = {
           amount?: number
           created_at?: string | null
           currency?: string
+          discount_applied?: number | null
           id?: string
+          original_amount?: number | null
           payment_data?: Json | null
           payment_method?: string
           services_quota?: number
           status?: string
+          subscription_tier?: string | null
           transaction_id?: string | null
           updated_at?: string | null
           user_id?: string
@@ -415,6 +424,7 @@ export type Database = {
       subscriptions: {
         Row: {
           amount: number
+          auto_bump_service: boolean | null
           auto_renew: boolean | null
           billing_cycle: string
           created_at: string
@@ -427,11 +437,13 @@ export type Database = {
           services_used: number | null
           started_at: string
           status: string
+          subscription_tier: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           amount?: number
+          auto_bump_service?: boolean | null
           auto_renew?: boolean | null
           billing_cycle?: string
           created_at?: string
@@ -444,11 +456,13 @@ export type Database = {
           services_used?: number | null
           started_at?: string
           status?: string
+          subscription_tier?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           amount?: number
+          auto_bump_service?: boolean | null
           auto_renew?: boolean | null
           billing_cycle?: string
           created_at?: string
@@ -461,6 +475,7 @@ export type Database = {
           services_used?: number | null
           started_at?: string
           status?: string
+          subscription_tier?: string | null
           updated_at?: string
           user_id?: string
         }

@@ -92,6 +92,13 @@ const ContactOptions = ({ serviceId, providerId, serviceName, providerName, emai
               )}
               محادثة داخل الموقع
             </Button>
+            {!user && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-2 mt-2">
+                <p className="text-xs text-yellow-700">
+                  يجب تسجيل الدخول أولاً للمحادثة داخل الموقع
+                </p>
+              </div>
+            )}
           </div>
         </PopoverContent>
       </Popover>

@@ -18,6 +18,7 @@ const Payment = () => {
     servicesNeeded,
     baseAmount,
     finalAmount,
+    subscriptionTier,
     paymentMethod,
     setPaymentMethod,
     appliedCoupon,
@@ -50,6 +51,7 @@ const Payment = () => {
             serviceData={serviceData}
             appliedCoupon={appliedCoupon}
             finalAmount={finalAmount}
+            subscriptionTier={subscriptionTier}
           />
 
           {/* Payment Form */}

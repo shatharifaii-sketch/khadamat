@@ -11,6 +11,9 @@ export interface PaymentHistory {
   services_quota: number;
   status: string;
   created_at: string;
+  subscription_tier?: string;
+  discount_applied?: number;
+  original_amount?: number;
 }
 
 export const usePaymentHistory = () => {

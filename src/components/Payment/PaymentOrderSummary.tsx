@@ -10,6 +10,7 @@ interface PaymentOrderSummaryProps {
   serviceData: any;
   appliedCoupon: any;
   finalAmount: number;
+  subscriptionTier: string;
 }
 
 const PaymentOrderSummary = ({
@@ -18,7 +19,8 @@ const PaymentOrderSummary = ({
   amount,
   serviceData,
   appliedCoupon,
-  finalAmount
+  finalAmount,
+  subscriptionTier
 }: PaymentOrderSummaryProps) => {
   return (
     <Card>
@@ -59,12 +61,18 @@ const PaymentOrderSummary = ({
         <div className="space-y-2">
           <h4 className="font-medium">تفاصيل الباقة</h4>
           <div className="flex items-center justify-between">
-            <span>عدد الخدمات</span>
-            <Badge variant="secondary">{servicesNeeded}</Badge>
+            <span>نوع الاشتراك</span>
+            <Badge variant="secondary">
+              {subscriptionTier === 'yearly' ? 'سنوي' : 'شهري'}
+            </Badge>
           </div>
           <div className="flex items-center justify-between">
-            <span>السعر لكل خدمة</span>
-            <span>5 شيكل</span>
+            <span>عدد الخدمات</span>
+            <Badge variant="outline">{subscriptionTier === 'yearly' ? '12 شهر' : '1 شهر'}</Badge>
+          </div>
+          <div className="flex items-center justify-between">
+            <span>السعر</span>
+            <span>{subscriptionTier === 'yearly' ? '100 شيكل (وفر 20 شيكل!)' : '10 شيكل'}</span>
           </div>
         </div>
 
@@ -93,7 +101,9 @@ const PaymentOrderSummary = ({
 
         {/* Payment Note */}
         <div className="text-xs text-gray-500 text-center">
-          سيتم تجديد اشتراكك تلقائياً كل شهر
+          {subscriptionTier === 'yearly' 
+            ? 'سيتم رفع خدمتك تلقائياً كل شهر لمدة سنة كاملة'
+            : 'سيتم تجديد اشتراكك تلقائياً كل شهر'}
         </div>
       </CardContent>
     </Card>

@@ -16,6 +16,8 @@ export interface Subscription {
   auto_renew: boolean;
   created_at: string;
   updated_at: string;
+  subscription_tier?: string;
+  auto_bump_service?: boolean;
 }
 
 export interface PaymentTransaction {
@@ -28,6 +30,9 @@ export interface PaymentTransaction {
   services_quota: number;
   status: string;
   payment_data?: any;
+  subscription_tier?: string;
+  discount_applied?: number;
+  original_amount?: number;
 }
 
 export const useSubscription = () => {
