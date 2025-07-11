@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, Search } from 'lucide-react';
 import Navigation from '@/components/Navigation';
-import Footer from '@/components/Footer';
+
 import { useHomeStats } from '@/hooks/useHomeStats';
 import StatsSection from '@/components/Home/StatsSection';
 import ServicesGrid from '@/components/Home/ServicesGrid';
@@ -168,7 +168,7 @@ const Index = () => {
         </div>
       </section>
 
-      <Footer />
+      
     </div>
   );
 };

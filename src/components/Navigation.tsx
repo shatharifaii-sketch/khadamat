@@ -8,6 +8,7 @@ import { Menu, User, MessageCircle, LogOut, PlusCircle, Search, Info, Shield } f
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
+import LanguageSwitcher from './LanguageSwitcher';
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -118,6 +119,8 @@ const Navigation = () => {
                 <Button>تسجيل الدخول</Button>
               </Link>
             )}
+            
+            <LanguageSwitcher />
           </div>
 
           {/* Mobile menu button */}

@@ -2,11 +2,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { MapPin, Phone, PhoneCall, Copy, Star, User } from 'lucide-react';
+import { MapPin, Phone, PhoneCall, Copy, Star, User, ChevronLeft, ChevronRight } from 'lucide-react';
 import { categories } from './FindService/ServiceCategories';
 import { PublicService } from '@/hooks/usePublicServices';
 import ContactOptions from '@/components/Chat/ContactOptions';
 import { toast } from 'sonner';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ServiceDetailsModalProps {
   service: PublicService | null;
@@ -16,6 +19,25 @@ interface ServiceDetailsModalProps {
 }
 
 const ServiceDetailsModal = ({ service, isOpen, onClose, onViewProvider }: ServiceDetailsModalProps) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  
+  const { data: serviceImages } = useQuery({
+    queryKey: ['service-images', service?.id],
+    queryFn: async () => {
+      if (!service?.id) return [];
+      
+      const { data, error } = await supabase
+        .from('service_images')
+        .select('*')
+        .eq('service_id', service.id)
+        .order('display_order');
+      
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!service?.id && isOpen,
+  });
+
   if (!service) return null;
 
   const CategoryIcon = categories.find(cat => cat.value === service.category)?.icon || Star;
@@ -24,6 +46,18 @@ const ServiceDetailsModal = ({ service, isOpen, onClose, onViewProvider }: Servi
   const copyToClipboard = (text: string, message: string) => {
     navigator.clipboard.writeText(text);
     toast.success(message);
+  };
+
+  const nextImage = () => {
+    if (serviceImages && serviceImages.length > 0) {
+      setCurrentImageIndex((prev) => (prev + 1) % serviceImages.length);
+    }
+  };
+
+  const prevImage = () => {
+    if (serviceImages && serviceImages.length > 0) {
+      setCurrentImageIndex((prev) => (prev - 1 + serviceImages.length) % serviceImages.length);
+    }
   };
 
   return (
@@ -40,6 +74,51 @@ const ServiceDetailsModal = ({ service, isOpen, onClose, onViewProvider }: Servi
               {categories.find(cat => cat.value === service.category)?.label || service.category}
             </Badge>
           </div>
+
+          {serviceImages && serviceImages.length > 0 && (
+            <div className="relative mb-6">
+              <div className="relative w-full h-64 bg-muted rounded-lg overflow-hidden">
+                <img
+                  src={serviceImages[currentImageIndex]?.image_url}
+                  alt={`صورة الخدمة ${currentImageIndex + 1}`}
+                  className="w-full h-full object-cover"
+                />
+                {serviceImages.length > 1 && (
+                  <>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="absolute left-2 top-1/2 -translate-y-1/2 z-10"
+                      onClick={prevImage}
+                    >
+                      <ChevronLeft size={16} />
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 z-10"
+                      onClick={nextImage}
+                    >
+                      <ChevronRight size={16} />
+                    </Button>
+                  </>
+                )}
+              </div>
+              {serviceImages.length > 1 && (
+                <div className="flex justify-center gap-2 mt-3">
+                  {serviceImages.map((_, index) => (
+                    <button
+                      key={index}
+                      className={`w-3 h-3 rounded-full transition-colors ${
+                        index === currentImageIndex ? 'bg-primary' : 'bg-muted'
+                      }`}
+                      onClick={() => setCurrentImageIndex(index)}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="text-right">
             <h3 className="font-semibold mb-2">وصف الخدمة:</h3>

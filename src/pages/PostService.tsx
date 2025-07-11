@@ -126,7 +126,7 @@ const PostService = () => {
       
       <div className="max-w-4xl mx-auto py-12 px-4">
         <PostServiceHeader>
-          {!isEditMode && <SubscriptionStatusCard subscription={subscription} />}
+          
           {isEditMode && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <h3 className="text-lg font-semibold text-blue-900 mb-1">تعديل الخدمة</h3>

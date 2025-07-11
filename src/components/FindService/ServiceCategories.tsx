@@ -1,5 +1,5 @@
 
-import { Camera, Music, Wrench, Truck, Palette, TrendingUp, Code, Shirt, Printer, Baby, MoreHorizontal } from 'lucide-react';
+import { Camera, Music, Wrench, Truck, Palette, TrendingUp, Code, Shirt, Printer, Baby, MoreHorizontal, GraduationCap, Languages } from 'lucide-react';
 
 export const categories = [
   { icon: Camera, value: 'photography', label: 'التصوير الفوتوغرافي' },
@@ -12,6 +12,8 @@ export const categories = [
   { icon: Shirt, value: 'tatreez', label: 'التطريز' },
   { icon: Printer, value: 'printing', label: 'خدمات الطباعة' },
   { icon: Baby, value: 'nanny', label: 'مربية أطفال' },
+  { icon: GraduationCap, value: 'tutoring', label: 'تدريس خصوصي' },
+  { icon: Languages, value: 'translation', label: 'ترجمة' },
   { icon: MoreHorizontal, value: 'other', label: 'أخرى' },
 ];
 

@@ -175,11 +175,11 @@ export const useServiceForm = (serviceToEdit?: Service | null) => {
       // Save the service data before redirecting to payment
       savePendingService(formData);
       
-      // Redirect to payment page
+      // Redirect to payment page for additional service
       navigate('/payment', { 
         state: { 
           serviceData: formData,
-          servicesNeeded: 2 // Default package
+          isAdditionalService: true
         } 
       });
       return;

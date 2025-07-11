@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MessageCircle, Clock, User, Loader2, ArrowLeft } from 'lucide-react';
 import Navigation from '@/components/Navigation';
-import Footer from '@/components/Footer';
+
 import { useConversations } from '@/hooks/useConversations';
 import { useProviderConversations } from '@/hooks/useProviderConversations';
 import { useAuth } from '@/contexts/AuthContext';
@@ -207,7 +207,7 @@ const Messages = () => {
         )}
       </div>
 
-      <Footer />
+      
 
       {selectedConv && (
         <ChatDialog
