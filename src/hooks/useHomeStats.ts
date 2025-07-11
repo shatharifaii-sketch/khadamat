@@ -17,15 +17,19 @@ export const useHomeStats = () => {
     queryFn: async (): Promise<HomeStats> => {
       console.log('Fetching home statistics...');
       
-      // Get count of service providers (profiles with is_service_provider = true)
-      const { count: serviceProvidersCount, error: providersError } = await supabase
-        .from('profiles')
-        .select('id', { count: 'exact', head: true })
-        .eq('is_service_provider', true);
+      // Get count of service providers by counting distinct users with published services
+      const { data: serviceProviders, error: providersError } = await supabase
+        .from('services')
+        .select('user_id')
+        .eq('status', 'published');
 
       if (providersError) {
         console.error('Error fetching service providers count:', providersError);
       }
+
+      // Count unique service providers
+      const uniqueProviders = new Set(serviceProviders?.map(s => s.user_id) || []);
+      const serviceProvidersCount = uniqueProviders.size;
 
       // Get count of published services
       const { count: publishedServicesCount, error: servicesError } = await supabase
@@ -59,7 +63,7 @@ export const useHomeStats = () => {
       }));
 
       const stats: HomeStats = {
-        serviceProvidersCount: serviceProvidersCount || 0,
+        serviceProvidersCount: serviceProvidersCount,
         publishedServicesCount: publishedServicesCount || 0,
         categoriesWithServices
       };

@@ -9,6 +9,7 @@ import SearchFilters from '@/components/FindService/SearchFilters';
 import ServiceCard from '@/components/FindService/ServiceCard';
 import EmptyState from '@/components/FindService/EmptyState';
 import LoadingGrid from '@/components/FindService/LoadingGrid';
+import { categories } from '@/components/FindService/ServiceCategories';
 
 const FindService = () => {
   const [searchParams] = useSearchParams();
@@ -30,9 +31,30 @@ const FindService = () => {
     if (!services) return [];
 
     return services.filter(service => {
-      const matchesSearch = searchTerm === '' || 
-        service.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        service.description.toLowerCase().includes(searchTerm.toLowerCase());
+      // Enhanced search that includes category labels and handles bilingual search
+      const matchesSearch = searchTerm === '' || (() => {
+        const searchLower = searchTerm.toLowerCase();
+        
+        // Find category label for current service
+        const categoryData = categories.find(cat => cat.value === service.category);
+        const categoryLabel = categoryData?.label || '';
+        
+        // Search in title, description, category value, and category label
+        return service.title.toLowerCase().includes(searchLower) ||
+               service.description.toLowerCase().includes(searchLower) ||
+               service.category.toLowerCase().includes(searchLower) ||
+               categoryLabel.includes(searchTerm) || // Arabic search
+               // Handle common English terms for categories
+               (searchLower === 'photography' && service.category === 'photography') ||
+               (searchLower === 'plumbing' && service.category === 'plumbing') ||
+               (searchLower === 'marketing' && service.category === 'digital-marketing') ||
+               (searchLower === 'design' && service.category === 'graphic-design') ||
+               (searchLower === 'development' && service.category === 'web-development') ||
+               (searchLower === 'printing' && service.category === 'printing') ||
+               (searchLower === 'nanny' && service.category === 'nanny') ||
+               (searchLower === 'dj' && service.category === 'dj') ||
+               (searchLower === 'hauling' && service.category === 'hauling');
+      })();
       
       const matchesCategory = selectedCategory === 'all' || service.category === selectedCategory;
       
