@@ -96,15 +96,6 @@ const ServiceCard = ({ service }: ServiceCardProps) => {
             <Button
               variant="outline"
               size="sm"
-              onClick={handleViewService}
-              className="gap-2"
-            >
-              <Eye size={14} />
-              التفاصيل
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
               onClick={handleViewProvider}
               className="gap-2"
             >
