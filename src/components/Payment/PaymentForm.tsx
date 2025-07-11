@@ -5,11 +5,8 @@ import { Separator } from '@/components/ui/separator';
 import { ArrowRight, ArrowLeft, AlertCircle } from 'lucide-react';
 import PaymentMethodSelector from './PaymentMethodSelector';
 import PaymentMethodForms from './PaymentMethodForms';
-import CouponInput, { AppliedCoupon } from './CouponInput';
 
 interface PaymentFormProps {
-  appliedCoupon: AppliedCoupon | null;
-  onCouponApplied: (coupon: AppliedCoupon | null) => void;
   paymentMethod: string;
   onPaymentMethodChange: (method: string) => void;
   paymentData: any;
@@ -21,8 +18,6 @@ interface PaymentFormProps {
 }
 
 const PaymentForm = ({
-  appliedCoupon,
-  onCouponApplied,
   paymentMethod,
   onPaymentMethodChange,
   paymentData,
@@ -37,41 +32,25 @@ const PaymentForm = ({
       <CardHeader>
         <CardTitle className="text-xl">طريقة الدفع</CardTitle>
         <CardDescription>
-          {appliedCoupon?.type === 'first_month_free' 
-            ? 'اشتراكك مجاني! اضغط على زر التفعيل أدناه'
-            : 'اختر طريقة الدفع المناسبة لك'
-          }
+          اختر طريقة الدفع المناسبة لك
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={onSubmit} className="space-y-6">
-          {/* Coupon Input */}
-          <CouponInput 
-            onCouponApplied={onCouponApplied}
-            appliedCoupon={appliedCoupon}
+          {/* Payment Method Selection */}
+          <PaymentMethodSelector 
+            paymentMethod={paymentMethod}
+            onPaymentMethodChange={onPaymentMethodChange}
           />
 
           <Separator />
 
-          {/* Show payment method selection only if not free */}
-          {appliedCoupon?.type !== 'first_month_free' && (
-            <>
-              {/* Payment Method Selection */}
-              <PaymentMethodSelector 
-                paymentMethod={paymentMethod}
-                onPaymentMethodChange={onPaymentMethodChange}
-              />
-
-              <Separator />
-
-              {/* Payment Method Specific Forms */}
-              <PaymentMethodForms 
-                paymentMethod={paymentMethod}
-                paymentData={paymentData}
-                onInputChange={onInputChange}
-              />
-            </>
-          )}
+          {/* Payment Method Specific Forms */}
+          <PaymentMethodForms 
+            paymentMethod={paymentMethod}
+            paymentData={paymentData}
+            onInputChange={onInputChange}
+          />
 
           <div className="space-y-4 pt-4">
             <Button 
@@ -83,9 +62,7 @@ const PaymentForm = ({
               <ArrowRight className="ml-2" size={20} />
               {isCreatingTransaction 
                 ? 'جاري المعالجة...' 
-                : appliedCoupon?.type === 'first_month_free'
-                  ? 'تفعيل الاشتراك المجاني'
-                  : `ادفع ${finalAmount} شيكل`
+                : `ادفع ${finalAmount} شيكل`
               }
             </Button>
             

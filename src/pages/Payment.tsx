@@ -21,8 +21,6 @@ const Payment = () => {
     subscriptionTier,
     paymentMethod,
     setPaymentMethod,
-    appliedCoupon,
-    setAppliedCoupon,
     paymentData,
     handleInputChange,
     handlePayment,
@@ -46,18 +44,15 @@ const Payment = () => {
           {/* Order Summary */}
           <PaymentOrderSummary 
             subscription={subscription}
-            servicesNeeded={servicesNeeded}
+             servicesNeeded={servicesNeeded}
             amount={baseAmount}
             serviceData={serviceData}
-            appliedCoupon={appliedCoupon}
             finalAmount={finalAmount}
             subscriptionTier={subscriptionTier}
           />
 
           {/* Payment Form */}
           <PaymentForm
-            appliedCoupon={appliedCoupon}
-            onCouponApplied={setAppliedCoupon}
             paymentMethod={paymentMethod}
             onPaymentMethodChange={setPaymentMethod}
             paymentData={paymentData}

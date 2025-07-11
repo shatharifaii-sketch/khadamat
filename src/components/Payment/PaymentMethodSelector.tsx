@@ -34,24 +34,17 @@ const PaymentMethodSelector = ({
       available: true
     },
     {
-      id: 'jawwal_pay',
-      name: 'Jawwal Pay',
-      description: 'المحفظة الإلكترونية',
-      icon: Smartphone,
-      available: true
-    },
-    {
-      id: 'credit_card',
-      name: 'بطاقة ائتمانية',
-      description: 'فيزا أو ماستركارد',
+      id: 'paypal',
+      name: 'PayPal',
+      description: 'الدفع عبر بايبال',
       icon: CreditCard,
       available: true
     },
     {
-      id: 'bank_transfer',
-      name: 'تحويل بنكي',
-      description: 'تحويل مباشر من البنك',
-      icon: Banknote,
+      id: 'jawwal_pay',
+      name: 'Jawwal Pay',
+      description: 'المحفظة الإلكترونية',
+      icon: Smartphone,
       available: true
     }
   ];

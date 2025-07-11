@@ -26,10 +26,8 @@ export const usePaymentLogic = () => {
 
   const subscription = getUserSubscription.data;
 
-  // Calculate final amount after coupon
-  const finalAmount = paymentState.appliedCoupon 
-    ? Math.max(0, baseAmount - paymentState.appliedCoupon.discount_amount)
-    : baseAmount;
+  // Final amount is the base amount (no coupons)
+  const finalAmount = baseAmount;
 
   const handlePayment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,7 +35,6 @@ export const usePaymentLogic = () => {
     await processPayment(
       paymentState.paymentMethod,
       paymentState.paymentData,
-      paymentState.appliedCoupon,
       finalAmount,
       servicesNeeded,
       subscriptionTier

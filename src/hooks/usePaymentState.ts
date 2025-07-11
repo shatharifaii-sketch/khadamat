@@ -1,6 +1,5 @@
 
 import { useState } from 'react';
-import { AppliedCoupon } from '@/components/Payment/CouponInput';
 
 export interface PaymentFormData {
   cardNumber: string;
@@ -13,7 +12,6 @@ export interface PaymentFormData {
 
 export const usePaymentState = () => {
   const [paymentMethod, setPaymentMethod] = useState('reflect');
-  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
   const [paymentData, setPaymentData] = useState<PaymentFormData>({
     cardNumber: '',
     expiryDate: '',
@@ -30,8 +28,6 @@ export const usePaymentState = () => {
   return {
     paymentMethod,
     setPaymentMethod,
-    appliedCoupon,
-    setAppliedCoupon,
     paymentData,
     handleInputChange
   };

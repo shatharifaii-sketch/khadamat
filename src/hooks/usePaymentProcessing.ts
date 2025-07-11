@@ -1,41 +1,23 @@
 
 import { useNavigate } from 'react-router-dom';
 import { useSubscription } from '@/hooks/useSubscription';
-import { useCouponLogic } from '@/hooks/useCouponLogic';
-import { AppliedCoupon } from '@/components/Payment/CouponInput';
 import { PaymentFormData } from '@/hooks/usePaymentState';
 
 export const usePaymentProcessing = () => {
   const navigate = useNavigate();
   const { createPaymentTransaction, completePayment } = useSubscription();
-  const { recordCouponUsage, handleFreeSubscription } = useCouponLogic();
 
   const processPayment = async (
     paymentMethod: string,
     paymentData: PaymentFormData,
-    appliedCoupon: AppliedCoupon | null,
     finalAmount: number,
     servicesNeeded: number,
     subscriptionTier: string = 'monthly'
-  ) => {
-    // Handle free subscription for FIRSTFREE coupon
-    if (appliedCoupon?.type === 'first_month_free') {
-      const success = await handleFreeSubscription(appliedCoupon, servicesNeeded);
-      if (success) {
-        navigate('/account');
-      }
-      return;
-    }
-    
+  ) => {    
     try {
-      // Determine services quota based on subscription tier and coupon
+      // Determine services quota based on subscription tier
       let servicesQuota = subscriptionTier === 'yearly' ? 12 : 1;
       let subscriptionMonths = subscriptionTier === 'yearly' ? 12 : 1;
-      
-      if (appliedCoupon?.type === 'three_months_for_one') {
-        subscriptionMonths = 3;
-        servicesQuota = 3;
-      }
 
       // Create payment transaction
       const transaction = await createPaymentTransaction.mutateAsync({
@@ -45,19 +27,13 @@ export const usePaymentProcessing = () => {
         services_quota: servicesQuota,
         status: 'pending',
         subscription_tier: subscriptionTier,
-        discount_applied: appliedCoupon?.discount_amount || 0,
-        original_amount: subscriptionTier === 'yearly' ? 120 : 10, // Original price before discount
+        discount_applied: 0,
+        original_amount: subscriptionTier === 'yearly' ? 100 : 10,
         payment_data: {
           ...paymentData,
-          coupon_code: appliedCoupon?.code,
           subscription_months: subscriptionMonths
         }
       });
-
-      // Record coupon usage
-      if (appliedCoupon) {
-        await recordCouponUsage(appliedCoupon.id, transaction.id, appliedCoupon);
-      }
 
       // Process payment based on method
       await handlePaymentMethod(paymentMethod, paymentData, transaction, finalAmount);
@@ -95,20 +71,17 @@ export const usePaymentProcessing = () => {
         navigate('/account');
       }, 3000);
       
-    } else if (paymentMethod === 'credit_card') {
-      alert('سيتم معالجة الدفع عبر البطاقة الائتمانية...');
+    } else if (paymentMethod === 'paypal') {
+      alert('سيتم معالجة الدفع عبر PayPal...');
       
       setTimeout(async () => {
         await completePayment.mutateAsync({ 
           transactionId: transaction.id,
-          externalTransactionId: `card_${Date.now()}`
+          externalTransactionId: `paypal_${Date.now()}`
         });
         navigate('/account');
       }, 4000);
       
-    } else if (paymentMethod === 'bank_transfer') {
-      alert('سيتم توجيهك لتفاصيل التحويل البنكي');
-      navigate('/bank-transfer', { state: { transaction } });
     }
   };
 
