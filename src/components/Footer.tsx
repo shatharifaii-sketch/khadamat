@@ -1,6 +1,6 @@
 
 import { Link } from 'react-router-dom';
-import { Home } from 'lucide-react';
+import { Home, Facebook, Instagram } from 'lucide-react';
 
 const Footer = () => {
   return (
@@ -15,12 +15,32 @@ const Footer = () => {
         <p className="text-muted-foreground text-large mb-6">
           منصتك للخدمات المهنية في فلسطين
         </p>
-        <div className="flex flex-wrap justify-center gap-6 text-large">
+        <div className="flex flex-wrap justify-center gap-6 text-large mb-6">
           <Link to="/about" className="text-muted-foreground hover:text-primary">من نحن</Link>
           <Link to="/contact" className="text-muted-foreground hover:text-primary">تواصل معنا</Link>
-          <Link to="/account" className="text-muted-foreground hover:text-primary">حسابي</Link>
+          <Link to="/faq" className="text-muted-foreground hover:text-primary">الأسئلة الشائعة</Link>
         </div>
-        <div className="mt-8 pt-8 border-t border-border text-muted-foreground">
+        <div className="flex justify-center gap-4 mb-6">
+          <a 
+            href="https://facebook.com" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-muted-foreground hover:text-primary transition-colors"
+            aria-label="Facebook"
+          >
+            <Facebook size={24} />
+          </a>
+          <a 
+            href="https://instagram.com" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-muted-foreground hover:text-primary transition-colors"
+            aria-label="Instagram"
+          >
+            <Instagram size={24} />
+          </a>
+        </div>
+        <div className="pt-6 border-t border-border text-muted-foreground">
           © 2024 خدمات. جميع الحقوق محفوظة.
         </div>
       </div>

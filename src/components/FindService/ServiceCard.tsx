@@ -1,19 +1,24 @@
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { MapPin, Phone, PhoneCall, Copy, Star } from 'lucide-react';
+import { MapPin, Phone, PhoneCall, Copy, Star, Eye, User } from 'lucide-react';
 import { categories } from './ServiceCategories';
 import { PublicService } from '@/hooks/usePublicServices';
 import ContactOptions from '@/components/Chat/ContactOptions';
 import { toast } from 'sonner';
 import { useServiceViews } from '@/hooks/useServiceViews';
+import ServiceDetailsModal from '@/components/ServiceDetailsModal';
+import ProviderProfileModal from '@/components/ProviderProfileModal';
 
 interface ServiceCardProps {
   service: PublicService;
 }
 
 const ServiceCard = ({ service }: ServiceCardProps) => {
+  const [showServiceDetails, setShowServiceDetails] = useState(false);
+  const [showProviderProfile, setShowProviderProfile] = useState(false);
   const CategoryIcon = categories.find(cat => cat.value === service.category)?.icon || Star;
   const providerName = service.profiles?.full_name || 'مقدم الخدمة';
   const { incrementView } = useServiceViews();
@@ -23,17 +28,30 @@ const ServiceCard = ({ service }: ServiceCardProps) => {
     toast.success(message);
   };
 
-  const handleViewService = () => {
+  const handleViewService = (e: React.MouseEvent) => {
+    e.stopPropagation();
     incrementView(service.id);
+    setShowServiceDetails(true);
+  };
+
+  const handleViewProvider = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowProviderProfile(true);
+  };
+
+  const handleCardClick = () => {
+    incrementView(service.id);
+    setShowServiceDetails(true);
   };
 
   return (
-    <Card className="hover:shadow-lg transition-shadow" onClick={handleViewService}>
+    <>
+      <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={handleCardClick}>
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <CardTitle className="text-xl mb-2 text-right">{service.title}</CardTitle>
-            <CardDescription className="text-right mb-2">
+            <CardDescription className="text-right mb-2 line-clamp-2">
               {service.description}
             </CardDescription>
             <div className="flex items-center gap-2 justify-end mb-2">
@@ -65,14 +83,38 @@ const ServiceCard = ({ service }: ServiceCardProps) => {
           )}
 
           <div className="text-sm text-muted-foreground text-right">
-            <strong>مقدم الخدمة:</strong> {providerName}
+            <strong>مقدم الخدمة:</strong> 
+            <button 
+              onClick={handleViewProvider}
+              className="text-primary hover:underline mr-1"
+            >
+              {providerName}
+            </button>
           </div>
 
           <div className="flex gap-2 pt-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleViewService}
+              className="gap-2"
+            >
+              <Eye size={14} />
+              التفاصيل
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleViewProvider}
+              className="gap-2"
+            >
+              <User size={14} />
+              الملف الشخصي
+            </Button>
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="flex-1">
-                  <Phone size={16} className="ml-2" />
+                <Button variant="outline" size="sm" onClick={(e) => e.stopPropagation()}>
+                  <Phone size={14} className="ml-1" />
                   اتصل
                 </Button>
               </PopoverTrigger>
@@ -81,7 +123,10 @@ const ServiceCard = ({ service }: ServiceCardProps) => {
                   <Button
                     variant="ghost"
                     className="w-full justify-start gap-2"
-                    onClick={() => window.open(`tel:${service.phone}`)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open(`tel:${service.phone}`);
+                    }}
                   >
                     <PhoneCall size={16} />
                     {service.phone}
@@ -89,7 +134,10 @@ const ServiceCard = ({ service }: ServiceCardProps) => {
                   <Button
                     variant="ghost"
                     className="w-full justify-start gap-2"
-                    onClick={() => copyToClipboard(service.phone, 'تم نسخ رقم الهاتف')}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      copyToClipboard(service.phone, 'تم نسخ رقم الهاتف');
+                    }}
                   >
                     <Copy size={16} />
                     نسخ الرقم
@@ -98,17 +146,36 @@ const ServiceCard = ({ service }: ServiceCardProps) => {
               </PopoverContent>
             </Popover>
 
-            <ContactOptions
-              serviceId={service.id}
-              providerId={service.user_id}
-              serviceName={service.title}
-              providerName={providerName}
-              email={service.email}
-            />
+            <div onClick={(e) => e.stopPropagation()}>
+              <ContactOptions
+                serviceId={service.id}
+                providerId={service.user_id}
+                serviceName={service.title}
+                providerName={providerName}
+                email={service.email}
+              />
+            </div>
           </div>
         </div>
       </CardContent>
     </Card>
+
+    <ServiceDetailsModal
+      service={service}
+      isOpen={showServiceDetails}
+      onClose={() => setShowServiceDetails(false)}
+      onViewProvider={() => {
+        setShowServiceDetails(false);
+        setShowProviderProfile(true);
+      }}
+    />
+
+    <ProviderProfileModal
+      service={service}
+      isOpen={showProviderProfile}
+      onClose={() => setShowProviderProfile(false)}
+    />
+    </>
   );
 };
 
