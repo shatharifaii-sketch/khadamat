@@ -181,13 +181,25 @@ export const useSubscription = () => {
   });
 
   // Check if user can post more services
-  const canPostService = () => {
+  const canPostService = async () => {
     const subscription = getUserSubscription.data;
-    if (!subscription) return false;
+    if (!subscription || !user) return false;
     
-    // For new subscription model: 1 service per subscription
-    // If user has any active services, they need to pay for additional ones
-    return subscription.services_allowed > 0;
+    // Get actual count of user's services
+    const { data: userServices, error } = await supabase
+      .from('services')
+      .select('id')
+      .eq('user_id', user.id);
+      
+    if (error) {
+      console.error('Error checking user services for quota:', error);
+      return false;
+    }
+    
+    const currentServiceCount = userServices?.length || 0;
+    console.log('Can post service check - Current:', currentServiceCount, 'Allowed:', subscription.services_allowed);
+    
+    return currentServiceCount < subscription.services_allowed;
   };
 
   return {

@@ -26,7 +26,7 @@ export const useServiceForm = (serviceToEdit?: Service | null) => {
     handleSubmit: submitForm,
     isCreating,
     isUpdating,
-    canPostService
+    canPostService: canPostServiceAsync
   } = useServiceFormSubmission(serviceToEdit);
 
   const handleFieldBlur = (field: string) => {
@@ -52,7 +52,7 @@ export const useServiceForm = (serviceToEdit?: Service | null) => {
     isEditMode,
     isCreating,
     isUpdating,
-    canPostService,
+    canPostService: isEditMode ? true : false, // For display purposes, actual check is in handleSubmit
     pendingService,
     getFieldError,
     hasValidationErrors
