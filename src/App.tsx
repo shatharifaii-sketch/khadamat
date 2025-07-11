@@ -12,6 +12,7 @@ import FindService from "./pages/FindService";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Auth from "./pages/Auth";
+import Admin from "./pages/Admin";
 import Account from "./pages/Account";
 import Payment from "./pages/Payment";
 import Checkout from "./pages/Checkout";
@@ -43,6 +44,7 @@ function App() {
                   <Route path="/checkout" element={<Checkout />} />
                   <Route path="/messages" element={<Messages />} />
                   <Route path="/faq" element={<FAQ />} />
+                  <Route path="/admin" element={<Admin />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </div>

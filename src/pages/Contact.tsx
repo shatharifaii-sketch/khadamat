@@ -24,18 +24,47 @@ const Contact = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In real app, this would send the message
-    alert('تم إرسال رسالتك بنجاح! سنتواصل معك قريباً');
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      subject: '',
-      message: '',
-      inquiryType: ''
-    });
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch('https://zfnewzekaxofgrindsmb.supabase.co/functions/v1/send-contact-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          message: `${formData.subject}\n\n${formData.message}`,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        alert('تم إرسال رسالتك بنجاح! سنتواصل معك قريباً');
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          subject: '',
+          message: '',
+          inquiryType: ''
+        });
+      } else {
+        throw new Error(result.error || 'حدث خطأ أثناء إرسال الرسالة');
+      }
+    } catch (error) {
+      console.error('Contact form error:', error);
+      alert('حدث خطأ أثناء إرسال الرسالة. يرجى المحاولة مرة أخرى.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const contactInfo = [
@@ -252,9 +281,9 @@ const Contact = () => {
                     />
                   </div>
 
-                  <Button type="submit" size="lg" className="w-full text-xl py-6">
+                  <Button type="submit" size="lg" className="w-full text-xl py-6" disabled={isSubmitting}>
                     <Send size={20} className="ml-2" />
-                    إرسال الرسالة
+                    {isSubmitting ? 'جاري الإرسال...' : 'إرسال الرسالة'}
                   </Button>
                 </form>
               </CardContent>
