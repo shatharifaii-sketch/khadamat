@@ -1,6 +1,7 @@
 
 import { Card, CardContent } from '@/components/ui/card';
 import { useServiceForm } from '@/hooks/useServiceForm';
+import { Service } from '@/types/service';
 import ServiceFormHeader from './ServiceFormHeader';
 import ServiceBasicInfo from './ServiceBasicInfo';
 import ServicePricing from './ServicePricing';
@@ -9,18 +10,6 @@ import ServiceContact from './ServiceContact';
 import ServiceExperience from './ServiceExperience';
 import ServicePortfolio from './ServicePortfolio';
 import ServiceFormSubmit from './ServiceFormSubmit';
-
-interface Service {
-  id: string;
-  title: string;
-  category: string;
-  description: string;
-  price_range: string;
-  location: string;
-  phone: string;
-  email: string;
-  experience: string;
-}
 
 interface ServiceFormProps {
   serviceToEdit?: Service | null;
