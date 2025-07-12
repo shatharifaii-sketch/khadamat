@@ -47,6 +47,57 @@ export type Database = {
         }
         Relationships: []
       }
+      conversation_analytics: {
+        Row: {
+          client_id: string
+          conversation_id: string
+          id: string
+          last_activity_at: string | null
+          message_count: number | null
+          provider_id: string
+          service_id: string
+          started_at: string
+          status: string | null
+        }
+        Insert: {
+          client_id: string
+          conversation_id: string
+          id?: string
+          last_activity_at?: string | null
+          message_count?: number | null
+          provider_id: string
+          service_id: string
+          started_at?: string
+          status?: string | null
+        }
+        Update: {
+          client_id?: string
+          conversation_id?: string
+          id?: string
+          last_activity_at?: string | null
+          message_count?: number | null
+          provider_id?: string
+          service_id?: string
+          started_at?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_analytics_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversation_analytics_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conversations: {
         Row: {
           client_id: string
@@ -327,6 +378,83 @@ export type Database = {
         }
         Relationships: []
       }
+      search_analytics: {
+        Row: {
+          category: string | null
+          created_at: string
+          id: string
+          ip_address: unknown | null
+          location: string | null
+          results_count: number | null
+          search_query: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          location?: string | null
+          results_count?: number | null
+          search_query: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          location?: string | null
+          results_count?: number | null
+          search_query?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      service_analytics: {
+        Row: {
+          action_type: string
+          created_at: string
+          id: string
+          ip_address: unknown | null
+          referrer: string | null
+          service_id: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          referrer?: string | null
+          service_id: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          referrer?: string | null
+          service_id?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_analytics_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_images: {
         Row: {
           created_at: string
@@ -502,6 +630,36 @@ export type Database = {
           inserted_at?: string
           name?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      user_activity: {
+        Row: {
+          activity_type: string
+          created_at: string
+          details: Json | null
+          id: string
+          ip_address: unknown | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          activity_type: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          activity_type?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          user_agent?: string | null
+          user_id?: string
         }
         Relationships: []
       }
