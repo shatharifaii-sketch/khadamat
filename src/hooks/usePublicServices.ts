@@ -1,5 +1,6 @@
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface PublicService {
@@ -22,6 +23,38 @@ export interface PublicService {
 }
 
 export const usePublicServices = () => {
+  const queryClient = useQueryClient();
+
+  // Set up real-time subscription
+  useEffect(() => {
+    console.log('Setting up real-time subscription for services...');
+    
+    const channel = supabase
+      .channel('public-services-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
+          schema: 'public',
+          table: 'services',
+          filter: 'status=eq.published'
+        },
+        (payload) => {
+          console.log('Real-time service change detected:', payload);
+          
+          // Invalidate and refetch the services data
+          queryClient.invalidateQueries({ queryKey: ['public-services'] });
+          queryClient.invalidateQueries({ queryKey: ['home-stats'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      console.log('Cleaning up real-time subscription for services');
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+
   return useQuery({
     queryKey: ['public-services'],
     queryFn: async () => {

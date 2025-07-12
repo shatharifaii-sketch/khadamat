@@ -1,5 +1,6 @@
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface HomeStats {
@@ -12,6 +13,36 @@ export interface HomeStats {
 }
 
 export const useHomeStats = () => {
+  const queryClient = useQueryClient();
+
+  // Set up real-time subscription for stats updates
+  useEffect(() => {
+    console.log('Setting up real-time subscription for home stats...');
+    
+    const channel = supabase
+      .channel('home-stats-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
+          schema: 'public',
+          table: 'services'
+        },
+        (payload) => {
+          console.log('Real-time service change detected for stats:', payload);
+          
+          // Invalidate and refetch the stats data
+          queryClient.invalidateQueries({ queryKey: ['home-stats'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      console.log('Cleaning up real-time subscription for home stats');
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+
   return useQuery({
     queryKey: ['home-stats'],
     queryFn: async (): Promise<HomeStats> => {
