@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useAdminAnalytics } from '@/hooks/useAnalytics';
+import { useAdminAnalytics } from '@/hooks/useAdminAnalytics';
 import { Search, Eye, MessageSquare, Users, TrendingUp, Activity } from 'lucide-react';
 
 export const AnalyticsDashboard = () => {
