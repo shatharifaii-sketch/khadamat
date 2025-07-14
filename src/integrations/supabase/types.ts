@@ -668,6 +668,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_category_analytics: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          category: string
+          searches: number
+          views: number
+        }[]
+      }
+      get_top_search_terms: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          query: string
+          count: number
+        }[]
+      }
       validate_coupon: {
         Args: { coupon_code: string; user_id: string }
         Returns: {

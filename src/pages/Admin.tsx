@@ -24,6 +24,8 @@ import {
 } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import { useToast } from '@/hooks/use-toast';
+import { ServiceEditModal } from '@/components/Admin/ServiceEditModal';
+import { AnalyticsDashboard } from '@/components/Admin/AnalyticsDashboard';
 
 interface ContactSubmission {
   id: string;
@@ -48,11 +50,16 @@ interface Service {
   id: string;
   title: string;
   category: string;
+  description: string;
   status: string;
   price_range: string;
   location: string;
+  phone: string;
+  email: string;
+  experience?: string;
   views: number;
   created_at: string;
+  updated_at: string;
   user_id: string;
   profiles: {
     full_name: string;
@@ -70,6 +77,8 @@ const Admin = () => {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
 
   useEffect(() => {
     if (isAdmin) {
@@ -174,6 +183,15 @@ const Admin = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleEditService = (service: Service) => {
+    setSelectedService(service);
+    setIsServiceModalOpen(true);
+  };
+
+  const handleServiceUpdated = () => {
+    loadAdminData(); // Reload data after service update
   };
 
   if (!user) {
@@ -458,11 +476,20 @@ const Admin = () => {
                         </TableCell>
                         <TableCell>
                           <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleEditService(service)}
+                              title="تحرير الخدمة"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
                             {service.status !== 'published' && (
                               <Button
                                 size="sm"
                                 variant="outline"
                                 onClick={() => updateServiceStatus(service.id, 'published')}
+                                title="نشر الخدمة"
                               >
                                 <CheckCircle className="h-4 w-4" />
                               </Button>
@@ -472,6 +499,7 @@ const Admin = () => {
                                 size="sm"
                                 variant="outline"
                                 onClick={() => updateServiceStatus(service.id, 'disabled')}
+                                title="إلغاء نشر الخدمة"
                               >
                                 <XCircle className="h-4 w-4" />
                               </Button>
@@ -530,6 +558,17 @@ const Admin = () => {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Service Edit Modal */}
+        <ServiceEditModal 
+          service={selectedService}
+          isOpen={isServiceModalOpen}
+          onClose={() => {
+            setIsServiceModalOpen(false);
+            setSelectedService(null);
+          }}
+          onServiceUpdated={handleServiceUpdated}
+        />
       </div>
     </div>
   );

@@ -10,6 +10,7 @@ import ServiceCard from '@/components/FindService/ServiceCard';
 import EmptyState from '@/components/FindService/EmptyState';
 import LoadingGrid from '@/components/FindService/LoadingGrid';
 import { categories } from '@/components/FindService/ServiceCategories';
+import { useAnalytics } from '@/hooks/useAnalytics';
 
 const FindService = () => {
   const [searchParams] = useSearchParams();
@@ -18,6 +19,7 @@ const FindService = () => {
   const [selectedLocation, setSelectedLocation] = useState<string>('all');
 
   const { data: services, isLoading, error } = usePublicServices();
+  const { trackSearch } = useAnalytics();
 
   // Set initial category from URL parameters
   useEffect(() => {
@@ -30,7 +32,7 @@ const FindService = () => {
   const filteredServices = useMemo(() => {
     if (!services) return [];
 
-    return services.filter(service => {
+    const filtered = services.filter(service => {
       // Enhanced search that includes category labels and handles bilingual search
       const matchesSearch = searchTerm === '' || (() => {
         const searchLower = searchTerm.toLowerCase();
@@ -63,7 +65,19 @@ const FindService = () => {
 
       return matchesSearch && matchesCategory && matchesLocation;
     });
-  }, [services, searchTerm, selectedCategory, selectedLocation]);
+
+    // Track search if there's a search term
+    if (searchTerm.trim()) {
+      trackSearch.mutate({
+        query: searchTerm,
+        category: selectedCategory !== 'all' ? selectedCategory : undefined,
+        location: selectedLocation !== 'all' ? selectedLocation : undefined,
+        resultsCount: filtered.length,
+      });
+    }
+
+    return filtered;
+  }, [services, searchTerm, selectedCategory, selectedLocation, trackSearch]);
 
   const clearFilters = () => {
     setSearchTerm('');

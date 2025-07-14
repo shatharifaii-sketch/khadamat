@@ -7,9 +7,10 @@ import { categories } from './FindService/ServiceCategories';
 import { PublicService } from '@/hooks/usePublicServices';
 import ContactOptions from '@/components/Chat/ContactOptions';
 import { toast } from 'sonner';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useAnalytics } from '@/hooks/useAnalytics';
 
 interface ServiceDetailsModalProps {
   service: PublicService | null;
@@ -20,6 +21,17 @@ interface ServiceDetailsModalProps {
 
 const ServiceDetailsModal = ({ service, isOpen, onClose, onViewProvider }: ServiceDetailsModalProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const { trackServiceAction } = useAnalytics();
+
+  // Track service view when modal opens
+  useEffect(() => {
+    if (isOpen && service) {
+      trackServiceAction.mutate({
+        serviceId: service.id,
+        actionType: 'view'
+      });
+    }
+  }, [isOpen, service, trackServiceAction]);
   
   const { data: serviceImages } = useQuery({
     queryKey: ['service-images', service?.id],
@@ -46,6 +58,29 @@ const ServiceDetailsModal = ({ service, isOpen, onClose, onViewProvider }: Servi
   const copyToClipboard = (text: string, message: string) => {
     navigator.clipboard.writeText(text);
     toast.success(message);
+  };
+
+  const handlePhoneClick = (phone: string) => {
+    copyToClipboard(phone, 'تم نسخ رقم الهاتف');
+    trackServiceAction.mutate({
+      serviceId: service.id,
+      actionType: 'phone_click'
+    });
+  };
+
+  const handleEmailClick = (email: string) => {
+    copyToClipboard(email, 'تم نسخ البريد الإلكتروني');
+    trackServiceAction.mutate({
+      serviceId: service.id,
+      actionType: 'email_click'
+    });
+  };
+
+  const handleContactClick = () => {
+    trackServiceAction.mutate({
+      serviceId: service.id,
+      actionType: 'contact_click'
+    });
   };
 
   const nextImage = () => {
@@ -185,7 +220,7 @@ const ServiceDetailsModal = ({ service, isOpen, onClose, onViewProvider }: Servi
                     <Button
                       variant="ghost"
                       className="w-full justify-start gap-2"
-                      onClick={() => copyToClipboard(service.phone, 'تم نسخ رقم الهاتف')}
+                      onClick={() => handlePhoneClick(service.phone)}
                     >
                       <Copy size={16} />
                       نسخ الرقم
@@ -194,13 +229,15 @@ const ServiceDetailsModal = ({ service, isOpen, onClose, onViewProvider }: Servi
                 </PopoverContent>
               </Popover>
 
-              <ContactOptions
-                serviceId={service.id}
-                providerId={service.user_id}
-                serviceName={service.title}
-                providerName={providerName}
-                email={service.email}
-              />
+              <div onClick={handleContactClick}>
+                <ContactOptions
+                  serviceId={service.id}
+                  providerId={service.user_id}
+                  serviceName={service.title}
+                  providerName={providerName}
+                  email={service.email}
+                />
+              </div>
             </div>
           </div>
         </div>
