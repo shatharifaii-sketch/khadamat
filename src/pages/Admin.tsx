@@ -1,31 +1,30 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { supabase } from '@/integrations/supabase/client';
 import { 
   Users, 
   MessageSquare, 
-  DollarSign, 
-  BarChart3, 
   Settings, 
   Mail,
   CheckCircle,
-  XCircle,
-  Eye,
+  Activity,
+  BarChart3,
   Edit,
-  Trash2
+  XCircle
 } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import { useToast } from '@/hooks/use-toast';
 import { ServiceEditModal } from '@/components/Admin/ServiceEditModal';
 import { AnalyticsDashboard } from '@/components/Admin/AnalyticsDashboard';
+import { UserManagement } from '@/components/Admin/UserManagement';
+import { ServiceManagement } from '@/components/Admin/ServiceManagement';
+import { RealTimeTracker } from '@/components/Admin/RealTimeTracker';
 
 interface ContactSubmission {
   id: string;
@@ -42,8 +41,11 @@ interface UserProfile {
   full_name: string;
   phone?: string;
   location?: string;
+  bio?: string;
   is_service_provider: boolean;
   created_at: string;
+  profile_image_url?: string;
+  experience_years?: number;
 }
 
 interface Service {
@@ -310,11 +312,11 @@ const Admin = () => {
           </Card>
         </div>
 
-        <Tabs defaultValue="contacts" className="space-y-6">
-          <TabsList className="grid grid-cols-4 w-full">
-            <TabsTrigger value="contacts" className="flex items-center gap-2">
-              <Mail className="h-4 w-4" />
-              الرسائل
+        <Tabs defaultValue="tracker" className="space-y-6">
+          <TabsList className="grid grid-cols-5 w-full">
+            <TabsTrigger value="tracker" className="flex items-center gap-2">
+              <Activity className="h-4 w-4" />
+              التتبع المباشر
             </TabsTrigger>
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
@@ -324,11 +326,31 @@ const Admin = () => {
               <Settings className="h-4 w-4" />
               الخدمات
             </TabsTrigger>
+            <TabsTrigger value="contacts" className="flex items-center gap-2">
+              <Mail className="h-4 w-4" />
+              الرسائل
+            </TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
               التحليلات
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="tracker">
+            <RealTimeTracker />
+          </TabsContent>
+
+          <TabsContent value="users">
+            <UserManagement users={users} onUserUpdated={loadAdminData} />
+          </TabsContent>
+
+          <TabsContent value="services">
+            <ServiceManagement 
+              services={services} 
+              users={users}
+              onServiceUpdated={loadAdminData} 
+            />
+          </TabsContent>
 
           <TabsContent value="contacts">
             <Card>
@@ -391,171 +413,8 @@ const Admin = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="users">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  إدارة المستخدمين
-                </CardTitle>
-                <CardDescription>
-                  عرض وإدارة جميع المستخدمين المسجلين
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>الاسم</TableHead>
-                      <TableHead>الموقع</TableHead>
-                      <TableHead>النوع</TableHead>
-                      <TableHead>تاريخ التسجيل</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {users.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell className="font-medium">
-                          {user.full_name || 'غير محدد'}
-                        </TableCell>
-                        <TableCell>{user.location || '-'}</TableCell>
-                        <TableCell>
-                          <Badge variant={user.is_service_provider ? 'default' : 'secondary'}>
-                            {user.is_service_provider ? 'مقدم خدمة' : 'عميل'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {new Date(user.created_at).toLocaleDateString('ar-SA')}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="services">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Settings className="h-5 w-5" />
-                  إدارة الخدمات
-                </CardTitle>
-                <CardDescription>
-                  عرض وإدارة جميع الخدمات المنشورة
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>العنوان</TableHead>
-                      <TableHead>الفئة</TableHead>
-                      <TableHead>مقدم الخدمة</TableHead>
-                      <TableHead>النطاق السعري</TableHead>
-                      <TableHead>المشاهدات</TableHead>
-                      <TableHead>الحالة</TableHead>
-                      <TableHead>إجراءات</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {services.map((service) => (
-                      <TableRow key={service.id}>
-                        <TableCell className="font-medium max-w-xs truncate">
-                          {service.title}
-                        </TableCell>
-                        <TableCell>{service.category}</TableCell>
-                        <TableCell>{service.profiles?.full_name || 'غير محدد'}</TableCell>
-                        <TableCell>{service.price_range}</TableCell>
-                        <TableCell>{service.views}</TableCell>
-                        <TableCell>
-                          <Badge variant={service.status === 'published' ? 'default' : 'secondary'}>
-                            {service.status === 'published' ? 'منشور' : service.status === 'draft' ? 'مسودة' : 'معطل'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleEditService(service)}
-                              title="تحرير الخدمة"
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            {service.status !== 'published' && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => updateServiceStatus(service.id, 'published')}
-                                title="نشر الخدمة"
-                              >
-                                <CheckCircle className="h-4 w-4" />
-                              </Button>
-                            )}
-                            {service.status === 'published' && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => updateServiceStatus(service.id, 'disabled')}
-                                title="إلغاء نشر الخدمة"
-                              >
-                                <XCircle className="h-4 w-4" />
-                              </Button>
-                            )}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
           <TabsContent value="analytics">
-            <div className="grid gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5" />
-                    إحصائيات عامة
-                  </CardTitle>
-                  <CardDescription>
-                    نظرة شاملة على أداء الموقع
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    <div className="text-center">
-                      <div className="text-3xl font-bold text-blue-500 mb-2">
-                        {services.reduce((sum, service) => sum + service.views, 0)}
-                      </div>
-                      <div className="text-sm text-muted-foreground">إجمالي المشاهدات</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-3xl font-bold text-green-500 mb-2">
-                        {Math.round((stats.publishedServices / stats.totalServices) * 100) || 0}%
-                      </div>
-                      <div className="text-sm text-muted-foreground">معدل نشر الخدمات</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-3xl font-bold text-purple-500 mb-2">
-                        {Math.round((stats.serviceProviders / stats.totalUsers) * 100) || 0}%
-                      </div>
-                      <div className="text-sm text-muted-foreground">نسبة مقدمي الخدمات</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-3xl font-bold text-orange-500 mb-2">
-                        {Math.round(services.reduce((sum, service) => sum + service.views, 0) / services.length) || 0}
-                      </div>
-                      <div className="text-sm text-muted-foreground">متوسط المشاهدات</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            <AnalyticsDashboard />
           </TabsContent>
         </Tabs>
 
