@@ -229,7 +229,13 @@ const Admin = () => {
 
   const stats = {
     totalUsers: users.length,
-    serviceProviders: users.filter(u => u.is_service_provider).length,
+    serviceProviders: services.reduce((acc, service) => {
+      const providerIds = new Set(acc.map((p: any) => p.user_id));
+      if (!providerIds.has(service.user_id)) {
+        acc.push({ user_id: service.user_id });
+      }
+      return acc;
+    }, [] as any[]).length,
     totalServices: services.length,
     publishedServices: services.filter(s => s.status === 'published').length,
     pendingContacts: contactSubmissions.filter(c => c.status === 'new').length
@@ -304,7 +310,7 @@ const Admin = () => {
               <div className="flex items-center gap-3">
                 <Mail className="h-8 w-8 text-red-500" />
                 <div>
-                  <p className="text-sm text-muted-foreground">رسائل جديدة</p>
+                  <p className="text-sm text-muted-foreground">نماذج تواصل جديدة</p>
                   <p className="text-3xl font-bold">{stats.pendingContacts}</p>
                 </div>
               </div>
@@ -328,7 +334,7 @@ const Admin = () => {
             </TabsTrigger>
             <TabsTrigger value="contacts" className="flex items-center gap-2">
               <Mail className="h-4 w-4" />
-              الرسائل
+              نماذج التواصل
             </TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
@@ -357,10 +363,10 @@ const Admin = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Mail className="h-5 w-5" />
-                  رسائل التواصل
+                  نماذج التواصل
                 </CardTitle>
                 <CardDescription>
-                  إدارة الرسائل الواردة من نموذج التواصل
+                  إدارة الرسائل الواردة من نموذج التواصل (يتم إرسالها إلى البريد الإلكتروني)
                 </CardDescription>
               </CardHeader>
               <CardContent>

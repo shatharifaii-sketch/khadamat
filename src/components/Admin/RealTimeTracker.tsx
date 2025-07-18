@@ -65,12 +65,12 @@ export const RealTimeTracker = () => {
       )
       .subscribe();
 
-    const messagesChannel = supabase
-      .channel('messages-changes')
+    const contactsChannel = supabase
+      .channel('contacts-changes')
       .on('postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'messages' },
+        { event: 'INSERT', schema: 'public', table: 'contact_submissions' },
         (payload) => {
-          addNotification('new_message', 'رسالة جديدة في المحادثات');
+          addNotification('new_message', `نموذج تواصل جديد من: ${payload.new.name}`);
           loadRealTimeStats();
         }
       )
@@ -80,7 +80,7 @@ export const RealTimeTracker = () => {
       clearInterval(interval);
       supabase.removeChannel(profilesChannel);
       supabase.removeChannel(servicesChannel);
-      supabase.removeChannel(messagesChannel);
+      supabase.removeChannel(contactsChannel);
     };
   }, []);
 
@@ -106,9 +106,9 @@ export const RealTimeTracker = () => {
         .select('*', { count: 'exact', head: true })
         .gte('created_at', today.toISOString());
 
-      // Get active conversations today
+      // Get contact forms today
       const { count: activeMessages } = await supabase
-        .from('messages')
+        .from('contact_submissions')
         .select('*', { count: 'exact', head: true })
         .gte('created_at', today.toISOString());
 
@@ -140,15 +140,12 @@ export const RealTimeTracker = () => {
         .slice(0, 5)
         .map(([title, clicks]) => ({ title, clicks: clicks as number }));
 
-      // Get active conversations
+      // Get recent contact forms by service
       const { data: conversations } = await supabase
-        .from('conversation_analytics')
-        .select(`
-          message_count,
-          service:services(title)
-        `)
-        .gte('last_activity_at', today.toISOString())
-        .order('message_count', { ascending: false })
+        .from('contact_submissions')
+        .select('*')
+        .gte('created_at', today.toISOString())
+        .order('created_at', { ascending: false })
         .limit(5);
 
       setStats({
@@ -158,10 +155,10 @@ export const RealTimeTracker = () => {
         activeMessages: activeMessages || 0,
         recentSearches: (searchData || []).map(s => s.search_query),
         topClickedServices: topClicked,
-        activeConversations: (conversations || []).map(c => ({
-          service_title: c.service?.title || 'خدمة محذوفة',
-          message_count: c.message_count || 0
-        }))
+        activeConversations: (conversations || []).map((c, index) => ({
+          service_title: c.name || `نموذج ${index + 1}`,
+          message_count: 1
+        })).slice(0, 5)
       });
 
     } catch (error) {
@@ -293,7 +290,7 @@ export const RealTimeTracker = () => {
             <div className="flex items-center gap-3">
               <MessageSquare className="h-8 w-8 text-orange-500" />
               <div>
-                <p className="text-sm text-muted-foreground">رسائل اليوم</p>
+                <p className="text-sm text-muted-foreground">نماذج تواصل اليوم</p>
                 <p className="text-2xl font-bold">{stats.activeMessages}</p>
               </div>
             </div>
@@ -345,18 +342,18 @@ export const RealTimeTracker = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>المحادثات النشطة</CardTitle>
+            <CardTitle>نماذج التواصل الحديثة</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               {stats.activeConversations.map((conv, index) => (
                 <div key={index} className="flex justify-between items-center p-2 bg-muted rounded">
                   <span className="text-sm font-medium truncate">{conv.service_title}</span>
-                  <Badge variant="secondary">{conv.message_count} رسالة</Badge>
+                  <Badge variant="secondary">{conv.message_count} نموذج</Badge>
                 </div>
               ))}
               {stats.activeConversations.length === 0 && (
-                <p className="text-muted-foreground text-sm">لا توجد محادثات نشطة</p>
+                <p className="text-muted-foreground text-sm">لا توجد نماذج تواصل حديثة</p>
               )}
             </div>
           </CardContent>
