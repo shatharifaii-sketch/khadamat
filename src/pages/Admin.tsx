@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
 import { 
   Users, 
   MessageSquare, 
@@ -72,6 +73,7 @@ interface Service {
 const Admin = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   
   // Admin check - in a real app, you'd check this from the database
   const isAdmin = user?.email === 'shatharifaii@gmail.com';
@@ -252,6 +254,10 @@ const Admin = () => {
 
   const handleServiceUpdated = () => {
     loadAdminData(); // Reload data after service update
+    // Invalidate React Query cache to reflect changes on the main website
+    queryClient.invalidateQueries({ queryKey: ['public-services'] });
+    queryClient.invalidateQueries({ queryKey: ['user-services'] });
+    queryClient.invalidateQueries({ queryKey: ['home-stats'] });
   };
 
   if (!user) {
@@ -357,7 +363,7 @@ const Admin = () => {
             <ServiceManagement 
               services={services} 
               users={users}
-              onServiceUpdated={loadAdminData} 
+              onServiceUpdated={handleServiceUpdated} 
             />
           </TabsContent>
 
