@@ -418,27 +418,6 @@ export const ServiceManagement = ({ services, users, onServiceUpdated }: Service
                       </DialogContent>
                     </Dialog>
 
-                    {service.status !== 'published' && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleStatusChange(service.id, 'published')}
-                        className="text-green-600 hover:text-green-700"
-                      >
-                        <CheckCircle className="h-4 w-4" />
-                      </Button>
-                    )}
-
-                    {service.status === 'published' && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleStatusChange(service.id, 'disabled')}
-                        className="text-orange-600 hover:text-orange-700"
-                      >
-                        <XCircle className="h-4 w-4" />
-                      </Button>
-                    )}
 
                     <AlertDialog>
                       <AlertDialogTrigger asChild>

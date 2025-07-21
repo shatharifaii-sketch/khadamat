@@ -324,83 +324,9 @@ const Admin = () => {
           </p>
         </div>
 
-        {/* Enhanced Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <Users className="h-6 w-6 text-blue-500" />
-                <div>
-                  <p className="text-xs text-muted-foreground">إجمالي المستخدمين</p>
-                  <p className="text-2xl font-bold">{stats.totalUsers}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <BarChart3 className="h-6 w-6 text-green-500" />
-                <div>
-                  <p className="text-xs text-muted-foreground">مقدمي الخدمات</p>
-                  <p className="text-2xl font-bold">{stats.serviceProviders}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <Settings className="h-6 w-6 text-purple-500" />
-                <div>
-                  <p className="text-xs text-muted-foreground">إجمالي الخدمات</p>
-                  <p className="text-2xl font-bold">{stats.totalServices}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <CheckCircle className="h-6 w-6 text-orange-500" />
-                <div>
-                  <p className="text-xs text-muted-foreground">خدمات منشورة</p>
-                  <p className="text-2xl font-bold">{stats.publishedServices}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <Mail className="h-6 w-6 text-red-500" />
-                <div>
-                  <p className="text-xs text-muted-foreground">نماذج تواصل جديدة</p>
-                  <p className="text-2xl font-bold">{stats.pendingContacts}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <Activity className="h-6 w-6 text-indigo-500" />
-                <div>
-                  <p className="text-xs text-muted-foreground">تسجيلات اليوم</p>
-                  <p className="text-2xl font-bold">{stats.todaySignups}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
 
         <Tabs defaultValue="tracker" className="space-y-6">
-          <TabsList className="grid grid-cols-5 w-full">
+          <TabsList className="grid grid-cols-4 w-full">
             <TabsTrigger value="tracker" className="flex items-center gap-2">
               <Activity className="h-4 w-4" />
               التتبع المباشر
@@ -416,10 +342,6 @@ const Admin = () => {
             <TabsTrigger value="contacts" className="flex items-center gap-2">
               <Mail className="h-4 w-4" />
               نماذج التواصل
-            </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4" />
-              التحليلات
             </TabsTrigger>
           </TabsList>
 
@@ -500,9 +422,6 @@ const Admin = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="analytics">
-            <AnalyticsDashboard />
-          </TabsContent>
         </Tabs>
 
         {/* Service Edit Modal */}
