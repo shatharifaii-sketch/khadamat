@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
@@ -85,8 +86,65 @@ const Admin = () => {
   useEffect(() => {
     if (isAdmin) {
       loadAdminData();
+      setupRealTimeSubscriptions();
     }
   }, [isAdmin]);
+
+  const setupRealTimeSubscriptions = () => {
+    // Real-time subscription for new users
+    const profilesChannel = supabase
+      .channel('profiles-realtime')
+      .on('postgres_changes', 
+        { event: 'INSERT', schema: 'public', table: 'profiles' },
+        (payload) => {
+          console.log('New user registered:', payload.new);
+          toast({
+            title: "مستخدم جديد",
+            description: `انضم ${payload.new.full_name || 'مستخدم جديد'} للموقع`,
+          });
+          loadAdminData(); // Refresh data
+        }
+      )
+      .subscribe();
+
+    // Real-time subscription for new services
+    const servicesChannel = supabase
+      .channel('services-realtime')
+      .on('postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'services' },
+        (payload) => {
+          console.log('New service posted:', payload.new);
+          toast({
+            title: "خدمة جديدة",
+            description: `تم إضافة خدمة جديدة: ${payload.new.title}`,
+          });
+          loadAdminData(); // Refresh data
+        }
+      )
+      .subscribe();
+
+    // Real-time subscription for contact forms
+    const contactsChannel = supabase
+      .channel('contacts-realtime')
+      .on('postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'contact_submissions' },
+        (payload) => {
+          console.log('New contact form:', payload.new);
+          toast({
+            title: "نموذج تواصل جديد",
+            description: `رسالة جديدة من ${payload.new.name}`,
+          });
+          loadAdminData(); // Refresh data
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(profilesChannel);
+      supabase.removeChannel(servicesChannel);
+      supabase.removeChannel(contactsChannel);
+    };
+  };
 
   const loadAdminData = async () => {
     try {
@@ -106,7 +164,7 @@ const Admin = () => {
       
       if (profiles) setUsers(profiles);
 
-      // Load services
+      // Load services with user profiles
       const { data: servicesList } = await supabase
         .from('services')
         .select(`
@@ -227,18 +285,29 @@ const Admin = () => {
     );
   }
 
+  // Calculate accurate metrics
+  const uniqueServiceProviders = new Set(
+    services
+      .filter(service => service.status === 'published')
+      .map(service => service.user_id)
+  ).size;
+
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
+  const todaySignups = users.filter(user => 
+    new Date(user.created_at) >= todayStart
+  ).length;
+
+  const pendingContacts = contactSubmissions.filter(c => c.status === 'new').length;
+
   const stats = {
     totalUsers: users.length,
-    serviceProviders: services.reduce((acc, service) => {
-      const providerIds = new Set(acc.map((p: any) => p.user_id));
-      if (!providerIds.has(service.user_id)) {
-        acc.push({ user_id: service.user_id });
-      }
-      return acc;
-    }, [] as any[]).length,
+    serviceProviders: uniqueServiceProviders,
     totalServices: services.length,
     publishedServices: services.filter(s => s.status === 'published').length,
-    pendingContacts: contactSubmissions.filter(c => c.status === 'new').length
+    pendingContacts: pendingContacts,
+    todaySignups: todaySignups
   };
 
   return (
@@ -255,63 +324,75 @@ const Admin = () => {
           </p>
         </div>
 
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
+        {/* Enhanced Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <Users className="h-8 w-8 text-blue-500" />
+                <Users className="h-6 w-6 text-blue-500" />
                 <div>
-                  <p className="text-sm text-muted-foreground">إجمالي المستخدمين</p>
-                  <p className="text-3xl font-bold">{stats.totalUsers}</p>
+                  <p className="text-xs text-muted-foreground">إجمالي المستخدمين</p>
+                  <p className="text-2xl font-bold">{stats.totalUsers}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <BarChart3 className="h-8 w-8 text-green-500" />
+                <BarChart3 className="h-6 w-6 text-green-500" />
                 <div>
-                  <p className="text-sm text-muted-foreground">مقدمي الخدمات</p>
-                  <p className="text-3xl font-bold">{stats.serviceProviders}</p>
+                  <p className="text-xs text-muted-foreground">مقدمي الخدمات</p>
+                  <p className="text-2xl font-bold">{stats.serviceProviders}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <Settings className="h-8 w-8 text-purple-500" />
+                <Settings className="h-6 w-6 text-purple-500" />
                 <div>
-                  <p className="text-sm text-muted-foreground">إجمالي الخدمات</p>
-                  <p className="text-3xl font-bold">{stats.totalServices}</p>
+                  <p className="text-xs text-muted-foreground">إجمالي الخدمات</p>
+                  <p className="text-2xl font-bold">{stats.totalServices}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <CheckCircle className="h-8 w-8 text-orange-500" />
+                <CheckCircle className="h-6 w-6 text-orange-500" />
                 <div>
-                  <p className="text-sm text-muted-foreground">خدمات منشورة</p>
-                  <p className="text-3xl font-bold">{stats.publishedServices}</p>
+                  <p className="text-xs text-muted-foreground">خدمات منشورة</p>
+                  <p className="text-2xl font-bold">{stats.publishedServices}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <Mail className="h-8 w-8 text-red-500" />
+                <Mail className="h-6 w-6 text-red-500" />
                 <div>
-                  <p className="text-sm text-muted-foreground">نماذج تواصل جديدة</p>
-                  <p className="text-3xl font-bold">{stats.pendingContacts}</p>
+                  <p className="text-xs text-muted-foreground">نماذج تواصل جديدة</p>
+                  <p className="text-2xl font-bold">{stats.pendingContacts}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <Activity className="h-6 w-6 text-indigo-500" />
+                <div>
+                  <p className="text-xs text-muted-foreground">تسجيلات اليوم</p>
+                  <p className="text-2xl font-bold">{stats.todaySignups}</p>
                 </div>
               </div>
             </CardContent>
@@ -366,7 +447,7 @@ const Admin = () => {
                   نماذج التواصل
                 </CardTitle>
                 <CardDescription>
-                  إدارة الرسائل الواردة من نموذج التواصل (يتم إرسالها إلى البريد الإلكتروني)
+                  إدارة نماذج التواصل الواردة من العملاء (يتم إرسالها إلى البريد الإلكتروني)
                 </CardDescription>
               </CardHeader>
               <CardContent>

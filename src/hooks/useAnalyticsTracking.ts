@@ -1,3 +1,4 @@
+
 import { useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -26,13 +27,18 @@ export const useAnalyticsTracking = () => {
           category,
           location,
           results_count: resultsCount,
+          ip_address: null, // Could be filled by edge function
+          user_agent: navigator.userAgent
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error tracking search:', error);
+        throw error;
+      }
     }
   });
 
-  // Track service action
+  // Track service action (view, contact click, phone click, email click)
   const trackServiceAction = useMutation({
     mutationFn: async ({ 
       serviceId, 
@@ -47,9 +53,15 @@ export const useAnalyticsTracking = () => {
           service_id: serviceId,
           user_id: user?.id,
           action_type: actionType,
+          ip_address: null, // Could be filled by edge function
+          user_agent: navigator.userAgent,
+          referrer: document.referrer || null
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error tracking service action:', error);
+        throw error;
+      }
     }
   });
 
@@ -70,9 +82,44 @@ export const useAnalyticsTracking = () => {
           user_id: user.id,
           activity_type: activityType,
           details,
+          ip_address: null, // Could be filled by edge function
+          user_agent: navigator.userAgent
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error tracking user activity:', error);
+        throw error;
+      }
+    }
+  });
+
+  // Track page visit
+  const trackPageVisit = useMutation({
+    mutationFn: async ({ 
+      page, 
+      referrer 
+    }: { 
+      page: string; 
+      referrer?: string;
+    }) => {
+      const { error } = await supabase
+        .from('user_activity')
+        .insert({
+          user_id: user?.id,
+          activity_type: 'page_visit',
+          details: { 
+            page, 
+            referrer: referrer || document.referrer,
+            timestamp: new Date().toISOString()
+          },
+          ip_address: null,
+          user_agent: navigator.userAgent
+        });
+
+      if (error) {
+        console.error('Error tracking page visit:', error);
+        throw error;
+      }
     }
   });
 
@@ -80,5 +127,6 @@ export const useAnalyticsTracking = () => {
     trackSearch,
     trackServiceAction,
     trackUserActivity,
+    trackPageVisit,
   };
 };

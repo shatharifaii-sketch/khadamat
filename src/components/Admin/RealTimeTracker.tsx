@@ -1,24 +1,26 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { Bell, Users, Search, Settings, MessageSquare, TrendingUp, Activity } from 'lucide-react';
+import { Bell, Users, Search, Settings, MessageSquare, TrendingUp, Activity, Eye, MousePointer } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface RealtimeStats {
-  dailyVisitors: number;
-  totalSignups: number;
+  dailySignups: number;
+  totalUsers: number;
   newServicesCount: number;
-  activeMessages: number;
+  activeContactForms: number;
   recentSearches: string[];
   topClickedServices: Array<{ title: string; clicks: number }>;
-  activeConversations: Array<{ service_title: string; message_count: number }>;
+  serviceViews: Array<{ title: string; views: number }>;
+  todayContactForms: Array<{ name: string; time: string }>;
 }
 
 interface Notification {
   id: string;
-  type: 'new_user' | 'new_service' | 'new_message' | 'high_activity';
+  type: 'new_user' | 'new_service' | 'new_contact' | 'high_activity';
   message: string;
   timestamp: Date;
   read: boolean;
@@ -27,13 +29,14 @@ interface Notification {
 export const RealTimeTracker = () => {
   const { toast } = useToast();
   const [stats, setStats] = useState<RealtimeStats>({
-    dailyVisitors: 0,
-    totalSignups: 0,
+    dailySignups: 0,
+    totalUsers: 0,
     newServicesCount: 0,
-    activeMessages: 0,
+    activeContactForms: 0,
     recentSearches: [],
     topClickedServices: [],
-    activeConversations: []
+    serviceViews: [],
+    todayContactForms: []
   });
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -42,9 +45,9 @@ export const RealTimeTracker = () => {
     loadRealTimeStats();
     const interval = setInterval(loadRealTimeStats, 30000); // Update every 30 seconds
 
-    // Set up real-time subscriptions
+    // Set up real-time subscriptions for live updates
     const profilesChannel = supabase
-      .channel('profiles-changes')
+      .channel('profiles-live')
       .on('postgres_changes', 
         { event: 'INSERT', schema: 'public', table: 'profiles' },
         (payload) => {
@@ -55,7 +58,7 @@ export const RealTimeTracker = () => {
       .subscribe();
 
     const servicesChannel = supabase
-      .channel('services-changes')
+      .channel('services-live')
       .on('postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'services' },
         (payload) => {
@@ -66,11 +69,11 @@ export const RealTimeTracker = () => {
       .subscribe();
 
     const contactsChannel = supabase
-      .channel('contacts-changes')
+      .channel('contacts-live')
       .on('postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'contact_submissions' },
         (payload) => {
-          addNotification('new_message', `نموذج تواصل جديد من: ${payload.new.name}`);
+          addNotification('new_contact', `نموذج تواصل جديد من: ${payload.new.name}`);
           loadRealTimeStats();
         }
       )
@@ -95,8 +98,8 @@ export const RealTimeTracker = () => {
         .select('*', { count: 'exact', head: true })
         .gte('created_at', today.toISOString());
 
-      // Get total signups
-      const { count: totalSignups } = await supabase
+      // Get total users
+      const { count: totalUsers } = await supabase
         .from('profiles')
         .select('*', { count: 'exact', head: true });
 
@@ -106,8 +109,8 @@ export const RealTimeTracker = () => {
         .select('*', { count: 'exact', head: true })
         .gte('created_at', today.toISOString());
 
-      // Get contact forms today
-      const { count: activeMessages } = await supabase
+      // Get today's contact forms
+      const { count: activeContactForms } = await supabase
         .from('contact_submissions')
         .select('*', { count: 'exact', head: true })
         .gte('created_at', today.toISOString());
@@ -127,7 +130,7 @@ export const RealTimeTracker = () => {
           service:services(title)
         `)
         .gte('created_at', today.toISOString())
-        .neq('action_type', 'view');
+        .eq('action_type', 'contact_click');
 
       const clickCounts = (serviceClicks || []).reduce((acc: any, item: any) => {
         const title = item.service?.title || 'خدمة محذوفة';
@@ -140,25 +143,47 @@ export const RealTimeTracker = () => {
         .slice(0, 5)
         .map(([title, clicks]) => ({ title, clicks: clicks as number }));
 
-      // Get recent contact forms by service
-      const { data: conversations } = await supabase
+      // Get service views today
+      const { data: serviceViewsData } = await supabase
+        .from('service_analytics')
+        .select(`
+          service_id,
+          service:services(title)
+        `)
+        .gte('created_at', today.toISOString())
+        .eq('action_type', 'view');
+
+      const viewCounts = (serviceViewsData || []).reduce((acc: any, item: any) => {
+        const title = item.service?.title || 'خدمة محذوفة';
+        acc[title] = (acc[title] || 0) + 1;
+        return acc;
+      }, {});
+
+      const topViewed = Object.entries(viewCounts)
+        .sort(([,a], [,b]) => (b as number) - (a as number))
+        .slice(0, 5)
+        .map(([title, views]) => ({ title, views: views as number }));
+
+      // Get today's contact forms
+      const { data: todayContacts } = await supabase
         .from('contact_submissions')
-        .select('*')
+        .select('name, created_at')
         .gte('created_at', today.toISOString())
         .order('created_at', { ascending: false })
-        .limit(5);
+        .limit(10);
 
       setStats({
-        dailyVisitors: dailySignups || 0,
-        totalSignups: totalSignups || 0,
+        dailySignups: dailySignups || 0,
+        totalUsers: totalUsers || 0,
         newServicesCount: newServices || 0,
-        activeMessages: activeMessages || 0,
+        activeContactForms: activeContactForms || 0,
         recentSearches: (searchData || []).map(s => s.search_query),
         topClickedServices: topClicked,
-        activeConversations: (conversations || []).map((c, index) => ({
-          service_title: c.name || `نموذج ${index + 1}`,
-          message_count: 1
-        })).slice(0, 5)
+        serviceViews: topViewed,
+        todayContactForms: (todayContacts || []).map(c => ({
+          name: c.name,
+          time: new Date(c.created_at).toLocaleTimeString('ar')
+        }))
       });
 
     } catch (error) {
@@ -198,7 +223,7 @@ export const RealTimeTracker = () => {
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <Activity className="h-5 w-5" />
-              التتبع المباشر
+              التتبع المباشر والإشعارات
             </CardTitle>
             <div className="relative">
               <Button
@@ -254,8 +279,9 @@ export const RealTimeTracker = () => {
             <div className="flex items-center gap-3">
               <Users className="h-8 w-8 text-blue-500" />
               <div>
-                <p className="text-sm text-muted-foreground">زوار اليوم</p>
-                <p className="text-2xl font-bold">{stats.dailyVisitors}</p>
+                <p className="text-sm text-muted-foreground">تسجيلات اليوم</p>
+                <p className="text-2xl font-bold">{stats.dailySignups}</p>
+                <p className="text-xs text-muted-foreground">من أصل {stats.totalUsers}</p>
               </div>
             </div>
           </CardContent>
@@ -264,19 +290,7 @@ export const RealTimeTracker = () => {
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
-              <TrendingUp className="h-8 w-8 text-green-500" />
-              <div>
-                <p className="text-sm text-muted-foreground">إجمالي المشتركين</p>
-                <p className="text-2xl font-bold">{stats.totalSignups}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3">
-              <Settings className="h-8 w-8 text-purple-500" />
+              <Settings className="h-8 w-8 text-green-500" />
               <div>
                 <p className="text-sm text-muted-foreground">خدمات جديدة اليوم</p>
                 <p className="text-2xl font-bold">{stats.newServicesCount}</p>
@@ -291,7 +305,21 @@ export const RealTimeTracker = () => {
               <MessageSquare className="h-8 w-8 text-orange-500" />
               <div>
                 <p className="text-sm text-muted-foreground">نماذج تواصل اليوم</p>
-                <p className="text-2xl font-bold">{stats.activeMessages}</p>
+                <p className="text-2xl font-bold">{stats.activeContactForms}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3">
+              <TrendingUp className="h-8 w-8 text-purple-500" />
+              <div>
+                <p className="text-sm text-muted-foreground">معدل النشاط</p>
+                <p className="text-2xl font-bold">
+                  {stats.dailySignups + stats.newServicesCount + stats.activeContactForms}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -299,17 +327,17 @@ export const RealTimeTracker = () => {
       </div>
 
       {/* Live Activity Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Search className="h-5 w-5" />
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Search className="h-4 w-4" />
               آخر عمليات البحث
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {stats.recentSearches.slice(0, 8).map((search, index) => (
+              {stats.recentSearches.slice(0, 6).map((search, index) => (
                 <div key={index} className="p-2 bg-muted rounded text-sm">
                   {search}
                 </div>
@@ -323,7 +351,10 @@ export const RealTimeTracker = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>الخدمات الأكثر تفاعلاً</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <MousePointer className="h-4 w-4" />
+              الخدمات الأكثر تفاعلاً
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
@@ -342,17 +373,42 @@ export const RealTimeTracker = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>نماذج التواصل الحديثة</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Eye className="h-4 w-4" />
+              الخدمات الأكثر مشاهدة
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {stats.activeConversations.map((conv, index) => (
+              {stats.serviceViews.map((service, index) => (
                 <div key={index} className="flex justify-between items-center p-2 bg-muted rounded">
-                  <span className="text-sm font-medium truncate">{conv.service_title}</span>
-                  <Badge variant="secondary">{conv.message_count} نموذج</Badge>
+                  <span className="text-sm font-medium truncate">{service.title}</span>
+                  <Badge variant="outline">{service.views}</Badge>
                 </div>
               ))}
-              {stats.activeConversations.length === 0 && (
+              {stats.serviceViews.length === 0 && (
+                <p className="text-muted-foreground text-sm">لا توجد مشاهدات اليوم</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <MessageSquare className="h-4 w-4" />
+              نماذج التواصل الحديثة
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {stats.todayContactForms.map((contact, index) => (
+                <div key={index} className="flex justify-between items-center p-2 bg-muted rounded">
+                  <span className="text-sm font-medium truncate">{contact.name}</span>
+                  <span className="text-xs text-muted-foreground">{contact.time}</span>
+                </div>
+              ))}
+              {stats.todayContactForms.length === 0 && (
                 <p className="text-muted-foreground text-sm">لا توجد نماذج تواصل حديثة</p>
               )}
             </div>
