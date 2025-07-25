@@ -21,6 +21,7 @@ import { toast } from 'sonner';
 import { useConversations } from '@/hooks/useConversations';
 import ServiceManagementCard from '@/components/Account/ServiceManagementCard';
 import SubscriptionHistoryTable from '@/components/Account/SubscriptionHistoryTable';
+import PaymentSuccessCard from '@/components/Account/PaymentSuccessCard';
 
 const Account = () => {
   const { user, loading } = useAuth();
@@ -124,6 +125,9 @@ const Account = () => {
         </div>
 
         <div className="grid gap-8">
+          {/* Payment Success Notification */}
+          <PaymentSuccessCard />
+          
           {/* Interactive Statistics Cards - Updated to 3 columns */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <Card 

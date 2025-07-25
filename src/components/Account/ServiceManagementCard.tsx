@@ -2,8 +2,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye, MapPin, Phone, Calendar, Edit } from 'lucide-react';
+import { MapPin, Phone, Calendar, Edit } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import ServiceStatusIndicator from './ServiceStatusIndicator';
 
 interface Service {
   id: string;
@@ -24,26 +25,17 @@ interface ServiceManagementCardProps {
 const ServiceManagementCard = ({ service }: ServiceManagementCardProps) => {
   const navigate = useNavigate();
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'published': return 'default';
-      case 'draft': return 'secondary';
-      case 'inactive': return 'destructive';
-      default: return 'secondary';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'published': return 'منشورة';
-      case 'draft': return 'مسودة';
-      case 'inactive': return 'غير نشطة';
-      default: return status;
-    }
-  };
-
   const handleEditService = () => {
     navigate(`/post-service?edit=${service.id}`);
+  };
+
+  // Check if service was recently created (within last 24 hours)
+  const isNewlyPublished = () => {
+    const now = new Date();
+    const serviceDate = new Date(service.created_at);
+    const timeDiff = now.getTime() - serviceDate.getTime();
+    const hoursDiff = timeDiff / (1000 * 3600);
+    return hoursDiff <= 24 && service.status === 'published';
   };
 
   return (
@@ -55,9 +47,11 @@ const ServiceManagementCard = ({ service }: ServiceManagementCardProps) => {
             <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
               {service.description}
             </p>
-            <Badge variant={getStatusColor(service.status)}>
-              {getStatusText(service.status)}
-            </Badge>
+            <ServiceStatusIndicator 
+              status={service.status}
+              views={service.views}
+              isNewlyPublished={isNewlyPublished()}
+            />
           </div>
         </div>
       </CardHeader>
@@ -71,10 +65,6 @@ const ServiceManagementCard = ({ service }: ServiceManagementCardProps) => {
           <div className="flex items-center gap-2">
             <Phone size={14} />
             <span>{service.phone}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Eye size={14} />
-            <span>{service.views} مشاهدة</span>
           </div>
           <div className="flex items-center gap-2">
             <Calendar size={14} />
