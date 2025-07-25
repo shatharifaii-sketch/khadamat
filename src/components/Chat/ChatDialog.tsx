@@ -9,6 +9,7 @@ import { useMessages } from '@/hooks/useMessages';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import DOMPurify from 'dompurify';
 
 interface ChatDialogProps {
   open: boolean;
@@ -115,7 +116,15 @@ const ChatDialog = ({ open, onOpenChange, conversationId, serviceName, providerN
                         : 'bg-muted'
                     }`}
                   >
-                    <div className="text-sm">{message.content}</div>
+                    <div 
+                      className="text-sm"
+                      dangerouslySetInnerHTML={{
+                        __html: DOMPurify.sanitize(message.content, {
+                          ALLOWED_TAGS: ['br'],
+                          ALLOWED_ATTR: []
+                        })
+                      }}
+                    />
                     <div className="text-xs opacity-70 mt-1">
                       {formatDistanceToNow(new Date(message.created_at), {
                         addSuffix: true,

@@ -23,6 +23,24 @@ export const useCoupon = () => {
 
     setIsValidating(true);
     try {
+      // Check rate limit first
+      const { data: rateLimitData, error: rateLimitError } = await supabase
+        .rpc('check_rate_limit', {
+          _user_id: userId,
+          _action_type: 'coupon_validation',
+          _max_attempts: 5,
+          _window_minutes: 15
+        });
+
+      if (rateLimitError) {
+        console.error('Rate limit check error:', rateLimitError);
+        // Continue with validation if rate limit check fails
+      } else if (rateLimitData === false) {
+        setAppliedCoupon({ valid: false, message: 'تم تجاوز الحد المسموح من المحاولات. حاول مرة أخرى بعد 15 دقيقة' });
+        toast.error('تم تجاوز الحد المسموح من المحاولات. حاول مرة أخرى بعد 15 دقيقة');
+        return;
+      }
+
       const { data, error } = await supabase
         .rpc('validate_coupon', { 
           coupon_code: code.trim().toUpperCase(), 
