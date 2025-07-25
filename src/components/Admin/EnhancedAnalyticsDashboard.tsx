@@ -108,20 +108,20 @@ const EnhancedAnalyticsDashboard = () => {
       {/* Quick Stats */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          title="إجمالي المستخدمين"
-          value={analyticsSummary?.totalActiveUsers || 0}
+          title="إجمالي عمليات البحث"
+          value={analyticsSummary?.totalSearches || 0}
           change="+12%"
           icon={Users}
           color="success"
-          description="مستخدمين مسجلين"
+          description="عمليات بحث"
         />
         <StatCard
-          title="الخدمات المنشورة"
-          value={analyticsSummary?.totalServices || 0}
+          title="مشاهدات الخدمات"
+          value={analyticsSummary?.totalServiceViews || 0}
           change="+8%"
           icon={Star}
           color="default"
-          description="خدمات نشطة"
+          description="إجمالي المشاهدات"
         />
         <StatCard
           title="المحادثات النشطة"
@@ -132,12 +132,12 @@ const EnhancedAnalyticsDashboard = () => {
           description="محادثات جارية"
         />
         <StatCard
-          title="إجمالي المشاهدات"
-          value={serviceAnalytics?.reduce((sum, s) => sum + s.views, 0) || 0}
+          title="جهات الاتصال"
+          value={analyticsSummary?.totalContacts || 0}
           change="+25%"
           icon={Eye}
           color="warning"
-          description="مشاهدات الخدمات"
+          description="طلبات التواصل"
         />
       </div>
 
@@ -162,22 +162,22 @@ const EnhancedAnalyticsDashboard = () => {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span>خدمات منشورة</span>
-                    <span className="font-medium">{analyticsSummary?.totalServices || 0}</span>
+                    <span>مشاهدات الخدمات</span>
+                    <span className="font-medium">{analyticsSummary?.totalServiceViews || 0}</span>
                   </div>
                   <Progress value={85} className="h-2" />
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span>خدمات معلقة</span>
-                    <span className="font-medium">0</span>
+                    <span>عمليات البحث</span>
+                    <span className="font-medium">{analyticsSummary?.totalSearches || 0}</span>
                   </div>
-                  <Progress value={15} className="h-2" />
+                  <Progress value={75} className="h-2" />
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span>متوسط المشاهدات</span>
-                    <span className="font-medium">{Math.round((serviceAnalytics?.reduce((sum, s) => sum + s.views, 0) || 0) / Math.max(1, analyticsSummary?.totalServices || 1))}</span>
+                    <span>طلبات التواصل</span>
+                    <span className="font-medium">{analyticsSummary?.totalContacts || 0}</span>
                   </div>
                   <Progress value={65} className="h-2" />
                 </div>
@@ -224,17 +224,17 @@ const EnhancedAnalyticsDashboard = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="text-center">
-                  <div className="text-4xl font-bold text-primary">{analyticsSummary?.totalActiveUsers || 0}</div>
-                  <p className="text-sm text-muted-foreground">إجمالي المستخدمين</p>
+                  <div className="text-4xl font-bold text-primary">{analyticsSummary?.totalConversations || 0}</div>
+                  <p className="text-sm text-muted-foreground">إجمالي المحادثات</p>
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span>مقدمو خدمات</span>
-                    <span className="font-medium">{Math.round((analyticsSummary?.totalActiveUsers || 0) * 0.3)}</span>
+                    <span>طلبات التواصل</span>
+                    <span className="font-medium">{analyticsSummary?.totalContacts || 0}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>عملاء</span>
-                    <span className="font-medium">{Math.round((analyticsSummary?.totalActiveUsers || 0) * 0.7)}</span>
+                    <span>عمليات البحث</span>
+                    <span className="font-medium">{analyticsSummary?.totalSearches || 0}</span>
                   </div>
                 </div>
               </CardContent>
