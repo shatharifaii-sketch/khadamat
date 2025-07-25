@@ -808,7 +808,7 @@ export type Database = {
         }[]
       }
       get_conversation_details: {
-        Args: { user_id: string }
+        Args: { p_user_id: string }
         Returns: {
           id: string
           service_id: string

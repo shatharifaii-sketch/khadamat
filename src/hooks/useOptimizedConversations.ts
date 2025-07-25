@@ -30,7 +30,7 @@ export const useOptimizedConversations = () => {
       if (!user) return [];
 
       const { data, error } = await supabase.rpc('get_conversation_details', {
-        user_id: user.id
+        p_user_id: user.id
       });
 
       if (error) {
@@ -115,7 +115,19 @@ export const useOptimizedConversations = () => {
           event: '*',
           schema: 'public',
           table: 'conversations',
-          filter: `client_id=eq.${user.id},provider_id=eq.${user.id}`
+          filter: `client_id=eq.${user.id}`
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['optimized-conversations'] });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'conversations',
+          filter: `provider_id=eq.${user.id}`
         },
         () => {
           queryClient.invalidateQueries({ queryKey: ['optimized-conversations'] });
