@@ -13,10 +13,7 @@ export const useMessages = (conversationId: string | null) => {
   const getMessages = useQuery({
     queryKey: ['messages', conversationId],
     queryFn: async () => {
-      console.log('🔍 Fetching messages for conversation:', conversationId);
-      
       if (!conversationId) {
-        console.log('❌ No conversation ID provided');
         return [];
       }
 
@@ -31,26 +28,21 @@ export const useMessages = (conversationId: string | null) => {
         throw error;
       }
 
-      console.log('✅ Fetched messages:', data?.length || 0);
       return data as Message[];
     },
     enabled: !!conversationId,
-    staleTime: 1000, // Consider data stale after 1 second
-    gcTime: 5000, // Keep in cache for 5 seconds
+    staleTime: 30000, // Consider data stale after 30 seconds
+    gcTime: 60000, // Keep in cache for 1 minute
   });
 
   const sendMessage = useMutation({
     mutationFn: async ({ content }: { content: string }) => {
-      console.log('🚀 Sending message:', { content, conversationId, userId: user?.id });
-
       if (!user || !conversationId) {
-        console.error('❌ Missing required data:', { user: !!user, conversationId });
-        throw new Error('Missing required data');
+        throw new Error('يجب تسجيل الدخول لإرسال الرسائل');
       }
 
       if (!content.trim()) {
-        console.error('❌ Empty message content');
-        throw new Error('Message content cannot be empty');
+        throw new Error('لا يمكن إرسال رسالة فارغة');
       }
 
       const messageData = {
@@ -60,8 +52,6 @@ export const useMessages = (conversationId: string | null) => {
         message_type: 'text'
       };
 
-      console.log('📤 Inserting message data:', messageData);
-
       const { data, error } = await supabase
         .from('messages')
         .insert(messageData)
@@ -70,14 +60,13 @@ export const useMessages = (conversationId: string | null) => {
 
       if (error) {
         console.error('❌ Error sending message:', error);
-        throw error;
+        throw new Error('فشل في إرسال الرسالة');
       }
 
-      console.log('✅ Successfully sent message:', data);
       return data;
     },
-    onSuccess: (data) => {
-      console.log('🎉 Message sent successfully:', data);
+    onSuccess: () => {
+      // Optimistically update the messages list
       queryClient.invalidateQueries({ queryKey: ['messages', conversationId] });
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
       queryClient.invalidateQueries({ queryKey: ['provider-conversations'] });
@@ -85,15 +74,13 @@ export const useMessages = (conversationId: string | null) => {
     },
     onError: (error: any) => {
       console.error('💥 Message sending failed:', error);
-      toast.error(`فشل في إرسال الرسالة: ${error.message}`);
+      toast.error('فشل في إرسال الرسالة. حاول مرة أخرى.');
     }
   });
 
   // Set up real-time subscription for messages
   useEffect(() => {
     if (!conversationId) return;
-
-    console.log('🔄 Setting up real-time subscription for conversation:', conversationId);
 
     const channel = supabase
       .channel(`messages-${conversationId}`)
@@ -106,20 +93,19 @@ export const useMessages = (conversationId: string | null) => {
           filter: `conversation_id=eq.${conversationId}`
         },
         (payload) => {
-          console.log('📨 Real-time message received:', payload);
-          queryClient.invalidateQueries({ queryKey: ['messages', conversationId] });
+          // Only update if the message is from another user
+          if (payload.new.sender_id !== user?.id) {
+            queryClient.invalidateQueries({ queryKey: ['messages', conversationId] });
+          }
           queryClient.invalidateQueries({ queryKey: ['unread-messages'] });
         }
       )
-      .subscribe((status) => {
-        console.log('📡 Real-time subscription status:', status);
-      });
+      .subscribe();
 
     return () => {
-      console.log('🔌 Cleaning up real-time subscription');
       supabase.removeChannel(channel);
     };
-  }, [conversationId, queryClient]);
+  }, [conversationId, queryClient, user?.id]);
 
   return {
     getMessages,

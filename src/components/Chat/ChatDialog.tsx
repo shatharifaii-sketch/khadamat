@@ -1,15 +1,15 @@
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef, useMemo, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useMessages } from '@/hooks/useMessages';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import DOMPurify from 'dompurify';
+import MessageInput from './MessageInput';
+import { toast } from 'sonner';
 
 interface ChatDialogProps {
   open: boolean;
@@ -20,66 +20,44 @@ interface ChatDialogProps {
 }
 
 const ChatDialog = ({ open, onOpenChange, conversationId, serviceName, providerName }: ChatDialogProps) => {
-  const [messageText, setMessageText] = useState('');
   const { user } = useAuth();
   const { getMessages, sendMessage, isSending } = useMessages(conversationId);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const messages = useMemo(() => getMessages.data || [], [getMessages.data]);
 
-  console.log('💬 ChatDialog state:', {
-    open,
-    conversationId,
-    messagesCount: messages.length,
-    isLoading: getMessages.isLoading,
-    error: getMessages.error?.message
-  });
-
-  const scrollToBottom = () => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
+  // Only log on significant state changes to reduce noise
   useEffect(() => {
-    if (messages.length > 0) {
-      scrollToBottom();
-    }
-  }, [messages.length]);
-
-  // Reset message text when dialog opens/closes
-  useEffect(() => {
-    if (!open) {
-      setMessageText('');
-    }
-  }, [open]);
-
-  const handleSendMessage = async () => {
-    if (!messageText.trim() || isSending) {
-      console.log('⚠️ Cannot send message:', { 
-        hasText: !!messageText.trim(), 
-        isSending 
+    if (open && conversationId) {
+      console.log('💬 ChatDialog opened:', {
+        conversationId,
+        messagesCount: messages.length,
+        isLoading: getMessages.isLoading,
+        hasError: !!getMessages.error
       });
-      return;
     }
+  }, [open, conversationId, messages.length, getMessages.isLoading, getMessages.error]);
 
-    console.log('📤 Sending message:', messageText);
-    
+  const scrollToBottom = useCallback(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, []);
+
+  useEffect(() => {
+    if (messages.length > 0 && open) {
+      setTimeout(scrollToBottom, 100);
+    }
+  }, [messages.length, open, scrollToBottom]);
+
+  const handleSendMessage = useCallback(async (content: string) => {
     try {
-      await sendMessage.mutateAsync({ content: messageText });
-      setMessageText('');
-      console.log('✅ Message sent successfully');
+      await sendMessage.mutateAsync({ content });
+      scrollToBottom();
     } catch (error) {
       console.error('💥 Failed to send message:', error);
+      toast.error('فشل في إرسال الرسالة. حاول مرة أخرى.');
+      throw error; // Re-throw to let MessageInput handle it
     }
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  };
+  }, [sendMessage, scrollToBottom]);
 
   // Memoize the sanitized message content to prevent unnecessary re-renders
   const MessageContent = useMemo(() => {
@@ -150,26 +128,13 @@ const ChatDialog = ({ open, onOpenChange, conversationId, serviceName, providerN
           </div>
         </ScrollArea>
 
-        <div className="flex gap-2 pt-4 border-t">
-          <Input
-            value={messageText}
-            onChange={(e) => setMessageText(e.target.value)}
+        <div className="pt-4 border-t">
+          <MessageInput
+            onSendMessage={handleSendMessage}
+            isSending={isSending}
+            disabled={!conversationId}
             placeholder="اكتب رسالتك..."
-            onKeyPress={handleKeyPress}
-            disabled={isSending || !conversationId}
-            className="text-right"
           />
-          <Button
-            onClick={handleSendMessage}
-            disabled={!messageText.trim() || isSending || !conversationId}
-            size="icon"
-          >
-            {isSending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Send className="h-4 w-4" />
-            )}
-          </Button>
         </div>
       </DialogContent>
     </Dialog>
