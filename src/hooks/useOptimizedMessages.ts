@@ -58,8 +58,8 @@ export const useOptimizedMessages = (conversationId: string | null) => {
         sender_id: user.id,
         content: content.trim(),
         message_type: 'text',
-        topic: 'chat',
-        extension: 'text'
+        topic: `conversation_${conversationId}`,
+        extension: 'chat'
       };
 
       console.log('📋 Message data prepared:', messageData);
