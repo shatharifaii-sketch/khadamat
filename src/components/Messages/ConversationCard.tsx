@@ -4,10 +4,10 @@ import { Button } from '@/components/ui/button';
 import { MessageCircle, Clock, User, ChevronRight } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
-import type { Conversation } from '@/hooks/useConversations';
+import type { ConversationDetail } from '@/hooks/useOptimizedConversations';
 
 interface ConversationCardProps {
-  conversation: Conversation & { conversationType: 'client' | 'provider' };
+  conversation: ConversationDetail;
   onOpenChat: (conversationId: string) => void;
   getConversationDetails: (conversation: any) => {
     otherPartyName: string;
@@ -29,7 +29,7 @@ const ConversationCard = ({ conversation, onOpenChat, getConversationDetails }: 
           <div className="flex-1 text-right space-y-2">
             <div className="flex items-center gap-2 justify-end">
               <Badge 
-                variant={conversation.conversationType === 'provider' ? 'default' : 'secondary'}
+                variant={conversation.conversation_type === 'provider' ? 'default' : 'secondary'}
                 className="text-xs font-medium"
               >
                 {details.roleLabel}
@@ -41,7 +41,7 @@ const ConversationCard = ({ conversation, onOpenChat, getConversationDetails }: 
             <CardDescription className="text-base">
               <div className="flex items-center gap-2 justify-end mb-2">
                 <span className="font-medium">
-                  {conversation.conversationType === 'provider' ? 'من' : 'مع'}: {details.otherPartyName}
+                  {conversation.conversation_type === 'provider' ? 'من' : 'مع'}: {details.otherPartyName}
                 </span>
                 <User size={16} className="text-primary" />
               </div>
