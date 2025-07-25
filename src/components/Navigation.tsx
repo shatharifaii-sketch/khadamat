@@ -8,7 +8,7 @@ import { Menu, User, MessageCircle, LogOut, PlusCircle, Search, Info, Shield } f
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
-import { useMessageNotifications } from '@/hooks/useMessageNotifications';
+import { useRealTimeNotifications } from '@/hooks/useRealTimeNotifications';
 import LanguageSwitcher from './LanguageSwitcher';
 
 const Navigation = () => {
@@ -17,8 +17,8 @@ const Navigation = () => {
   const { user, signOut } = useAuth();
   const { data: unreadCount = 0 } = useUnreadMessages();
   
-  // Enable message notifications
-  useMessageNotifications();
+  // Enable real-time notifications
+  const { isConnected } = useRealTimeNotifications();
   
   const isAdmin = user?.email === 'shatharifaii@gmail.com';
 
