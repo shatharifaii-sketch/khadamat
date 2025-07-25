@@ -11,33 +11,41 @@ export const useUnreadMessages = () => {
     queryFn: async () => {
       if (!user) return 0;
 
-      const { data, error } = await supabase
-        .from('messages')
-        .select(`
-          id,
-          conversation_id,
-          conversations!inner(
-            provider_id,
-            client_id
-          )
-        `)
-        .is('read_at', null)
-        .neq('sender_id', user.id);
+      // First, get conversations where user is either client or provider
+      const { data: userConversations, error: convError } = await supabase
+        .from('conversations')
+        .select('id')
+        .or(`client_id.eq.${user.id},provider_id.eq.${user.id}`);
 
-      if (error) {
-        console.error('Error fetching unread messages:', error);
+      if (convError) {
+        console.error('Error fetching user conversations:', convError);
         return 0;
       }
 
-      // Filter messages where user is either client or provider
-      const unreadMessages = data.filter(message => 
-        message.conversations.client_id === user.id || 
-        message.conversations.provider_id === user.id
-      );
+      if (!userConversations || userConversations.length === 0) {
+        return 0;
+      }
 
-      return unreadMessages.length;
+      const conversationIds = userConversations.map(conv => conv.id);
+
+      // Then get unread messages from those conversations
+      const { data: unreadMessages, error: msgError } = await supabase
+        .from('messages')
+        .select('id')
+        .in('conversation_id', conversationIds)
+        .is('read_at', null)
+        .neq('sender_id', user.id);
+
+      if (msgError) {
+        console.error('Error fetching unread messages:', msgError);
+        return 0;
+      }
+
+      return unreadMessages?.length || 0;
     },
     enabled: !!user,
-    refetchInterval: 30000 // Refetch every 30 seconds
+    refetchInterval: 30000, // Refetch every 30 seconds
+    staleTime: 5000, // Consider data stale after 5 seconds
+    gcTime: 10000, // Keep in cache for 10 seconds
   });
 };

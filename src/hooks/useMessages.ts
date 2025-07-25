@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -28,19 +28,15 @@ export const useMessages = (conversationId: string | null) => {
 
       if (error) {
         console.error('❌ Error fetching messages:', error);
-        console.error('❌ Error details:', {
-          message: error.message,
-          code: error.code,
-          details: error.details,
-          hint: error.hint
-        });
         throw error;
       }
 
-      console.log('✅ Fetched messages:', data);
+      console.log('✅ Fetched messages:', data?.length || 0);
       return data as Message[];
     },
-    enabled: !!conversationId
+    enabled: !!conversationId,
+    staleTime: 1000, // Consider data stale after 1 second
+    gcTime: 5000, // Keep in cache for 5 seconds
   });
 
   const sendMessage = useMutation({
@@ -74,12 +70,6 @@ export const useMessages = (conversationId: string | null) => {
 
       if (error) {
         console.error('❌ Error sending message:', error);
-        console.error('❌ Error details:', {
-          message: error.message,
-          code: error.code,
-          details: error.details,
-          hint: error.hint
-        });
         throw error;
       }
 
@@ -91,6 +81,7 @@ export const useMessages = (conversationId: string | null) => {
       queryClient.invalidateQueries({ queryKey: ['messages', conversationId] });
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
       queryClient.invalidateQueries({ queryKey: ['provider-conversations'] });
+      queryClient.invalidateQueries({ queryKey: ['unread-messages'] });
     },
     onError: (error: any) => {
       console.error('💥 Message sending failed:', error);
@@ -117,6 +108,7 @@ export const useMessages = (conversationId: string | null) => {
         (payload) => {
           console.log('📨 Real-time message received:', payload);
           queryClient.invalidateQueries({ queryKey: ['messages', conversationId] });
+          queryClient.invalidateQueries({ queryKey: ['unread-messages'] });
         }
       )
       .subscribe((status) => {

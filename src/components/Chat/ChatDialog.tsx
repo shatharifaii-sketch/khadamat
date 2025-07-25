@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,23 +25,34 @@ const ChatDialog = ({ open, onOpenChange, conversationId, serviceName, providerN
   const { getMessages, sendMessage, isSending } = useMessages(conversationId);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const messages = getMessages.data || [];
+  const messages = useMemo(() => getMessages.data || [], [getMessages.data]);
 
   console.log('💬 ChatDialog state:', {
     open,
     conversationId,
     messagesCount: messages.length,
     isLoading: getMessages.isLoading,
-    error: getMessages.error
+    error: getMessages.error?.message
   });
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    if (messages.length > 0) {
+      scrollToBottom();
+    }
+  }, [messages.length]);
+
+  // Reset message text when dialog opens/closes
+  useEffect(() => {
+    if (!open) {
+      setMessageText('');
+    }
+  }, [open]);
 
   const handleSendMessage = async () => {
     if (!messageText.trim() || isSending) {
@@ -70,10 +81,39 @@ const ChatDialog = ({ open, onOpenChange, conversationId, serviceName, providerN
     }
   };
 
-  // Show error state if there's an error
-  if (getMessages.error) {
-    console.error('💥 Messages query error:', getMessages.error);
-  }
+  // Memoize the sanitized message content to prevent unnecessary re-renders
+  const MessageContent = useMemo(() => {
+    return messages.map((message) => (
+      <div
+        key={message.id}
+        className={`flex ${message.sender_id === user?.id ? 'justify-end' : 'justify-start'}`}
+      >
+        <div
+          className={`max-w-[80%] rounded-lg px-3 py-2 ${
+            message.sender_id === user?.id
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-muted'
+          }`}
+        >
+          <div 
+            className="text-sm"
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(message.content, {
+                ALLOWED_TAGS: ['br'],
+                ALLOWED_ATTR: []
+              })
+            }}
+          />
+          <div className="text-xs opacity-70 mt-1">
+            {formatDistanceToNow(new Date(message.created_at), {
+              addSuffix: true,
+              locale: ar
+            })}
+          </div>
+        </div>
+      </div>
+    ));
+  }, [messages, user?.id]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -104,36 +144,7 @@ const ChatDialog = ({ open, onOpenChange, conversationId, serviceName, providerN
                 لا توجد رسائل بعد. ابدأ المحادثة!
               </div>
             ) : (
-              messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex ${message.sender_id === user?.id ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div
-                    className={`max-w-[80%] rounded-lg px-3 py-2 ${
-                      message.sender_id === user?.id
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted'
-                    }`}
-                  >
-                    <div 
-                      className="text-sm"
-                      dangerouslySetInnerHTML={{
-                        __html: DOMPurify.sanitize(message.content, {
-                          ALLOWED_TAGS: ['br'],
-                          ALLOWED_ATTR: []
-                        })
-                      }}
-                    />
-                    <div className="text-xs opacity-70 mt-1">
-                      {formatDistanceToNow(new Date(message.created_at), {
-                        addSuffix: true,
-                        locale: ar
-                      })}
-                    </div>
-                  </div>
-                </div>
-              ))
+              MessageContent
             )}
             <div ref={messagesEndRef} />
           </div>
