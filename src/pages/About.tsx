@@ -19,11 +19,6 @@ const About = () => {
       description: 'آلاف مقدمي الخدمات المحترفين في جميع أنحاء فلسطين'
     },
     {
-      icon: Award,
-      title: 'جودة عالية',
-      description: 'نظام تقييم وتعليقات يضمن جودة الخدمات المقدمة'
-    },
-    {
       icon: CheckCircle,
       title: 'سهولة الاستخدام',
       description: 'واجهة بسيطة وسهلة للعثور على الخدمة المناسبة بسرعة'
@@ -143,7 +138,7 @@ const About = () => {
           <h2 className="text-3xl font-bold text-center mb-12">
             لماذا نحن مختلفون؟
           </h2>
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-3 gap-8">
             {features.map((feature, index) => {
               const Icon = feature.icon;
               return (
@@ -203,10 +198,10 @@ const About = () => {
               </p>
             </Card>
             <Card className="p-6">
-              <div className="text-4xl mb-4">⭐</div>
-              <h3 className="text-xl font-semibold mb-2">التميز</h3>
+              <div className="text-4xl mb-4">🌐</div>
+              <h3 className="text-xl font-semibold mb-2">التواصل</h3>
               <p className="text-large text-muted-foreground">
-                نلتزم بتقديم أعلى مستويات الجودة والخدمة
+                نربط بين الناس ونسهل التواصل بين مقدمي الخدمات والعملاء
               </p>
             </Card>
           </div>
