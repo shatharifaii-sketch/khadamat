@@ -70,7 +70,7 @@ const ProviderInbox = () => {
 
   // Helper function to safely get client name
   const getClientName = (conversation: typeof conversations[0]) => {
-    return conversation.profiles?.full_name || 'عميل';
+    return conversation.other_party_name || 'عميل';
   };
 
   return (
@@ -133,7 +133,7 @@ const ProviderInbox = () => {
                   <div className="flex items-start justify-between">
                     <div className="flex-1 text-right">
                       <CardTitle className="text-lg mb-2">
-                        استفسار حول: {conversation.services?.title || 'خدمة محذوفة'}
+                        استفسار حول: {conversation.service_title || 'خدمة محذوفة'}
                       </CardTitle>
                       <div className="flex items-center gap-2 justify-end text-sm text-muted-foreground mb-2">
                         <span>من: {getClientName(conversation)}</span>
@@ -168,7 +168,7 @@ const ProviderInbox = () => {
           open={showChat}
           onOpenChange={setShowChat}
           conversationId={selectedConversation}
-          serviceName={selectedConv.services?.title || 'خدمة محذوفة'}
+          serviceName={selectedConv.service_title || 'خدمة محذوفة'}
           providerName={getClientName(selectedConv)}
         />
       )}

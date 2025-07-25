@@ -9,6 +9,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { useRealTimeNotifications } from '@/hooks/useRealTimeNotifications';
+import { useProfile } from '@/hooks/useProfile';
 import LanguageSwitcher from './LanguageSwitcher';
 
 const Navigation = () => {
@@ -16,11 +17,13 @@ const Navigation = () => {
   const location = useLocation();
   const { user, signOut } = useAuth();
   const { data: unreadCount = 0 } = useUnreadMessages();
+  const { profile } = useProfile();
   
   // Enable real-time notifications
   const { isConnected } = useRealTimeNotifications();
   
   const isAdmin = user?.email === 'shatharifaii@gmail.com';
+  const isServiceProvider = profile?.is_service_provider || false;
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -46,19 +49,30 @@ const Navigation = () => {
     </Link>
   );
 
+  const MessagesButton = ({ mobile = false }: { mobile?: boolean }) => {
+    const messagePath = isServiceProvider ? '/provider-inbox' : '/messages';
+    const messageLabel = isServiceProvider ? 'رسائل العملاء' : 'الرسائل';
+    
+    return (
+      <NavLink to={messagePath} onClick={mobile ? () => setIsOpen(false) : undefined}>
+        <div className="flex items-center gap-2">
+          <MessageCircle size={mobile ? 20 : 16} />
+          <span>{messageLabel}</span>
+          {unreadCount > 0 && (
+            <Badge variant="destructive" className="h-5 w-5 p-0 flex items-center justify-center text-xs">
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </Badge>
+          )}
+        </div>
+      </NavLink>
+    );
+  };
+
   const AccountButton = ({ mobile = false }: { mobile?: boolean }) => (
     <NavLink to="/account" onClick={mobile ? () => setIsOpen(false) : undefined}>
       <div className="flex items-center gap-2">
         <User size={mobile ? 20 : 16} />
         <span>حسابي</span>
-        {unreadCount > 0 && (
-          <div className="relative">
-            <MessageCircle size={mobile ? 16 : 14} className="text-destructive" />
-            <Badge variant="destructive" className="absolute -top-2 -right-2 h-4 w-4 p-0 flex items-center justify-center text-xs">
-              {unreadCount > 99 ? '99+' : unreadCount}
-            </Badge>
-          </div>
-        )}
       </div>
     </NavLink>
   );
@@ -106,6 +120,7 @@ const Navigation = () => {
           <div className="hidden md:flex items-center space-x-4 space-x-reverse">
             {user ? (
               <div className="flex items-center space-x-4 space-x-reverse">
+                <MessagesButton />
                 <AccountButton />
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -167,6 +182,7 @@ const Navigation = () => {
                   <div className="border-t pt-4">
                     {user ? (
                       <div className="space-y-4">
+                        <MessagesButton mobile />
                         <AccountButton mobile />
                         <Button variant="ghost" size="sm" onClick={handleSignOut} className="w-full justify-start">
                           <LogOut size={20} className="ml-2" />
