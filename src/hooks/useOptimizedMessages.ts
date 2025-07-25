@@ -51,12 +51,18 @@ export const useOptimizedMessages = (conversationId: string | null) => {
         throw new Error('لا يمكن إرسال رسالة فارغة');
       }
 
+      console.log('📤 Preparing to send message:', { conversationId, userId: user.id, contentLength: content.trim().length });
+      
       const messageData = {
         conversation_id: conversationId,
         sender_id: user.id,
         content: content.trim(),
-        message_type: 'text'
+        message_type: 'text',
+        topic: 'chat',
+        extension: 'text'
       };
+
+      console.log('📋 Message data prepared:', messageData);
 
       const { data, error } = await supabase
         .from('messages')
@@ -66,9 +72,11 @@ export const useOptimizedMessages = (conversationId: string | null) => {
 
       if (error) {
         console.error('❌ Error sending message:', error);
+        console.error('❌ Message data that failed:', messageData);
         throw new Error('فشل في إرسال الرسالة');
       }
 
+      console.log('✅ Message sent successfully:', data);
       return data;
     },
     onMutate: async ({ content }) => {

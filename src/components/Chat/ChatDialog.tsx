@@ -1,6 +1,6 @@
 
 import { useEffect, useRef, useMemo, useCallback } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Loader2 } from 'lucide-react';
 import { useOptimizedMessages } from '@/hooks/useOptimizedMessages';
@@ -101,6 +101,9 @@ const ChatDialog = ({ open, onOpenChange, conversationId, serviceName, providerN
               مع: {providerName}
             </div>
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            نافذة المحادثة للتواصل حول الخدمة
+          </DialogDescription>
         </DialogHeader>
 
         <ScrollArea className="flex-1 p-4 border rounded-md">
