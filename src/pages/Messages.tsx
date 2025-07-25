@@ -4,12 +4,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { User, Loader2, ArrowLeft } from 'lucide-react';
 import Navigation from '@/components/Navigation';
-import { useConversations } from '@/hooks/useConversations';
-import { useProviderConversations } from '@/hooks/useProviderConversations';
+import { useOptimizedConversations } from '@/hooks/useOptimizedConversations';
 import { useAuth } from '@/contexts/AuthContext';
 import ChatDialog from '@/components/Chat/ChatDialog';
 import { Link } from 'react-router-dom';
-import type { Conversation } from '@/hooks/useConversations';
+import type { ConversationDetail } from '@/hooks/useOptimizedConversations';
 import ConversationCard from '@/components/Messages/ConversationCard';
 import MessagesEmptyState from '@/components/Messages/MessagesEmptyState';
 import MessagesLoadingState from '@/components/Messages/MessagesLoadingState';
@@ -18,10 +17,7 @@ const Messages = () => {
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [showChat, setShowChat] = useState(false);
   const { user, loading } = useAuth();
-  const { getConversations } = useConversations();
-  const { data: providerConversations = [] } = useProviderConversations();
-
-  const clientConversations = getConversations.data || [];
+  const { conversations, isLoading, error, refetch } = useOptimizedConversations();
 
   if (loading) {
     return (
@@ -66,11 +62,8 @@ const Messages = () => {
     );
   }
 
-  // Combine all conversations and add type indicators
-  const allConversations: (Conversation & { conversationType: 'client' | 'provider' })[] = [
-    ...clientConversations.map(conv => ({ ...conv, conversationType: 'client' as const })),
-    ...providerConversations.map(conv => ({ ...conv, conversationType: 'provider' as const }))
-  ].sort((a, b) => new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime());
+  // Use optimized conversations data
+  const allConversations = conversations;
 
   const handleOpenChat = (conversationId: string) => {
     setSelectedConversation(conversationId);
@@ -80,25 +73,38 @@ const Messages = () => {
   const selectedConv = allConversations.find(c => c.id === selectedConversation);
 
   // Helper function to get the other party's name and service context
-  const getConversationDetails = (conversation: typeof allConversations[0]) => {
-    if (conversation.conversationType === 'client') {
+  const getConversationDetails = (conversation: ConversationDetail) => {
+    if (conversation.conversation_type === 'client') {
       // User is the client, show provider name
       return {
-        otherPartyName: conversation.profiles?.full_name || 'مقدم الخدمة',
-        context: `محادثة حول: ${conversation.services?.title || 'خدمة محذوفة'}`,
+        otherPartyName: conversation.other_party_name,
+        context: `محادثة حول: ${conversation.service_title || 'خدمة محذوفة'}`,
         roleLabel: 'استفسار أرسلته'
       };
     } else {
       // User is the provider, show client name
       return {
-        otherPartyName: conversation.profiles?.full_name || 'عميل',
-        context: `استفسار حول: ${conversation.services?.title || 'خدمة محذوفة'}`,
+        otherPartyName: conversation.other_party_name,
+        context: `استفسار حول: ${conversation.service_title || 'خدمة محذوفة'}`,
         roleLabel: 'استفسار وارد'
       };
     }
   };
 
-  const isLoading = getConversations.isLoading;
+  // Error handling
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background arabic">
+        <Navigation />
+        <div className="max-w-4xl mx-auto py-12 px-4">
+          <div className="text-center">
+            <p className="text-destructive mb-4">حدث خطأ في تحميل المحادثات</p>
+            <Button onClick={() => refetch()}>إعادة المحاولة</Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background arabic">
@@ -149,7 +155,7 @@ const Messages = () => {
           open={showChat}
           onOpenChange={setShowChat}
           conversationId={selectedConversation}
-          serviceName={selectedConv.services?.title || 'خدمة محذوفة'}
+          serviceName={selectedConv.service_title || 'خدمة محذوفة'}
           providerName={getConversationDetails(selectedConv).otherPartyName}
         />
       )}

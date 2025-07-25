@@ -807,6 +807,23 @@ export type Database = {
           views: number
         }[]
       }
+      get_conversation_details: {
+        Args: { user_id: string }
+        Returns: {
+          id: string
+          service_id: string
+          client_id: string
+          provider_id: string
+          status: string
+          last_message_at: string
+          created_at: string
+          updated_at: string
+          service_title: string
+          other_party_name: string
+          conversation_type: string
+          unread_count: number
+        }[]
+      }
       get_top_search_terms: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -829,6 +846,10 @@ export type Database = {
           _old_values?: Json
           _new_values?: Json
         }
+        Returns: undefined
+      }
+      mark_message_as_read: {
+        Args: { message_id: string }
         Returns: undefined
       }
       validate_admin_input: {

@@ -3,7 +3,7 @@ import { useEffect, useRef, useMemo, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Loader2 } from 'lucide-react';
-import { useMessages } from '@/hooks/useMessages';
+import { useOptimizedMessages } from '@/hooks/useOptimizedMessages';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -21,10 +21,8 @@ interface ChatDialogProps {
 
 const ChatDialog = ({ open, onOpenChange, conversationId, serviceName, providerName }: ChatDialogProps) => {
   const { user } = useAuth();
-  const { getMessages, sendMessage, isSending } = useMessages(conversationId);
+  const { messages, isLoading, sendMessage, isSending } = useOptimizedMessages(conversationId);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const messages = useMemo(() => getMessages.data || [], [getMessages.data]);
 
   // Only log on significant state changes to reduce noise
   useEffect(() => {
@@ -32,11 +30,11 @@ const ChatDialog = ({ open, onOpenChange, conversationId, serviceName, providerN
       console.log('💬 ChatDialog opened:', {
         conversationId,
         messagesCount: messages.length,
-        isLoading: getMessages.isLoading,
-        hasError: !!getMessages.error
+        isLoading,
+        hasError: false
       });
     }
-  }, [open, conversationId, messages.length, getMessages.isLoading, getMessages.error]);
+  }, [open, conversationId, messages.length, isLoading]);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -107,16 +105,11 @@ const ChatDialog = ({ open, onOpenChange, conversationId, serviceName, providerN
 
         <ScrollArea className="flex-1 p-4 border rounded-md">
           <div className="space-y-4">
-            {getMessages.isLoading ? (
-              <div className="flex justify-center">
-                <Loader2 className="h-6 w-6 animate-spin" />
-                <span className="mr-2 text-sm text-muted-foreground">جاري تحميل الرسائل...</span>
-              </div>
-            ) : getMessages.error ? (
-              <div className="text-center text-red-500 py-8">
-                <p>حدث خطأ في تحميل الرسائل</p>
-                <p className="text-xs mt-2">{getMessages.error.message}</p>
-              </div>
+          {isLoading ? (
+            <div className="flex justify-center">
+              <Loader2 className="h-6 w-6 animate-spin" />
+              <span className="mr-2 text-sm text-muted-foreground">جاري تحميل الرسائل...</span>
+            </div>
             ) : messages.length === 0 ? (
               <div className="text-center text-muted-foreground py-8">
                 لا توجد رسائل بعد. ابدأ المحادثة!

@@ -3,10 +3,10 @@ import Navigation from '@/components/Navigation';
 import PaymentOrderSummary from '@/components/Payment/PaymentOrderSummary';
 import PaymentForm from '@/components/Payment/PaymentForm';
 import PaymentHeader from '@/components/Payment/PaymentHeader';
-import { usePaymentLogic } from '@/hooks/usePaymentLogic';
+import { useEnhancedPaymentLogic } from '@/hooks/useEnhancedPaymentLogic';
 
 const Payment = () => {
-  const paymentLogic = usePaymentLogic();
+  const paymentLogic = useEnhancedPaymentLogic();
 
   // Return null if user is not authenticated (redirect handled in hook)
   if (!paymentLogic) {
