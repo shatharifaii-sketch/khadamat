@@ -144,7 +144,7 @@ export const useUnifiedMessaging = () => {
           event: '*',
           schema: 'public',
           table: 'conversations',
-          filter: `client_id=eq.${user.id};provider_id=eq.${user.id}`
+          filter: `client_id=eq.${user.id},provider_id=eq.${user.id}`
         },
         () => {
           queryClient.invalidateQueries({ queryKey: ['unified-conversations'] });
