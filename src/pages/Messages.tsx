@@ -1,19 +1,18 @@
 
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MessageCircle, Clock, User, Loader2, ArrowLeft } from 'lucide-react';
+import { User, Loader2, ArrowLeft } from 'lucide-react';
 import Navigation from '@/components/Navigation';
-
 import { useConversations } from '@/hooks/useConversations';
 import { useProviderConversations } from '@/hooks/useProviderConversations';
 import { useAuth } from '@/contexts/AuthContext';
 import ChatDialog from '@/components/Chat/ChatDialog';
-import { formatDistanceToNow } from 'date-fns';
-import { ar } from 'date-fns/locale';
 import { Link } from 'react-router-dom';
 import type { Conversation } from '@/hooks/useConversations';
+import ConversationCard from '@/components/Messages/ConversationCard';
+import MessagesEmptyState from '@/components/Messages/MessagesEmptyState';
+import MessagesLoadingState from '@/components/Messages/MessagesLoadingState';
 
 const Messages = () => {
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
@@ -105,104 +104,40 @@ const Messages = () => {
     <div className="min-h-screen bg-background arabic">
       <Navigation />
       
-      <div className="max-w-4xl mx-auto py-12 px-4">
-        <div className="flex items-center gap-4 mb-8">
-          <Link to="/account">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4 ml-2" />
+      <div className="max-w-5xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        {/* Header with improved mobile layout */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-8">
+          <Link to="/account" className="shrink-0">
+            <Button variant="ghost" size="sm" className="group">
+              <ArrowLeft className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
               العودة للحساب
             </Button>
           </Link>
-          <div className="text-center flex-1">
-            <h1 className="text-3xl font-bold text-foreground mb-2">
+          <div className="text-center sm:text-right flex-1">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-2">
               الرسائل
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-lg">
               جميع محادثاتك واستفساراتك في مكان واحد
             </p>
           </div>
         </div>
 
+        {/* Content */}
         {isLoading ? (
-          <div className="space-y-4">
-            {[...Array(3)].map((_, index) => (
-              <Card key={index} className="animate-pulse">
-                <CardHeader>
-                  <div className="h-6 bg-muted rounded mb-2"></div>
-                  <div className="h-4 bg-muted rounded w-3/4"></div>
-                </CardHeader>
-              </Card>
-            ))}
-          </div>
+          <MessagesLoadingState />
         ) : allConversations.length === 0 ? (
-          <Card className="text-center p-8">
-            <CardContent className="space-y-6">
-              <MessageCircle size={64} className="mx-auto text-muted-foreground" />
-              <div>
-                <h2 className="text-xl font-semibold mb-2">لا توجد محادثات</h2>
-                <p className="text-muted-foreground mb-6">
-                  لم تبدأ أي محادثات بعد. ابحث عن خدمة أو انتظر استفسارات العملاء!
-                </p>
-              </div>
-              <div className="flex gap-4 justify-center">
-                <Link to="/find-service">
-                  <Button>ابحث عن خدمة</Button>
-                </Link>
-                <Link to="/post-service">
-                  <Button variant="outline">أضف خدمة</Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
+          <MessagesEmptyState />
         ) : (
           <div className="space-y-4">
-            {allConversations.map((conversation) => {
-              const details = getConversationDetails(conversation);
-              return (
-                <Card 
-                  key={conversation.id} 
-                  className="hover:shadow-md transition-shadow cursor-pointer"
-                  onClick={() => handleOpenChat(conversation.id)}
-                >
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1 text-right">
-                        <div className="flex items-center gap-2 justify-end mb-2">
-                          <Badge 
-                            variant={conversation.conversationType === 'provider' ? 'default' : 'secondary'}
-                            className="text-xs"
-                          >
-                            {details.roleLabel}
-                          </Badge>
-                        </div>
-                        <CardTitle className="text-lg mb-2">
-                          {details.context}
-                        </CardTitle>
-                        <div className="flex items-center gap-2 justify-end text-sm text-muted-foreground mb-2">
-                          <span>{conversation.conversationType === 'provider' ? 'من' : 'مع'}: {details.otherPartyName}</span>
-                          <User size={14} />
-                        </div>
-                        <div className="flex items-center gap-2 justify-end text-sm text-muted-foreground">
-                          <span>
-                            {formatDistanceToNow(new Date(conversation.last_message_at), {
-                              addSuffix: true,
-                              locale: ar
-                            })}
-                          </span>
-                          <Clock size={14} />
-                        </div>
-                      </div>
-                      <Badge 
-                        variant={conversation.status === 'active' ? 'default' : 'secondary'}
-                        className="mr-4"
-                      >
-                        {conversation.status === 'active' ? 'نشطة' : 'مؤرشفة'}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                </Card>
-              );
-            })}
+            {allConversations.map((conversation) => (
+              <ConversationCard
+                key={conversation.id}
+                conversation={conversation}
+                onOpenChat={handleOpenChat}
+                getConversationDetails={getConversationDetails}
+              />
+            ))}
           </div>
         )}
       </div>

@@ -5,8 +5,8 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import { usePublicServices } from '@/hooks/usePublicServices';
-import SearchFilters from '@/components/FindService/SearchFilters';
-import ServiceCard from '@/components/FindService/ServiceCard';
+import EnhancedSearchFilters from '@/components/FindService/EnhancedSearchFilters';
+import EnhancedServiceCard from '@/components/FindService/EnhancedServiceCard';
 import EmptyState from '@/components/FindService/EmptyState';
 import LoadingGrid from '@/components/FindService/LoadingGrid';
 import { categories } from '@/components/FindService/ServiceCategories';
@@ -106,25 +106,27 @@ const FindService = () => {
     <div className="min-h-screen bg-background arabic">
       <Navigation />
       
-      <div className="max-w-6xl mx-auto py-12 px-4">
+      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
             ابحث عن الخدمة المناسبة
           </h1>
-          <p className="text-xl text-muted-foreground">
-            اكتشف أفضل الخدمات المهنية في منطقتك
+          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+            اكتشف أفضل الخدمات المهنية في منطقتك واحصل على أفضل العروض
           </p>
         </div>
 
-        {/* Search and Filters */}
-        <SearchFilters
+        {/* Enhanced Search and Filters */}
+        <EnhancedSearchFilters
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
           selectedCategory={selectedCategory}
           setSelectedCategory={setSelectedCategory}
           selectedLocation={selectedLocation}
           setSelectedLocation={setSelectedLocation}
+          onClearFilters={clearFilters}
+          resultsCount={filteredServices.length}
         />
 
         {/* Results */}
@@ -133,9 +135,9 @@ const FindService = () => {
         ) : filteredServices.length === 0 ? (
           <EmptyState onClearFilters={clearFilters} />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
             {filteredServices.map((service) => (
-              <ServiceCard key={service.id} service={service} />
+              <EnhancedServiceCard key={service.id} service={service} />
             ))}
           </div>
         )}

@@ -63,14 +63,14 @@
     @apply font-bold;
   }
 
-  /* Arabic text support */
+  /* Arabic text support with enhanced typography */
   .arabic {
     direction: rtl;
     text-align: right;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   }
 
-  /* Large, accessible text */
+  /* Improved text sizing for better accessibility */
   .text-large {
     font-size: 1.125rem;
     line-height: 1.7;
@@ -79,5 +79,24 @@
   .text-xl-large {
     font-size: 1.25rem;
     line-height: 1.8;
+  }
+
+  /* Enhanced scroll behavior */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Improved focus styles */
+  *:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  /* Better mobile touch targets */
+  @media (max-width: 768px) {
+    button, a, [role="button"] {
+      min-height: 44px;
+      min-width: 44px;
+    }
   }
 }
