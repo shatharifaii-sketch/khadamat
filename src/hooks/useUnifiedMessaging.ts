@@ -104,9 +104,7 @@ export const useUnifiedMessaging = () => {
         conversation_id: selectedConversation,
         sender_id: user.id,
         content: content.trim(),
-        message_type: 'text',
-        topic: `conversation_${selectedConversation}`,
-        extension: 'chat'
+        message_type: 'text'
       };
 
       const { data, error } = await supabase
@@ -146,7 +144,7 @@ export const useUnifiedMessaging = () => {
           event: '*',
           schema: 'public',
           table: 'conversations',
-          filter: `client_id=eq.${user.id},provider_id=eq.${user.id}`
+          filter: `client_id=eq.${user.id};provider_id=eq.${user.id}`
         },
         () => {
           queryClient.invalidateQueries({ queryKey: ['unified-conversations'] });
