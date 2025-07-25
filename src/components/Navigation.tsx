@@ -65,7 +65,7 @@ const Navigation = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <span className="text-xl font-bold text-primary">خدمات</span>
+            <span className="text-xl font-bold text-primary">خدمتك</span>
           </Link>
 
           {/* Desktop Navigation */}

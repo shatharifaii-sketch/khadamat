@@ -219,7 +219,7 @@ const Contact = () => {
                       <Input
                         id="email"
                         type="email"
-                        placeholder="your@email.com"
+                        placeholder="info@khedemtak.com"
                         value={formData.email}
                         onChange={(e) => handleInputChange('email', e.target.value)}
                         className="text-large"

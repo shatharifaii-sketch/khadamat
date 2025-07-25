@@ -11,7 +11,7 @@ export const validateEmail = (email: string): ValidationResult => {
   
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
-    return { isValid: false, message: 'يرجى إدخال بريد إلكتروني صحيح (مثال: user@example.com)' };
+    return { isValid: false, message: 'يرجى إدخال بريد إلكتروني صحيح (مثال: info@khedemtak.com)' };
   }
   
   return { isValid: true, message: '' };

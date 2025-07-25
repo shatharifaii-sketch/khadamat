@@ -10,6 +10,7 @@ interface PaymentOrderSummaryProps {
   serviceData: any;
   finalAmount: number;
   subscriptionTier: string;
+  discount?: number;
 }
 
 const PaymentOrderSummary = (props: PaymentOrderSummaryProps) => {
@@ -19,7 +20,8 @@ const PaymentOrderSummary = (props: PaymentOrderSummaryProps) => {
     amount, 
     serviceData,
     finalAmount,
-    subscriptionTier
+    subscriptionTier,
+    discount = 0
   } = props;
   return (
     <Card>
@@ -82,6 +84,12 @@ const PaymentOrderSummary = (props: PaymentOrderSummaryProps) => {
             <span>{amount} شيكل</span>
           </div>
           
+          {discount > 0 && (
+            <div className="flex items-center justify-between text-green-600">
+              <span>خصم الكوبون</span>
+              <span>-{discount} شيكل</span>
+            </div>
+          )}
           
           <div className="flex items-center justify-between font-bold text-lg border-t pt-2">
             <span>المجموع النهائي</span>

@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { useCoupon } from './useCoupon';
 
 export interface PaymentFormData {
   cardNumber: string;
@@ -21,6 +22,8 @@ export const usePaymentState = () => {
     accountNumber: ''
   });
 
+  const couponState = useCoupon();
+
   const handleInputChange = (field: string, value: string) => {
     setPaymentData(prev => ({ ...prev, [field]: value }));
   };
@@ -29,6 +32,7 @@ export const usePaymentState = () => {
     paymentMethod,
     setPaymentMethod,
     paymentData,
-    handleInputChange
+    handleInputChange,
+    ...couponState
   };
 };

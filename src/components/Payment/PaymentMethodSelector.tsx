@@ -17,13 +17,13 @@ interface PaymentMethod {
 }
 
 interface PaymentMethodSelectorProps {
-  paymentMethod: string;
-  onPaymentMethodChange: (method: string) => void;
+  selectedMethod: string;
+  onMethodChange: (method: string) => void;
 }
 
 const PaymentMethodSelector = ({ 
-  paymentMethod, 
-  onPaymentMethodChange 
+  selectedMethod, 
+  onMethodChange 
 }: PaymentMethodSelectorProps) => {
   const paymentMethods: PaymentMethod[] = [
     {
@@ -52,7 +52,7 @@ const PaymentMethodSelector = ({
   return (
     <div className="space-y-4">
       <Label className="text-large font-semibold">اختر طريقة الدفع</Label>
-      <RadioGroup value={paymentMethod} onValueChange={onPaymentMethodChange}>
+      <RadioGroup value={selectedMethod} onValueChange={onMethodChange}>
         {paymentMethods.map((method) => {
           const Icon = method.icon;
           return (

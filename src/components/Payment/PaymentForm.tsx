@@ -5,6 +5,7 @@ import { Separator } from '@/components/ui/separator';
 import { ArrowRight, ArrowLeft, AlertCircle } from 'lucide-react';
 import PaymentMethodSelector from './PaymentMethodSelector';
 import PaymentMethodForms from './PaymentMethodForms';
+import CouponInput from './CouponInput';
 
 interface PaymentFormProps {
   paymentMethod: string;
@@ -15,6 +16,12 @@ interface PaymentFormProps {
   finalAmount: number;
   isCreatingTransaction: boolean;
   onBack: () => void;
+  couponCode: string;
+  setCouponCode: (code: string) => void;
+  appliedCoupon: any;
+  isValidating: boolean;
+  validateCoupon: (code: string, userId: string) => Promise<void>;
+  removeCoupon: () => void;
 }
 
 const PaymentForm = ({
@@ -25,7 +32,13 @@ const PaymentForm = ({
   onSubmit,
   finalAmount,
   isCreatingTransaction,
-  onBack
+  onBack,
+  couponCode,
+  setCouponCode,
+  appliedCoupon,
+  isValidating,
+  validateCoupon,
+  removeCoupon
 }: PaymentFormProps) => {
   return (
     <Card>
@@ -37,10 +50,22 @@ const PaymentForm = ({
       </CardHeader>
       <CardContent>
         <form onSubmit={onSubmit} className="space-y-6">
+          {/* Coupon Input */}
+          <CouponInput
+            couponCode={couponCode}
+            setCouponCode={setCouponCode}
+            appliedCoupon={appliedCoupon}
+            isValidating={isValidating}
+            validateCoupon={validateCoupon}
+            removeCoupon={removeCoupon}
+          />
+          
+          <Separator />
+          
           {/* Payment Method Selection */}
           <PaymentMethodSelector 
-            paymentMethod={paymentMethod}
-            onPaymentMethodChange={onPaymentMethodChange}
+            selectedMethod={paymentMethod}
+            onMethodChange={onPaymentMethodChange}
           />
 
           <Separator />

@@ -90,7 +90,7 @@ const Auth = () => {
             <div className="bg-primary text-primary-foreground p-2 rounded-lg">
               <Home size={24} />
             </div>
-            <span className="text-2xl font-bold text-primary">خدمات</span>
+            <span className="text-2xl font-bold text-primary">خدمتك</span>
           </Link>
         </div>
 
@@ -127,7 +127,7 @@ const Auth = () => {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="example@email.com"
+                  placeholder="info@khedemtak.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required

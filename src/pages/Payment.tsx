@@ -49,6 +49,7 @@ const Payment = () => {
             serviceData={serviceData}
             finalAmount={finalAmount}
             subscriptionTier={subscriptionTier}
+            discount={paymentLogic.getDiscount()}
           />
 
           {/* Payment Form */}
@@ -61,6 +62,12 @@ const Payment = () => {
             finalAmount={finalAmount}
             isCreatingTransaction={isCreatingTransaction}
             onBack={handleBack}
+            couponCode={paymentLogic.couponCode}
+            setCouponCode={paymentLogic.setCouponCode}
+            appliedCoupon={paymentLogic.appliedCoupon}
+            isValidating={paymentLogic.isValidating}
+            validateCoupon={paymentLogic.validateCoupon}
+            removeCoupon={paymentLogic.removeCoupon}
           />
         </div>
       </div>

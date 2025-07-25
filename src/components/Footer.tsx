@@ -10,7 +10,7 @@ const Footer = () => {
           <div className="bg-primary text-primary-foreground p-2 rounded-lg">
             <Home size={24} />
           </div>
-          <span className="text-2xl font-bold text-primary">خدمات</span>
+          <span className="text-2xl font-bold text-primary">خدمتك</span>
         </div>
         <p className="text-muted-foreground text-large mb-6">
           منصتك للخدمات المهنية في فلسطين
@@ -22,7 +22,7 @@ const Footer = () => {
         </div>
         <div className="flex justify-center gap-4 mb-6">
           <a 
-            href="https://facebook.com" 
+            href="https://www.facebook.com/profile.php?id=61578182502625" 
             target="_blank" 
             rel="noopener noreferrer"
             className="text-muted-foreground hover:text-primary transition-colors"
@@ -41,7 +41,7 @@ const Footer = () => {
           </a>
         </div>
         <div className="pt-6 border-t border-border text-muted-foreground">
-          © 2024 خدمات. جميع الحقوق محفوظة.
+          © 2024 خدمتك. جميع الحقوق محفوظة.
         </div>
       </div>
     </footer>

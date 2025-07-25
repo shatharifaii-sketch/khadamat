@@ -26,8 +26,9 @@ export const usePaymentLogic = () => {
 
   const subscription = getUserSubscription.data;
 
-  // Final amount is the base amount (no coupons)
-  const finalAmount = baseAmount;
+  // Apply coupon discount if available
+  const discount = paymentState.getDiscount();
+  const finalAmount = Math.max(0, baseAmount - discount);
 
   const handlePayment = async (e: React.FormEvent) => {
     e.preventDefault();
