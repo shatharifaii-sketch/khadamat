@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MapPin, Phone, Mail, Eye, Star, MessageCircle, ExternalLink, Heart } from 'lucide-react';
 import { useServiceViews } from '@/hooks/useServiceViews';
-import { useConversations } from '@/hooks/useConversations';
+
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { categories } from '@/components/FindService/ServiceCategories';
@@ -17,7 +17,7 @@ interface EnhancedServiceCardProps {
 const EnhancedServiceCard = ({ service }: EnhancedServiceCardProps) => {
   const [isLiked, setIsLiked] = useState(false);
   const { incrementView } = useServiceViews();
-  const { createConversation, isCreating } = useConversations();
+  
   const { user } = useAuth();
 
   const categoryLabel = categories.find(cat => cat.value === service.category)?.label || service.category;
@@ -26,21 +26,9 @@ const EnhancedServiceCard = ({ service }: EnhancedServiceCardProps) => {
     incrementView(service.id);
   };
 
-  const handleContactProvider = async () => {
-    if (!user) {
-      toast.error('يجب تسجيل الدخول للتواصل مع مقدم الخدمة');
-      return;
-    }
-
-    try {
-      await createConversation.mutateAsync({
-        serviceId: service.id,
-        providerId: service.user_id
-      });
-      toast.success('تم إنشاء المحادثة بنجاح!');
-    } catch (error) {
-      console.error('Error creating conversation:', error);
-    }
+  const handleContactProvider = () => {
+    // This would normally open a contact dialog or redirect to contact info
+    toast.info('معلومات الاتصال متاحة في تفاصيل الخدمة');
   };
 
   const handleLike = (e: React.MouseEvent) => {
@@ -111,17 +99,10 @@ const EnhancedServiceCard = ({ service }: EnhancedServiceCardProps) => {
           <Button 
             size="sm" 
             onClick={handleContactProvider}
-            disabled={isCreating}
             className="flex-1 group"
           >
-            {isCreating ? (
-              'جاري الإنشاء...'
-            ) : (
-              <>
-                <MessageCircle className="h-4 w-4 ml-2 group-hover:scale-110 transition-transform" />
-                تواصل الآن
-              </>
-            )}
+            <MessageCircle className="h-4 w-4 ml-2 group-hover:scale-110 transition-transform" />
+            تواصل الآن
           </Button>
           <Button 
             variant="outline" 

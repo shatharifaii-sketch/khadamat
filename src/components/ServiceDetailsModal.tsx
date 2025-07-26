@@ -236,6 +236,7 @@ const ServiceDetailsModal = ({ service, isOpen, onClose, onViewProvider }: Servi
                   serviceName={service.title}
                   providerName={providerName}
                   email={service.email}
+                  phone={service.phone}
                 />
               </div>
             </div>

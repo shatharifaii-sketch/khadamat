@@ -14,11 +14,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { useServices } from '@/hooks/useServices';
 import { useSubscription } from '@/hooks/useSubscription';
-import { useProviderConversations } from '@/hooks/useProviderConversations';
-import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { useConversations } from '@/hooks/useConversations';
+
 import ServiceManagementCard from '@/components/Account/ServiceManagementCard';
 import SubscriptionHistoryTable from '@/components/Account/SubscriptionHistoryTable';
 import PaymentSuccessCard from '@/components/Account/PaymentSuccessCard';
@@ -29,9 +27,6 @@ const Account = () => {
   const { profile, updateProfile, isLoading: profileLoading } = useProfile();
   const { getUserServices } = useServices();
   const { getUserSubscription } = useSubscription();
-  const { data: providerConversations = [] } = useProviderConversations();
-  const { getConversations } = useConversations();
-  const { data: unreadCount = 0 } = useUnreadMessages();
   
   const [formData, setFormData] = useState({
     full_name: '',
@@ -46,10 +41,6 @@ const Account = () => {
   // Get services and subscription data
   const { data: services = [], isLoading: servicesLoading } = getUserServices;
   const { data: subscription } = getUserSubscription;
-  const clientConversations = getConversations.data || [];
-
-  // Calculate total conversations
-  const totalConversations = providerConversations.length + clientConversations.length;
 
   useEffect(() => {
     if (profile) {
@@ -128,8 +119,8 @@ const Account = () => {
           {/* Payment Success Notification */}
           <PaymentSuccessCard />
           
-          {/* Interactive Statistics Cards - Updated to 3 columns */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* Interactive Statistics Cards - Updated to 2 columns */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Card 
               className="cursor-pointer hover:shadow-md transition-shadow"
               onClick={() => scrollToSection('my-services')}
@@ -142,31 +133,6 @@ const Account = () => {
                 <div className="text-2xl font-bold">{activeServices}</div>
                 <p className="text-xs text-muted-foreground">
                   من إجمالي {services?.length || 0} خدمة
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card 
-              className="cursor-pointer hover:shadow-md transition-shadow"
-              onClick={() => {
-                if (isServiceProvider) {
-                  navigate('/provider-inbox');
-                } else {
-                  navigate('/messages');
-                }
-              }}
-            >
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  {isServiceProvider ? 'رسائل العملاء' : 'المحادثات'}
-                </CardTitle>
-                <MessageCircle className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{totalConversations}</div>
-                <p className="text-xs text-muted-foreground">
-                  {unreadCount > 0 && `${unreadCount} غير مقروءة`}
-                  {isServiceProvider && ' - صندوق وارد مقدم الخدمة'}
                 </p>
               </CardContent>
             </Card>

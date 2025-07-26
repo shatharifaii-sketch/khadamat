@@ -144,6 +144,7 @@ const ServiceCard = ({ service }: ServiceCardProps) => {
                 serviceName={service.title}
                 providerName={providerName}
                 email={service.email}
+                phone={service.phone}
               />
             </div>
           </div>
