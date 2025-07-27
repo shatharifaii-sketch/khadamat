@@ -19,13 +19,16 @@ import {
   BarChart3,
   Edit,
   XCircle,
-  Shield
+  Shield,
+  Search,
+  TrendingUp
 } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import { useToast } from '@/hooks/use-toast';
 import { ServiceEditModal } from '@/components/Admin/ServiceEditModal';
 import { UserManagement } from '@/components/Admin/UserManagement';
 import { ServiceManagement } from '@/components/Admin/ServiceManagement';
+import { useAdminAnalytics } from '@/hooks/useAdminAnalytics';
 
 
 interface UserProfile {
@@ -64,6 +67,7 @@ const Admin = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { analyticsSummary } = useAdminAnalytics();
   
   // Admin check - in a real app, you'd check this from the database
   const isAdmin = user?.email === 'shatharifaii@gmail.com';
@@ -123,13 +127,33 @@ const Admin = () => {
 
   const loadAdminData = async () => {
     try {
-      // Load users
+      // Load all users from auth.users and join with profiles for additional data
+      const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
+      
+      if (authError) throw authError;
+      
+      // Get profiles data
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .select('*');
       
-      if (profiles) setUsers(profiles);
+      // Merge auth users with profile data
+      const allUsers = authUsers.users.map(authUser => {
+        const profile = profiles?.find(p => p.id === authUser.id);
+        return {
+          id: authUser.id,
+          full_name: profile?.full_name || authUser.email || 'غير محدد',
+          phone: profile?.phone,
+          location: profile?.location,
+          bio: profile?.bio,
+          is_service_provider: profile?.is_service_provider || false,
+          created_at: authUser.created_at,
+          profile_image_url: profile?.profile_image_url,
+          experience_years: profile?.experience_years
+        };
+      });
+      
+      setUsers(allUsers);
 
       // Load services with user profiles
       const { data: servicesList } = await supabase
@@ -323,7 +347,7 @@ const Admin = () => {
           </TabsList>
 
           <TabsContent value="analytics">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
               <Card>
                 <CardHeader>
                   <CardTitle>إحصائيات المستخدمين</CardTitle>
@@ -357,10 +381,54 @@ const Admin = () => {
                     <span>الخدمات المنشورة:</span>
                     <span className="font-bold">{stats.publishedServices}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>الخدمات قيد المراجعة:</span>
-                    <span className="font-bold">{services.filter(s => s.status === 'draft').length}</span>
-                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Search className="h-5 w-5 text-primary" />
+                    أكثر الكلمات بحثاً
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {analyticsSummary?.topSearchTerms && analyticsSummary.topSearchTerms.length > 0 ? (
+                    <div className="space-y-3">
+                      {analyticsSummary.topSearchTerms.slice(0, 5).map((term, index) => (
+                        <div key={term.query} className="flex justify-between items-center">
+                          <span className="font-medium">#{index + 1} {term.query}</span>
+                          <Badge variant="secondary">{term.count} مرة</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground text-center py-4">لا توجد عمليات بحث بعد</p>
+                  )}
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-primary" />
+                    أكثر الخدمات نقراً
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {analyticsSummary?.topViewedServices && analyticsSummary.topViewedServices.length > 0 ? (
+                    <div className="space-y-3">
+                      {analyticsSummary.topViewedServices.slice(0, 5).map((service, index) => (
+                        <div key={service.service_id} className="flex justify-between items-center">
+                          <span className="font-medium truncate">#{index + 1} {service.title}</span>
+                          <Badge variant="secondary">{service.views} مشاهدة</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground text-center py-4">لا توجد مشاهدات بعد</p>
+                  )}
                 </CardContent>
               </Card>
             </div>
