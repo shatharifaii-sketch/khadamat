@@ -127,33 +127,13 @@ const Admin = () => {
 
   const loadAdminData = async () => {
     try {
-      // Load all users from auth.users and join with profiles for additional data
-      const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
-      
-      if (authError) throw authError;
-      
-      // Get profiles data
+      // Load users - fallback to profiles table since we don't have service_role access
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('*');
+        .select('*')
+        .order('created_at', { ascending: false });
       
-      // Merge auth users with profile data
-      const allUsers = authUsers.users.map(authUser => {
-        const profile = profiles?.find(p => p.id === authUser.id);
-        return {
-          id: authUser.id,
-          full_name: profile?.full_name || authUser.email || 'غير محدد',
-          phone: profile?.phone,
-          location: profile?.location,
-          bio: profile?.bio,
-          is_service_provider: profile?.is_service_provider || false,
-          created_at: authUser.created_at,
-          profile_image_url: profile?.profile_image_url,
-          experience_years: profile?.experience_years
-        };
-      });
-      
-      setUsers(allUsers);
+      if (profiles) setUsers(profiles);
 
       // Load services with user profiles
       const { data: servicesList } = await supabase
