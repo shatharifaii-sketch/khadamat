@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Phone, Mail, Eye, Star, MessageCircle, ExternalLink, Heart } from 'lucide-react';
+import { MapPin, Phone, Mail, Eye, Star, MessageCircle, Heart } from 'lucide-react';
+import ContactOptions from '@/components/Chat/ContactOptions';
 import { useServiceViews } from '@/hooks/useServiceViews';
 
 import { useAuth } from '@/contexts/AuthContext';
@@ -26,10 +27,6 @@ const EnhancedServiceCard = ({ service }: EnhancedServiceCardProps) => {
     incrementView(service.id);
   };
 
-  const handleContactProvider = () => {
-    // This would normally open a contact dialog or redirect to contact info
-    toast.info('معلومات الاتصال متاحة في تفاصيل الخدمة');
-  };
 
   const handleLike = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -96,21 +93,21 @@ const EnhancedServiceCard = ({ service }: EnhancedServiceCardProps) => {
 
         {/* Action Buttons */}
         <div className="flex gap-2 pt-2">
-          <Button 
-            size="sm" 
-            onClick={handleContactProvider}
-            className="flex-1 group"
-          >
-            <MessageCircle className="h-4 w-4 ml-2 group-hover:scale-110 transition-transform" />
-            تواصل الآن
-          </Button>
+          <ContactOptions
+            serviceId={service.id}
+            providerId={service.user_id}
+            serviceName={service.title}
+            providerName={service.profiles?.full_name || 'مقدم الخدمة'}
+            email={service.email}
+            phone={service.phone}
+          />
           <Button 
             variant="outline" 
             size="sm"
             onClick={handleViewService}
             className="group"
           >
-            <ExternalLink className="h-4 w-4 group-hover:scale-110 transition-transform" />
+            <Eye className="h-4 w-4 group-hover:scale-110 transition-transform" />
           </Button>
         </div>
       </CardContent>
