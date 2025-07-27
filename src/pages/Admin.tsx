@@ -24,12 +24,8 @@ import {
 import Navigation from '@/components/Navigation';
 import { useToast } from '@/hooks/use-toast';
 import { ServiceEditModal } from '@/components/Admin/ServiceEditModal';
-import { AnalyticsDashboard } from '@/components/Admin/AnalyticsDashboard';
 import { UserManagement } from '@/components/Admin/UserManagement';
 import { ServiceManagement } from '@/components/Admin/ServiceManagement';
-import { RealTimeTracker } from '@/components/Admin/RealTimeTracker';
-import EnhancedAnalyticsDashboard from '@/components/Admin/EnhancedAnalyticsDashboard';
-import RealTimeSystemMonitor from '@/components/Admin/RealTimeSystemMonitor';
 
 interface ContactSubmission {
   id: string;
@@ -335,11 +331,44 @@ const Admin = () => {
           </p>
         </div>
 
-        {/* Real-time System Monitor */}
-        <div className="mb-8">
-          <RealTimeSystemMonitor />
+        {/* Simple Statistics */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium">إجمالي المستخدمين</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.totalUsers}</div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium">إجمالي الخدمات</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.totalServices}</div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium">الخدمات المنشورة</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.publishedServices}</div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium">رسائل التواصل الجديدة</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.pendingContacts}</div>
+            </CardContent>
+          </Card>
         </div>
-
 
         {/* Main Admin Tabs */}
         <Tabs defaultValue="analytics" className="space-y-6">
@@ -363,7 +392,47 @@ const Admin = () => {
           </TabsList>
 
           <TabsContent value="analytics">
-            <EnhancedAnalyticsDashboard />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>إحصائيات المستخدمين</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex justify-between">
+                    <span>إجمالي المستخدمين:</span>
+                    <span className="font-bold">{stats.totalUsers}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>مقدمي الخدمات:</span>
+                    <span className="font-bold">{stats.serviceProviders}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>المنضمين اليوم:</span>
+                    <span className="font-bold">{stats.todaySignups}</span>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>إحصائيات الخدمات</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex justify-between">
+                    <span>إجمالي الخدمات:</span>
+                    <span className="font-bold">{stats.totalServices}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>الخدمات المنشورة:</span>
+                    <span className="font-bold">{stats.publishedServices}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>الخدمات قيد المراجعة:</span>
+                    <span className="font-bold">{services.filter(s => s.status === 'draft').length}</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="users">
