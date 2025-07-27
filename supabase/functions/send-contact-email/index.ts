@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.2';
 import { Resend } from "npm:resend@2.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
@@ -29,35 +28,10 @@ const handler = async (req: Request): Promise<Response> => {
     const { name, email, phone, message }: ContactEmailRequest = await req.json();
     console.log('Processing contact form for:', email);
 
-    // Initialize Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    // Store in database
-    const { data: submission, error: dbError } = await supabase
-      .from('contact_submissions')
-      .insert({
-        name,
-        email,
-        phone,
-        message,
-        status: 'new'
-      })
-      .select()
-      .single();
-
-    if (dbError) {
-      console.error('Database error:', dbError);
-      throw new Error('Failed to save contact submission');
-    }
-
-    console.log('Contact submission saved to database:', submission.id);
-
-    // Send email notification to admin
+    // Send email directly to info@khedemtak.com
     const adminEmailResponse = await resend.emails.send({
       from: "خدماتي Contact Form <onboarding@resend.dev>",
-      to: ["shatharifaii@gmail.com"],
+      to: ["info@khedemtak.com"],
       subject: `رسالة جديدة من ${name}`,
       html: `
         <div dir="rtl" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -128,8 +102,7 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: "تم إرسال رسالتك بنجاح",
-        submissionId: submission.id 
+        message: "تم إرسال رسالتك بنجاح"
       }), 
       {
         status: 200,
