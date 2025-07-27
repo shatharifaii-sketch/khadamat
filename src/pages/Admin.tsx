@@ -271,7 +271,7 @@ const Admin = () => {
         </div>
 
         {/* Simple Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium">إجمالي المستخدمين</CardTitle>
@@ -287,24 +287,6 @@ const Admin = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats.totalServices}</div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">الخدمات المنشورة</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.publishedServices}</div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">المنضمين اليوم</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.todaySignups}</div>
             </CardContent>
           </Card>
         </div>
