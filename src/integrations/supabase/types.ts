@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instanciate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.3 (519615d)"
+    PostgrestVersion: "13.0.4"
   }
   public: {
     Tables: {
@@ -156,6 +156,13 @@ export type Database = {
             foreignKeyName: "conversation_analytics_service_id_fkey"
             columns: ["service_id"]
             isOneToOne: false
+            referencedRelation: "public_services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversation_analytics_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
             referencedRelation: "services"
             referencedColumns: ["id"]
           },
@@ -193,6 +200,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "conversations_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "public_services"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "conversations_service_id_fkey"
             columns: ["service_id"]
@@ -543,6 +557,13 @@ export type Database = {
             foreignKeyName: "service_analytics_service_id_fkey"
             columns: ["service_id"]
             isOneToOne: false
+            referencedRelation: "public_services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_analytics_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
             referencedRelation: "services"
             referencedColumns: ["id"]
           },
@@ -574,6 +595,13 @@ export type Database = {
           service_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "service_images_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "public_services"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "service_images_service_id_fkey"
             columns: ["service_id"]
@@ -782,9 +810,71 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_services: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          description: string | null
+          email: string | null
+          experience: string | null
+          id: string | null
+          location: string | null
+          phone: string | null
+          price_range: string | null
+          status: string | null
+          title: string | null
+          updated_at: string | null
+          user_id: string | null
+          views: number | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          email?: never
+          experience?: string | null
+          id?: string | null
+          location?: string | null
+          phone?: never
+          price_range?: string | null
+          status?: string | null
+          title?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          views?: number | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          email?: never
+          experience?: string | null
+          id?: string | null
+          location?: string | null
+          phone?: never
+          price_range?: string | null
+          status?: string | null
+          title?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          views?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_services_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      can_view_contact_info: {
+        Args: { service_user_id: string }
+        Returns: boolean
+      }
       check_contact_rate_limit: {
         Args: { _ip_address: unknown }
         Returns: boolean
