@@ -831,11 +831,11 @@ export type Database = {
           category?: string | null
           created_at?: string | null
           description?: string | null
-          email?: never
+          email?: string | null
           experience?: string | null
           id?: string | null
           location?: string | null
-          phone?: never
+          phone?: string | null
           price_range?: string | null
           status?: string | null
           title?: string | null
@@ -847,11 +847,11 @@ export type Database = {
           category?: string | null
           created_at?: string | null
           description?: string | null
-          email?: never
+          email?: string | null
           experience?: string | null
           id?: string | null
           location?: string | null
-          phone?: never
+          phone?: string | null
           price_range?: string | null
           status?: string | null
           title?: string | null
