@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "13.0.4"
@@ -881,10 +881,10 @@ export type Database = {
       }
       check_rate_limit: {
         Args: {
-          _user_id?: string
-          _ip_address?: unknown
           _action_type?: string
+          _ip_address?: unknown
           _max_attempts?: number
+          _user_id?: string
           _window_minutes?: number
         }
         Returns: boolean
@@ -900,41 +900,41 @@ export type Database = {
       get_conversation_details: {
         Args: { p_user_id: string }
         Returns: {
-          id: string
-          service_id: string
           client_id: string
-          provider_id: string
-          status: string
-          last_message_at: string
-          created_at: string
-          updated_at: string
-          service_title: string
-          other_party_name: string
           conversation_type: string
+          created_at: string
+          id: string
+          last_message_at: string
+          other_party_name: string
+          provider_id: string
+          service_id: string
+          service_title: string
+          status: string
           unread_count: number
+          updated_at: string
         }[]
       }
       get_top_search_terms: {
         Args: Record<PropertyKey, never>
         Returns: {
-          query: string
           count: number
+          query: string
         }[]
       }
       has_role: {
         Args: {
-          _user_id: string
           _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
         }
         Returns: boolean
       }
       log_admin_action: {
         Args: {
           _action_type: string
-          _table_name?: string
-          _record_id?: string
-          _old_values?: Json
           _new_values?: Json
+          _old_values?: Json
+          _record_id?: string
+          _table_name?: string
         }
         Returns: undefined
       }
@@ -949,11 +949,11 @@ export type Database = {
       validate_coupon: {
         Args: { coupon_code: string; user_id: string }
         Returns: {
-          valid: boolean
           coupon_id: string
           coupon_type: string
           discount_amount: number
           message: string
+          valid: boolean
         }[]
       }
     }
