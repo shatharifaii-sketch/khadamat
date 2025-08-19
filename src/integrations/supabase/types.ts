@@ -831,11 +831,11 @@ export type Database = {
           category?: string | null
           created_at?: string | null
           description?: string | null
-          email?: never
+          email?: string | null
           experience?: string | null
           id?: string | null
           location?: string | null
-          phone?: never
+          phone?: string | null
           price_range?: string | null
           status?: string | null
           title?: string | null
@@ -847,11 +847,11 @@ export type Database = {
           category?: string | null
           created_at?: string | null
           description?: string | null
-          email?: never
+          email?: string | null
           experience?: string | null
           id?: string | null
           location?: string | null
-          phone?: never
+          phone?: string | null
           price_range?: string | null
           status?: string | null
           title?: string | null
@@ -871,10 +871,6 @@ export type Database = {
       }
     }
     Functions: {
-      can_view_contact_info: {
-        Args: { service_user_id: string }
-        Returns: boolean
-      }
       check_contact_rate_limit: {
         Args: { _ip_address: unknown }
         Returns: boolean
