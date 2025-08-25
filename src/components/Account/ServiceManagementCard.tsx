@@ -2,9 +2,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Phone, Calendar, Edit } from 'lucide-react';
+import { MapPin, Phone, Calendar, Edit, Eye, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import ServiceStatusIndicator from './ServiceStatusIndicator';
+import { useServiceAnalytics } from '@/hooks/useServiceAnalytics';
 
 interface Service {
   id: string;
@@ -24,6 +25,9 @@ interface ServiceManagementCardProps {
 
 const ServiceManagementCard = ({ service }: ServiceManagementCardProps) => {
   const navigate = useNavigate();
+
+  // Fetch accurate analytics data for this service
+  const { data: analyticsData, isLoading: analyticsLoading } = useServiceAnalytics(service.id);
 
   const handleEditService = () => {
     navigate(`/post-service?edit=${service.id}`);
@@ -49,9 +53,25 @@ const ServiceManagementCard = ({ service }: ServiceManagementCardProps) => {
             </p>
             <ServiceStatusIndicator 
               status={service.status}
-              views={service.views}
+              views={analyticsData?.totalViews || service.views}
               isNewlyPublished={isNewlyPublished()}
             />
+            
+            {/* Enhanced analytics display */}
+            <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <Eye size={14} />
+                <span>
+                  {analyticsLoading ? '...' : (analyticsData?.totalViews || service.views)} مشاهدة
+                </span>
+              </div>
+              <div className="flex items-center gap-1">
+                <TrendingUp size={14} />
+                <span>
+                  {analyticsLoading ? '...' : (analyticsData?.totalContacts || 0)} تواصل
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </CardHeader>

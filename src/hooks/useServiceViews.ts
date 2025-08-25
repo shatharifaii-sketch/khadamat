@@ -1,9 +1,11 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const useServiceViews = () => {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   const incrementView = useMutation({
     mutationFn: async (serviceId: string) => {
@@ -27,6 +29,24 @@ export const useServiceViews = () => {
         .single();
 
       if (error) throw error;
+      
+      // Also record the view in analytics table for accurate tracking
+      try {
+        await supabase
+          .from('service_analytics')
+          .insert({
+            service_id: serviceId,
+            user_id: user?.id,
+            action_type: 'view',
+            ip_address: null,
+            user_agent: navigator.userAgent,
+            referrer: document.referrer || null
+          });
+      } catch (analyticsError) {
+        // Don't fail the main operation if analytics fails
+        console.warn('Failed to record service view analytics:', analyticsError);
+      }
+      
       return data;
     },
     onSuccess: () => {

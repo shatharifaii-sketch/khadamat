@@ -2,7 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { usePaymentHistory } from '@/hooks/usePaymentHistory';
+import { usePaymentHistory, PaymentHistory } from '@/hooks/usePaymentHistory';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
 
@@ -43,16 +43,15 @@ const SubscriptionHistoryTable = () => {
     }
   };
 
-  const formatAmount = (payment: any) => {
+  const formatAmount = (payment: PaymentHistory) => {
     if (payment.amount === 0) {
       return 'مجاني';
     }
     
-    let displayText = `${payment.amount} ${payment.currency}`;
+    let displayText = `${payment.finalAmount || payment.amount} ${payment.currency}`;
     
-    if (payment.discount_applied && payment.discount_applied > 0) {
-      const originalAmount = payment.original_amount || payment.amount + payment.discount_applied;
-      displayText += ` (خصم ${payment.discount_applied} من ${originalAmount})`;
+    if (payment.hasDiscount && payment.discount_applied && payment.discount_applied > 0) {
+      displayText += ` (خصم ${payment.discount_applied} من ${payment.original_amount})`;
     }
     
     return displayText;
@@ -96,7 +95,7 @@ const SubscriptionHistoryTable = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paymentHistory.map((payment: any) => (
+              {paymentHistory.map((payment: PaymentHistory) => (
                 <TableRow key={payment.id}>
                   <TableCell>
                     {new Date(payment.created_at).toLocaleDateString('ar')}
@@ -105,7 +104,7 @@ const SubscriptionHistoryTable = () => {
                     {formatAmount(payment)}
                   </TableCell>
                   <TableCell>
-                    {getPaymentMethodText(payment.payment_method)}
+                    {payment.paymentMethodText || getPaymentMethodText(payment.payment_method)}
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline">
@@ -113,7 +112,7 @@ const SubscriptionHistoryTable = () => {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {payment.subscription_tier === 'yearly' ? '12 شهر' : '1 شهر'}
+                    {payment.actualDuration || (payment.subscription_tier === 'yearly' ? '12 شهر' : '1 شهر')}
                   </TableCell>
                   <TableCell>
                     {getStatusBadge(payment.status)}
