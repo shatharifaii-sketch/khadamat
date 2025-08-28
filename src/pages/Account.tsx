@@ -9,6 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { User, Settings, CreditCard, MessageCircle, TrendingUp, Eye, Calendar, Loader2, Search } from 'lucide-react';
 import Navigation from '@/components/Navigation';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { locations } from '@/components/FindService/ServiceCategories';
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
@@ -287,13 +289,22 @@ const Account = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="location">الموقع</Label>
-                  <Input
-                    id="location"
-                    value={formData.location}
-                    onChange={(e) => handleInputChange('location', e.target.value)}
-                    placeholder="المدينة أو المحافظة"
-                  />
+                  <Label htmlFor="location">المنطقة/المحافظة</Label>
+                  <Select 
+                    value={formData.location} 
+                    onValueChange={(value) => handleInputChange('location', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="اختر المنطقة أو المحافظة" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {locations.map((location) => (
+                        <SelectItem key={location} value={location}>
+                          {location}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">
