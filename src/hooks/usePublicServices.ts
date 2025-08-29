@@ -1,4 +1,3 @@
-
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -60,40 +59,42 @@ export const usePublicServices = () => {
     queryFn: async () => {
       console.log('Fetching public services...');
       
-      // First, let's try to get all services without join to see if they exist
-      const { data: allServices, error: allServicesError } = await supabase
+      // Fetch services
+      const { data: services, error } = await supabase
         .from('services')
         .select('*')
         .eq('status', 'published')
         .order('created_at', { ascending: false });
 
-      console.log('All services (without join):', allServices, 'Error:', allServicesError);
-
-      // Now try with the join
-      const { data, error } = await supabase
-        .from('services')
-        .select(`
-          *,
-          profiles (
-            full_name,
-            profile_image_url
-          )
-        `)
-        .eq('status', 'published')
-        .order('created_at', { ascending: false });
-
       if (error) {
-        console.error('Error fetching services with profiles:', error);
-        // Fallback to services without profile join if join fails
-        if (allServices && !allServicesError) {
-          console.log('Using fallback services without profile data');
-          return allServices.map(service => ({
-            ...service,
-            profiles: null
-          })) as PublicService[];
-        }
+        console.error('Error fetching services:', error);
         throw error;
       }
+
+      if (!services || services.length === 0) {
+        console.log('No services found');
+        return [];
+      }
+
+      // Get unique user IDs
+      const userIds = [...new Set(services.map(s => s.user_id))];
+      
+      // Fetch profiles for these users
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, full_name, profile_image_url')
+        .in('id', userIds);
+
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError);
+        // Continue without profile data if profiles fetch fails
+      }
+
+      // Map profiles to services
+      const data = services.map(service => ({
+        ...service,
+        profiles: profiles?.find(p => p.id === service.user_id) || null
+      }));
 
       console.log('Fetched services with profiles:', data);
       return data as PublicService[];
