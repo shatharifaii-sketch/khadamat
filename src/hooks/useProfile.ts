@@ -1,5 +1,5 @@
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -67,3 +67,21 @@ export const useProfile = () => {
     isUpdating: updateProfile.isPending
   };
 };
+
+export const usePublisherProfile = (userId: string) => {
+  const queryClient = useQueryClient();
+
+  return useSuspenseQuery({
+    queryKey: ['publisher-profile'],
+    queryFn: async () => {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) throw error;
+      return profile;
+    }
+  })
+}

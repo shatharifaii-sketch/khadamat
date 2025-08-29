@@ -87,8 +87,6 @@ const FindService = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-background arabic">
-        <Navigation />
         <div className="max-w-6xl mx-auto py-12 px-4">
           <Alert className="max-w-2xl mx-auto">
             <AlertTriangle className="h-4 w-4" />
@@ -98,14 +96,10 @@ const FindService = () => {
             </AlertDescription>
           </Alert>
         </div>
-      </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background arabic">
-      <Navigation />
-      
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-8">
@@ -142,7 +136,6 @@ const FindService = () => {
           </div>
         )}
       </div>
-    </div>
   );
 };
 

@@ -46,8 +46,6 @@ const PostService = () => {
   // Show login prompt if not authenticated
   if (!user) {
     return (
-      <div className="min-h-screen bg-background arabic">
-        <Navigation />
         <div className="max-w-4xl mx-auto py-12 px-4">
           <Card className="text-center p-8">
             <CardContent className="space-y-6">
@@ -73,30 +71,25 @@ const PostService = () => {
             </CardContent>
           </Card>
         </div>
-      </div>
     );
   }
 
   // Show loading while fetching service data in edit mode
   if (isEditMode && !serviceToEdit && getUserServices.isLoading) {
     return (
-      <div className="min-h-screen bg-background arabic">
-        <Navigation />
         <div className="max-w-4xl mx-auto py-12 px-4">
           <div className="text-center">
             <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4" />
             <p className="text-muted-foreground">جاري تحميل بيانات الخدمة...</p>
           </div>
         </div>
-      </div>
     );
   }
 
   // Show error if service not found in edit mode
   if (isEditMode && !serviceToEdit && !getUserServices.isLoading) {
     return (
-      <div className="min-h-screen bg-background arabic">
-        <Navigation />
+
         <div className="max-w-4xl mx-auto py-12 px-4">
           <Card className="text-center p-8">
             <CardContent className="space-y-6">
@@ -114,16 +107,12 @@ const PostService = () => {
             </CardContent>
           </Card>
         </div>
-      </div>
     );
   }
 
   const subscription = getUserSubscription.data;
 
   return (
-    <div className="min-h-screen bg-background arabic">
-      <Navigation />
-      
       <div className="max-w-4xl mx-auto py-12 px-4">
         <PostServiceHeader>
           
@@ -139,7 +128,6 @@ const PostService = () => {
 
         <ServiceForm serviceToEdit={serviceToEdit} />
       </div>
-    </div>
   );
 };
 

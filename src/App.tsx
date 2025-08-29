@@ -20,6 +20,9 @@ import Checkout from "./pages/Checkout";
 import SubscriptionPlans from "./pages/SubscriptionPlans";
 import NotFound from "./pages/NotFound";
 import FAQ from "./pages/FAQ";
+import ServicePage from "./pages/ServicePage";
+import UserProfilePage from "./pages/UserProfilePage";
+import UserLayout from "./layouts/UserLayout";
 
 const queryClient = new QueryClient();
 
@@ -31,33 +34,33 @@ function App() {
           <TooltipProvider>
             <Toaster />
             <BrowserRouter>
-            <PendingServiceHandler />
-            <div className="min-h-screen flex flex-col">
-              <div className="flex-1">
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/post-service" element={<PostService />} />
-                  <Route path="/find-service" element={<FindService />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/contact" element={<Contact />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/account" element={<Account />} />
-                  <Route path="/payment" element={<Payment />} />
-                  <Route path="/checkout" element={<Checkout />} />
-                  <Route path="/subscription-plans" element={<SubscriptionPlans />} />
-                  <Route path="/faq" element={<FAQ />} />
-                  <Route path="/admin" element={<Admin />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </div>
-              <Footer />
-            </div>
-          </BrowserRouter>
-        </TooltipProvider>
-      </LanguageProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+              <PendingServiceHandler />
+                  <Routes>
+                    <Route path="/" element={<UserLayout />}>
+                      <Route path="" element={<Index />} />
+                      <Route path="post-service" element={<PostService />} />
+                      <Route path="find-service" element={<FindService />} />
+                      <Route path="find-service/:id" element={<ServicePage />} />
+                      <Route path="about" element={<About />} />
+                      <Route path="contact" element={<Contact />} />
+                      <Route path="profile/:id" element={<UserProfilePage />} />
+                      <Route path="payment" element={<Payment />} />
+                      <Route path="checkout" element={<Checkout />} />
+                      <Route path="subscription-plans" element={<SubscriptionPlans />} />
+                      <Route path="faq" element={<FAQ />} />
+                      <Route path="account" element={<Account />} />
+                    </Route>
+                    <Route path="auth" element={<Auth />} />
+                    <Route path="admin" element={<Admin />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                <Footer />
+            </BrowserRouter>
+          </TooltipProvider>
+        </LanguageProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
 }
 
 export default App;
