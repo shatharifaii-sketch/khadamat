@@ -62,9 +62,6 @@ const About = () => {
   const isNewPlatform = !isLoading && (homeStats?.serviceProvidersCount || 0) < 10 && (homeStats?.publishedServicesCount || 0) < 20;
 
   return (
-    <div className="min-h-screen bg-background arabic">
-      <Navigation />
-      
       <div className="max-w-6xl mx-auto py-12 px-4">
         {/* Hero Section */}
         <div className="text-center mb-16">
@@ -207,7 +204,6 @@ const About = () => {
           </div>
         </div>
       </div>
-    </div>
   );
 };
 

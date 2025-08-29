@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { User, Settings, CreditCard, MessageCircle, TrendingUp, Eye, Calendar, Loader2, Search } from 'lucide-react';
+import { User, Settings, CreditCard, MessageCircle, TrendingUp, Eye, Calendar, Loader2, Search, Pen } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { locations } from '@/components/FindService/ServiceCategories';
@@ -22,6 +22,7 @@ import { toast } from 'sonner';
 import ServiceManagementCard from '@/components/Account/ServiceManagementCard';
 import SubscriptionHistoryTable from '@/components/Account/SubscriptionHistoryTable';
 import PaymentSuccessCard from '@/components/Account/PaymentSuccessCard';
+import MainUserDetails from '@/components/Account/MainUserDetails';
 
 const Account = () => {
   const { user, loading } = useAuth();
@@ -29,6 +30,8 @@ const Account = () => {
   const { profile, updateProfile, isLoading: profileLoading } = useProfile();
   const { getUserServices } = useServices();
   const { getUserSubscription } = useSubscription();
+
+  const cardRef = useRef<HTMLDivElement>(null);
   
   const [formData, setFormData] = useState({
     full_name: '',
@@ -103,18 +106,23 @@ const Account = () => {
   const activeServices = services?.filter(service => service.status === 'published').length || 0;
   const isServiceProvider = activeServices > 0;
 
+  const scrollToEdit = () => {
+    if (cardRef.current) {
+      cardRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
   return (
-    <div className="min-h-screen bg-background arabic">
-      <Navigation />
-      
       <div className="max-w-4xl mx-auto py-12 px-4">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
-            حسابي
-          </h1>
-          <p className="text-muted-foreground">
-            إدارة ملفك الشخصي وخدماتك
-          </p>
+          <MainUserDetails user={profile} />
+          <Button 
+          onClick={scrollToEdit} 
+          variant='ghost' 
+          className="text-muted-foreground justify-center flex items-center gap-2 hover:text-primary mx-auto">
+            <Pen className='size-4' />
+            <p>إدارة ملفك الشخصي وخدماتك</p>
+          </Button>
         </div>
 
         <div className="grid gap-8">
@@ -254,7 +262,7 @@ const Account = () => {
           </Card>
 
           {/* Profile Settings */}
-          <Card>
+          <Card ref={cardRef}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <User className="h-5 w-5" />
@@ -358,7 +366,6 @@ const Account = () => {
           </Card>
         </div>
       </div>
-    </div>
   );
 };
 

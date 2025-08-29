@@ -38,9 +38,6 @@ const FAQ = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background arabic">
-      <Navigation />
-      
       <div className="max-w-4xl mx-auto py-12 px-4">
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
@@ -80,7 +77,6 @@ const FAQ = () => {
           </a>
         </div>
       </div>
-    </div>
   );
 };
 

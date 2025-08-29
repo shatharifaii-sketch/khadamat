@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -7,35 +6,30 @@ import ContactOptions from '@/components/Chat/ContactOptions';
 import { useServiceViews } from '@/hooks/useServiceViews';
 
 import { useAuth } from '@/contexts/AuthContext';
-import { toast } from 'sonner';
 import { categories } from '@/components/FindService/ServiceCategories';
 import type { PublicService } from '@/hooks/usePublicServices';
+import { truncateString } from '@/lib/utils';
+import { NavLink, useNavigate } from 'react-router-dom';
 
 interface EnhancedServiceCardProps {
   service: PublicService;
 }
 
 const EnhancedServiceCard = ({ service }: EnhancedServiceCardProps) => {
-  const [isLiked, setIsLiked] = useState(false);
   const { incrementView } = useServiceViews();
-  
+  const navigate = useNavigate()
+
   const { user } = useAuth();
 
   const categoryLabel = categories.find(cat => cat.value === service.category)?.label || service.category;
 
   const handleViewService = () => {
     incrementView(service.id);
-  };
-
-
-  const handleLike = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsLiked(!isLiked);
-    toast.success(isLiked ? 'تم إلغاء الإعجاب' : 'تم الإعجاب بالخدمة');
+    navigate(`/find-service/${service.id}`);
   };
 
   return (
-    <Card className="group hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 border-0 shadow-md hover:scale-105">
+    <Card className="group flex flex-col justify-between hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 border-0 shadow-md hover:scale-105">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 text-right">
@@ -45,24 +39,27 @@ const EnhancedServiceCard = ({ service }: EnhancedServiceCardProps) => {
               </Badge>
             </div>
             <CardTitle className="text-lg leading-tight group-hover:text-primary transition-colors line-clamp-2">
-              {service.title}
+              <Button 
+              variant='link'
+              onClick={handleViewService}
+              className='text-lg hover:no-underline px-0'>
+                {service.title}
+              </Button>
+              <NavLink 
+              to={`/profile/${service.publisher?.id}`} className='text-sm text-muted-foreground flex items-center gap-2 hover:text-primary transition-colors'
+              >
+              {service.publisher?.full_name}
+              
+              </NavLink>
             </CardTitle>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            className={`shrink-0 ${isLiked ? 'text-red-500' : 'text-muted-foreground'}`}
-            onClick={handleLike}
-          >
-            <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
-          </Button>
         </div>
       </CardHeader>
 
       <CardContent className="space-y-4">
         {/* Description */}
         <CardDescription className="text-sm line-clamp-3 text-right leading-relaxed">
-          {service.description}
+          {truncateString(service.description, 100)}
         </CardDescription>
 
         {/* Price and Location */}
@@ -84,31 +81,20 @@ const EnhancedServiceCard = ({ service }: EnhancedServiceCardProps) => {
               <span>{service.views}</span>
               <Eye className="h-3 w-3" />
             </div>
-            <div className="flex items-center gap-1">
-              <span>4.8</span>
-              <Star className="h-3 w-3 fill-current text-yellow-400" />
-            </div>
           </div>
         </div>
 
         {/* Action Buttons */}
         <div className="flex gap-2 pt-2">
           <ContactOptions
+            className='flex-1'
             serviceId={service.id}
             providerId={service.user_id}
             serviceName={service.title}
-            providerName={service.profiles?.full_name || 'مقدم الخدمة'}
+            providerName={service.publisher?.full_name || 'مقدم الخدمة'}
             email={service.email}
             phone={service.phone}
           />
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={handleViewService}
-            className="group"
-          >
-            <Eye className="h-4 w-4 group-hover:scale-110 transition-transform" />
-          </Button>
         </div>
       </CardContent>
     </Card>
