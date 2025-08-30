@@ -74,7 +74,6 @@ export const useRealTimeNotifications = () => {
           event: 'INSERT',
           schema: 'public',
           table: 'conversations',
-          filter: `provider_id=eq.${user.id}`
         },
         (payload) => {
           // Handle new service inquiries for providers

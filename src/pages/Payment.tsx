@@ -34,9 +34,6 @@ const Payment = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background arabic">
-      <Navigation />
-      
       <div className="max-w-4xl mx-auto py-12 px-4">
         <PaymentHeader />
 
@@ -71,7 +68,6 @@ const Payment = () => {
           />
         </div>
       </div>
-    </div>
   );
 };
 

@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -15,9 +15,11 @@ export interface PublicService {
   views: number;
   created_at: string;
   user_id: string;
-  profiles?: {
-    full_name?: string;
-    profile_image_url?: string;
+  updated_at: Date;
+  publisher: {
+    id: string;
+    full_name: string;
+    profile_image_url: string;
   };
 }
 
@@ -27,7 +29,7 @@ export const usePublicServices = () => {
   // Set up real-time subscription
   useEffect(() => {
     console.log('Setting up real-time subscription for services...');
-    
+
     const channel = supabase
       .channel('public-services-changes')
       .on(
@@ -36,11 +38,10 @@ export const usePublicServices = () => {
           event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
           schema: 'public',
           table: 'services',
-          filter: 'status=eq.published'
         },
         (payload) => {
           console.log('Real-time service change detected:', payload);
-          
+
           // Invalidate and refetch the services data
           queryClient.invalidateQueries({ queryKey: ['public-services'] });
           queryClient.invalidateQueries({ queryKey: ['home-stats'] });
@@ -57,49 +58,89 @@ export const usePublicServices = () => {
   return useQuery({
     queryKey: ['public-services'],
     queryFn: async () => {
-      console.log('Fetching public services...');
-      
-      // Fetch services
       const { data: services, error } = await supabase
         .from('services')
-        .select('*')
+        .select(`
+    *,
+    publisher:fk_services_user_id (
+      id,
+      full_name,
+      profile_image_url
+    )
+  `)
         .eq('status', 'published')
-        .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching services:', error);
-        throw error;
-      }
-
-      if (!services || services.length === 0) {
-        console.log('No services found');
+        console.error('Error fetching public services:', error);
         return [];
       }
 
-      // Get unique user IDs
-      const userIds = [...new Set(services.map(s => s.user_id))];
-      
-      // Fetch profiles for these users
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('id, full_name, profile_image_url')
-        .in('id', userIds);
-
-      if (profilesError) {
-        console.error('Error fetching profiles:', profilesError);
-        // Continue without profile data if profiles fetch fails
-      }
-
-      // Map profiles to services
-      const data = services.map(service => ({
-        ...service,
-        profiles: profiles?.find(p => p.id === service.user_id) || null
-      }));
-
-      console.log('Fetched services with profiles:', data);
-      return data as PublicService[];
+      console.log('Fetched services with publisher:', services);
+      return services;
     },
     retry: 1,
     staleTime: 30000, // 30 seconds
   });
 };
+
+export const useServiceData = (id: string) => {
+  const queryClient = useQueryClient();
+
+  // Set up real-time subscription
+  useEffect(() => {
+    console.log('Setting up real-time subscription for services...');
+
+    const channel = supabase
+      .channel('public-service-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
+          schema: 'public',
+          table: 'services',
+        },
+        (payload) => {
+          console.log('Real-time service change detected:', payload);
+
+          // Invalidate and refetch the services data
+          queryClient.invalidateQueries({ queryKey: ['public-service-data'] });
+          queryClient.invalidateQueries({ queryKey: ['home-stats'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      console.log('Cleaning up real-time subscription for services');
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+
+  return useSuspenseQuery({
+    queryKey: ['public-service-data'],
+    queryFn: async () => {
+      const { data: service, error } = await supabase
+        .from('services')
+        .select(`
+    *,
+    publisher:fk_services_user_id (
+      id,
+      full_name,
+      profile_image_url
+    )
+  `)
+        .eq('status', 'published')
+        .eq('id', id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching public services:', error);
+        return [];
+      }
+
+      console.log('Fetched services with publisher:', service);
+      return service;
+    },
+    retry: 1,
+    staleTime: 30000, // 30 seconds
+  });
+}

@@ -3,6 +3,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Mail, Phone, Copy } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAnalyticsTracking } from '@/hooks/useAnalyticsTracking';
+import { cn } from '@/lib/utils';
 
 interface ContactOptionsProps {
   serviceId: string;
@@ -11,9 +12,10 @@ interface ContactOptionsProps {
   providerName: string;
   email: string;
   phone?: string;
+  className?: string;
 }
 
-const ContactOptions = ({ serviceId, serviceName, providerName, email, phone }: ContactOptionsProps) => {
+const ContactOptions = ({ serviceId, serviceName, providerName, email, phone, className }: ContactOptionsProps) => {
   const { trackServiceAction } = useAnalyticsTracking();
 
   const handleEmailContact = () => {
@@ -70,7 +72,7 @@ const ContactOptions = ({ serviceId, serviceName, providerName, email, phone }: 
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button className="flex-1">
+        <Button className={className}>
           تواصل معنا
         </Button>
       </PopoverTrigger>

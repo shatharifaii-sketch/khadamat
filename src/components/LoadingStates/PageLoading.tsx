@@ -85,3 +85,9 @@ export const FormLoading = () => {
     </Card>
   );
 };
+
+export const ServiceLoading = () => {
+  return (
+    <></>
+  );
+}
