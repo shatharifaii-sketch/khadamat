@@ -16,9 +16,7 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background arabic">
-      <Navigation />
-      
+    <>
       {/* Hero Section */}
       <section className="relative py-20 px-4 text-center bg-gradient-to-br from-accent/30 to-primary/10">
         <div className="max-w-4xl mx-auto">
@@ -167,9 +165,7 @@ const Index = () => {
           </div>
         </div>
       </section>
-
-      
-    </div>
+      </>
   );
 };
 
