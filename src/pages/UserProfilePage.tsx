@@ -1,6 +1,9 @@
 import ErrorBoundary from '@/components/ErrorBoundary';
 import ProfileView from '@/components/Profile/ProfileView';
+import { Button } from '@/components/ui/button';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { usePublisherProfile } from '@/hooks/useProfile';
+import { EllipsisVertical } from 'lucide-react';
 import { Suspense } from 'react';
 import { useParams } from 'react-router-dom';
 
@@ -11,18 +14,28 @@ const UserProfilePage = () => {
     throw new Error('User ID not found');
   };
 
-  const { data: userProfile } = usePublisherProfile(userId);
+  const { profile, services } = usePublisherProfile(userId);
 
   return (
     <div className='max-w-4xl mx-auto py-12 px-4 space-y-10'>
-            <div className="flex items-center justify-center">
+            <div className="flex items-center justify-center gap-2">
+              <Popover>
+                  <PopoverTrigger>
+                    <EllipsisVertical className='size-4 text-muted-foreground' />
+                  </PopoverTrigger>
+                  <PopoverContent>
+                    <Button variant='ghost' className='w-full flex justify-start'>
+                      ابدأ شكوى
+                    </Button>
+                  </PopoverContent>
+                </Popover>
                 <h1 className="text-4xl font-bold">
                   حساب المستخدم
                 </h1>
             </div>
             <Suspense fallback={<div>Loading...</div>}>
             <ErrorBoundary fallback={<div>Something went wrong</div>}>
-                <ProfileView profile={userProfile} />
+                <ProfileView profile={profile} services={services} />
             </ErrorBoundary>
         </Suspense>
     </div>
