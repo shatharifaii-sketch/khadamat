@@ -668,6 +668,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_services_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_with_email"
+            referencedColumns: ["id"]
+          },
         ]
       }
       subscriptions: {
@@ -810,6 +817,22 @@ export type Database = {
       }
     }
     Views: {
+      profiles_with_email: {
+        Row: {
+          bio: string | null
+          created_at: string | null
+          email: string | null
+          experience_years: number | null
+          full_name: string | null
+          id: string | null
+          is_service_provider: boolean | null
+          location: string | null
+          phone: string | null
+          profile_image_url: string | null
+          updated_at: string | null
+        }
+        Relationships: []
+      }
       public_services: {
         Row: {
           category: string | null
@@ -865,6 +888,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_services_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_with_email"
             referencedColumns: ["id"]
           },
         ]

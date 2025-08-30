@@ -6,9 +6,9 @@ import { useAnalyticsTracking } from '@/hooks/useAnalyticsTracking';
 import { cn } from '@/lib/utils';
 
 interface ContactOptionsProps {
-  serviceId: string;
+  serviceId?: string;
   providerId: string;
-  serviceName: string;
+  serviceName?: string;
   providerName: string;
   email: string;
   phone?: string;
@@ -24,30 +24,34 @@ const ContactOptions = ({ serviceId, serviceName, providerName, email, phone, cl
     const body = encodeURIComponent(`مرحباً،\n\nأود الاستفسار حول خدمة "${serviceName}".\n\nشكراً لك.`);
     window.open(`mailto:${email}?subject=${subject}&body=${body}`);
     toast.success('تم فتح برنامج البريد الإلكتروني');
-    
-    // Track email contact action
-    trackServiceAction.mutate({
-      serviceId,
-      actionType: 'email_click'
-    });
+
+    if (serviceId && serviceName) {
+      // Track email contact action
+      trackServiceAction.mutate({
+        serviceId,
+        actionType: 'email_click'
+      });
+    }
   };
 
   const handleCopyEmail = () => {
     navigator.clipboard.writeText(email);
     toast.success('تم نسخ عنوان البريد الإلكتروني');
-    
-    // Track email contact action
-    trackServiceAction.mutate({
-      serviceId,
-      actionType: 'contact_click'
-    });
+
+    if (serviceId && serviceName) {
+      // Track email contact action
+      trackServiceAction.mutate({
+        serviceId,
+        actionType: 'contact_click'
+      });
+    }
   };
 
   const handlePhoneCall = () => {
     if (phone) {
       window.open(`tel:${phone}`);
       toast.success('تم فتح تطبيق الهاتف');
-      
+
       // Track phone contact action
       trackServiceAction.mutate({
         serviceId,
@@ -60,12 +64,14 @@ const ContactOptions = ({ serviceId, serviceName, providerName, email, phone, cl
     if (phone) {
       navigator.clipboard.writeText(phone);
       toast.success('تم نسخ رقم الهاتف');
-      
-      // Track phone contact action
-      trackServiceAction.mutate({
-        serviceId,
-        actionType: 'contact_click'
-      });
+
+      if (serviceId && serviceName) {
+        // Track phone contact action
+        trackServiceAction.mutate({
+          serviceId,
+          actionType: 'contact_click'
+        });
+      }
     }
   };
 
@@ -81,7 +87,7 @@ const ContactOptions = ({ serviceId, serviceName, providerName, email, phone, cl
           <div className="text-sm font-medium text-center mb-3">
             تواصل مع: {providerName}
           </div>
-          
+
           <div className="space-y-2">
             <div className="flex gap-1">
               <Button
@@ -101,7 +107,7 @@ const ContactOptions = ({ serviceId, serviceName, providerName, email, phone, cl
                 <Copy size={16} />
               </Button>
             </div>
-            
+
             {phone && (
               <div className="flex gap-1">
                 <Button
