@@ -23,6 +23,7 @@ import ServiceManagementCard from '@/components/Account/ServiceManagementCard';
 import SubscriptionHistoryTable from '@/components/Account/SubscriptionHistoryTable';
 import PaymentSuccessCard from '@/components/Account/PaymentSuccessCard';
 import MainUserDetails from '@/components/Account/MainUserDetails';
+import UploadProfileImage from '@/components/Account/UploadProfileImage';
 
 const Account = () => {
   const { user, loading } = useAuth();
@@ -87,7 +88,6 @@ const Account = () => {
   if (loading || profileLoading) {
     return (
       <div className="min-h-screen bg-background arabic">
-        <Navigation />
         <div className="max-w-4xl mx-auto py-12 px-4">
           <div className="text-center">
             <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4" />
@@ -273,6 +273,7 @@ const Account = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
+              <UploadProfileImage userId={profile?.id} userName={profile?.full_name} userImage={profile?.profile_image_url} />
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">

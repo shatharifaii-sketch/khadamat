@@ -32,9 +32,8 @@ const ServiceHeader = ({
         <NavLink
           to={`/profile/${publisherId}`} 
           className='flex items-center justify-end gap-2 hover:text-primary transition-colors'>
-          <h2>{publisherName}</h2>
           {publisherImage ? (
-            <Avatar>
+            <Avatar className='size-7'>
               <AvatarImage
                 src={publisherImage}
               />
@@ -46,6 +45,7 @@ const ServiceHeader = ({
               className="size-7"
             />
           )}
+          <h2>{publisherName}</h2>
         </NavLink>
       </div>
       <div className=''>
