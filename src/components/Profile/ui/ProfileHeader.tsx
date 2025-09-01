@@ -19,7 +19,7 @@ const ProfileHeader = ({
         <div>
             <div className='flex flex-col items-center justify-center w-3/4 mx-auto'>
                 {image ? (
-                    <Avatar>
+                    <Avatar className="size-32">
                         <AvatarImage
                             src={image}
                         />

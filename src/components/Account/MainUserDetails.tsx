@@ -10,7 +10,7 @@ const MainUserDetails = ({user}: Props) => {
     <div className='flex items-center justify-center flex-col mb-5'>
         <div>
             {user.profile_image_url ? (
-                    <Avatar>
+                    <Avatar className='size-32'>
                         <AvatarImage
                             src={user.profile_image_url}
                         />
