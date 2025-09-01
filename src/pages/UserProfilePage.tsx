@@ -1,5 +1,6 @@
 import ErrorBoundary from '@/components/ErrorBoundary';
 import ProfileView from '@/components/Profile/ProfileView';
+import ProfileViewWrapper from '@/components/Profile/ProfileViewWrapper';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { usePublisherProfile } from '@/hooks/useProfile';
@@ -13,8 +14,6 @@ const UserProfilePage = () => {
   if (!userId) {
     throw new Error('User ID not found');
   };
-
-  const { profile, services } = usePublisherProfile(userId);
 
   return (
     <div className='max-w-4xl mx-auto py-12 px-4 space-y-10'>
@@ -35,7 +34,7 @@ const UserProfilePage = () => {
             </div>
             <Suspense fallback={<div>Loading...</div>}>
             <ErrorBoundary fallback={<div>Something went wrong</div>}>
-                <ProfileView profile={profile} services={services} />
+                <ProfileViewWrapper userId={userId} />
             </ErrorBoundary>
         </Suspense>
     </div>
