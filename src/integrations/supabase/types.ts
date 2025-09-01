@@ -677,6 +677,45 @@ export type Database = {
           },
         ]
       }
+      profiles_images: {
+        Row: {
+          created_at: string
+          id: string
+          image_name: string | null
+          image_url: string
+          profile_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_name?: string | null
+          image_url: string
+          profile_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_name?: string | null
+          image_url?: string
+          profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_images_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_images_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_with_email"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscriptions: {
         Row: {
           amount: number

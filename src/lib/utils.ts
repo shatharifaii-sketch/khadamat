@@ -12,3 +12,16 @@ export function truncateString(str, num) {
         return str;
     }
 }
+
+export function generateRandomPrefix(length: number = 20) {
+    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+}
+
+export function handleFileName(fileName: string) {
+    const randomPrefix = generateRandomPrefix();
+    const newFileName = `${randomPrefix}${fileName}`;
+    const filePath = `uploads/${newFileName}`;
+
+    return { newFileName, filePath };
+}

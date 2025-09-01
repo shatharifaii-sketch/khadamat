@@ -11,17 +11,19 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRealTimeNotifications } from '@/hooks/useRealTimeNotifications';
 import { useProfile } from '@/hooks/useProfile';
 import LanguageSwitcher from './LanguageSwitcher';
+import { Avatar, AvatarImage } from './ui/avatar';
+import { GeneratedAvatar } from './GeneratedAvatar';
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const { user, signOut } = useAuth();
-  
+
   const { profile } = useProfile();
-  
+
   // Enable real-time notifications
   const { isConnected } = useRealTimeNotifications();
-  
+
   const isAdmin = user?.email === 'shatharifaii@gmail.com';
   const isServiceProvider = profile?.is_service_provider || false;
 
@@ -32,17 +34,16 @@ const Navigation = () => {
     setIsOpen(false);
   };
 
-  const NavLink = ({ to, children, className = "", onClick }: { 
-    to: string; 
-    children: React.ReactNode; 
+  const NavLink = ({ to, children, className = "", onClick }: {
+    to: string;
+    children: React.ReactNode;
     className?: string;
     onClick?: () => void;
   }) => (
-    <Link 
-      to={to} 
-      className={`text-sm font-medium transition-colors hover:text-primary ${
-        isActive(to) ? 'text-primary' : 'text-muted-foreground'
-      } ${className}`}
+    <Link
+      to={to}
+      className={`text-sm font-medium transition-colors hover:text-primary ${isActive(to) ? 'text-primary' : 'text-muted-foreground'
+        } ${className}`}
       onClick={onClick}
     >
       {children}
@@ -53,7 +54,21 @@ const Navigation = () => {
   const AccountButton = ({ mobile = false }: { mobile?: boolean }) => (
     <NavLink to="/account" onClick={mobile ? () => setIsOpen(false) : undefined}>
       <div className="flex items-center gap-2">
-        <User size={mobile ? 20 : 16} />
+        {
+          profile?.profile_image_url ? (
+          <Avatar className='size-7'>
+            <AvatarImage
+              src={profile?.profile_image_url}
+            />
+          </Avatar>
+          ) : (
+            <GeneratedAvatar
+              seed={profile?.full_name}
+              variant="initials"
+              className="size-7"
+            />
+          )
+        }
         <span>حسابي</span>
       </div>
     </NavLink>
@@ -102,7 +117,7 @@ const Navigation = () => {
           <div className="hidden md:flex items-center space-x-4 space-x-reverse">
             {user ? (
               <div className="flex items-center space-x-4 space-x-reverse">
-                
+
                 <AccountButton />
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -120,7 +135,7 @@ const Navigation = () => {
                 <Button>تسجيل الدخول</Button>
               </Link>
             )}
-            
+
             <LanguageSwitcher />
           </div>
 
@@ -160,11 +175,11 @@ const Navigation = () => {
                       </div>
                     </NavLink>
                   )}
-                  
+
                   <div className="border-t pt-4">
                     {user ? (
                       <div className="space-y-4">
-                        
+
                         <AccountButton mobile />
                         <Button variant="ghost" size="sm" onClick={handleSignOut} className="w-full justify-start">
                           <LogOut size={20} className="ml-2" />
