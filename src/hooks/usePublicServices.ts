@@ -15,7 +15,7 @@ export interface PublicService {
   views: number;
   created_at: string;
   user_id: string;
-  updated_at: Date;
+  updated_at: string;
   publisher: {
     id: string;
     full_name: string;
@@ -76,7 +76,7 @@ export const usePublicServices = () => {
       }
 
       console.log('Fetched services with publisher:', services);
-      return services;
+      return services as PublicService[];
     },
     retry: 1,
     staleTime: 30000, // 30 seconds
@@ -84,39 +84,8 @@ export const usePublicServices = () => {
 };
 
 export const useServiceData = (id: string) => {
-  const queryClient = useQueryClient();
-
-  // Set up real-time subscription
-  useEffect(() => {
-    console.log('Setting up real-time subscription for services...');
-
-    const channel = supabase
-      .channel('public-service-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
-          schema: 'public',
-          table: 'services',
-        },
-        (payload) => {
-          console.log('Real-time service change detected:', payload);
-
-          // Invalidate and refetch the services data
-          queryClient.invalidateQueries({ queryKey: ['public-service-data'] });
-          queryClient.invalidateQueries({ queryKey: ['home-stats'] });
-        }
-      )
-      .subscribe();
-
-    return () => {
-      console.log('Cleaning up real-time subscription for services');
-      supabase.removeChannel(channel);
-    };
-  }, [queryClient]);
-
-  return useSuspenseQuery({
-    queryKey: ['public-service-data'],
+  const { data: service } = useSuspenseQuery({
+    queryKey: ['public-service-data', id],
     queryFn: async () => {
       const { data: service, error } = await supabase
         .from('services')
@@ -139,8 +108,8 @@ export const useServiceData = (id: string) => {
 
       console.log('Fetched services with publisher:', service);
       return service;
-    },
-    retry: 1,
-    staleTime: 30000, // 30 seconds
+    }
   });
+
+  return service as PublicService;
 }

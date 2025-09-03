@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { PublicService } from './usePublicServices';
 
 export interface Service {
   id?: string;
@@ -244,3 +245,28 @@ export const useServices = () => {
     isUpdating: updateService.isPending
   };
 };
+
+export const useCategoryServices = (category: string, serviceId: string) => {
+  const { data: services } = useSuspenseQuery({
+    queryKey: ['category-services', category],
+    queryFn: async () => {
+      const { data, error } = await supabase
+      .from('services')
+      .select(`
+    *,
+    publisher:fk_services_user_id (
+      id,
+      full_name,
+      profile_image_url
+    )
+  `)
+      .eq('category', category)
+      .neq('id', serviceId)
+      .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  return services as PublicService[];
+}

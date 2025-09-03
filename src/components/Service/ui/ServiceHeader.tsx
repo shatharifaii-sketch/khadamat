@@ -2,8 +2,6 @@ import { categories } from '@/components/FindService/ServiceCategories';
 import { GeneratedAvatar } from '@/components/GeneratedAvatar';
 import { Avatar, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { PublicService } from '@/hooks/usePublicServices'
-import React from 'react'
 import { NavLink } from 'react-router-dom';
 
 interface Props {
@@ -27,10 +25,10 @@ const ServiceHeader = ({
   const categoryLabel = categories.find(cat => cat.value === category)?.label || category;
 
   return (
-    <div className='flex items-center justify-between w-3/4 mx-auto'>
+    <div className='flex items-center justify-between'>
       <div>
         <NavLink
-          to={`/profile/${publisherId}`} 
+          to={`/profile/${publisherId}`}
           className='flex items-center justify-end gap-2 hover:text-primary transition-colors'>
           {publisherImage ? (
             <Avatar className='size-7'>
@@ -51,9 +49,9 @@ const ServiceHeader = ({
       <div className=''>
         <div className='flex justify-start gap-2'>
           <Badge variant="secondary" className="text-sm font-medium">
-          {categoryLabel}
-        </Badge>
-        <h1 className='text-4xl'>{title}</h1>
+            {categoryLabel}
+          </Badge>
+          <h1 className='text-4xl text-wrap'>{title}</h1>
         </div>
         <p className='text-end text-muted-foreground text-sm mt-3'>{updatedAt.split('T')[0]}</p>
       </div>
