@@ -9,6 +9,10 @@ import { ServiceViewWrapper } from "@/components/Service/ServiceViewWrapper";
 const ServicePage = () => {
     const { id: serviceId } = useParams<{id: string}>();
 
+    if (!serviceId) {
+    throw new Error('Service ID not found');
+  };
+
   return (
     <div className='max-w-4xl mx-auto py-12 px-4 space-y-10'>
             <div className="flex items-center justify-center">
@@ -16,7 +20,7 @@ const ServicePage = () => {
             </div>
             <Suspense fallback={<div>Loading...</div>}>
             <ErrorBoundary fallback={<div>Something went wrong</div>}>
-                <ServiceViewWrapper serviceId={serviceId!} />
+                <ServiceViewWrapper serviceId={serviceId} />
             </ErrorBoundary>
         </Suspense>
     </div>

@@ -1,7 +1,11 @@
 import { useServiceData } from "@/hooks/usePublicServices";
 import ServiceView from "./ServiceView";
 
-export const ServiceViewWrapper = ({ serviceId }: { serviceId: string }) => {
-  const { data: service } = useServiceData(serviceId); // hook inside Suspense
+interface Props {
+    serviceId: string;
+}
+
+export const ServiceViewWrapper = ({ serviceId }: Props) => {
+  const service = useServiceData(serviceId);
   return <ServiceView service={service} />
 }

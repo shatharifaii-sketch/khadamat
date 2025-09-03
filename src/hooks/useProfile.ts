@@ -69,16 +69,14 @@ export const useProfile = () => {
 };
 
 export const usePublisherProfile = (userId: string) => {
-  const queryClient = useQueryClient();
-
   const { data: getProfile } = useSuspenseQuery({
-    queryKey: ['publisher-profile'],
+    queryKey: ['publisher-profile', userId],
     queryFn: async () => {
       const { data: profile, error } = await supabase
         .from('profiles_with_email')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
       
         console.log('Publisher profile:', profile);
 
@@ -90,7 +88,7 @@ export const usePublisherProfile = (userId: string) => {
   if (!getProfile) return { profile: null, services: null };
 
   const { data: getServices } = useSuspenseQuery({
-    queryKey: ['publisher-services'],
+    queryKey: ['publisher-services', getProfile.id],
     queryFn: async () => {
       const { data: services, error } = await supabase
         .from('services')

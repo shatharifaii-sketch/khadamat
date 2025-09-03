@@ -16,6 +16,9 @@ interface EnhancedSearchFiltersProps {
   setSelectedLocation: (location: string) => void;
   onClearFilters?: () => void;
   resultsCount?: number;
+  handleSearchSubmit?: () => void;
+  submittedSearchTerm?: string;
+  setSubmittedSearchTerm?: (term: string) => void;
 }
 
 const EnhancedSearchFilters = ({
@@ -26,11 +29,14 @@ const EnhancedSearchFilters = ({
   selectedLocation,
   setSelectedLocation,
   onClearFilters,
-  resultsCount
+  resultsCount,
+  handleSearchSubmit,
+  submittedSearchTerm,
+  setSubmittedSearchTerm
 }: EnhancedSearchFiltersProps) => {
   const [showFilters, setShowFilters] = useState(false);
   
-  const hasActiveFilters = selectedCategory !== 'all' || selectedLocation !== 'all' || searchTerm;
+  const hasActiveFilters = selectedCategory !== 'all' || selectedLocation !== 'all' || submittedSearchTerm || searchTerm;
   
   const locations = [
     'رام الله', 'القدس', 'بيت لحم', 'الخليل', 'نابلس', 'جنين', 'طولكرم', 'قلقيلية', 
@@ -49,6 +55,11 @@ const EnhancedSearchFilters = ({
                 placeholder="ابحث عن خدمة..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSearchSubmit?.();
+                  }
+                }}
                 className="pr-10 text-right text-lg"
               />
               {searchTerm && (
@@ -56,7 +67,11 @@ const EnhancedSearchFilters = ({
                   variant="ghost"
                   size="sm"
                   className="absolute left-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
-                  onClick={() => setSearchTerm('')}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSearchTerm('');
+                    setSubmittedSearchTerm('');
+                  }}
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -124,7 +139,11 @@ const EnhancedSearchFilters = ({
 
             {hasActiveFilters && (
               <div className="flex justify-between items-center mt-4 pt-4 border-t">
-                <Button variant="outline" size="sm" onClick={onClearFilters}>
+                <Button variant="outline" size="sm" onClick={(e) => {
+                  e.stopPropagation();
+                  onClearFilters?.();
+                  setSubmittedSearchTerm?.('');
+                }}>
                   <X className="h-4 w-4 ml-2" />
                   مسح الفلاتر
                 </Button>
@@ -150,7 +169,11 @@ const EnhancedSearchFilters = ({
                 variant="ghost"
                 size="sm"
                 className="h-4 w-4 p-0 hover:bg-transparent"
-                onClick={() => setSearchTerm('')}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSearchTerm('');
+                  setSubmittedSearchTerm('');
+                }}
               >
                 <X className="h-3 w-3" />
               </Button>
