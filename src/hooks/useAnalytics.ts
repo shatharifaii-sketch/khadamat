@@ -50,6 +50,7 @@ export interface AnalyticsSummary {
 
 export const useAnalytics = () => {
   const { user } = useAuth();
+  console.log('inserting')
 
   // Track search query
   const trackSearch = useMutation({
@@ -77,6 +78,8 @@ export const useAnalytics = () => {
       if (error) throw error;
     }
   });
+
+  console.log(trackSearch);
 
   // Track service action
   const trackServiceAction = useMutation({

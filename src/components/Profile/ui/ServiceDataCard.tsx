@@ -1,4 +1,3 @@
-import ServiceStatusIndicator from '@/components/Account/ServiceStatusIndicator'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import { useServiceAnalytics } from '@/hooks/useServiceAnalytics'
