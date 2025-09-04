@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Edit, Trash2, CheckCircle, XCircle } from 'lucide-react';
+import { useAdminFunctionality } from '@/hooks/useAdminFunctionality';
 
 interface Service {
   id: string;
@@ -28,7 +29,7 @@ interface Service {
   created_at: string;
   updated_at: string;
   user_id: string;
-  profiles: {
+  publisher: {
     full_name: string;
   };
 }
@@ -74,6 +75,7 @@ export const ServiceManagement = ({ services, users, onServiceUpdated }: Service
     user_id: '',
     status: 'published'
   });
+  const { deleteService, updateService } = useAdminFunctionality();
 
   const serviceProviders = users.filter(user => user.is_service_provider);
 
@@ -117,22 +119,7 @@ export const ServiceManagement = ({ services, users, onServiceUpdated }: Service
     if (!editingService) return;
 
     try {
-      const { error } = await supabase
-        .from('services')
-        .update({
-          title: formData.title,
-          category: formData.category,
-          description: formData.description,
-          price_range: formData.price_range,
-          location: formData.location,
-          phone: formData.phone,
-          email: formData.email,
-          experience: formData.experience,
-          status: formData.status
-        })
-        .eq('id', editingService.id);
-
-      if (error) throw error;
+      updateService.mutate(formData);
 
       toast({
         title: "تم التحديث",
@@ -152,19 +139,12 @@ export const ServiceManagement = ({ services, users, onServiceUpdated }: Service
 
   const handleDeleteService = async (serviceId: string) => {
     try {
-      const { error } = await supabase
-        .from('services')
-        .delete()
-        .eq('id', serviceId);
-
-      if (error) throw error;
+      deleteService.mutate(serviceId);
 
       toast({
         title: "تم الحذف",
         description: "تم حذف الخدمة بنجاح",
       });
-
-      onServiceUpdated();
     } catch (error: any) {
       toast({
         title: "خطأ",
@@ -380,12 +360,12 @@ export const ServiceManagement = ({ services, users, onServiceUpdated }: Service
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>العنوان</TableHead>
-              <TableHead>الفئة</TableHead>
-              <TableHead>مقدم الخدمة</TableHead>
-              <TableHead>المشاهدات</TableHead>
-              <TableHead>الحالة</TableHead>
-              <TableHead>إجراءات</TableHead>
+              <TableHead className='text-end'>العنوان</TableHead>
+              <TableHead className='text-end'>الفئة</TableHead>
+              <TableHead className='text-end'>مقدم الخدمة</TableHead>
+              <TableHead className='text-end'>المشاهدات</TableHead>
+              <TableHead className='text-end'>الحالة</TableHead>
+              <TableHead className='text-end'>إجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -395,14 +375,14 @@ export const ServiceManagement = ({ services, users, onServiceUpdated }: Service
                   {service.title}
                 </TableCell>
                 <TableCell>{service.category}</TableCell>
-                <TableCell>{service.profiles?.full_name || 'غير محدد'}</TableCell>
+                <TableCell>{service.publisher?.full_name || 'غير محدد'}</TableCell>
                 <TableCell>{service.views}</TableCell>
                 <TableCell>
                   <Badge variant={service.status === 'published' ? 'default' : 'secondary'}>
                     {service.status === 'published' ? 'منشور' : service.status === 'draft' ? 'مسودة' : 'معطل'}
                   </Badge>
                 </TableCell>
-                <TableCell>
+                <TableCell className='flex justify-center'>
                   <div className="flex gap-2">
                     <Dialog open={editingService?.id === service.id} onOpenChange={(open) => !open && setEditingService(null)}>
                       <DialogTrigger asChild>
