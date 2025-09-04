@@ -9,10 +9,11 @@ import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { UserPlus, Edit, Trash2, Eye } from 'lucide-react';
+import { useAdminFunctionality } from '@/hooks/useAdminFunctionality';
+import { NavLink } from 'react-router-dom';
 
 interface UserProfile {
   id: string;
@@ -28,14 +29,14 @@ interface UserProfile {
 
 interface UserManagementProps {
   users: UserProfile[];
-  onUserUpdated: () => void;
 }
 
-export const UserManagement = ({ users, onUserUpdated }: UserManagementProps) => {
+export const UserManagement = ({ users }: UserManagementProps) => {
   const { toast } = useToast();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
   const [formData, setFormData] = useState({
+    id: editingUser?.id || '',
     email: '',
     password: '',
     full_name: '',
@@ -45,6 +46,7 @@ export const UserManagement = ({ users, onUserUpdated }: UserManagementProps) =>
     is_service_provider: false,
     experience_years: 0
   });
+  const { deleteUser, updateUser } = useAdminFunctionality();
 
   const handleCreateUser = async () => {
     try {
@@ -74,6 +76,7 @@ export const UserManagement = ({ users, onUserUpdated }: UserManagementProps) =>
 
       setIsCreateModalOpen(false);
       setFormData({
+        id: editingUser?.id || '',
         email: '',
         password: '',
         full_name: '',
@@ -83,7 +86,6 @@ export const UserManagement = ({ users, onUserUpdated }: UserManagementProps) =>
         is_service_provider: false,
         experience_years: 0
       });
-      onUserUpdated();
     } catch (error: any) {
       toast({
         title: "خطأ",
@@ -97,19 +99,7 @@ export const UserManagement = ({ users, onUserUpdated }: UserManagementProps) =>
     if (!editingUser) return;
 
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          full_name: formData.full_name,
-          phone: formData.phone,
-          location: formData.location,
-          bio: formData.bio,
-          is_service_provider: formData.is_service_provider,
-          experience_years: formData.experience_years
-        })
-        .eq('id', editingUser.id);
-
-      if (error) throw error;
+      updateUser.mutate(formData);
 
       toast({
         title: "تم التحديث",
@@ -117,7 +107,6 @@ export const UserManagement = ({ users, onUserUpdated }: UserManagementProps) =>
       });
 
       setEditingUser(null);
-      onUserUpdated();
     } catch (error: any) {
       toast({
         title: "خطأ",
@@ -129,20 +118,7 @@ export const UserManagement = ({ users, onUserUpdated }: UserManagementProps) =>
 
   const handleDeleteUser = async (userId: string) => {
     try {
-      // Delete profile (in production, this would also delete from auth)
-      const { error } = await supabase
-        .from('profiles')
-        .delete()
-        .eq('id', userId);
-
-      if (error) throw error;
-
-      toast({
-        title: "تم الحذف",
-        description: "تم حذف المستخدم بنجاح",
-      });
-
-      onUserUpdated();
+      deleteUser.mutate(userId);
     } catch (error: any) {
       toast({
         title: "خطأ",
@@ -155,6 +131,7 @@ export const UserManagement = ({ users, onUserUpdated }: UserManagementProps) =>
   const openEditModal = (user: UserProfile) => {
     setEditingUser(user);
     setFormData({
+      id: editingUser?.id || '',
       email: '',
       password: '',
       full_name: user.full_name || '',
@@ -258,19 +235,21 @@ export const UserManagement = ({ users, onUserUpdated }: UserManagementProps) =>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>الاسم</TableHead>
-              <TableHead>الهاتف</TableHead>
-              <TableHead>الموقع</TableHead>
-              <TableHead>النوع</TableHead>
-              <TableHead>تاريخ التسجيل</TableHead>
-              <TableHead>إجراءات</TableHead>
+              <TableHead className='text-end'>الاسم</TableHead>
+              <TableHead className='text-end'>الهاتف</TableHead>
+              <TableHead className='text-end'>الموقع</TableHead>
+              <TableHead className='text-end'>النوع</TableHead>
+              <TableHead className='text-end'>تاريخ التسجيل</TableHead>
+              <TableHead className='text-end'>إجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {users.map((user) => (
               <TableRow key={user.id}>
                 <TableCell className="font-medium">
-                  {user.full_name || 'غير محدد'}
+                  <NavLink to={user.id ? `/profile/${user.id}` : '#'}>
+                    {user.full_name || 'غير محدد'}
+                  </NavLink>
                 </TableCell>
                 <TableCell>{user.phone || '-'}</TableCell>
                 <TableCell>{user.location || '-'}</TableCell>
@@ -282,7 +261,7 @@ export const UserManagement = ({ users, onUserUpdated }: UserManagementProps) =>
                 <TableCell>
                   {new Date(user.created_at).toLocaleDateString('ar-SA')}
                 </TableCell>
-                <TableCell>
+                <TableCell className='flex items-center justify-center'>
                   <div className="flex gap-2">
                     <Dialog open={editingUser?.id === user.id} onOpenChange={(open) => !open && setEditingUser(null)}>
                       <DialogTrigger asChild>

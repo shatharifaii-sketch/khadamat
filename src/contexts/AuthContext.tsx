@@ -76,7 +76,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signIn = async (email: string, password: string) => {
     console.log('Attempting sign in for:', email);
     
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password
     });
@@ -84,15 +84,47 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (error) {
       console.error('Sign in error:', error);
     } else {
-      console.log('Sign in successful');
+      console.log('Sign in successful', userId);
+      const { error } = await supabase
+        .from('user_activity')
+        .insert({
+          activity_type: 'login',
+          user_id: data.user?.id,
+          details: {"page":"home"}
+        });
+      
+      if (error) {
+        console.error('Error tracking login:', error);
+        throw new Error('Error tracking login');
+      }
+        
     }
     
-    return { error };
+    return { data, error };
   };
+
+  const userId: string | undefined = session?.user?.id;
 
   const signOut = async () => {
     console.log('Signing out...');
-    await supabase.auth.signOut();
+
+    // Log activity **before** signing out
+  const { error: activityError } = await supabase
+    .from('user_activity')
+    .insert({
+      activity_type: 'logout',
+      user_id: userId,
+      details: { page: "home" }
+    });
+
+  if (activityError) {
+    console.error('Error tracking logout:', activityError);
+    throw new Error('Error tracking logout');
+  }
+
+  // Now sign out
+  await supabase.auth.signOut();
+  console.log('Sign out successful');
   };
 
   const value = {
