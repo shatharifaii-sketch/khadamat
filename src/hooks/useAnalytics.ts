@@ -117,7 +117,6 @@ export const useAnalytics = () => {
         .from('user_activity')
         .insert({
           user_id: user.id,
-          activity_type: activityType,
           details,
         });
 
@@ -264,6 +263,18 @@ export const useAdminAnalytics = () => {
     }
   });
 
+  const getLoginStats = useQuery({
+      queryKey: ['admin-login-stats'],
+      queryFn: async () => {
+        const { data, error } = await supabase.rpc("login_activity_summary");
+
+        if (error) throw error;
+
+        console.log('Login stats:', data);
+        return data;
+      }
+    })
+
   return {
     searchAnalytics: getSearchAnalytics.data || [],
     serviceAnalytics: getServiceAnalytics.data || [],
@@ -271,5 +282,6 @@ export const useAdminAnalytics = () => {
     analyticsSummary: getAnalyticsSummary.data,
     isLoading: getSearchAnalytics.isLoading || getServiceAnalytics.isLoading || 
                getConversationAnalytics.isLoading || getAnalyticsSummary.isLoading,
+    loginStats: getLoginStats.data
   };
 };
