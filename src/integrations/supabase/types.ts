@@ -455,6 +455,45 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles_images: {
+        Row: {
+          created_at: string
+          id: string
+          image_name: string | null
+          image_url: string
+          profile_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_name?: string | null
+          image_url: string
+          profile_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_name?: string | null
+          image_url?: string
+          profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_images_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_images_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_with_email"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rate_limits: {
         Row: {
           action_type: string
@@ -677,45 +716,6 @@ export type Database = {
           },
         ]
       }
-      profiles_images: {
-        Row: {
-          created_at: string
-          id: string
-          image_name: string | null
-          image_url: string
-          profile_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          image_name?: string | null
-          image_url: string
-          profile_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          image_name?: string | null
-          image_url?: string
-          profile_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_images_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "profiles_images_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_with_email"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       subscriptions: {
         Row: {
           amount: number
@@ -802,7 +802,7 @@ export type Database = {
       }
       user_activity: {
         Row: {
-          activity_type: string
+          activity_type: Database["public"]["Enums"]["activity_type"] | null
           created_at: string
           details: Json | null
           id: string
@@ -811,7 +811,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          activity_type: string
+          activity_type?: Database["public"]["Enums"]["activity_type"] | null
           created_at?: string
           details?: Json | null
           id?: string
@@ -820,7 +820,7 @@ export type Database = {
           user_id: string
         }
         Update: {
-          activity_type?: string
+          activity_type?: Database["public"]["Enums"]["activity_type"] | null
           created_at?: string
           details?: Json | null
           id?: string
@@ -954,6 +954,13 @@ export type Database = {
         }
         Returns: boolean
       }
+      daily_login_activity: {
+        Args: { days_back?: number }
+        Returns: {
+          day: string
+          user_count: number
+        }[]
+      }
       get_category_analytics: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -993,6 +1000,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_admin: {
+        Args: { uid: string }
+        Returns: boolean
+      }
       log_admin_action: {
         Args: {
           _action_type: string
@@ -1003,9 +1014,20 @@ export type Database = {
         }
         Returns: undefined
       }
+      login_activity_summary: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       mark_message_as_read: {
         Args: { message_id: string }
         Returns: undefined
+      }
+      monthly_login_activity: {
+        Args: { months_back?: number }
+        Returns: {
+          month: string
+          user_count: number
+        }[]
       }
       validate_admin_input: {
         Args: { input_text: string }
@@ -1021,8 +1043,16 @@ export type Database = {
           valid: boolean
         }[]
       }
+      yearly_login_activity: {
+        Args: { years_back?: number }
+        Returns: {
+          user_count: number
+          year: string
+        }[]
+      }
     }
     Enums: {
+      activity_type: "login" | "logout"
       app_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
@@ -1151,6 +1181,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      activity_type: ["login", "logout"],
       app_role: ["admin", "moderator", "user"],
     },
   },

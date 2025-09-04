@@ -1,10 +1,10 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import type { 
-  SearchAnalytic, 
-  ServiceAnalytic, 
-  ConversationAnalytic, 
-  AnalyticsSummary 
+import type {
+  SearchAnalytic,
+  ServiceAnalytic,
+  ConversationAnalytic,
+  AnalyticsSummary
 } from '@/types/analytics';
 
 export const useAdminAnalytics = () => {
@@ -83,7 +83,7 @@ export const useAdminAnalytics = () => {
       }, {});
 
       const topSearchTerms = Object.entries(searchTermCounts)
-        .sort(([,a], [,b]) => b - a)
+        .sort(([, a], [, b]) => b - a)
         .slice(0, 10)
         .map(([query, count]) => ({ query, count }));
 
@@ -108,7 +108,7 @@ export const useAdminAnalytics = () => {
       }, {});
 
       const topViewedServices = Object.entries(serviceViewCounts)
-        .sort(([,a], [,b]) => b.views - a.views)
+        .sort(([, a], [, b]) => b.views - a.views)
         .slice(0, 10)
         .map(([service_id, { title, views }]) => ({ service_id, title, views }));
 
@@ -145,9 +145,10 @@ export const useAdminAnalytics = () => {
       });
 
       const topCategories = Object.entries(categoryStats)
-        .sort(([,a], [,b]) => (b.searches + b.views) - (a.searches + a.views))
+        .sort(([, a], [, b]) => (b.searches + b.views) - (a.searches + a.views))
         .slice(0, 10)
         .map(([category, stats]) => ({ category, ...stats }));
+
 
       return {
         totalSearches: searchesResult.count || 0,
@@ -161,12 +162,60 @@ export const useAdminAnalytics = () => {
     }
   });
 
+  const getLoginStats = useSuspenseQuery({
+    queryKey: ['admin-login-stats'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("login_activity_summary");
+
+      if (error) throw error;
+
+      return data;
+    }
+  })
+
+  const useDailyLogins = useSuspenseQuery({
+    queryKey: ['admin-daily-logins'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('daily_login_activity', { days_back: 30 });
+
+      if (error) throw error;
+
+      return data;
+    }
+  })
+
+  const useMonthlyLogins = useSuspenseQuery({
+    queryKey: ['admin-monthly-logins'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('monthly_login_activity', { months_back: 12 });
+
+      if (error) throw error;
+
+      return data;
+    }
+  })
+
+  const useYearlyLogins = useSuspenseQuery({
+    queryKey: ['admin-yearly-logins'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('yearly_login_activity', { years_back: 5 });
+
+      if (error) throw error;
+
+      return data;
+    }
+  })
+
   return {
     searchAnalytics: getSearchAnalytics.data || [],
     serviceAnalytics: getServiceAnalytics.data || [],
     conversationAnalytics: getConversationAnalytics.data || [],
     analyticsSummary: getAnalyticsSummary.data,
-    isLoading: getSearchAnalytics.isLoading || getServiceAnalytics.isLoading || 
-               getConversationAnalytics.isLoading || getAnalyticsSummary.isLoading,
+    isLoading: getSearchAnalytics.isLoading || getServiceAnalytics.isLoading ||
+      getConversationAnalytics.isLoading || getAnalyticsSummary.isLoading,
+    loginStats: getLoginStats.data,
+    dailyStats: useDailyLogins.data,
+    monthlyStats: useMonthlyLogins.data,
+    yearlyStats: useYearlyLogins.data
   };
 };
