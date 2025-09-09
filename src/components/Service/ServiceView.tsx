@@ -3,12 +3,12 @@ import ServiceDataCard from './ui/ServiceDataCard'
 import ContactOptions from '../Chat/ContactOptions';
 import CategoryServices from './ui/CategoryServices';
 import { Separator } from '../ui/separator';
+import { PublicService } from '@/hooks/usePublicServices';
 
 interface Props {
-  service: any
+  service: PublicService
 }
 const ServiceView = ({ service }: Props) => {
-  console.log(service);
   return (
     <div className='flex flex-col gap-10'>
       <ServiceHeader
@@ -20,14 +20,7 @@ const ServiceView = ({ service }: Props) => {
         updatedAt={service?.updated_at}
       />
       <ServiceDataCard
-        serviceDescription={service?.description}
-        publisherName={service?.publisher.full_name}
-        publisherEmail={service?.email}
-        publisherPhone={service?.phone}
-        serviceCost={service?.price_range}
-        location={service?.location}
-        experience={service?.experience}
-        views={service?.views}
+        service={service}
       />
 
       <div className="flex gap-2 pt-2">

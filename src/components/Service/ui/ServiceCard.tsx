@@ -1,8 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Phone, Mail, Eye, Star, MessageCircle, Heart } from 'lucide-react';
-import ContactOptions from '@/components/Chat/ContactOptions';
+import { MapPin, Eye } from 'lucide-react';
 import { useServiceViews } from '@/hooks/useServiceViews';
 
 import { useAuth } from '@/contexts/AuthContext';

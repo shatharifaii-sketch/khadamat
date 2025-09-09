@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface UploadedImage {
   id: string;
-  url: string;
-  name: string;
+  image_url: string;
+  image_name: string;
   file?: File;
 }
 
@@ -14,6 +15,7 @@ export const useImageUpload = () => {
   const { user } = useAuth();
   const [images, setImages] = useState<UploadedImage[]>([]);
   const [uploading, setUploading] = useState(false);
+  const queryClient = useQueryClient();
 
   const validateFile = (file: File): boolean => {
     // Check file type
@@ -59,8 +61,8 @@ export const useImageUpload = () => {
 
       return {
         id: fileName,
-        url: publicUrl,
-        name: file.name,
+        image_url: publicUrl,
+        image_name: file.name,
         file
       };
     } catch (error) {
@@ -138,12 +140,44 @@ export const useImageUpload = () => {
     }
   };
 
+  const deleteImage = async (imageId: string, imageUrl: string) => {
+    const url = new URL(imageUrl);
+    const parts = url.pathname.split('/');
+    const bucketIndex = parts.indexOf("public") + 1;
+    const bucket = parts[bucketIndex];
+    const filePath = parts.slice(bucketIndex + 1).join("/");
+
+    const { error: storageError } = await supabase.storage
+      .from(bucket)
+      .remove([filePath]);
+      
+    if (storageError) {
+      console.error('Error deleting image from storage:', storageError);
+      return;
+    }
+
+    const { error: dbError } = await supabase.from('service_images')
+      .delete()
+      .eq('id', imageId);
+
+    
+    if (dbError) {
+      console.error('Error deleting image from DB:', dbError);
+      return;
+    }
+
+    console.log('Image deleted successfully');
+
+    queryClient.invalidateQueries({ queryKey: ['admin-data']})
+  }
+
   return {
     images,
     uploading,
     handleFileSelect,
     removeImage,
     clearImages,
-    setImages
+    setImages,
+    deleteImage
   };
 };

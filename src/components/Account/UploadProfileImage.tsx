@@ -1,5 +1,3 @@
-import { supabase } from "@/integrations/supabase/client";
-import { generateRandomPrefix, handleFileName } from "@/lib/utils";
 import React, { useRef, useState } from "react"
 import { Button } from "../ui/button";
 import { Loader, Upload, X } from "lucide-react";
@@ -7,7 +5,6 @@ import { Label } from "../ui/label";
 import { useProfileImageUpload, useSaveProfileImage } from "@/hooks/useProfileImageUpload";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import { GeneratedAvatar } from "../GeneratedAvatar";
-import { toast } from "sonner";
 
 interface Props {
     userImage?: string | null;
