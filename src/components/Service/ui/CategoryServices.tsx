@@ -1,5 +1,4 @@
 import { useCategoryServices } from '@/hooks/useServices'
-import React from 'react'
 import ServiceCard from './ServiceCard';
 
 interface Props {

@@ -1,5 +1,4 @@
-
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Upload, X, ImageIcon } from 'lucide-react';
@@ -13,15 +12,16 @@ const ServicePortfolio = ({ onImagesChange }: ServicePortfolioProps) => {
   const { images, uploading, handleFileSelect, removeImage } = useImageUpload();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  React.useEffect(() => {
+
+  useEffect(() => {
     if (onImagesChange) {
       onImagesChange(images);
     }
-  }, [images, onImagesChange]);
+  }, [images]);
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    const files = e.dataTransfer.files;
+    const {files} = e.dataTransfer;
     if (files.length > 0) {
       handleFileSelect(files);
     }
@@ -32,7 +32,7 @@ const ServicePortfolio = ({ onImagesChange }: ServicePortfolioProps) => {
   };
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
+    const {files} = e.target;
     if (files && files.length > 0) {
       handleFileSelect(files);
     }

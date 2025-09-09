@@ -19,6 +19,13 @@ export interface Service {
   user_id?: string;
 }
 
+export interface ServiceImageProps {
+  id: string;
+  service_id: string;
+  image_url: string;
+  image_name: string;
+}
+
 export const useServices = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -269,4 +276,25 @@ export const useCategoryServices = (category: string, serviceId: string) => {
   });
 
   return services as PublicService[];
+}
+
+export const useServiceImages = (serviceId: string) => {
+  const { data: images } = useSuspenseQuery({
+    queryKey: ['service-images'],
+    queryFn: async () => {
+      const { data: images, error } = await supabase
+      .from('service_images')
+      .select('*')
+      .eq('service_id', serviceId);
+
+      if (error) {
+        console.error('Error fetching service images:', error);
+        throw error;
+      }
+
+      return images as ServiceImageProps[];
+    }
+  })
+
+  return images;
 }
