@@ -1,29 +1,18 @@
-import ContactOptions from '@/components/Chat/ContactOptions';
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator';
 import { Eye } from 'lucide-react';
+import ServiceImages from './ServiceImages';
+import { PublicService } from '@/hooks/usePublicServices';
 
 interface Props {
-    serviceDescription: string;
-    publisherName: string;
-    publisherEmail: string;
-    publisherPhone: string;
-    serviceCost: string;
-    location: string;
-    experience: string;
-    views: number;
+    service: PublicService
 }
 
 const ServiceDataCard = ({
-    serviceDescription,
-    publisherName,
-    publisherEmail,
-    publisherPhone,
-    serviceCost,
-    location,
-    experience,
-    views
+    service
 }: Props) => {
+
+    console.log('service', service);
     return (
         <Card>
             <CardHeader>
@@ -34,37 +23,43 @@ const ServiceDataCard = ({
                             <div className="flex items-center justify-between text-muted-foreground opacity-70">
                                 <div className="flex items-center gap-4">
                                     <div className="flex items-center gap-1">
-                                        <span className='text-lg'>{views}</span>
+                                        <span className='text-lg'>{service?.views}</span>
                                         <Eye className="size-6" />
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <p className='text-muted-foreground border border-gray-100 rounded-lg p-4 text-lg'>{serviceDescription}</p>
+                        <p className='text-muted-foreground border border-gray-100 rounded-lg p-4 text-lg'>{service?.description}</p>
+                    </div>
+                    <div className='mt-5'>
+                        <h3 className='text-xl font-semibold'>الملحقات</h3>
+                        <div className='mt-3'>
+                            <ServiceImages serviceId={service?.id} />
+                        </div>
                     </div>
                     <div className='flex items-center gap-8 my-5'>
                         <div className='flex items-center gap-4'>
                             <h3 className='text-lg font-semibold mt-4 text-nowrap'>تكلفة الخدمة</h3>
-                            <h2 className='text-xl font-semibold text-primary text-nowrap'>{serviceCost}</h2>
+                            <h2 className='text-xl font-semibold text-primary text-nowrap'>{service?.price_range}</h2>
                         </div>
                         <Separator orientation='vertical' className='h-5 mt-3' />
                         <div className='flex items-center gap-4'>
                             <h3 className='text-lg font-semibold mt-4 text-nowrap'>مكان الخدمة</h3>
-                            <h2 className='text-xl font-semibold text-primary text-nowrap'>{location}</h2>
+                            <h2 className='text-xl font-semibold text-primary text-nowrap'>{service?.location}</h2>
                         </div>
                         <Separator orientation='vertical' className='h-5 mt-3' />
                         <div className='flex items-center gap-4'>
                             <h3 className='text-lg font-semibold mt-4 text-nowrap'>الخبرة</h3>
-                            <h2 className='text-xl font-semibold text-primary text-nowrap'>{experience}</h2>
+                            <h2 className='text-xl font-semibold text-primary text-nowrap'>{service?.experience}</h2>
                         </div>
                     </div>
                     <Separator />
                     <div className='space-y-3'>
                         <h3 className='text-xl font-semibold mt-4'>معلومات موفر الخدمة</h3>
                         <div className='space-y-2 text-muted-foreground'>
-                            <p>الاسم الشخصي: {publisherName}</p>
-                            <p>البريد الالكتروني: {publisherEmail}</p>
-                            <p>رقم الهاتف: {publisherPhone}</p>
+                            <p>الاسم الشخصي: {service?.publisher.full_name}</p>
+                            <p>البريد الالكتروني: {service?.email}</p>
+                            <p>رقم الهاتف: {service?.phone}</p>
                         </div>
                     </div>
                 </CardContent>

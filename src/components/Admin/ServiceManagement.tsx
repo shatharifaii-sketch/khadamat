@@ -1,20 +1,19 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2, CheckCircle, XCircle } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye } from 'lucide-react';
 import { useAdminFunctionality } from '@/hooks/useAdminFunctionality';
+import ServiceForm from './ui/ServiceForm';
+import { NavLink } from 'react-router-dom';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { SelectLabel } from '@radix-ui/react-select';
 
-interface Service {
+export interface Service {
   id: string;
   title: string;
   category: string;
@@ -32,9 +31,14 @@ interface Service {
   publisher: {
     full_name: string;
   };
+  service_images: {
+    id: string;
+    image_name: string;
+    image_url: string;
+  }[]
 }
 
-interface UserProfile {
+export interface UserProfile {
   id: string;
   full_name: string;
   is_service_provider: boolean;
@@ -46,96 +50,32 @@ interface ServiceManagementProps {
   onServiceUpdated: () => void;
 }
 
-const serviceCategories = [
-  'تنظيف المنازل',
-  'صيانة السيارات',
-  'التدريس الخصوصي',
-  'التصوير',
-  'التصميم الجرافيكي',
-  'البناء والترميم',
-  'الكهرباء',
-  'السباكة',
-  'الطبخ والتموين',
-  'الحدائق والزراعة'
-];
+type SortOption = "name-ar" | "name-en" | "date-asc" | "date-desc";
 
 export const ServiceManagement = ({ services, users, onServiceUpdated }: ServiceManagementProps) => {
   const { toast } = useToast();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
-  const [formData, setFormData] = useState({
-    title: '',
-    category: '',
-    description: '',
-    price_range: '',
-    location: '',
-    phone: '',
-    email: '',
-    experience: '',
-    user_id: '',
-    status: 'published'
-  });
-  const { deleteService, updateService } = useAdminFunctionality();
+  const [sortOption, setSortOption] = useState<SortOption>('date-desc');
+
+  const { deleteService } = useAdminFunctionality();
 
   const serviceProviders = users.filter(user => user.is_service_provider);
 
-  const handleCreateService = async () => {
-    try {
-      const { error } = await supabase
-        .from('services')
-        .insert({
-          title: formData.title,
-          category: formData.category,
-          description: formData.description,
-          price_range: formData.price_range,
-          location: formData.location,
-          phone: formData.phone,
-          email: formData.email,
-          experience: formData.experience,
-          user_id: formData.user_id,
-          status: formData.status
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: "تم إنشاء الخدمة",
-        description: "تم إنشاء الخدمة بنجاح",
-      });
-
-      setIsCreateModalOpen(false);
-      resetForm();
-      onServiceUpdated();
-    } catch (error: any) {
-      toast({
-        title: "خطأ",
-        description: error.message || "حدث خطأ أثناء إنشاء الخدمة",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleUpdateService = async () => {
-    if (!editingService) return;
-
-    try {
-      updateService.mutate(formData);
-
-      toast({
-        title: "تم التحديث",
-        description: "تم تحديث الخدمة بنجاح",
-      });
-
-      setEditingService(null);
-      onServiceUpdated();
-    } catch (error: any) {
-      toast({
-        title: "خطأ",
-        description: error.message || "حدث خطأ أثناء تحديث الخدمة",
-        variant: "destructive",
-      });
-    }
-  };
+  const sortedServices = useMemo(() => {
+    if (!services) return [];
+    return [...services].sort((a, b) => {
+      if (sortOption === "date-desc") {
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      } else if (sortOption === "name-ar") {
+        return a.title.localeCompare(b.title, 'ar', { sensitivity: 'base' });
+      } else if (sortOption === "name-en") {
+        return a.title.localeCompare(b.title, 'en', { sensitivity: 'base' });
+      } else if (sortOption === "date-asc") {
+        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      }
+    });
+  }, [services, sortOption]);
 
   const handleDeleteService = async (serviceId: string) => {
     try {
@@ -154,190 +94,9 @@ export const ServiceManagement = ({ services, users, onServiceUpdated }: Service
     }
   };
 
-  const handleStatusChange = async (serviceId: string, newStatus: string) => {
-    try {
-      const { error } = await supabase
-        .from('services')
-        .update({ status: newStatus })
-        .eq('id', serviceId);
-
-      if (error) throw error;
-
-      toast({
-        title: "تم التحديث",
-        description: "تم تحديث حالة الخدمة بنجاح",
-      });
-
-      onServiceUpdated();
-    } catch (error: any) {
-      toast({
-        title: "خطأ",
-        description: error.message || "حدث خطأ أثناء تحديث الحالة",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const resetForm = () => {
-    setFormData({
-      title: '',
-      category: '',
-      description: '',
-      price_range: '',
-      location: '',
-      phone: '',
-      email: '',
-      experience: '',
-      user_id: '',
-      status: 'published'
-    });
-  };
-
-  const openEditModal = (service: Service) => {
-    setEditingService(service);
-    setFormData({
-      title: service.title,
-      category: service.category,
-      description: service.description,
-      price_range: service.price_range,
-      location: service.location,
-      phone: service.phone,
-      email: service.email,
-      experience: service.experience || '',
-      user_id: service.user_id,
-      status: service.status
-    });
-  };
-
-  const renderServiceForm = (isEdit = false) => (
-    <div className="space-y-4">
-      <div>
-        <Label htmlFor="title">عنوان الخدمة</Label>
-        <Input
-          id="title"
-          value={formData.title}
-          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-        />
-      </div>
-      
-      <div>
-        <Label htmlFor="category">الفئة</Label>
-        <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
-          <SelectTrigger>
-            <SelectValue placeholder="اختر الفئة" />
-          </SelectTrigger>
-          <SelectContent>
-            {serviceCategories.map((category) => (
-              <SelectItem key={category} value={category}>
-                {category}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {!isEdit && (
-        <div>
-          <Label htmlFor="user_id">مقدم الخدمة</Label>
-          <Select value={formData.user_id} onValueChange={(value) => setFormData({ ...formData, user_id: value })}>
-            <SelectTrigger>
-              <SelectValue placeholder="اختر مقدم الخدمة" />
-            </SelectTrigger>
-            <SelectContent>
-              {serviceProviders.map((provider) => (
-                <SelectItem key={provider.id} value={provider.id}>
-                  {provider.full_name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
-
-      <div>
-        <Label htmlFor="description">الوصف</Label>
-        <Textarea
-          id="description"
-          value={formData.description}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-          rows={4}
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="price_range">النطاق السعري</Label>
-        <Input
-          id="price_range"
-          value={formData.price_range}
-          onChange={(e) => setFormData({ ...formData, price_range: e.target.value })}
-          placeholder="مثال: 100-500 ريال"
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="location">الموقع</Label>
-        <Input
-          id="location"
-          value={formData.location}
-          onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="phone">رقم الهاتف</Label>
-        <Input
-          id="phone"
-          value={formData.phone}
-          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="email">البريد الإلكتروني</Label>
-        <Input
-          id="email"
-          type="email"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="experience">الخبرة</Label>
-        <Textarea
-          id="experience"
-          value={formData.experience}
-          onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
-          rows={3}
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="status">الحالة</Label>
-        <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="published">منشور</SelectItem>
-            <SelectItem value="draft">مسودة</SelectItem>
-            <SelectItem value="disabled">معطل</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <Button 
-        onClick={isEdit ? handleUpdateService : handleCreateService} 
-        className="w-full"
-      >
-        {isEdit ? 'حفظ التغييرات' : 'إنشاء الخدمة'}
-      </Button>
-    </div>
-  );
-
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className='flex flex-col gap-3'>
         <div className="flex items-center justify-between">
           <CardTitle>إدارة الخدمات</CardTitle>
           <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
@@ -351,10 +110,23 @@ export const ServiceManagement = ({ services, users, onServiceUpdated }: Service
               <DialogHeader>
                 <DialogTitle>إنشاء خدمة جديدة</DialogTitle>
               </DialogHeader>
-              {renderServiceForm()}
+              <ServiceForm serviceProviders={serviceProviders} closeForm={() => setIsCreateModalOpen(false)} />
             </DialogContent>
           </Dialog>
         </div>
+        <Select value={sortOption} onValueChange={(value) => setSortOption(value as SortOption)}>
+          <SelectTrigger>
+            <SelectValue placeholder="ترتيب حسب التاريخ" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectLabel className='text-right px-3 text-muted-foreground'>ترتيب حسب</SelectLabel>
+              <SelectItem value="date-desc">الأحدث</SelectItem>
+              <SelectItem value="date-asc">الأقدم</SelectItem>
+              <SelectItem value="name-ar">الاسم عربي</SelectItem> <SelectItem value="name-en">الاسم الانجليزي</SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
       </CardHeader>
       <CardContent>
         <Table>
@@ -369,7 +141,7 @@ export const ServiceManagement = ({ services, users, onServiceUpdated }: Service
             </TableRow>
           </TableHeader>
           <TableBody>
-            {services.map((service) => (
+            {sortedServices.map((service) => (
               <TableRow key={service.id}>
                 <TableCell className="font-medium max-w-xs truncate">
                   {service.title}
@@ -384,17 +156,22 @@ export const ServiceManagement = ({ services, users, onServiceUpdated }: Service
                 </TableCell>
                 <TableCell className='flex justify-center'>
                   <div className="flex gap-2">
+                    <Button variant='link' size='sm' className='outline-primary outline outline-1'>
+                      <NavLink to={`/find-service/${service.id}`}>
+                        <Eye className="size-4" />
+                      </NavLink>
+                    </Button>
                     <Dialog open={editingService?.id === service.id} onOpenChange={(open) => !open && setEditingService(null)}>
                       <DialogTrigger asChild>
-                        <Button size="sm" variant="outline" onClick={() => openEditModal(service)}>
-                          <Edit className="h-4 w-4" />
+                        <Button size="sm" variant="outline" onClick={() => setEditingService(service)}>
+                          <Edit className="size-4" />
                         </Button>
                       </DialogTrigger>
                       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
                         <DialogHeader>
                           <DialogTitle>تحرير الخدمة</DialogTitle>
                         </DialogHeader>
-                        {renderServiceForm(true)}
+                        <ServiceForm isEdit={true} serviceProviders={serviceProviders} service={editingService} closeForm={() => setEditingService(null)} />
                       </DialogContent>
                     </Dialog>
 
@@ -402,7 +179,7 @@ export const ServiceManagement = ({ services, users, onServiceUpdated }: Service
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button size="sm" variant="destructive">
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="size-4" />
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
