@@ -1,4 +1,5 @@
 import ErrorBoundary from '@/components/ErrorBoundary';
+import ProfileLoading from '@/components/Profile/ProfileLoading';
 import ProfileView from '@/components/Profile/ProfileView';
 import ProfileViewWrapper from '@/components/Profile/ProfileViewWrapper';
 import { Button } from '@/components/ui/button';
@@ -32,7 +33,7 @@ const UserProfilePage = () => {
                   حساب المستخدم
                 </h1>
             </div>
-            <Suspense fallback={<div>Loading...</div>}>
+            <Suspense fallback={<ProfileLoading />}>
             <ErrorBoundary fallback={<div>Something went wrong</div>}>
                 <ProfileViewWrapper userId={userId} />
             </ErrorBoundary>

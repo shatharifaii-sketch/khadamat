@@ -12,21 +12,23 @@ export const useServiceViews = () => {
       // First, get the current views count
       const { data: currentData, error: fetchError } = await supabase
         .from('services')
-        .select('views')
+        .select('title,views')
         .eq('id', serviceId)
-        .single();
+        .maybeSingle();
 
       if (fetchError) throw fetchError;
 
+      console.log('Current views data:', currentData);
+
       // Then increment the views count
-      const newViewsCount = (currentData?.views || 0) + 1;
+      const newViewsCount = currentData.views + 1;
+
+      console.log(`Incrementing views for service ${serviceId} from ${currentData.views} to ${newViewsCount}`);
       
       const { data, error } = await supabase
         .from('services')
         .update({ views: newViewsCount })
         .eq('id', serviceId)
-        .select('views')
-        .single();
 
       if (error) throw error;
       

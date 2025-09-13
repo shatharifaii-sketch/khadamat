@@ -611,7 +611,7 @@ export type Database = {
       service_images: {
         Row: {
           created_at: string
-          display_order: number
+          display_order: number | null
           id: string
           image_name: string | null
           image_url: string
@@ -619,7 +619,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          display_order?: number
+          display_order?: number | null
           id?: string
           image_name?: string | null
           image_url: string
@@ -627,7 +627,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          display_order?: number
+          display_order?: number | null
           id?: string
           image_name?: string | null
           image_url?: string
@@ -646,6 +646,62 @@ export type Database = {
             columns: ["service_id"]
             isOneToOne: false
             referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_reviews: {
+        Row: {
+          created_at: string
+          id: string
+          rating: number
+          review_body: string
+          service_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          rating?: number
+          review_body?: string
+          service_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          rating?: number
+          review_body?: string
+          service_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_reviews_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "public_services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_reviews_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_reviews_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_reviews_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_with_email"
             referencedColumns: ["id"]
           },
         ]
