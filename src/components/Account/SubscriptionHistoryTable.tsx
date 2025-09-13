@@ -5,9 +5,12 @@ import { Badge } from '@/components/ui/badge';
 import { usePaymentHistory, PaymentHistory } from '@/hooks/usePaymentHistory';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
+import { useSubscription } from '@/hooks/useSubscription';
+import { Button } from '../ui/button';
 
 const SubscriptionHistoryTable = () => {
   const { paymentHistory, isLoading } = usePaymentHistory();
+  const { getUserSubscription } = useSubscription();
   const { user } = useAuth();
 
   const getStatusBadge = (status: string) => {
@@ -122,6 +125,24 @@ const SubscriptionHistoryTable = () => {
             </TableBody>
           </Table>
         )}
+
+          {paymentHistory.length === 0 ? (
+            <div className='w-full'>
+              {/* Additional content can be added here if needed */}
+              <Button variant='default' className='flex-1 w-full mt-6' disabled={!user}>
+                اشترك الآن
+              </Button>
+            </div>
+          ) : (
+            <div>
+              {getUserSubscription.data.status === 'active' && (
+                <p className="mt-4 text-sm text-muted-foreground">
+                  اشتراكك الحالي: {getSubscriptionTierText(getUserSubscription.data.subscription_tier)} - 
+                  ينتهي في: {new Date(getUserSubscription.data.expires_at).toLocaleDateString('ar')}
+                </p>
+              )}
+            </div>
+          )}
       </CardContent>
     </Card>
   );

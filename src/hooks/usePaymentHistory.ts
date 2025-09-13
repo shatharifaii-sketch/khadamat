@@ -1,5 +1,5 @@
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -25,7 +25,7 @@ export interface PaymentHistory {
 export const usePaymentHistory = () => {
   const { user } = useAuth();
 
-  const getPaymentHistory = useQuery({
+  const getPaymentHistory = useSuspenseQuery({
     queryKey: ['payment-history', user?.id],
     queryFn: async () => {
       if (!user) return [];
@@ -55,7 +55,6 @@ export const usePaymentHistory = () => {
       
       return enhancedData;
     },
-    enabled: !!user,
     refetchInterval: 30000 // Refresh every 30 seconds to catch status updates
   });
 

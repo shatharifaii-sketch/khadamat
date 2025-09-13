@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,6 +24,8 @@ import SubscriptionHistoryTable from '@/components/Account/SubscriptionHistoryTa
 import PaymentSuccessCard from '@/components/Account/PaymentSuccessCard';
 import MainUserDetails from '@/components/Account/MainUserDetails';
 import UploadProfileImage from '@/components/Account/UploadProfileImage';
+import ErrorBoundary from '@/components/ErrorBoundary';
+import SubscriptionsLoading from '@/components/Account/SubscriptionsLoading';
 
 const Account = () => {
   const { user, loading } = useAuth();
@@ -218,7 +220,11 @@ const Account = () => {
 
           {/* Subscription History Section */}
           <div id="subscription-history">
-            <SubscriptionHistoryTable />
+            <Suspense fallback={<SubscriptionsLoading />}>
+              <ErrorBoundary fallback={<div>فشل في تحميل تاريخ الاشتراكات</div>}>
+                <SubscriptionHistoryTable />
+              </ErrorBoundary>
+            </Suspense>
           </div>
 
           {/* Account Settings */}

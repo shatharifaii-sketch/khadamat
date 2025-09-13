@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -40,13 +40,11 @@ export const useSubscription = () => {
   const queryClient = useQueryClient();
 
   // Get user's current subscription
-  const getUserSubscription = useQuery({
+  const getUserSubscription = useSuspenseQuery({
     queryKey: ['user-subscription', user?.id],
     queryFn: async () => {
       if (!user) return null;
-      
-      console.log('Fetching subscription for user:', user.id);
-      
+            
       const { data, error } = await supabase
         .from('subscriptions')
         .select('*')
@@ -58,10 +56,8 @@ export const useSubscription = () => {
         throw error;
       }
       
-      console.log('User subscription:', data);
       return data as Subscription | null;
     },
-    enabled: !!user
   });
 
   // Create payment transaction
