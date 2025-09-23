@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { Home } from 'lucide-react';
+import GoogleSignInButton from '@/components/GoogleSignInButton';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -15,7 +16,7 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn, signUp, user } = useAuth();
+  const { signIn, signUp, user, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -80,7 +81,10 @@ const Auth = () => {
       setLoading(false);
     }
   };
-
+  
+  const handleGoogleSignIn = async () => {
+    signInWithGoogle();
+  }
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4 arabic">
       <div className="w-full max-w-md">
@@ -160,6 +164,8 @@ const Auth = () => {
                 }
               </Button>
             </form>
+
+            <GoogleSignInButton singInFn={handleGoogleSignIn} />
 
             <div className="mt-6 text-center">
               <p className="text-sm text-muted-foreground">

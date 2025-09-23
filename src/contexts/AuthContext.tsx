@@ -148,5 +148,28 @@ export const useAuth = () => {
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
-  return context;
+
+  const signInWithGoogle = async () => {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: 'http://localhost:8080/',
+
+      }
+    });
+
+    if (error) {
+      console.error('Google sign-in error:', error);
+      return {error};
+    }
+
+    return { data };
+    } catch (err) {
+      console.error('Google sign-in error:', err);
+      return { error: err}
+    }
+  }
+
+  return { ...context, signInWithGoogle };
 };
