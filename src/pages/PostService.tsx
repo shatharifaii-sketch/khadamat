@@ -1,17 +1,15 @@
 
-import { useEffect } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
-import Navigation from '@/components/Navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useServices } from '@/hooks/useServices';
 import PostServiceHeader from '@/components/PostService/PostServiceHeader';
-import SubscriptionStatusCard from '@/components/PostService/SubscriptionStatusCard';
 import ServiceForm from '@/components/PostService/ServiceForm';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { LogIn, Loader2 } from 'lucide-react';
+import { useState } from 'react';
 
 const PostService = () => {
   const navigate = useNavigate();
@@ -20,19 +18,24 @@ const PostService = () => {
   const { user, loading } = useAuth();
   const { getUserSubscription } = useSubscription();
   const { getUserServices } = useServices();
+  const [services, setServices] = useState([]);
 
   const editServiceId = searchParams.get('edit');
   const isEditMode = !!editServiceId;
 
   // Get the service data if we're in edit mode
-  const { data: services = [] } = getUserServices;
+  if (isEditMode) {
+      const { data } = getUserServices;
+      if (data) {
+          setServices(data);
+      }
+  }
   const serviceToEdit = isEditMode ? services.find(service => service.id === editServiceId) : null;
 
   // Wait for auth to load
   if (loading) {
     return (
       <div className="min-h-screen bg-background arabic">
-        <Navigation />
         <div className="max-w-4xl mx-auto py-12 px-4">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
@@ -114,7 +117,7 @@ const PostService = () => {
 
   return (
       <div className="max-w-4xl mx-auto py-12 px-4">
-        <PostServiceHeader>
+        <PostServiceHeader isEditMode={isEditMode}>
           
           {isEditMode && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -126,7 +129,7 @@ const PostService = () => {
           )}
         </PostServiceHeader>
 
-        <ServiceForm serviceToEdit={serviceToEdit} />
+        <ServiceForm serviceToEdit={isEditMode ? serviceToEdit : null} />
       </div>
   );
 };
