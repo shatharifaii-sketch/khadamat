@@ -53,7 +53,27 @@ const ServiceDetailsModal = ({ service, isOpen, onClose, onViewProvider }: Servi
   if (!service) return null;
 
   const CategoryIcon = categories.find(cat => cat.value === service.category)?.icon || Star;
-  const providerName = service.profiles?.full_name || 'مقدم الخدمة';
+  const { data: profile } = useQuery({
+    queryKey: ['service-provider-profile', service?.user_id],
+    queryFn: async () => {
+      if (!service?.user_id) return null;
+      
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', service.user_id)
+        .single();
+      
+      if (error) {
+        console.error('Error fetching provider profile:', error);
+        return null;
+      }
+      return data;
+    },
+    enabled: !!service?.user_id && isOpen,
+  });
+
+  const providerName = profile?.full_name || 'مقدم الخدمة';
 
   const copyToClipboard = (text: string, message: string) => {
     navigator.clipboard.writeText(text);

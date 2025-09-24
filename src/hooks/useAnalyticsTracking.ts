@@ -65,13 +65,13 @@ export const useAnalyticsTracking = () => {
     }
   });
 
-  // Track user activity
+  // Track user activity - only for login/logout
   const trackUserActivity = useMutation({
     mutationFn: async ({ 
       activityType, 
       details 
     }: { 
-      activityType: string; 
+      activityType: 'login' | 'logout'; 
       details?: Record<string, any>;
     }) => {
       if (!user) return;
@@ -93,7 +93,7 @@ export const useAnalyticsTracking = () => {
     }
   });
 
-  // Track page visit
+  // Track page visit - using separate analytics table
   const trackPageVisit = useMutation({
     mutationFn: async ({ 
       page, 
@@ -102,16 +102,16 @@ export const useAnalyticsTracking = () => {
       page: string; 
       referrer?: string;
     }) => {
+      // For now, we'll store page visits in search_analytics table
+      // In a future migration, we can create a dedicated page_analytics table
       const { error } = await supabase
-        .from('user_activity')
+        .from('search_analytics')
         .insert({
           user_id: user?.id,
-          activity_type: 'page_visit',
-          details: { 
-            page, 
-            referrer: referrer || document.referrer,
-            timestamp: new Date().toISOString()
-          },
+          search_query: `page_visit:${page}`,
+          category: 'page_visit',
+          location: referrer || document.referrer || 'direct',
+          results_count: 1,
           ip_address: null,
           user_agent: navigator.userAgent
         });

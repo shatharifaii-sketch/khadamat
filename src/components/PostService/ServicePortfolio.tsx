@@ -15,9 +15,15 @@ const ServicePortfolio = ({ onImagesChange }: ServicePortfolioProps) => {
 
   useEffect(() => {
     if (onImagesChange) {
-      onImagesChange(images);
+      // Transform the images to match the expected interface
+      const transformedImages = images.map(img => ({
+        id: img.id,
+        url: img.image_url,
+        name: img.image_name
+      }));
+      onImagesChange(transformedImages);
     }
-  }, [images]);
+  }, [images, onImagesChange]);
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
@@ -74,8 +80,8 @@ const ServicePortfolio = ({ onImagesChange }: ServicePortfolioProps) => {
             <div key={image.id} className="relative group">
               <div className="aspect-square rounded-lg overflow-hidden border border-border">
                 <img
-                  src={image.url}
-                  alt={image.name}
+                  src={image.image_url}
+                  alt={image.image_name}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -87,7 +93,7 @@ const ServicePortfolio = ({ onImagesChange }: ServicePortfolioProps) => {
                 <X size={16} />
               </button>
               <div className="absolute bottom-2 left-2 right-2 bg-black/50 text-white text-xs p-1 rounded truncate opacity-0 group-hover:opacity-100 transition-opacity">
-                {image.name}
+                {image.image_name}
               </div>
             </div>
           ))}

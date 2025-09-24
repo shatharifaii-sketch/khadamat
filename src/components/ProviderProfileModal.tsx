@@ -50,7 +50,7 @@ const ProviderProfileModal = ({ service, isOpen, onClose }: ProviderProfileModal
 
   if (!service) return null;
 
-  const providerName = profile?.full_name || service.profiles?.full_name || 'مقدم الخدمة';
+  const providerName = profile?.full_name || 'مقدم الخدمة';
   const initials = providerName.split(' ').map(name => name[0]).join('').toUpperCase();
 
   return (
