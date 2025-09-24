@@ -24,6 +24,7 @@ import ServicePage from "./pages/ServicePage";
 import UserProfilePage from "./pages/UserProfilePage";
 import UserLayout from "./layouts/UserLayout";
 import AdminDashboard from "./layouts/AdminDashboard";
+import SubscriptionPayment from "./pages/SubscriptionPayment";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +47,7 @@ function App() {
                   <Route path="contact" element={<Contact />} />
                   <Route path="profile/:id" element={<UserProfilePage />} />
                   <Route path="payment" element={<Payment />} />
+                  <Route path="subscription-payment" element={<SubscriptionPayment />} />
                   <Route path="checkout" element={<Checkout />} />
                   <Route path="subscription-plans" element={<SubscriptionPlans />} />
                   <Route path="faq" element={<FAQ />} />

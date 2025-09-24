@@ -43,12 +43,7 @@ export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
       savePendingService(formData);
       
       // Redirect to payment page for additional service
-      navigate('/payment', { 
-        state: { 
-          serviceData: formData,
-          isAdditionalService: true
-        } 
-      });
+      
       return;
     }
 
