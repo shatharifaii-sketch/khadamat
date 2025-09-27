@@ -5,7 +5,7 @@ import { Upload, X, ImageIcon } from 'lucide-react';
 import { useImageUpload } from '@/hooks/useImageUpload';
 
 interface ServicePortfolioProps {
-  onImagesChange?: (images: Array<{ id: string; url: string; name: string }>) => void;
+  onImagesChange?: (images: Array<{ id: string; image_url: string; image_name: string }>) => void;
 }
 
 const ServicePortfolio = ({ onImagesChange }: ServicePortfolioProps) => {
@@ -74,8 +74,8 @@ const ServicePortfolio = ({ onImagesChange }: ServicePortfolioProps) => {
             <div key={image.id} className="relative group">
               <div className="aspect-square rounded-lg overflow-hidden border border-border">
                 <img
-                  src={image.url}
-                  alt={image.name}
+                  src={image.image_url}
+                  alt={image.image_name}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -87,7 +87,7 @@ const ServicePortfolio = ({ onImagesChange }: ServicePortfolioProps) => {
                 <X size={16} />
               </button>
               <div className="absolute bottom-2 left-2 right-2 bg-black/50 text-white text-xs p-1 rounded truncate opacity-0 group-hover:opacity-100 transition-opacity">
-                {image.name}
+                {image.image_name}
               </div>
             </div>
           ))}

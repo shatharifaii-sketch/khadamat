@@ -23,6 +23,9 @@ const PaymentOrderSummary = (props: PaymentOrderSummaryProps) => {
     subscriptionTier,
     discount = 0
   } = props;
+
+  console.log('PaymentOrderSummary props:', props);
+
   return (
     <Card>
       <CardHeader>
@@ -64,16 +67,16 @@ const PaymentOrderSummary = (props: PaymentOrderSummaryProps) => {
           <div className="flex items-center justify-between">
             <span>نوع الاشتراك</span>
             <Badge variant="secondary">
-              {subscriptionTier === 'yearly' ? 'سنوي' : 'شهري'}
+              {subscriptionTier === 'Yearly' ? 'سنوي' : 'شهري'}
             </Badge>
           </div>
           <div className="flex items-center justify-between">
             <span>عدد الخدمات</span>
-            <Badge variant="outline">{subscriptionTier === 'yearly' ? '12 شهر' : '1 شهر'}</Badge>
+            <Badge variant="outline">{subscriptionTier === 'Yearly' ? '12 شهر' : '1 شهر'}</Badge>
           </div>
           <div className="flex items-center justify-between">
             <span>السعر</span>
-            <span>{subscriptionTier === 'yearly' ? '100 شيكل (وفر 20 شيكل!)' : '10 شيكل'}</span>
+            <span>{subscriptionTier === 'Yearly' ? '100 شيكل (وفر 20 شيكل!)' : '10 شيكل'}</span>
           </div>
         </div>
 

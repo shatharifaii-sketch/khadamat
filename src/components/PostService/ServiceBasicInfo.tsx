@@ -2,6 +2,7 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { serviceCategories } from './ServiceCategoryData';
 import FormField from '@/components/ui/form-field';
+import { useEffect } from 'react';
 
 interface ServiceBasicInfoProps {
   title: string;

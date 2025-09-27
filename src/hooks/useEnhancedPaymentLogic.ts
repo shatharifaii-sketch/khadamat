@@ -18,9 +18,9 @@ export const useEnhancedPaymentLogic = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   
   const serviceData = location.state?.serviceData;
-  const subscriptionTier = location.state?.subscriptionTier || 'monthly';
+  const subscriptionTier = location.state?.subscription.price_monthly_title || 'Monthly';
   const servicesNeeded = 1;
-  const baseAmount = subscriptionTier === 'yearly' ? 100 : 10;
+  const baseAmount = subscriptionTier === 'Yearly' ? 100 : 10;
 
   // Enhanced authentication check with error handling
   useEffect(() => {
@@ -44,6 +44,7 @@ export const useEnhancedPaymentLogic = () => {
   }
 
   const subscription = getUserSubscription.data;
+  const subscriptionToGet = location.state?.subscription || null
 
   // Enhanced discount calculation with validation
   const getDiscountSafely = () => {
@@ -98,11 +99,9 @@ export const useEnhancedPaymentLogic = () => {
         if (!phoneRegex.test(paymentData.phoneNumber.replace(/\D/g, ''))) {
           throw new Error('رقم الهاتف غير صحيح');
         }
-      } else if (paymentMethod === 'bank_transfer') {
-        if (!paymentData.accountNumber) {
-          throw new Error('يرجى إدخال رقم الحساب البنكي');
-        }
-      }
+      } else if (paymentMethod === 'bank_transfer' && !paymentData.accountNumber) {
+                   throw new Error('يرجى إدخال رقم الحساب البنكي');
+             }
 
       // Validate final amount
       if (finalAmount <= 0) {
@@ -176,6 +175,7 @@ export const useEnhancedPaymentLogic = () => {
     navigate,
     paymentError,
     canProceedWithPayment: canProceedWithPayment(),
-    isProcessing
+    isProcessing,
+    subscriptionToGet
   };
 };

@@ -10,6 +10,8 @@ import ServiceContact from './ServiceContact';
 import ServiceExperience from './ServiceExperience';
 import ServicePortfolio from './ServicePortfolio';
 import ServiceFormSubmit from './ServiceFormSubmit';
+import { useEffect } from 'react';
+import { usePendingService } from '@/hooks/usePendingService';
 
 interface ServiceFormProps {
   serviceToEdit?: Service | null;
@@ -28,6 +30,14 @@ const ServiceForm = ({ serviceToEdit }: ServiceFormProps) => {
     pendingService,
     getFieldError
   } = useServiceForm(serviceToEdit);
+
+  const { clearPendingService } = usePendingService();
+
+  useEffect(() => {
+    if (!isEditMode && pendingService) {
+      clearPendingService();
+    }
+  }, [isEditMode, pendingService, clearPendingService]);
 
   return (
     <Card>
@@ -82,8 +92,7 @@ const ServiceForm = ({ serviceToEdit }: ServiceFormProps) => {
           />
 
           <ServicePortfolio onImagesChange={(images) => {
-            // Store images in form data for potential future use
-            console.log('Portfolio images updated:', images.length);
+            handleInputChange('images', images);
           }} />
 
           <ServiceFormSubmit
