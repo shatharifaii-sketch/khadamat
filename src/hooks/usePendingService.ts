@@ -10,6 +10,7 @@ export interface PendingServiceData {
   phone: string;
   email: string;
   experience: string;
+  images: { id: string; image_name: string; image_url: string }[];
 }
 
 const PENDING_SERVICE_KEY = 'pending_service_data';

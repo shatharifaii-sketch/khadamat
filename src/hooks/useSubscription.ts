@@ -203,6 +203,7 @@ export const useSubscription = () => {
     createPaymentTransaction,
     completePayment,
     canPostService,
+    canPost: getUserSubscription.data?.status === 'active' || getUserSubscription.data,
     isCreatingTransaction: createPaymentTransaction.isPending,
     isCompletingPayment: completePayment.isPending
   };

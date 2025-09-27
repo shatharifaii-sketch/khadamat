@@ -1,5 +1,3 @@
-
-import Navigation from '@/components/Navigation';
 import PaymentOrderSummary from '@/components/Payment/PaymentOrderSummary';
 import PaymentForm from '@/components/Payment/PaymentForm';
 import PaymentHeader from '@/components/Payment/PaymentHeader';
@@ -26,7 +24,8 @@ const Payment = () => {
     handlePayment,
     subscription,
     isCreatingTransaction,
-    navigate
+    navigate,
+    subscriptionToGet
   } = paymentLogic;
 
   const handleBack = () => {

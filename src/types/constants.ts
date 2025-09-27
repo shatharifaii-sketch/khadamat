@@ -14,18 +14,16 @@ export const subscriptions = [
         subscriptionTier: 1,
         allowedServices: 2,
         title: 'Individual/شخصي',
-        description: 'يمكنك نشر خدمتين',
         notes:
-        {
-            1: 'الحد الأقصى للخدمات في الشهر: 2',
-            2: 'في حال وجود خدمتين لديك بالفعل فعليك حذف احدها لتقدر على اضافة خدمة جديدة',
-            3: 'الاشتراك يتجدد تلقائيا في حال عدم الالغاء',
-            4: 'سيتم اعلامك من خلال البريد الالكتروني والمنصة للتاكد من الدفع الشهري'
-        },
+        [
+            'الحد الأقصى للخدمات: 2',
+            'في حال وجود خدمتين لديك بالفعل فعليك حذف احدها لتقدر على اضافة خدمة جديدة'
+        ],
         freeTial: true,
-        freeTrialPeriodText: '3 months',
+        freeTrialPeriodText: 'ثلاثة أشهر مجانا',
         freeTrialPeriod: 90,
-        className: 'bg-primary text-primary-foreground'
+        className: 'bg-primary text-primary-foreground',
+        badgeClassName: 'bg-secondary text-secondary-foreground px-4 py-1 hover:bg-secondary'
     },
     {
         id: 2,
@@ -42,16 +40,15 @@ export const subscriptions = [
         subscriptionTier: 2,
         allowedServices: 10,
         title: 'Business/شركة',
-        description: ' يمكنك نشر عشر خدمات',
         notes:
-        {
-            1: 'الحد الأقصى للخدمات في الشهر: 10',
-            2: 'في حال وجود عشر خدمات لديك بالفعل فعليك حذف احدها لتقدر على اضافة خدمة جديدة',
-            3: 'الاشتراك يتجدد تلقائيا في حال عدم الالغاء',
-            4: 'سيتم اعلامك من خلال البريد الالكتروني والمنصة للتاكد من الدفع الشهري'
-        },
+        [
+            'الحد الأقصى للخدمات: 10',
+            'في حال وجود عشر خدمات لديك بالفعل فعليك حذف احدها لتقدر على اضافة خدمة جديدة'
+        ],
         freeTial: true,
-        freeTrialPeriodText: '3 months',
-        freeTrialPeriod: 90
+        freeTrialPeriodText: 'ثلاثة أشهر مجانا',
+        freeTrialPeriod: 90,
+        badgeClassName: 'bg-primary text-secondary px-4 py-1 hover:bg-primary',
+        className: 'bg-secondary text-secondary-foreground'
     }
 ]

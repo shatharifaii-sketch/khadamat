@@ -1,8 +1,9 @@
 
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTrigger } from '../ui/dialog';
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import SubscriptionsModal from './SubscriptionsModal';
+import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from '../ui/drawer';
+import ErrorBoundary from '../ErrorBoundary';
 
 interface ServiceFormSubmitProps {
   isCreating: boolean;
@@ -15,7 +16,7 @@ const ServiceFormSubmit = ({ isCreating, canPostService, isEditMode = false }: S
   return (
     <div className="pt-6">
       <Button
-        type="submit"
+        type={isEditMode || canPostService ? 'submit' : 'button'}
         size="lg"
         className="w-full text-xl py-6"
         disabled={isCreating}
@@ -24,19 +25,7 @@ const ServiceFormSubmit = ({ isCreating, canPostService, isEditMode = false }: S
         {isCreating ?
           (isEditMode ? 'جاري التحديث...' : 'جاري النشر...') :
           (isEditMode ? 'حفظ التعديلات' :
-            canPostService ? 'انشر الخدمة' : (
-              <Dialog
-                open={openSubscribeModal}
-                onOpenChange={setOpenSubscribeModal}
-              >
-                <DialogTrigger>
-                  <span>اشترك الان و انشر الخدمة</span>
-                </DialogTrigger>
-                <DialogContent className='max-w-3xl'>
-                  <SubscriptionsModal closeModal={() => setOpenSubscribeModal(false)} />
-                </DialogContent>
-              </Dialog>
-            ))
+            canPostService ? 'انشر الخدمة' : 'اشترك الان و انشر الخدمة')
         }
       </Button>
       {!canPostService && !isEditMode && (
@@ -44,6 +33,35 @@ const ServiceFormSubmit = ({ isCreating, canPostService, isEditMode = false }: S
           سيتم توجيهك لصفحة الدفع أولاً
         </p>
       )}
+
+      <Drawer
+        direction='right'
+        open={openSubscribeModal}
+        onOpenChange={() => setOpenSubscribeModal(false)}
+      >
+        <DrawerContent className='h-screen w-full sm:w-4/5 lg:w-2/5 transition-all rounded-none'>
+          <DrawerHeader className='flex items-center justify-between'>
+            <DrawerTitle className='text-2xl text-start'>
+              أنواع الاشتراك
+            </DrawerTitle>
+          </DrawerHeader>
+          <DrawerDescription className='flex flex-col gap-4 px-5 overflow-y-auto'>
+            <div>
+              <p>يجب على جميع الاشتراك بأحد العروض المتوفرة للحصول على قدرة نشر الخدمات</p>
+            </div>
+            <Suspense fallback={<div>Loading...</div>}>
+              <ErrorBoundary fallback={<div>Something went wrong</div>}>
+                <SubscriptionsModal />
+              </ErrorBoundary>
+            </Suspense>
+          </DrawerDescription>
+          <DrawerFooter>
+            <DrawerClose className='flex'>
+              <Button variant='ghost' className='flex-1'>إلغاء</Button>
+            </DrawerClose>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 };

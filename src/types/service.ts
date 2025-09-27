@@ -8,6 +8,11 @@ export interface Service {
   phone: string;
   email: string;
   experience: string;
+  images: {
+    id: string;
+    image_name: string;
+    image_url: string;
+  }[];
 }
 
 export interface ServiceFormData {
@@ -19,4 +24,9 @@ export interface ServiceFormData {
   phone: string;
   email: string;
   experience: string;
+  images: {
+    id: string;
+    image_name: string;
+    image_url: string;
+  }[];
 }

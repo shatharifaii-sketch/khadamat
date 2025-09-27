@@ -17,12 +17,12 @@ export const useServiceFormState = (serviceToEdit?: Service | null) => {
     phone: '',
     email: user?.email || '',
     experience: '',
+    images: [],
   });
 
   // Load service data for editing or pending service data
   useEffect(() => {
     if (serviceToEdit) {
-      console.log('Loading service data for editing');
       setFormData({
         title: serviceToEdit.title,
         category: serviceToEdit.category,
@@ -32,6 +32,7 @@ export const useServiceFormState = (serviceToEdit?: Service | null) => {
         phone: serviceToEdit.phone,
         email: serviceToEdit.email,
         experience: serviceToEdit.experience || '',
+        images: serviceToEdit.images,
       });
     } else if (pendingService && !isEditMode) {
       console.log('Loading pending service data into form');
@@ -46,7 +47,7 @@ export const useServiceFormState = (serviceToEdit?: Service | null) => {
     }
   }, [user?.email, isEditMode]);
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | { id: string; image_name: string; image_url: string; }[]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 

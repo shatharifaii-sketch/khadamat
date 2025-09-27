@@ -7,9 +7,16 @@ import Navigation from '@/components/Navigation';
 import { useHomeStats } from '@/hooks/useHomeStats';
 import StatsSection from '@/components/Home/StatsSection';
 import ServicesGrid from '@/components/Home/ServicesGrid';
+import { useAuth } from '@/contexts/AuthContext';
+import SubscriptionsModal from '@/components/PostService/SubscriptionsModal';
+import { Suspense } from 'react';
+import ErrorBoundary from '@/components/ErrorBoundary';
+import { useSubscription } from '@/hooks/useSubscription';
 
 const Index = () => {
   const { data: homeStats, isLoading, error } = useHomeStats();
+  const { user } = useAuth();
+  const { canPost } = useSubscription();
 
   if (error) {
     console.error('Error loading home stats:', error);
@@ -151,7 +158,8 @@ const Index = () => {
               : 'كن من أوائل مقدمي الخدمات على منصتنا'
             }
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          {user && canPost ? (
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/post-service">
               <Button size="lg" variant="secondary" className="text-xl py-6 px-8">
                 ابدأ تقديم الخدمات
@@ -163,6 +171,15 @@ const Index = () => {
               </Button>
             </Link>
           </div>
+          ) : (
+            <Suspense fallback={<div>Loading...</div>}>
+              <ErrorBoundary fallback={<div>Something went wrong</div>}>
+                <SubscriptionsModal 
+                cardClassName='shadow-xl'
+                switchClassName='transition-all bg-secondary text-muted-foreground px-4 py-2 rounded-full' />
+              </ErrorBoundary>
+            </Suspense>
+          )}
         </div>
       </section>
       </>

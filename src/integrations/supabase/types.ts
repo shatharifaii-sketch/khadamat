@@ -656,24 +656,24 @@ export type Database = {
           id: string
           rating: number
           review_body: string
-          service_id: string | null
-          user_id: string | null
+          service_id: string
+          user_id: string
         }
         Insert: {
           created_at?: string
           id?: string
           rating?: number
           review_body?: string
-          service_id?: string | null
-          user_id?: string | null
+          service_id?: string
+          user_id?: string
         }
         Update: {
           created_at?: string
           id?: string
           rating?: number
           review_body?: string
-          service_id?: string | null
-          user_id?: string | null
+          service_id?: string
+          user_id?: string
         }
         Relationships: [
           {
@@ -771,6 +771,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      subscription_tiers: {
+        Row: {
+          allowed_services: number | null
+          badge_class_name: string | null
+          class_name: string | null
+          created_at: string
+          free_trial: boolean | null
+          free_trial_period: number | null
+          free_trial_period_text: string | null
+          id: string
+          notes: string[] | null
+          price_monthly_title: string | null
+          price_monthly_value: number | null
+          price_yearly_title: string | null
+          price_yearly_value: number | null
+          tier: number | null
+          title: string | null
+          users: string[] | null
+        }
+        Insert: {
+          allowed_services?: number | null
+          badge_class_name?: string | null
+          class_name?: string | null
+          created_at?: string
+          free_trial?: boolean | null
+          free_trial_period?: number | null
+          free_trial_period_text?: string | null
+          id?: string
+          notes?: string[] | null
+          price_monthly_title?: string | null
+          price_monthly_value?: number | null
+          price_yearly_title?: string | null
+          price_yearly_value?: number | null
+          tier?: number | null
+          title?: string | null
+          users?: string[] | null
+        }
+        Update: {
+          allowed_services?: number | null
+          badge_class_name?: string | null
+          class_name?: string | null
+          created_at?: string
+          free_trial?: boolean | null
+          free_trial_period?: number | null
+          free_trial_period_text?: string | null
+          id?: string
+          notes?: string[] | null
+          price_monthly_title?: string | null
+          price_monthly_value?: number | null
+          price_yearly_title?: string | null
+          price_yearly_value?: number | null
+          tier?: number | null
+          title?: string | null
+          users?: string[] | null
+        }
+        Relationships: []
       }
       subscriptions: {
         Row: {

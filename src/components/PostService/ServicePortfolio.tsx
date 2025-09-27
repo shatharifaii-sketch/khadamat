@@ -5,7 +5,7 @@ import { Upload, X, ImageIcon } from 'lucide-react';
 import { useImageUpload } from '@/hooks/useImageUpload';
 
 interface ServicePortfolioProps {
-  onImagesChange?: (images: Array<{ id: string; url: string; name: string }>) => void;
+  onImagesChange?: (images: Array<{ id: string; image_url: string; image_name: string }>) => void;
 }
 
 const ServicePortfolio = ({ onImagesChange }: ServicePortfolioProps) => {
