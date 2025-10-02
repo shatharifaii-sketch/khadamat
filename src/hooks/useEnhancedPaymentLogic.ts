@@ -16,11 +16,14 @@ export const useEnhancedPaymentLogic = () => {
   
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  const { subscriptionToGet, serviceData } = location.state || {};
   
-  const serviceData = location.state?.serviceData;
-  const subscriptionTier = location.state?.subscription.price_monthly_title || 'Monthly';
-  const servicesNeeded = 1;
-  const baseAmount = subscriptionTier === 'Yearly' ? 100 : 10;
+  const subscriptionTier = subscriptionToGet.price_monthly_title || 'Monthly';
+  const servicesNeeded = subscriptionToGet.allowed_services || 2;
+  const baseAmount = subscriptionTier === 'Yearly' ? subscriptionToGet.price_yearly_value : subscriptionToGet.price_monthly_value;
+
+  console.log('Enhanced payment logic initialized...', subscriptionTier, servicesNeeded, baseAmount, serviceData, subscriptionToGet);
 
   // Enhanced authentication check with error handling
   useEffect(() => {
@@ -44,7 +47,6 @@ export const useEnhancedPaymentLogic = () => {
   }
 
   const subscription = getUserSubscription.data;
-  const subscriptionToGet = location.state?.subscription || null
 
   // Enhanced discount calculation with validation
   const getDiscountSafely = () => {

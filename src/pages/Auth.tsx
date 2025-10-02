@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { Home } from 'lucide-react';
 import GoogleSignInButton from '@/components/GoogleSignInButton';
+import { useEmail } from '@/hooks/useEmail';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -17,6 +18,7 @@ const Auth = () => {
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
   const { signIn, signUp, user, signInWithGoogle } = useAuth();
+  const { sendWelcomeEmail } = useEmail();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -59,7 +61,7 @@ const Auth = () => {
           navigate(from, { replace: true });
         }
       } else {
-        const { error } = await signUp(email, password, fullName);
+        const { data, error } = await signUp(email, password, fullName);
         if (error) {
           console.error('Sign up error:', error);
           if (error.message.includes('User already registered')) {
@@ -71,6 +73,7 @@ const Auth = () => {
           }
         } else {
           toast.success('تم إنشاء الحساب بنجاح! يرجى تفقد بريدك الإلكتروني لتأكيد الحساب');
+          sendWelcomeEmail.mutate({ name: fullName, email: data.user.email })
           setIsLogin(true);
         }
       }

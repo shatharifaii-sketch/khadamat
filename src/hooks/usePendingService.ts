@@ -13,7 +13,7 @@ export interface PendingServiceData {
   images: { id: string; image_name: string; image_url: string }[];
 }
 
-const PENDING_SERVICE_KEY = 'pending_service_data';
+export const PENDING_SERVICE_KEY = 'pending_service_data';
 
 export const usePendingService = () => {
   const [pendingService, setPendingService] = useState<PendingServiceData | null>(null);
