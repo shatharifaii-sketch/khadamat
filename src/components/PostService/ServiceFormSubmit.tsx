@@ -4,15 +4,20 @@ import { Suspense, useState } from 'react';
 import SubscriptionsModal from './SubscriptionsModal';
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from '../ui/drawer';
 import ErrorBoundary from '../ErrorBoundary';
+import { usePendingService } from '@/hooks/usePendingService';
+import { ServiceFormData } from '@/types/service';
 
 interface ServiceFormSubmitProps {
   isCreating: boolean;
   canPostService: boolean;
   isEditMode?: boolean;
+  savePendingService?: () => void;
 }
 
-const ServiceFormSubmit = ({ isCreating, canPostService, isEditMode = false }: ServiceFormSubmitProps) => {
+const ServiceFormSubmit = ({ isCreating, canPostService, isEditMode = false, savePendingService }: ServiceFormSubmitProps) => {
   const [openSubscribeModal, setOpenSubscribeModal] = useState<boolean>(false);
+
+  
   return (
     <div className="pt-6">
       <Button
@@ -20,7 +25,12 @@ const ServiceFormSubmit = ({ isCreating, canPostService, isEditMode = false }: S
         size="lg"
         className="w-full text-xl py-6"
         disabled={isCreating}
-        onClick={() => !canPostService && setOpenSubscribeModal(true)}
+        onClick={() => {
+          if (!canPostService) {
+            savePendingService();
+            setOpenSubscribeModal(true);
+          }
+        }}
       >
         {isCreating ?
           (isEditMode ? 'جاري التحديث...' : 'جاري النشر...') :

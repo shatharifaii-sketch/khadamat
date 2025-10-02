@@ -11,7 +11,7 @@ import ServiceExperience from './ServiceExperience';
 import ServicePortfolio from './ServicePortfolio';
 import ServiceFormSubmit from './ServiceFormSubmit';
 import { useEffect } from 'react';
-import { usePendingService } from '@/hooks/usePendingService';
+import { PENDING_SERVICE_KEY, usePendingService } from '@/hooks/usePendingService';
 
 interface ServiceFormProps {
   serviceToEdit?: Service | null;
@@ -31,7 +31,7 @@ const ServiceForm = ({ serviceToEdit }: ServiceFormProps) => {
     getFieldError
   } = useServiceForm(serviceToEdit);
 
-  const { clearPendingService } = usePendingService();
+  const { clearPendingService, savePendingService } = usePendingService();
 
   useEffect(() => {
     if (!isEditMode && pendingService) {
@@ -96,6 +96,12 @@ const ServiceForm = ({ serviceToEdit }: ServiceFormProps) => {
           }} />
 
           <ServiceFormSubmit
+            savePendingService={() => {
+              console.log('Saving pending service data...', formData);
+              //savePendingService(formData);
+
+              localStorage.setItem(PENDING_SERVICE_KEY, JSON.stringify(formData));
+            }}
             isCreating={isCreating || isUpdating}
             canPostService={canPostService}
             isEditMode={isEditMode}

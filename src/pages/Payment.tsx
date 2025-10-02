@@ -2,9 +2,10 @@ import PaymentOrderSummary from '@/components/Payment/PaymentOrderSummary';
 import PaymentForm from '@/components/Payment/PaymentForm';
 import PaymentHeader from '@/components/Payment/PaymentHeader';
 import { useEnhancedPaymentLogic } from '@/hooks/useEnhancedPaymentLogic';
+import { useLocation } from 'react-router-dom';
 
 const Payment = () => {
-  const paymentLogic = useEnhancedPaymentLogic();
+const paymentLogic = useEnhancedPaymentLogic();
 
   // Return null if user is not authenticated (redirect handled in hook)
   if (!paymentLogic) {
@@ -28,6 +29,8 @@ const Payment = () => {
     subscriptionToGet
   } = paymentLogic;
 
+  console.log('Payment data:', paymentData);
+
   const handleBack = () => {
     navigate('/post-service', { state: { serviceData } });
   };
@@ -45,6 +48,7 @@ const Payment = () => {
             serviceData={serviceData}
             finalAmount={finalAmount}
             subscriptionTier={subscriptionTier}
+            subscriptionToGet={subscriptionToGet}
             discount={paymentLogic.getDiscount()}
           />
 

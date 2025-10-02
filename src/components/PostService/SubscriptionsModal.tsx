@@ -17,11 +17,12 @@ const SubscriptionsModal = ({ cardClassName, switchClassName }: SubscriptionsMod
     const navigate = useNavigate();
     const [yearly, setYearly] = useState<boolean>(false);
 
-    const { subscriptionTiersData, subscriptionTiersSuccess } = useSubscriptionTiers();
+    const { subscriptionTiersData } = useSubscriptionTiers();
 
     const handleSubscriptionSelect = (subscription: Tables<'subscription_tiers'>) => {
         const serviceData = JSON.parse(localStorage.getItem('serviceData') || '{}');
-        navigate('/payment', { state: { subscription, serviceData }});
+        console.log(serviceData)
+        navigate('/payment', { state: { subscriptionToGet: subscription, serviceData }});
     }
 
     return (
@@ -57,7 +58,7 @@ const SubscriptionsModal = ({ cardClassName, switchClassName }: SubscriptionsMod
                                             </p>
                                             <ul className='list-disc list-inside'>
                                                 {subscription.notes.map((note) => (
-                                                    <li key={note}>{note}</li>
+                                                    <li className='text-start' key={note}>{note}</li>
                                                 ))}
                                             </ul>
                                         </div>

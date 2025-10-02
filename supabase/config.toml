@@ -2,9 +2,38 @@ project_id = "zfnewzekaxofgrindsmb"
 
 [auth]
 enabled = true
-external_email_enabled = true
-external_phone_enabled = false
-external_sms_enabled = false
 
 [functions.send-contact-email]
 verify_jwt = false
+[functions.send-welcome-email]
+enabled = true
+verify_jwt = true
+import_map = "./functions/send-welcome-email/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/send-welcome-email/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/send-welcome-email/*.html" ]
+
+[functions.send-welcome-email-dev]
+enabled = true
+verify_jwt = true
+import_map = "./functions/send-welcome-email-dev/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/send-welcome-email-dev/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/send-welcome-email-dev/*.html" ]
+
+[functions.billPs-auth]
+enabled = true
+verify_jwt = true
+import_map = "./functions/billPs-auth/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/billPs-auth/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/billPs-auth/*.html" ]

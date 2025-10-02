@@ -1,7 +1,7 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Calendar, CreditCard } from 'lucide-react';
+import { CheckCircle, Calendar, CreditCard, Star } from 'lucide-react';
+import { Tables } from '@/integrations/supabase/types';
 
 interface PaymentOrderSummaryProps {
   subscription: any;
@@ -11,17 +11,19 @@ interface PaymentOrderSummaryProps {
   finalAmount: number;
   subscriptionTier: string;
   discount?: number;
+  subscriptionToGet?: Tables<'subscription_tiers'>
 }
 
 const PaymentOrderSummary = (props: PaymentOrderSummaryProps) => {
-  const { 
-    subscription, 
-    servicesNeeded, 
-    amount, 
+  const {
+    subscription,
+    servicesNeeded,
+    amount,
     serviceData,
     finalAmount,
     subscriptionTier,
-    discount = 0
+    discount = 0,
+    subscriptionToGet
   } = props;
 
   console.log('PaymentOrderSummary props:', props);
@@ -72,11 +74,14 @@ const PaymentOrderSummary = (props: PaymentOrderSummaryProps) => {
           </div>
           <div className="flex items-center justify-between">
             <span>عدد الخدمات</span>
-            <Badge variant="outline">{subscriptionTier === 'Yearly' ? '12 شهر' : '1 شهر'}</Badge>
+            <Badge variant="outline">{servicesNeeded} {servicesNeeded > 2 ? 'خدمات' : 'خدمة'} شهريا</Badge>
           </div>
-          <div className="flex items-center justify-between">
-            <span>السعر</span>
-            <span>{subscriptionTier === 'Yearly' ? '100 شيكل (وفر 20 شيكل!)' : '10 شيكل'}</span>
+          <div className='flex flex-col gap-2'>
+            <div className='flex items-center justify-between'>
+              <span className='flex items-center gap-1'><Star className='text-yellow-400' />المدة المجانية</span>
+              <Badge variant="default" className='hover:bg-priamry'>{subscriptionToGet.free_trial_period_text}</Badge>
+            </div>
+            <p className='text-xs text-muted-foreground'>سيتم بدء الاشتراك بعد انتهاء المدة المجانية</p>
           </div>
         </div>
 
@@ -86,14 +91,14 @@ const PaymentOrderSummary = (props: PaymentOrderSummaryProps) => {
             <span>المجموع الفرعي</span>
             <span>{amount} شيكل</span>
           </div>
-          
+
           {discount > 0 && (
             <div className="flex items-center justify-between text-green-600">
               <span>خصم الكوبون</span>
               <span>-{discount} شيكل</span>
             </div>
           )}
-          
+
           <div className="flex items-center justify-between font-bold text-lg border-t pt-2">
             <span>المجموع النهائي</span>
             <div className="flex items-center gap-1">
@@ -105,7 +110,7 @@ const PaymentOrderSummary = (props: PaymentOrderSummaryProps) => {
 
         {/* Payment Note */}
         <div className="text-xs text-gray-500 text-center">
-          {subscriptionTier === 'yearly' 
+          {subscriptionTier === 'Yearly'
             ? 'سيتم رفع خدمتك تلقائياً كل شهر لمدة سنة كاملة'
             : 'سيتم تجديد اشتراكك تلقائياً كل شهر'}
         </div>

@@ -18,8 +18,8 @@ const ServicePortfolio = ({ onImagesChange }: ServicePortfolioProps) => {
       // Transform the images to match the expected interface
       const transformedImages = images.map(img => ({
         id: img.id,
-        url: img.image_url,
-        name: img.image_name
+        image_url: img.image_url,
+        image_name: img.image_name
       }));
       onImagesChange(transformedImages);
     }

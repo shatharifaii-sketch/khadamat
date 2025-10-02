@@ -17,7 +17,13 @@ export const useServiceFormState = (serviceToEdit?: Service | null) => {
     phone: '',
     email: user?.email || '',
     experience: '',
-    images: [],
+    images: [
+      {
+        id: '',
+        image_name: '',
+        image_url: '',
+      }
+    ],
   });
 
   // Load service data for editing or pending service data
