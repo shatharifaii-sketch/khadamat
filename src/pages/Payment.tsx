@@ -24,12 +24,13 @@ const paymentLogic = useEnhancedPaymentLogic();
     handleInputChange,
     handlePayment,
     subscription,
-    isCreatingTransaction,
+    //isCreatingTransaction,
     navigate,
     subscriptionToGet
   } = paymentLogic;
+  
 
-  console.log('Payment data:', paymentData);
+  console.log('Payment data:', paymentLogic);
 
   const handleBack = () => {
     navigate('/post-service', { state: { serviceData } });
@@ -60,7 +61,7 @@ const paymentLogic = useEnhancedPaymentLogic();
             onInputChange={handleInputChange}
             onSubmit={handlePayment}
             finalAmount={finalAmount}
-            isCreatingTransaction={isCreatingTransaction}
+            //isCreatingTransaction={isCreatingTransaction}
             onBack={handleBack}
             couponCode={paymentLogic.couponCode}
             setCouponCode={paymentLogic.setCouponCode}
@@ -68,6 +69,9 @@ const paymentLogic = useEnhancedPaymentLogic();
             isValidating={paymentLogic.isValidating}
             validateCoupon={paymentLogic.validateCoupon}
             removeCoupon={paymentLogic.removeCoupon}
+            subscription={subscription}
+            subscriptionTierId={subscriptionToGet.id}
+            billingCycle={subscriptionTier}
           />
         </div>
       </div>

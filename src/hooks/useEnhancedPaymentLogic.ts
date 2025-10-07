@@ -12,14 +12,13 @@ export const useEnhancedPaymentLogic = () => {
   const { user } = useAuth();
   const { getUserSubscription } = useSubscription();
   const paymentState = usePaymentState();
-  const { processPayment, isCreatingTransaction } = usePaymentProcessing();
+  //const { processPayment, isCreatingTransaction } = usePaymentProcessing();
   
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const { subscriptionToGet, serviceData } = location.state || {};
+  const { subscriptionToGet, serviceData, subscriptionTier } = location.state || {};
   
-  const subscriptionTier = subscriptionToGet.price_monthly_title || 'Monthly';
   const servicesNeeded = subscriptionToGet.allowed_services || 2;
   const baseAmount = subscriptionTier === 'Yearly' ? subscriptionToGet.price_yearly_value : subscriptionToGet.price_monthly_value;
 
@@ -118,13 +117,13 @@ export const useEnhancedPaymentLogic = () => {
         }
       }
 
-      await processPayment(
+      /*await processPayment(
         paymentMethod,
         paymentData,
         finalAmount,
         servicesNeeded,
         subscriptionTier
-      );
+      );*/
 
     } catch (error: any) {
       console.error('Payment error:', error);
@@ -173,7 +172,7 @@ export const useEnhancedPaymentLogic = () => {
     ...paymentState,
     handlePayment,
     subscription,
-    isCreatingTransaction: isCreatingTransaction || isProcessing,
+    //isCreatingTransaction: isCreatingTransaction || isProcessing,
     navigate,
     paymentError,
     canProceedWithPayment: canProceedWithPayment(),

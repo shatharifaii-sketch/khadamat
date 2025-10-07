@@ -789,7 +789,7 @@ export type Database = {
           price_yearly_value: number | null
           tier: number | null
           title: string | null
-          users: string[] | null
+          users: number
         }
         Insert: {
           allowed_services?: number | null
@@ -807,7 +807,7 @@ export type Database = {
           price_yearly_value?: number | null
           tier?: number | null
           title?: string | null
-          users?: string[] | null
+          users?: number
         }
         Update: {
           allowed_services?: number | null
@@ -825,69 +825,86 @@ export type Database = {
           price_yearly_value?: number | null
           tier?: number | null
           title?: string | null
-          users?: string[] | null
+          users?: number
         }
         Relationships: []
       }
       subscriptions: {
         Row: {
           amount: number
-          auto_bump_service: boolean | null
           auto_renew: boolean | null
           billing_cycle: string
           created_at: string
           currency: string
           expires_at: string
           id: string
+          is_in_trial: boolean
+          is_payment_pastdue: boolean | null
+          last_payment_date: string | null
+          next_payment_date: string | null
           payment_method: string | null
-          plan_type: string
           services_allowed: number | null
           services_used: number | null
           started_at: string
           status: string
-          subscription_tier: string | null
+          tier_id: string | null
+          trial_expires_at: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           amount?: number
-          auto_bump_service?: boolean | null
           auto_renew?: boolean | null
           billing_cycle?: string
           created_at?: string
           currency?: string
           expires_at?: string
           id?: string
+          is_in_trial?: boolean
+          is_payment_pastdue?: boolean | null
+          last_payment_date?: string | null
+          next_payment_date?: string | null
           payment_method?: string | null
-          plan_type?: string
           services_allowed?: number | null
           services_used?: number | null
           started_at?: string
           status?: string
-          subscription_tier?: string | null
+          tier_id?: string | null
+          trial_expires_at?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           amount?: number
-          auto_bump_service?: boolean | null
           auto_renew?: boolean | null
           billing_cycle?: string
           created_at?: string
           currency?: string
           expires_at?: string
           id?: string
+          is_in_trial?: boolean
+          is_payment_pastdue?: boolean | null
+          last_payment_date?: string | null
+          next_payment_date?: string | null
           payment_method?: string | null
-          plan_type?: string
           services_allowed?: number | null
           services_used?: number | null
           started_at?: string
           status?: string
-          subscription_tier?: string | null
+          tier_id?: string | null
+          trial_expires_at?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_tier_id_fkey"
+            columns: ["tier_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_tiers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       table_name: {
         Row: {

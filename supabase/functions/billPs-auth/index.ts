@@ -3,29 +3,43 @@
 // This enables autocomplete, go to definition, etc.
 
 // Setup type definitions for built-in Supabase Runtime APIs
-import "jsr:@supabase/functions-js/edge-runtime.d.ts"
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-console.log("Hello from Functions!")
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "authorization, content-type",
+};
 
 serve(async (req: Request) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, {
+      headers: corsHeaders,
+    });
+  }
+
+  if (req.method !== "POST") {
+    return new Response("Method Not Allowed", { status: 405, headers: corsHeaders });
+  }
+
   try {
     const API_KEY = Deno.env.get("BILLPS_API_KEY");
     const API_APP_DATA = Deno.env.get("BILLPS_APP_DATA");
+    const HOST_URL = Deno.env.get("BILLPS_HOST_URL");
 
     if (!API_KEY || !API_APP_DATA) {
       throw new Error("Bill.ps credentials not set");
     }
 
-    const tokenResponse = await fetch("https://bill.ps/api/loginBill", {
+    const url = `${HOST_URL}api/loginBill?apiKey=${API_KEY}&api_data=${API_APP_DATA}`
+
+    const tokenResponse = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        apiKey: API_KEY,
-        api_data: API_APP_DATA,
-      })
+        "accept": "application/json"
+      }
     });
 
     const tokenData = await tokenResponse.json();
@@ -35,6 +49,7 @@ serve(async (req: Request) => {
 
     return new Response(JSON.stringify({ token: tokenData.token }), {
       headers: {
+        ...corsHeaders,
         "Content-Type": "application/json",
       },
       status: 200
@@ -44,7 +59,10 @@ serve(async (req: Request) => {
     return new Response(JSON.stringify({
       success: false,
       error: error.message
-    }))
+    }), {
+      headers: corsHeaders,
+      status: 500
+    })
   }
 })
 

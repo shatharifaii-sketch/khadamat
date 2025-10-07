@@ -64,7 +64,7 @@ const SubscriptionHistoryTable = () => {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>تاريخ الاشتراكات</CardTitle>
+          <CardTitle>تاريخ الدفع</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-8">
@@ -78,7 +78,7 @@ const SubscriptionHistoryTable = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>تاريخ الاشتراكات</CardTitle>
+        <CardTitle>تاريخ الدفع</CardTitle>
       </CardHeader>
       <CardContent>
         {paymentHistory.length === 0 ? (
@@ -137,7 +137,7 @@ const SubscriptionHistoryTable = () => {
             <div>
               {getUserSubscription.data.status === 'active' && (
                 <p className="mt-4 text-sm text-muted-foreground">
-                  اشتراكك الحالي: {getSubscriptionTierText(getUserSubscription.data.subscription_tier)} - 
+                  اشتراكك الحالي: {getSubscriptionTierText(getUserSubscription.data.billing_cycle)} - 
                   ينتهي في: {new Date(getUserSubscription.data.expires_at).toLocaleDateString('ar')}
                 </p>
               )}
