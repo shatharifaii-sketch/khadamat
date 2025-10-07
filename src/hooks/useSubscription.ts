@@ -16,8 +16,21 @@ export interface Subscription {
   auto_renew: boolean;
   created_at: string;
   updated_at: string;
-  subscription_tier?: string;
   auto_bump_service?: boolean;
+  billing_cycle: string;
+  is_in_trial: boolean;
+  trial_expires_at: string;
+  is_payment_pastdue: boolean;
+  next_payment_date: string;
+  last_payment_date: string;
+  subscription_tier: {
+    title: string;
+    allowed_services: number;
+    price_monthly_title: string;
+    price_yearly_title: string;
+    price_monthly_value: number;
+    price_yearly_value: number;
+  }
 }
 
 export interface PaymentTransaction {
@@ -47,7 +60,15 @@ export const useSubscription = () => {
             
       const { data, error } = await supabase
         .from('subscriptions')
-        .select('*')
+        .select(`*, 
+          subscription_tier:subscriptions_tier_id_fkey (
+            title,
+            allowed_services,
+            price_monthly_title,
+            price_yearly_title,
+            price_monthly_value,
+            price_yearly_value
+          )`)
         .eq('user_id', user.id)
         .single();
 
@@ -60,6 +81,7 @@ export const useSubscription = () => {
     },
   });
 
+  /*
   // Create payment transaction
   const createPaymentTransaction = useMutation({
     mutationFn: async (transactionData: Omit<PaymentTransaction, 'id' | 'user_id'>) => {
@@ -175,6 +197,7 @@ export const useSubscription = () => {
       toast.error('حدث خطأ في إتمام الدفع: ' + error.message);
     }
   });
+  */
 
   // Check if user can post more services
   const canPostService = async () => {
@@ -198,13 +221,84 @@ export const useSubscription = () => {
     return currentServiceCount < subscription.services_allowed;
   };
 
+  const createNewSubscription = useMutation({
+    mutationKey: ['create-new-subscription'],
+    mutationFn: async ({ subscriptionTierId, billingCycle }: { subscriptionTierId: string, billingCycle: string }) => {
+      const { data: {session} } = await supabase.auth.getSession();
+
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-subscription`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          user_id: user?.id,
+          subscription_tier_id: subscriptionTierId,
+          billing_cycle: billingCycle,
+        })
+      });
+
+      if (!response.ok) {
+        console.log('Error creating new subscription:', response);
+        throw new Error('error');
+      }
+
+      const data = await response.json();
+
+      return data.subscription;
+    },
+    onSuccess() {
+        queryClient.invalidateQueries({ queryKey: ['user-subscription'] });
+        toast.success('تم انشاء الاشتراك بنجاح! يمكنك الآن نشر خدماتك.');
+    },
+    onError(error: any) {
+      console.error('Error creating new subscription:', error);
+      toast.error('حدث خطاء في انشاء الاشتراك: ' + error.message);
+    },
+  })
+
+  const deactivateSubscription = useMutation({
+    mutationKey: ['deactivate-subscription'],
+    mutationFn: async ({ subscriptionId }: { subscriptionId: string }) => {
+      if (!user?.id) throw new Error('User not authenticated.');
+
+    const { data, error } = await supabase
+      .from('subscriptions')
+      .update({ status: 'inactive' })
+      .eq('id', subscriptionId)
+      .select();
+    
+    console.log('Deactivating subscription:', data);
+
+    if (error) throw error;
+    if (!data || data.length === 0) throw new Error('No subscription found for user.');
+
+    return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-subscription'] });
+      toast.success('تم انهاء الاشتراك بنجاح!.');
+    },
+    onError(error: any) {
+      console.error('Error deactivating subscription:', error);
+      toast.error('حدث خطاء في انهاء الاشتراك: ' + error.message);
+    },
+  })
+
   return {
     getUserSubscription,
-    createPaymentTransaction,
-    completePayment,
+    //createPaymentTransaction,
+    //completePayment,
     canPostService,
     canPost: getUserSubscription.data?.status === 'active' || getUserSubscription.data,
-    isCreatingTransaction: createPaymentTransaction.isPending,
-    isCompletingPayment: completePayment.isPending
+    //isCreatingTransaction: createPaymentTransaction.isPending,
+    //isCompletingPayment: completePayment.isPending,
+    createNewSubscription,
+    creatingNewSubscription: createNewSubscription.isPending,
+    createNewSubscriptionError: createNewSubscription.error,
+    createnNewSubscriptionSuccess: createNewSubscription.isSuccess,
+    deactivateSubscription,
+    deactivatingSubscription: deactivateSubscription.isPending
   };
 };

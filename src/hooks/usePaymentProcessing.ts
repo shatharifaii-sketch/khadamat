@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 
 export const usePaymentProcessing = () => {
   const navigate = useNavigate();
-  const { createPaymentTransaction, completePayment } = useSubscription();
+  //const { createPaymentTransaction, completePayment } = useSubscription();
 
   const processPayment = async (
     paymentMethod: string,
@@ -21,7 +21,7 @@ export const usePaymentProcessing = () => {
       let subscriptionMonths = subscriptionTier === 'yearly' ? 12 : 1;
 
       // Create payment transaction
-      const transaction = await createPaymentTransaction.mutateAsync({
+      /*const transaction = await createPaymentTransaction.mutateAsync({
         amount: finalAmount,
         currency: 'ILS',
         payment_method: paymentMethod,
@@ -34,10 +34,10 @@ export const usePaymentProcessing = () => {
           ...paymentData,
           subscription_months: subscriptionMonths
         }
-      });
+      });*/
 
       // Process payment based on method
-      await handlePaymentMethod(paymentMethod, paymentData, transaction, finalAmount);
+      //await handlePaymentMethod(paymentMethod, paymentData, transaction, finalAmount);
       
     } catch (error) {
       console.error('Payment error:', error);
@@ -68,10 +68,10 @@ export const usePaymentProcessing = () => {
           });
           
           try {
-            await completePayment.mutateAsync({ 
+            /*await completePayment.mutateAsync({ 
               transactionId: transaction.id,
               externalTransactionId: `reflect_${Date.now()}`
-            });
+            });*/
             
             toast.dismiss(completionToast);
             toast.success('تم الدفع بنجاح! جاري تحضير خدماتك...', {
@@ -108,10 +108,10 @@ export const usePaymentProcessing = () => {
           });
           
           try {
-            await completePayment.mutateAsync({ 
+            /*await completePayment.mutateAsync({ 
               transactionId: transaction.id,
               externalTransactionId: `jawwal_${Date.now()}`
-            });
+            });*/
             
             toast.dismiss(verificationToast);
             toast.success('تم الدفع بنجاح عبر جوال باي!', {
@@ -144,10 +144,10 @@ export const usePaymentProcessing = () => {
           });
           
           try {
-            await completePayment.mutateAsync({ 
+            /*await completePayment.mutateAsync({ 
               transactionId: transaction.id,
               externalTransactionId: `paypal_${Date.now()}`
-            });
+            });*/
             
             toast.dismiss(completionToast);
             toast.success('تم الدفع بنجاح عبر PayPal!', {
@@ -176,6 +176,6 @@ export const usePaymentProcessing = () => {
 
   return {
     processPayment,
-    isCreatingTransaction: createPaymentTransaction.isPending
+    //isCreatingTransaction: createPaymentTransaction.isPending
   };
 };

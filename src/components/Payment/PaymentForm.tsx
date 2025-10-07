@@ -4,8 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Separator } from '@/components/ui/separator';
 import { ArrowRight, ArrowLeft, AlertCircle } from 'lucide-react';
 import PaymentMethodSelector from './PaymentMethodSelector';
-import PaymentMethodForms from './PaymentMethodForms';
+//import PaymentMethodForms from './PaymentMethodForms';
 import CouponInput from './CouponInput';
+import { Subscription, useSubscription } from '@/hooks/useSubscription';
+import { useNavigate } from 'react-router-dom';
 
 interface PaymentFormProps {
   paymentMethod: string;
@@ -14,7 +16,7 @@ interface PaymentFormProps {
   onInputChange: (field: string, value: string) => void;
   onSubmit: (e: React.FormEvent) => void;
   finalAmount: number;
-  isCreatingTransaction: boolean;
+  isCreatingTransaction?: boolean;
   onBack: () => void;
   couponCode: string;
   setCouponCode: (code: string) => void;
@@ -22,6 +24,9 @@ interface PaymentFormProps {
   isValidating: boolean;
   validateCoupon: (code: string, userId: string) => Promise<void>;
   removeCoupon: () => void;
+  subscription: Subscription | null;
+  subscriptionTierId: string | null;
+  billingCycle: string | null;
 }
 
 const PaymentForm = ({
@@ -38,8 +43,24 @@ const PaymentForm = ({
   appliedCoupon,
   isValidating,
   validateCoupon,
-  removeCoupon
+  removeCoupon,
+  subscription,
+  subscriptionTierId,
+  billingCycle
 }: PaymentFormProps) => {
+  const navigate = useNavigate();
+  const { createNewSubscription, createNewSubscriptionError, createnNewSubscriptionSuccess, creatingNewSubscription } = useSubscription();
+
+  const createSubscription = () => {
+    createNewSubscription.mutateAsync({
+      subscriptionTierId,
+      billingCycle
+    }).then(() => {
+      if (createnNewSubscriptionSuccess) {
+        navigate("/account");
+      }
+    })
+  }
   return (
     <Card>
       <CardHeader>
@@ -71,24 +92,21 @@ const PaymentForm = ({
           <Separator />
 
           {/* Payment Method Specific Forms */}
-          <PaymentMethodForms 
+          {/*<PaymentMethodForms 
             paymentMethod={paymentMethod}
             paymentData={paymentData}
             onInputChange={onInputChange}
-          />
+          />*/}
 
           <div className="space-y-4 pt-4">
             <Button 
-              type="submit" 
               size="lg" 
               className="w-full text-xl py-6"
-              disabled={isCreatingTransaction}
+              disabled={creatingNewSubscription}
+              onClick={createSubscription}
             >
               <ArrowRight className="ml-2" size={20} />
-              {isCreatingTransaction 
-                ? 'جاري المعالجة...' 
-                : `ادفع ${finalAmount} شيكل`
-              }
+              {subscription ? 'تحديث الاشتراك' : 'ابدأ الاشتراك'}
             </Button>
             
             <Button 

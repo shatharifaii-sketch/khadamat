@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Calendar, CreditCard, Star } from 'lucide-react';
 import { Tables } from '@/integrations/supabase/types';
+import { usePaymentLogic } from '@/hooks/usePaymentLogic';
 
 interface PaymentOrderSummaryProps {
   subscription: any;
@@ -53,7 +54,7 @@ const PaymentOrderSummary = (props: PaymentOrderSummaryProps) => {
         )}
 
         {/* Service Info */}
-        {serviceData && (
+        {serviceData > 0 && (
           <div className="space-y-2">
             <h4 className="font-medium">تفاصيل الخدمة</h4>
             <div className="p-3 bg-gray-50 rounded-lg text-sm">

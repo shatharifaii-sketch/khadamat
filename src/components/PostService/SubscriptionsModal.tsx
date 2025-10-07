@@ -1,28 +1,35 @@
-import { Card, CardContent, CardDescription, CardFooter, CardHeader } from '../ui/card'
-import { cn } from '@/lib/utils'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader } from '../ui/card';
+import { cn } from '@/lib/utils';
 import { Button } from '../ui/button'
-import { Switch } from '../ui/switch'
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Badge } from '../ui/badge'
-import { Star } from 'lucide-react'
-import { useSubscriptionTiers } from '@/hooks/useSubscriptionTiers'
-import { Tables } from '@/integrations/supabase/types'
+import { Switch } from '../ui/switch';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Badge } from '../ui/badge';
+import { Star } from 'lucide-react';
+import { useSubscriptionTiers } from '@/hooks/useSubscriptionTiers';
+import { Tables } from '@/integrations/supabase/types';
+import { useEnhancedPaymentLogic } from '@/hooks/useEnhancedPaymentLogic';
+import { usePaymentLogic } from '@/hooks/usePaymentLogic';
 
 interface SubscriptionsModalProps {
     cardClassName?: string;
     switchClassName?: string;
 }
+
 const SubscriptionsModal = ({ cardClassName, switchClassName }: SubscriptionsModalProps) => {
     const navigate = useNavigate();
     const [yearly, setYearly] = useState<boolean>(false);
 
     const { subscriptionTiersData } = useSubscriptionTiers();
+    const { getToken } = usePaymentLogic();
 
     const handleSubscriptionSelect = (subscription: Tables<'subscription_tiers'>) => {
         const serviceData = JSON.parse(localStorage.getItem('serviceData') || '{}');
-        console.log(serviceData)
-        navigate('/payment', { state: { subscriptionToGet: subscription, serviceData }});
+        console.log(serviceData);
+        getToken.mutateAsync();
+
+        console.log('is yearly? ', yearly)
+        navigate('/payment', { state: { subscriptionToGet: subscription, serviceData, subscriptionTier: yearly ? 'Yearly' : 'Monthly' } });
     }
 
     return (
