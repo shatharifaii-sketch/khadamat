@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient, useSuspenseQuery } from '@tansta
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { json } from 'react-router-dom';
 
 export interface Subscription {
   id: string;
@@ -23,6 +24,7 @@ export interface Subscription {
   is_payment_pastdue: boolean;
   next_payment_date: string;
   last_payment_date: string;
+  subscription_ended_at: string;
   subscription_tier: {
     title: string;
     allowed_services: number;
@@ -70,6 +72,7 @@ export const useSubscription = () => {
             price_yearly_value
           )`)
         .eq('user_id', user.id)
+        .eq('status', 'active')
         .single();
 
       if (error && error.code !== 'PGRST116') {
@@ -78,6 +81,60 @@ export const useSubscription = () => {
       }
       
       return data as Subscription | null;
+    },
+  });
+
+  const getUserSubscriptions = useSuspenseQuery({
+    queryKey: ['user-subscriptions', user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+            
+      const { data: activeSubscription, error: activeSubscriptionError } = await supabase
+        .from('subscriptions')
+        .select(`*, 
+          subscription_tier:subscriptions_tier_id_fkey (
+            title,
+            allowed_services,
+            price_monthly_title,
+            price_yearly_title,
+            price_monthly_value,
+            price_yearly_value
+          )`)
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .single();
+
+      if (activeSubscriptionError && activeSubscriptionError.code !== 'PGRST116') {
+        console.error('Error fetching subscription:', activeSubscriptionError);
+        throw activeSubscriptionError;
+      }
+
+      const { data: inactiveSubscriptions, error: inactiveSubscriptionsError } = await supabase
+        .from('subscriptions')
+        .select(`*, 
+          subscription_tier:subscriptions_tier_id_fkey (
+            title,
+            allowed_services,
+            price_monthly_title,
+            price_yearly_title,
+            price_monthly_value,
+            price_yearly_value
+          )`)
+        .eq('user_id', user.id)
+        .eq('status', 'inactive');
+
+      if (inactiveSubscriptionsError && inactiveSubscriptionsError.code !== 'PGRST116') {
+        console.error('Error fetching subscription:', inactiveSubscriptionsError);
+        throw inactiveSubscriptionsError;
+      }
+      
+      return { 
+        activeSubscription, 
+        inactiveSubscriptions 
+      } as {
+        activeSubscription: Subscription;
+        inactiveSubscriptions: Subscription[];
+      };
     },
   });
 
@@ -263,18 +320,20 @@ export const useSubscription = () => {
     mutationFn: async ({ subscriptionId }: { subscriptionId: string }) => {
       if (!user?.id) throw new Error('User not authenticated.');
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('subscriptions')
-      .update({ status: 'inactive' })
+      .update({ 
+        status: 'inactive',
+        subscription_ended_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
       .eq('id', subscriptionId)
-      .select();
-    
-    console.log('Deactivating subscription:', data);
+
+    console.log('Deactivating subscription:', subscriptionId);
 
     if (error) throw error;
-    if (!data || data.length === 0) throw new Error('No subscription found for user.');
 
-    return data;
+    return json({ success: true });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-subscription'] });
@@ -288,6 +347,7 @@ export const useSubscription = () => {
 
   return {
     getUserSubscription,
+    getUserSubscriptions,
     //createPaymentTransaction,
     //completePayment,
     canPostService,

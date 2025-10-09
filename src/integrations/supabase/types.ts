@@ -268,7 +268,7 @@ export type Database = {
           discount_percentage: number | null
           expires_at: string | null
           id: string
-          type: string
+          type: Database["public"]["Enums"]["coupon_type"]
           updated_at: string
           usage_limit: number | null
           used_count: number
@@ -282,7 +282,7 @@ export type Database = {
           discount_percentage?: number | null
           expires_at?: string | null
           id?: string
-          type: string
+          type: Database["public"]["Enums"]["coupon_type"]
           updated_at?: string
           usage_limit?: number | null
           used_count?: number
@@ -296,7 +296,7 @@ export type Database = {
           discount_percentage?: number | null
           expires_at?: string | null
           id?: string
-          type?: string
+          type?: Database["public"]["Enums"]["coupon_type"]
           updated_at?: string
           usage_limit?: number | null
           used_count?: number
@@ -847,6 +847,7 @@ export type Database = {
           services_used: number | null
           started_at: string
           status: string
+          subscription_ended_at: string | null
           tier_id: string | null
           trial_expires_at: string | null
           updated_at: string
@@ -869,6 +870,7 @@ export type Database = {
           services_used?: number | null
           started_at?: string
           status?: string
+          subscription_ended_at?: string | null
           tier_id?: string | null
           trial_expires_at?: string | null
           updated_at?: string
@@ -891,6 +893,7 @@ export type Database = {
           services_used?: number | null
           started_at?: string
           status?: string
+          subscription_ended_at?: string | null
           tier_id?: string | null
           trial_expires_at?: string | null
           updated_at?: string
@@ -1169,6 +1172,7 @@ export type Database = {
           coupon_id: string
           coupon_type: string
           discount_amount: number
+          discount_percentage: number
           message: string
           valid: boolean
         }[]
@@ -1184,6 +1188,11 @@ export type Database = {
     Enums: {
       activity_type: "login" | "logout"
       app_role: "admin" | "moderator" | "user"
+      coupon_type:
+        | "first_month_free"
+        | "three_months_for_one"
+        | "percentage"
+        | "fixed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1313,6 +1322,12 @@ export const Constants = {
     Enums: {
       activity_type: ["login", "logout"],
       app_role: ["admin", "moderator", "user"],
+      coupon_type: [
+        "first_month_free",
+        "three_months_for_one",
+        "percentage",
+        "fixed",
+      ],
     },
   },
 } as const

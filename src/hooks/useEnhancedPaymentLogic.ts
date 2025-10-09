@@ -58,7 +58,12 @@ export const useEnhancedPaymentLogic = () => {
     }
   };
 
-  const discount = getDiscountSafely();
+  const couponData = paymentState.appliedCoupon || null;
+  let discount = getDiscountSafely();
+
+  if (couponData?.coupon_type === 'percentage' && couponData?.discount_percentage > 0) {
+    discount = (baseAmount * couponData.discount_percentage) / 100;
+  }
   const finalAmount = Math.max(0, baseAmount - discount);
 
   // Enhanced payment handler with comprehensive error handling

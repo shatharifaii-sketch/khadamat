@@ -1,7 +1,7 @@
 import React, { Suspense, useState } from 'react'
 import ActivityChart, { ActivityChartProps } from './ActivityChart'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
-import { BarChart3, Search, Settings, TrendingUp, Users } from 'lucide-react'
+import { BadgePercent, BarChart3, Search, Settings, TrendingUp, Users } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
 import { Badge } from '../ui/badge'
 import { AnalyticsSummary } from '@/types/analytics'
@@ -11,12 +11,14 @@ import { UserManagement } from './UserManagement'
 import { Json, Tables } from '@/integrations/supabase/types'
 import { Service } from '@/hooks/useAdminFunctionality'
 import { ServiceEditModal } from './ServiceEditModal'
+import CouponsManagement from './CouponsManagement'
 
 interface Props {
     analyticsSummary: AnalyticsSummary;
     adminData: {
         services: Service[];
         profiles: Tables<'profiles'>[];
+        coupons: Tables<'coupons'>[];
     };
     stats: {
         publishedServices: number;
@@ -76,7 +78,7 @@ const AdminView = ({ analyticsSummary, adminData, stats, dailyStats, monthlyStat
 
             {/* Main Admin Tabs */}
             <Tabs defaultValue="analytics" className="space-y-6">
-                <TabsList className="grid w-full grid-cols-3">
+                <TabsList className="grid w-full grid-cols-4">
                     <TabsTrigger value="analytics" className="flex items-center gap-2">
                         <BarChart3 className="h-4 w-4" />
                         التحليلات
@@ -88,6 +90,10 @@ const AdminView = ({ analyticsSummary, adminData, stats, dailyStats, monthlyStat
                     <TabsTrigger value="services" className="flex items-center gap-2">
                         <Settings className="h-4 w-4" />
                         الخدمات
+                    </TabsTrigger>
+                    <TabsTrigger value="coupons" className="flex items-center gap-2">
+                        <BadgePercent className="h-4 w-4" />
+                        الكوبونات
                     </TabsTrigger>
                 </TabsList>
 
@@ -190,6 +196,13 @@ const AdminView = ({ analyticsSummary, adminData, stats, dailyStats, monthlyStat
                         services={adminData.services}
                         users={adminData.profiles}
                         onServiceUpdated={() => { }}
+                    />
+                </TabsContent>
+
+                {/** Coupon Management */}
+                <TabsContent value="coupons">
+                    <CouponsManagement
+                        coupons={adminData.coupons}
                     />
                 </TabsContent>
             </Tabs>
