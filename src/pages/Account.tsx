@@ -33,7 +33,7 @@ const Account = () => {
   const navigate = useNavigate();
   const { profile, updateProfile, isLoading: profileLoading } = useProfile();
   const { getUserServices } = useServices();
-  const { getUserSubscription } = useSubscription();
+  const { getUserSubscription, getUserSubscriptions } = useSubscription();
 
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -220,11 +220,11 @@ const Account = () => {
         </div>
 
         {/* Subscription History Section */}
-        {getUserSubscription.data && (
+        {getUserSubscriptions.data && (
           <div>
           <Suspense fallback={<>
-            <p>تحميل تاريخ الاشتراكات</p></>}>
-            <ErrorBoundary fallback={<div>فشل في تحميل تاريخ الاشتراكات</div>}>
+            <p>تحميل الاشتراكات</p></>}>
+            <ErrorBoundary fallback={<div>فشل في تحميل  الاشتراكات</div>}>
               <UserSubscriptions />
             </ErrorBoundary>
           </Suspense>

@@ -1,9 +1,11 @@
 import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { toast } from "./use-toast";
+import { toast, useToast } from "./use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabaseAdmin } from "@/integrations/supabase/adminClient";
 import { User } from "@/components/Admin/ui/UserForm";
+import { Tables } from "@/integrations/supabase/types";
+import { json } from "react-router-dom";
 
 interface UserProfile {
   id: string;
@@ -95,10 +97,14 @@ export const useAdminData = () => {
         )`)
         .order('created_at', { ascending: false });
 
-      console.log('Admin data:', { profiles, services });
+
+      const { data: coupons, error: couponsError } = await supabase.from('coupons').select('*').order('created_at', { ascending: false });
+
+      console.log('Admin data:', { profiles, services, coupons });
 
       if (usersError) throw usersError;
       if (servicesError) throw servicesError;
+      if (couponsError) throw couponsError;
 
       // Calculate accurate metrics
       const uniqueServiceProviders = services.map(service => service.user_id).filter((value, index, self) => self.indexOf(value) === index).length;
@@ -121,11 +127,12 @@ export const useAdminData = () => {
       };
 
 
-      return { profiles, services, stats };
+      return { profiles, services, stats, coupons };
     },
     initialData: {
       profiles: [],
       services: [],
+      coupons: [],
       stats: {
         totalUsers: 0,
         serviceProviders: 0,
@@ -166,16 +173,16 @@ export const useAdminFunctionality = () => {
       if (userError) throw userError;
 
       const { data: profile, error: profileError } = await supabase.from('profiles')
-      .update({
-        full_name: formData.full_name,
-        phone: formData.phone,
-        location: formData.location,
-        bio: formData.bio ?? '',
-        experience_years: formData.experience_years ?? 0,
-        is_service_provider: formData.is_service_provider ?? false,
-        profile_image_url: '',
-      })
-      .eq('id', user.user?.id);
+        .update({
+          full_name: formData.full_name,
+          phone: formData.phone,
+          location: formData.location,
+          bio: formData.bio ?? '',
+          experience_years: formData.experience_years ?? 0,
+          is_service_provider: formData.is_service_provider ?? false,
+          profile_image_url: '',
+        })
+        .eq('id', user.user?.id);
 
       if (profileError) throw profileError;
 
@@ -258,15 +265,15 @@ export const useAdminFunctionality = () => {
 
       if ((formData.email || formData.password)) {
         if (formData.email) {
-          const { error } = await supabaseAdmin.auth.admin.updateUserById(formData.id!, { email: formData.email } );
+          const { error } = await supabaseAdmin.auth.admin.updateUserById(formData.id!, { email: formData.email });
           if (error) throw error;
         }
         if (formData.password) {
-          const { error } = await supabaseAdmin.auth.admin.updateUserById(formData.id!, { password: formData.password } );
+          const { error } = await supabaseAdmin.auth.admin.updateUserById(formData.id!, { password: formData.password });
           if (error) throw error;
         }
       }
-      
+
       const { error } = await supabase
         .from('profiles')
         .update({
@@ -336,16 +343,16 @@ export const useAdminFunctionality = () => {
 
       if (formData.service_images) {
         for (const image of formData.service_images) {
-        const { error: imageError } = await supabase
-          .from('service_images')
-          .insert({
-            service_id: data?.id,
-            image_url: image.image_url,
-            image_name: image.image_name,
-          });
+          const { error: imageError } = await supabase
+            .from('service_images')
+            .insert({
+              service_id: data?.id,
+              image_url: image.image_url,
+              image_name: image.image_name,
+            });
 
-        if (imageError) throw imageError;
-      }
+          if (imageError) throw imageError;
+        }
       }
 
       return;
@@ -360,7 +367,7 @@ export const useAdminFunctionality = () => {
       if (!admin) {
         throw new Error("Only admins can delete users");
       }
-      
+
       const { data, error } = await supabase
         .from('services')
         .update({
@@ -378,18 +385,18 @@ export const useAdminFunctionality = () => {
         .select('*')
         .single();
 
-        if (formData.service_images) {
+      if (formData.service_images) {
         for (const image of formData.service_images) {
-        const { error: imageError } = await supabase
-          .from('service_images')
-          .insert({
-            service_id: data?.id,
-            image_url: image.image_url,
-            image_name: image.image_name,
-          });
+          const { error: imageError } = await supabase
+            .from('service_images')
+            .insert({
+              service_id: data?.id,
+              image_url: image.image_url,
+              image_name: image.image_name,
+            });
 
-        if (imageError) throw imageError;
-      }
+          if (imageError) throw imageError;
+        }
       }
 
       if (error) throw error;
@@ -398,6 +405,57 @@ export const useAdminFunctionality = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-data'] });
+    }
+  })
+
+  const createCoupon = useMutation({
+    mutationKey: ['create-coupon'],
+    mutationFn: async (formData: Partial<Tables<'coupons'>>) => {
+      const { data, error } = await supabase
+      .from('coupons')
+      .insert({
+        code: formData.code.trim().toUpperCase() || '',
+        type: formData.type || 'fixed',
+        discount_amount: formData.discount_amount || 0,
+        discount_percentage: formData.discount_percentage || null,
+        usage_limit: formData.usage_limit || null,
+        used_count: 0,
+        description: formData.description || '',
+      })
+      .select()
+      .single();
+
+      if (error) {
+        console.error('Error creating coupon:', error);
+        throw error;
+      }
+
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-data'] });
+    },
+    onError: (error) => {
+      console.error('Mutation error:', error);
+    }
+  })
+
+  const deleteCoupon = useMutation({
+    mutationFn: async (couponId: string) => {
+      const { error } = await supabase.from('coupons').delete().eq('id', couponId);
+
+      if (error) {
+        console.error('Error deleting coupon:', error);
+        throw error;
+      }
+
+      return json({ success: true });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-data'] });
+    },
+    onError: (error) => {
+      console.error('Mutation error:', error);
     }
   })
 
@@ -414,6 +472,9 @@ export const useAdminFunctionality = () => {
     createServiceSuccess: createService.isSuccess,
     deleteUserSuccess: deleteUser.isSuccess,
     updateUserSuccess: updateUser.isSuccess,
-    deleteServiceSuccess: deleteService.isSuccess
+    deleteServiceSuccess: deleteService.isSuccess,
+    deleteCoupon,
+    createCoupon,
+    createCouponSuccess: createCoupon.isSuccess,
   };
 }

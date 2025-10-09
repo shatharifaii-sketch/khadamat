@@ -54,7 +54,7 @@ const CouponInput = ({
                   {inputValue}
                 </Badge>
                 <span className="text-sm text-green-700">
-                  خصم {appliedCoupon.discount_amount} شيكل
+                  خصم {appliedCoupon.coupon_type === 'percentage' ? `${appliedCoupon.discount_percentage}%` : `${appliedCoupon.discount_amount} شيكل`}
                 </span>
               </div>
               <Button

@@ -11,6 +11,7 @@ import { useProfile } from '@/hooks/useProfile';
 import LanguageSwitcher from './LanguageSwitcher';
 import { Avatar, AvatarImage } from './ui/avatar';
 import { GeneratedAvatar } from './GeneratedAvatar';
+import { isAdmin } from '@/hooks/useAdminFunctionality';
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,7 +23,7 @@ const Navigation = () => {
   // Enable real-time notifications
   const { isConnected } = useRealTimeNotifications();
 
-  const isAdmin = user?.email === 'shatharifaii@gmail.com';
+  const admin = isAdmin() || user?.email === 'shatharifaii@gmail.com';
   const isServiceProvider = profile?.is_service_provider || false;
 
   const isActive = (path: string) => location.pathname === path;
@@ -101,7 +102,7 @@ const Navigation = () => {
                 من نحن
               </div>
             </NavLink>
-            {isAdmin && (
+            {admin && (
               <NavLink to="/admin">
                 <div className="flex items-center gap-2">
                   <Shield size={16} />
@@ -165,7 +166,7 @@ const Navigation = () => {
                       من نحن
                     </div>
                   </NavLink>
-                  {isAdmin && (
+                  {admin && (
                     <NavLink to="/admin" onClick={() => setIsOpen(false)}>
                       <div className="flex items-center gap-2 text-lg">
                         <Shield size={20} />

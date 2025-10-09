@@ -8,19 +8,23 @@ import { useHomeStats } from '@/hooks/useHomeStats';
 import StatsSection from '@/components/Home/StatsSection';
 import ServicesGrid from '@/components/Home/ServicesGrid';
 import { useAuth } from '@/contexts/AuthContext';
-import SubscriptionsModal from '@/components/PostService/SubscriptionsModal';
-import { Suspense } from 'react';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { useSubscription } from '@/hooks/useSubscription';
+import React, { Suspense, useEffect } from 'react';
 
 const Index = () => {
   const { data: homeStats, isLoading, error } = useHomeStats();
   const { user } = useAuth();
   const { canPost } = useSubscription();
+  const SubscriptionModal = React.lazy(() => import('@/components/PostService/SubscriptionsModal'));
 
   if (error) {
     console.error('Error loading home stats:', error);
   }
+
+  useEffect(() => {
+    import('@/components/PostService/SubscriptionsModal');
+  }, [])
 
   return (
     <>
@@ -172,13 +176,15 @@ const Index = () => {
             </Link>
           </div>
           ) : (
-            <Suspense fallback={<div>Loading...</div>}>
+            <div>
+              <Suspense fallback={<div>Loading...</div>}>
               <ErrorBoundary fallback={<div>Something went wrong</div>}>
-                <SubscriptionsModal 
+                <SubscriptionModal 
                 cardClassName='shadow-xl'
                 switchClassName='transition-all bg-secondary text-muted-foreground px-4 py-2 rounded-full' />
               </ErrorBoundary>
             </Suspense>
+            </div>
           )}
         </div>
       </section>

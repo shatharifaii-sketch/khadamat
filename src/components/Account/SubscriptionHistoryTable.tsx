@@ -15,12 +15,10 @@ const SubscriptionHistoryTable = () => {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'completed':
-        return <Badge variant="default">مكتملة</Badge>;
-      case 'pending':
-        return <Badge variant="secondary">قيد المراجعة</Badge>;
-      case 'failed':
-        return <Badge variant="destructive">فاشلة</Badge>;
+      case 'active':
+        return <Badge variant="default">مفعل</Badge>;
+      case 'inactive':
+        return <Badge variant="secondary">متوقف</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -40,8 +38,8 @@ const SubscriptionHistoryTable = () => {
 
   const getSubscriptionTierText = (tier: string) => {
     switch (tier) {
-      case 'yearly': return 'سنوي';
-      case 'monthly': return 'شهري';
+      case 'Yearly': return 'سنوي';
+      case 'Monthly': return 'شهري';
       default: return tier || 'شهري';
     }
   };
@@ -126,21 +124,12 @@ const SubscriptionHistoryTable = () => {
           </Table>
         )}
 
-          {paymentHistory.length === 0 ? (
+          {paymentHistory.length === 0 && (
             <div className='w-full'>
               {/* Additional content can be added here if needed */}
               <Button variant='default' className='flex-1 w-full mt-6' disabled={!user}>
                 اشترك الآن
               </Button>
-            </div>
-          ) : (
-            <div>
-              {getUserSubscription.data.status === 'active' && (
-                <p className="mt-4 text-sm text-muted-foreground">
-                  اشتراكك الحالي: {getSubscriptionTierText(getUserSubscription.data.billing_cycle)} - 
-                  ينتهي في: {new Date(getUserSubscription.data.expires_at).toLocaleDateString('ar')}
-                </p>
-              )}
             </div>
           )}
       </CardContent>

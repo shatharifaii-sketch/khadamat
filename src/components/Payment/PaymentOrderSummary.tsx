@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Calendar, CreditCard, Star } from 'lucide-react';
 import { Tables } from '@/integrations/supabase/types';
 import { usePaymentLogic } from '@/hooks/usePaymentLogic';
+import { CouponValidation } from '@/hooks/useCoupon';
 
 interface PaymentOrderSummaryProps {
   subscription: any;
@@ -12,7 +13,8 @@ interface PaymentOrderSummaryProps {
   finalAmount: number;
   subscriptionTier: string;
   discount?: number;
-  subscriptionToGet?: Tables<'subscription_tiers'>
+  subscriptionToGet?: Tables<'subscription_tiers'>;
+  couponData: CouponValidation;
 }
 
 const PaymentOrderSummary = (props: PaymentOrderSummaryProps) => {
@@ -24,7 +26,8 @@ const PaymentOrderSummary = (props: PaymentOrderSummaryProps) => {
     finalAmount,
     subscriptionTier,
     discount = 0,
-    subscriptionToGet
+    subscriptionToGet,
+    couponData
   } = props;
 
   console.log('PaymentOrderSummary props:', props);
@@ -93,10 +96,12 @@ const PaymentOrderSummary = (props: PaymentOrderSummaryProps) => {
             <span>{amount} شيكل</span>
           </div>
 
-          {discount > 0 && (
+          {discount > 0 && couponData && (
             <div className="flex items-center justify-between text-green-600">
               <span>خصم الكوبون</span>
-              <span>-{discount} شيكل</span>
+              <span>-{
+                  couponData?.coupon_type === "percentage" ? `${discount}%` : `${discount} شيكل`
+                }</span>
             </div>
           )}
 

@@ -7,6 +7,7 @@ export interface CouponValidation {
   coupon_id?: string;
   coupon_type?: string;
   discount_amount?: number;
+  discount_percentage?: number;
   message: string;
 }
 
@@ -78,7 +79,13 @@ export const useCoupon = () => {
   };
 
   const getDiscount = () => {
-    return appliedCoupon?.valid ? appliedCoupon.discount_amount || 0 : 0;
+    if (!appliedCoupon?.valid) return 0;
+
+    if (appliedCoupon?.coupon_type === 'percentage') {
+      return appliedCoupon.discount_percentage > 0 ? appliedCoupon.discount_percentage : appliedCoupon.discount_amount;
+    }
+
+    return appliedCoupon.discount_amount;
   };
 
   return {
@@ -88,6 +95,6 @@ export const useCoupon = () => {
     isValidating,
     validateCoupon,
     removeCoupon,
-    getDiscount
+    getDiscount,
   };
 };
