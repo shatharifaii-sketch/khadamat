@@ -37,7 +37,7 @@ export const usePaymentLogic = () => {
         throw new Error('User must be authenticated');
       }
 
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/billPs-auth`, {
+      const response = await fetch(`https://zfnewzekaxofgrindsmb.supabase.co/functions/v1/billPs-auth`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -74,7 +74,7 @@ export const usePaymentLogic = () => {
       }
 
       try {
-        const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/pay-for-subscription`, {
+        const response = await fetch(`https://zfnewzekaxofgrindsmb.supabase.co/functions/v1/pay-for-subscription`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
