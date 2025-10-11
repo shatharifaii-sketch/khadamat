@@ -19,7 +19,7 @@ const SubscriptionStatusCard = ({ subscription }: SubscriptionStatusCardProps) =
           <div className="flex items-center justify-center gap-3 mb-4">
             <CreditCard className="text-blue-600" size={24} />
             <span className="text-xl font-semibold text-blue-800">
-              اشتراكك: {subscription.subscription_tier === 'yearly' ? 'سنوي' : 'شهري'} - 
+              اشتراكك: {subscription.billing_cycle === 'yearly' ? 'سنوي' : 'شهري'} - 
               {subscription.services_used}/{subscription.services_allowed} خدمات مستخدمة
             </span>
           </div>
