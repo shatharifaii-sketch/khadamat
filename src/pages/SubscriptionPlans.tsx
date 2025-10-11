@@ -166,7 +166,7 @@ const SubscriptionPlans = () => {
             <div className="text-sm text-muted-foreground space-y-1">
               <p>الخدمات المتاحة: {subscription.services_allowed}</p>
               <p>الخدمات المستخدمة: {subscription.services_used}</p>
-              <p>نوع الاشتراك: {subscription.billing_cycle === 'yearly' ? 'سنوي' : 'شهري'}</p>
+              <p>نوع الاشتراك: {subscription.billing_cycle === 'Yearly' ? 'سنوي' : 'شهري'}</p>
               <p>ينتهي في: {new Date(subscription.expires_at).toLocaleDateString('ar')}</p>
             </div>
           </div>
