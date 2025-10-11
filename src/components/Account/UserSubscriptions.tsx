@@ -9,11 +9,18 @@ import { Label } from '../ui/label';
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from '../ui/drawer';
 import ErrorBoundary from '../ErrorBoundary';
 import SubscriptionsModal from '../PostService/SubscriptionsModal';
+import { usePaymentLogic } from '@/hooks/usePaymentLogic';
+import { useNavigate } from 'react-router-dom';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
 
 const UserSubscriptions = () => {
     const { getUserSubscriptions, deactivateSubscription, deactivatingSubscription } = useSubscription();
+    const { getPaymentUrl } = usePaymentLogic();
     const [isPaymentTime, setIsPaymentTime] = useState<boolean>(false);
     const [openSubscribeModal, setOpenSubscribeModal] = useState<boolean>(false);
+    const [openPaymentModal, setOpenPaymentModal] = useState<boolean>(false);
+    const [openDeactivateModal, setOpenDeactivateModal] = useState<boolean>(false);
+    const [currency, setCurrency] = useState<string>('JOD');
 
     if (!getUserSubscriptions.data) return null;
 
@@ -21,6 +28,14 @@ const UserSubscriptions = () => {
 
     const handleDeactivate = async () => {
         deactivateSubscription.mutateAsync({ subscriptionId: activeSubscription.id });
+    }
+
+    const startPayment = () => {
+        getPaymentUrl.mutateAsync({
+            subscription: activeSubscription,
+            total: activeSubscription.amount,
+            currency: currency
+        })
     }
 
     useEffect(() => {
@@ -91,7 +106,7 @@ const UserSubscriptions = () => {
                                     </div>
                                 </CardContent>
                                 <CardFooter>
-                                    <Button onClick={handleDeactivate} disabled={deactivatingSubscription} className='flex-1'>
+                                    <Button onClick={() => setOpenDeactivateModal(true)} disabled={deactivatingSubscription} className='flex-1'>
                                         الغاء تفعيل الاشتراك
                                     </Button>
                                 </CardFooter>
@@ -113,7 +128,7 @@ const UserSubscriptions = () => {
                                     </div>
                                     <div className='flex flex-col'>
                                         <p className='text-sm text-muted-foreground'>في حال لم يحن تاريخ الدفع المحدد فلا يصح بدء عملية الدفع!</p>
-                                        <Button disabled={!isPaymentTime} className='flex-1 mt-3'>
+                                        <Button onClick={() => setOpenPaymentModal(true)}  className='flex-1 mt-3'>
                                             ابدأ عمليه الدفع
                                         </Button>
                                     </div>
@@ -133,6 +148,47 @@ const UserSubscriptions = () => {
                     )
                 }
             </CardContent>
+
+            <Dialog open={openDeactivateModal} onOpenChange={setOpenDeactivateModal}>
+        <DialogContent className='flex flex-col gap-4'>
+          <DialogHeader>
+            <DialogTitle>هل انت متاكد؟</DialogTitle>
+            <DialogDescription>
+              هل انت متاكد من انك تريد الغاء تفعيل الاشتراك؟
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter className='flex gap-2'>
+            <Button
+              variant="ghost"
+              onClick={() => setOpenDeactivateModal(false)}
+            >
+              الغاء
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeactivate}
+              disabled={deactivatingSubscription}
+            >
+              {deactivatingSubscription ? "جاري المعالجة..." : "تاكيد"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+            <Dialog open={openPaymentModal} onOpenChange={() => setOpenPaymentModal(false)}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>بدء عملية الدفع</DialogTitle>
+                        <DialogDescription>
+                            هل أنت متأكد من رغبتك في بدء عملية الدفع للاشتراك الحالي؟
+                        </DialogDescription>
+                    </DialogHeader>
+                <DialogFooter>
+                    <Button variant='ghost' onClick={() => setOpenDeactivateModal(false)}>الغاء</Button>
+                    <Button variant='default' onClick={startPayment}>{deactivatingSubscription ? 'جاري المعالجة...' : 'نعم'}</Button>
+                </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
             <Drawer
         direction='right'

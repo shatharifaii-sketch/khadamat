@@ -92,6 +92,8 @@ const CouponInput = ({
           
           <p className="text-xs text-muted-foreground">
             أدخل كود الخصم للحصول على تخفيض على سعر الاشتراك
+            <br />
+            هذا الكوبون سيتم تطبيقه مرة واحدة فقط عند الدفع لأول مرة.
           </p>
         </div>
       </CardContent>

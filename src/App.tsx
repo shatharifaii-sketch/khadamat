@@ -25,6 +25,7 @@ import UserProfilePage from "./pages/UserProfilePage";
 import UserLayout from "./layouts/UserLayout";
 import AdminDashboard from "./layouts/AdminDashboard";
 import SubscriptionPayment from "./pages/SubscriptionPayment";
+import CompletedPayment from "./pages/CompletedPayment";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,7 @@ function App() {
                 <Route path="/" element={<UserLayout />}>
                   <Route path="" element={<Index />} />
                   <Route path="post-service" element={<PostService />} />
+                  <Route path="completed-payment" element={<CompletedPayment />} />
                   <Route path="find-service" element={<FindService />} />
                   <Route path="find-service/:id" element={<ServicePage />} />
                   <Route path="about" element={<About />} />

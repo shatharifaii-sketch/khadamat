@@ -1,8 +1,6 @@
-import ServiceView from "@/components/Service/ServiceView"
 import { useParams } from "react-router-dom";
 import { Suspense, useEffect } from "react";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import { useServiceData } from "@/hooks/usePublicServices";
 import { ServiceViewWrapper } from "@/components/Service/ServiceViewWrapper";
 import ServiceLoading from "@/components/Service/ServiceLoading";
 

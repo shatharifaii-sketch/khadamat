@@ -1,5 +1,5 @@
 
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, json } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Subscription, useSubscription } from '@/hooks/useSubscription';
 import { usePaymentState } from '@/hooks/usePaymentState';
@@ -7,8 +7,7 @@ import { usePaymentProcessing } from '@/hooks/usePaymentProcessing';
 import { useMutation } from '@tanstack/react-query';
 import { Tables } from '@/integrations/supabase/types';
 import { supabase } from '@/integrations/supabase/client';
-
-export let billToken = null;
+import { useState } from 'react';
 
 export const usePaymentLogic = () => {
   const navigate = useNavigate();
@@ -17,6 +16,7 @@ export const usePaymentLogic = () => {
   const { getUserSubscription } = useSubscription();
   const paymentState = usePaymentState();
   //const { processPayment, isCreatingTransaction } = usePaymentProcessing();
+  const [token, setToken] = useState<string | null>(null);
 
   const serviceData = location.state?.serviceData;
   const subscriptionTier = location.state?.subscriptionTier || 'Monthly';
@@ -53,15 +53,8 @@ export const usePaymentLogic = () => {
       const data = await response.json();
 
       console.log(data);
-
-      billToken = data.token;
-    }
-  })
-
-  const getPaymentUrl = useMutation({
-    mutationKey: ['get-payment-url'],
-    mutationFn: async (subscription: Tables<'subscription_tiers'>) => {
-      
+      setToken(data.token);
+      return json({ success: true })
     }
   })
 
@@ -70,6 +63,48 @@ export const usePaymentLogic = () => {
   // Apply coupon discount if available
   const discount = paymentState.getDiscount();
   const finalAmount = Math.max(0, baseAmount - discount);
+
+  const getPaymentUrl = useMutation({
+    mutationKey: ['get-payment-url'],
+    mutationFn: async ({ subscription, total, currency }: { subscription: Subscription, total: number, currency: string }) => {
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
+        throw new Error('User must be authenticated');
+      }
+
+      try {
+        const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/pay-for-subscription`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`
+          },
+          body: JSON.stringify({
+            subscriptionData: subscription,
+            currency,
+            total
+          })
+        })
+
+        if (!response.ok) {
+          console.log('Error getting payment url:', response);
+          throw new Error('error');
+        }
+
+        const data = await response.json();
+
+        if (data.paymentUrl) {
+          window.open(data.paymentUrl, '_blank');
+        } else {
+          console.error('failed to get payment url', data);
+        }
+      } catch (error) {
+        console.log(error);
+        throw new Error((error as Error).message);
+      }
+    }
+  })
 
   const handlePayment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,6 +129,9 @@ export const usePaymentLogic = () => {
     subscription,
     //isCreatingTransaction,
     navigate,
-    getToken
+    getToken,
+    token,
+    setToken,
+    getPaymentUrl
   };
 };
