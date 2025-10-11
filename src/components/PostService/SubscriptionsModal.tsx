@@ -21,12 +21,10 @@ const SubscriptionsModal = ({ cardClassName, switchClassName }: SubscriptionsMod
     const [yearly, setYearly] = useState<boolean>(false);
 
     const { subscriptionTiersData } = useSubscriptionTiers();
-    const { getToken } = usePaymentLogic();
 
     const handleSubscriptionSelect = (subscription: Tables<'subscription_tiers'>) => {
         const serviceData = JSON.parse(localStorage.getItem('serviceData') || '{}');
         console.log(serviceData);
-        getToken.mutateAsync();
 
         console.log('is yearly? ', yearly)
         navigate('/payment', { state: { subscriptionToGet: subscription, serviceData, subscriptionTier: yearly ? 'Yearly' : 'Monthly' } });

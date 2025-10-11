@@ -1,11 +1,12 @@
 
 import { Button } from '@/components/ui/button';
-import { Suspense, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import SubscriptionsModal from './SubscriptionsModal';
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from '../ui/drawer';
 import ErrorBoundary from '../ErrorBoundary';
 import { usePendingService } from '@/hooks/usePendingService';
 import { ServiceFormData } from '@/types/service';
+import { useServiceForm } from '@/hooks/useServiceForm';
 
 interface ServiceFormSubmitProps {
   isCreating: boolean;
@@ -16,8 +17,16 @@ interface ServiceFormSubmitProps {
 
 const ServiceFormSubmit = ({ isCreating, canPostService, isEditMode = false, savePendingService }: ServiceFormSubmitProps) => {
   const [openSubscribeModal, setOpenSubscribeModal] = useState<boolean>(false);
+  const { canPostServiceAsync } = useServiceForm();
+  const [postService, setPostService] = useState<boolean>(canPostService);
 
-  
+  useEffect(() => {
+    const checkCanPost = async () => {
+      setPostService(await canPostServiceAsync());
+    }
+
+    checkCanPost();
+  })
   return (
     <div className="pt-6">
       <Button
@@ -26,7 +35,7 @@ const ServiceFormSubmit = ({ isCreating, canPostService, isEditMode = false, sav
         className="w-full text-xl py-6"
         disabled={isCreating}
         onClick={() => {
-          if (!canPostService) {
+          if (!canPostService && !postService) {
             savePendingService();
             setOpenSubscribeModal(true);
           }
@@ -35,7 +44,7 @@ const ServiceFormSubmit = ({ isCreating, canPostService, isEditMode = false, sav
         {isCreating ?
           (isEditMode ? 'جاري التحديث...' : 'جاري النشر...') :
           (isEditMode ? 'حفظ التعديلات' :
-            canPostService ? 'انشر الخدمة' : 'اشترك الان و انشر الخدمة')
+            canPostService || postService ? 'انشر الخدمة' : 'اشترك الان و انشر الخدمة')
         }
       </Button>
       {!canPostService && !isEditMode && (

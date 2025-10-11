@@ -55,6 +55,7 @@ export const useServiceForm = (serviceToEdit?: Service | null) => {
     canPostService: isEditMode ? true : false, // For display purposes, actual check is in handleSubmit
     pendingService,
     getFieldError,
-    hasValidationErrors
+    hasValidationErrors,
+    canPostServiceAsync
   };
 };

@@ -35,7 +35,7 @@ Deno.serve(async (req) => {
 
     if (tierError) throw tierError;
 
-    const { data: existingSubscription, error: fetchError } = await supabase.from("subscriptions").select("*").eq("user_id", user_id).maybeSingle();
+    const { data: existingSubscription, error: fetchError } = await supabase.from("subscriptions").select("*").eq("user_id", user_id).eq('status', 'active').maybeSingle();
 
     if (fetchError) throw fetchError;
 

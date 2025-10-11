@@ -834,6 +834,7 @@ export type Database = {
           amount: number
           auto_renew: boolean | null
           billing_cycle: string
+          coupon_id: string | null
           created_at: string
           currency: string
           expires_at: string
@@ -851,12 +852,14 @@ export type Database = {
           tier_id: string | null
           trial_expires_at: string | null
           updated_at: string
+          used_coupon_on_start: boolean | null
           user_id: string
         }
         Insert: {
           amount?: number
           auto_renew?: boolean | null
           billing_cycle?: string
+          coupon_id?: string | null
           created_at?: string
           currency?: string
           expires_at?: string
@@ -874,12 +877,14 @@ export type Database = {
           tier_id?: string | null
           trial_expires_at?: string | null
           updated_at?: string
+          used_coupon_on_start?: boolean | null
           user_id: string
         }
         Update: {
           amount?: number
           auto_renew?: boolean | null
           billing_cycle?: string
+          coupon_id?: string | null
           created_at?: string
           currency?: string
           expires_at?: string
@@ -897,6 +902,7 @@ export type Database = {
           tier_id?: string | null
           trial_expires_at?: string | null
           updated_at?: string
+          used_coupon_on_start?: boolean | null
           user_id?: string
         }
         Relationships: [

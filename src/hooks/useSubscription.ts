@@ -3,6 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { json } from 'react-router-dom';
+import { useCoupon } from './useCoupon';
+import { useState } from 'react';
 
 export interface Subscription {
   id: string;
@@ -25,7 +27,10 @@ export interface Subscription {
   next_payment_date: string;
   last_payment_date: string;
   subscription_ended_at: string;
+  used_coupon_on_start: boolean;
+  coupon_id?: string;
   subscription_tier: {
+    id: string;
     title: string;
     allowed_services: number;
     price_monthly_title: string;
@@ -53,6 +58,8 @@ export interface PaymentTransaction {
 export const useSubscription = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { appliedCoupon } = useCoupon();
+  const [token, setToken] = useState<string | null>(null);
 
   // Get user's current subscription
   const getUserSubscription = useSuspenseQuery({
@@ -64,6 +71,7 @@ export const useSubscription = () => {
         .from('subscriptions')
         .select(`*, 
           subscription_tier:subscriptions_tier_id_fkey (
+            id,
             title,
             allowed_services,
             price_monthly_title,
@@ -93,6 +101,7 @@ export const useSubscription = () => {
         .from('subscriptions')
         .select(`*, 
           subscription_tier:subscriptions_tier_id_fkey (
+            id,
             title,
             allowed_services,
             price_monthly_title,
@@ -113,6 +122,7 @@ export const useSubscription = () => {
         .from('subscriptions')
         .select(`*, 
           subscription_tier:subscriptions_tier_id_fkey (
+            id,
             title,
             allowed_services,
             price_monthly_title,
@@ -293,6 +303,8 @@ export const useSubscription = () => {
           user_id: user?.id,
           subscription_tier_id: subscriptionTierId,
           billing_cycle: billingCycle,
+          coupon_used_at_start: !!appliedCoupon?.valid,
+          coupon_id: appliedCoupon?.valid ? appliedCoupon.coupon_id : null
         })
       });
 
@@ -336,7 +348,8 @@ export const useSubscription = () => {
     return json({ success: true });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['user-subscription'] });
+      queryClient.invalidateQueries({ queryKey: ['user-subscription', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['user-subscriptions', user?.id] });
       toast.success('تم انهاء الاشتراك بنجاح!.');
     },
     onError(error: any) {

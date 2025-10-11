@@ -8,6 +8,7 @@ import PaymentMethodSelector from './PaymentMethodSelector';
 import CouponInput from './CouponInput';
 import { Subscription, useSubscription } from '@/hooks/useSubscription';
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 
 interface PaymentFormProps {
   paymentMethod: string;
@@ -55,12 +56,14 @@ const PaymentForm = ({
     createNewSubscription.mutateAsync({
       subscriptionTierId,
       billingCycle
-    }).then(() => {
-      if (createnNewSubscriptionSuccess) {
-        navigate("/account");
-      }
     })
   }
+
+  useEffect(() => {
+    if (createnNewSubscriptionSuccess) {
+      navigate('/', { replace: true });
+    }
+  }, [createnNewSubscriptionSuccess, navigate]);
   return (
     <Card>
       <CardHeader>
