@@ -23,7 +23,7 @@ const Navigation = () => {
   // Enable real-time notifications
   const { isConnected } = useRealTimeNotifications();
 
-  const admin = isAdmin() || user?.email === 'shatharifaii@gmail.com';
+  const admin = /*isAdmin() || */user?.email === 'shatharifaii@gmail.com';
   const isServiceProvider = profile?.is_service_provider || false;
 
   const isActive = (path: string) => location.pathname === path;
