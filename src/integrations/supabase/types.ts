@@ -829,6 +829,59 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_transactions: {
+        Row: {
+          billing_period_end: string | null
+          billling_period_start: string | null
+          coupon_id: string | null
+          coupon_used: boolean | null
+          created_at: string
+          currency: string | null
+          id: string
+          payment_date: string | null
+          payment_status: string | null
+          subscription_id: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          billing_period_end?: string | null
+          billling_period_start?: string | null
+          coupon_id?: string | null
+          coupon_used?: boolean | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          payment_date?: string | null
+          payment_status?: string | null
+          subscription_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          billing_period_end?: string | null
+          billling_period_start?: string | null
+          coupon_id?: string | null
+          coupon_used?: boolean | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          payment_date?: string | null
+          payment_status?: string | null
+          subscription_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_transactions_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscriptions: {
         Row: {
           amount: number

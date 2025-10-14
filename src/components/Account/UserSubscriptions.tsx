@@ -56,6 +56,22 @@ const UserSubscriptions = () => {
         }
     }, [activeSubscription]);
 
+    const handlePay = async () => {
+        const baseUrl = "https://crosspayonline.com/api/loginBill";
+        const apiData = import.meta.env.VITE_BILLPS_APP_DATA.trim();
+        const apiKey = import.meta.env.VITE_BILLPS_API_KEY.trim();
+
+        const url = `${baseUrl}?api_data=${apiData}&apiKey=${apiKey}`;
+        console.log("URL:", url);
+
+        const res = await fetch(url);
+        const data = await res.json();
+
+        console.log(data);
+    };
+
+
+
     return (
         <Card>
             <CardHeader>
@@ -128,9 +144,12 @@ const UserSubscriptions = () => {
                                     </div>
                                     <div className='flex flex-col'>
                                         <p className='text-sm text-muted-foreground'>في حال لم يحن تاريخ الدفع المحدد فلا يصح بدء عملية الدفع!</p>
-                                        <Button onClick={() => setOpenPaymentModal(true)}  className='flex-1 mt-3'>
+                                        <Button onClick={() => setOpenPaymentModal(true)} className='flex-1 mt-3'>
                                             ابدأ عمليه الدفع
                                         </Button>
+                                        {/*<button onClick={handlePay} className='flex-1 mt-3 bg-green-600 text-white p-2 rounded-md'>
+                                            pay
+                                        </button>*/}
                                     </div>
                                 </CardContent>
                             </Card>
@@ -150,31 +169,31 @@ const UserSubscriptions = () => {
             </CardContent>
 
             <Dialog open={openDeactivateModal} onOpenChange={setOpenDeactivateModal}>
-        <DialogContent className='flex flex-col gap-4'>
-          <DialogHeader>
-            <DialogTitle>هل انت متاكد؟</DialogTitle>
-            <DialogDescription>
-              هل انت متاكد من انك تريد الغاء تفعيل الاشتراك؟
-            </DialogDescription>
-          </DialogHeader>
+                <DialogContent className='flex flex-col gap-4'>
+                    <DialogHeader>
+                        <DialogTitle>هل انت متاكد؟</DialogTitle>
+                        <DialogDescription>
+                            هل انت متاكد من انك تريد الغاء تفعيل الاشتراك؟
+                        </DialogDescription>
+                    </DialogHeader>
 
-          <DialogFooter className='flex gap-2'>
-            <Button
-              variant="ghost"
-              onClick={() => setOpenDeactivateModal(false)}
-            >
-              الغاء
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDeactivate}
-              disabled={deactivatingSubscription}
-            >
-              {deactivatingSubscription ? "جاري المعالجة..." : "تاكيد"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+                    <DialogFooter className='flex gap-2'>
+                        <Button
+                            variant="ghost"
+                            onClick={() => setOpenDeactivateModal(false)}
+                        >
+                            الغاء
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={handleDeactivate}
+                            disabled={deactivatingSubscription}
+                        >
+                            {deactivatingSubscription ? "جاري المعالجة..." : "تاكيد"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
             <Dialog open={openPaymentModal} onOpenChange={() => setOpenPaymentModal(false)}>
                 <DialogContent>
                     <DialogHeader>
@@ -183,41 +202,41 @@ const UserSubscriptions = () => {
                             هل أنت متأكد من رغبتك في بدء عملية الدفع للاشتراك الحالي؟
                         </DialogDescription>
                     </DialogHeader>
-                <DialogFooter>
-                    <Button variant='ghost' onClick={() => setOpenDeactivateModal(false)}>الغاء</Button>
-                    <Button variant='default' onClick={startPayment}>{deactivatingSubscription ? 'جاري المعالجة...' : 'نعم'}</Button>
-                </DialogFooter>
+                    <DialogFooter>
+                        <Button variant='ghost' onClick={() => setOpenDeactivateModal(false)}>الغاء</Button>
+                        <Button variant='default' onClick={startPayment}>{deactivatingSubscription ? 'جاري المعالجة...' : 'نعم'}</Button>
+                    </DialogFooter>
                 </DialogContent>
             </Dialog>
 
             <Drawer
-        direction='right'
-        open={openSubscribeModal}
-        onOpenChange={() => setOpenSubscribeModal(false)}
-      >
-        <DrawerContent className='h-screen w-full sm:w-4/5 lg:w-2/5 transition-all rounded-none'>
-          <DrawerHeader className='flex items-center justify-between'>
-            <DrawerTitle className='text-2xl text-start'>
-              أنواع الاشتراك
-            </DrawerTitle>
-          </DrawerHeader>
-          <DrawerDescription className='flex flex-col gap-4 px-5 overflow-y-auto'>
-            <div>
-              <p>يجب على جميع الاشتراك بأحد العروض المتوفرة للحصول على قدرة نشر الخدمات</p>
-            </div>
-            <Suspense fallback={<div>Loading...</div>}>
-              <ErrorBoundary fallback={<div>Something went wrong</div>}>
-                <SubscriptionsModal />
-              </ErrorBoundary>
-            </Suspense>
-          </DrawerDescription>
-          <DrawerFooter>
-            <DrawerClose className='flex'>
-              <Button variant='ghost' className='flex-1'>إلغاء</Button>
-            </DrawerClose>
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
+                direction='right'
+                open={openSubscribeModal}
+                onOpenChange={() => setOpenSubscribeModal(false)}
+            >
+                <DrawerContent className='h-screen w-full sm:w-4/5 lg:w-2/5 transition-all rounded-none'>
+                    <DrawerHeader className='flex items-center justify-between'>
+                        <DrawerTitle className='text-2xl text-start'>
+                            أنواع الاشتراك
+                        </DrawerTitle>
+                    </DrawerHeader>
+                    <DrawerDescription className='flex flex-col gap-4 px-5 overflow-y-auto'>
+                        <div>
+                            <p>يجب على جميع الاشتراك بأحد العروض المتوفرة للحصول على قدرة نشر الخدمات</p>
+                        </div>
+                        <Suspense fallback={<div>Loading...</div>}>
+                            <ErrorBoundary fallback={<div>Something went wrong</div>}>
+                                <SubscriptionsModal />
+                            </ErrorBoundary>
+                        </Suspense>
+                    </DrawerDescription>
+                    <DrawerFooter>
+                        <DrawerClose className='flex'>
+                            <Button variant='ghost' className='flex-1'>إلغاء</Button>
+                        </DrawerClose>
+                    </DrawerFooter>
+                </DrawerContent>
+            </Drawer>
 
             <CardFooter className='pt-5 px-10 flex flex-col items-start gap-3'>
                 <Separator />

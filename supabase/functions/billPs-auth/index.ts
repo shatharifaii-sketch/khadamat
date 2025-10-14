@@ -32,7 +32,7 @@ serve(async (req: Request) => {
       throw new Error("Bill.ps credentials not set");
     }
 
-    const url = `${HOST_URL}api/loginBill?apiKey=${API_KEY}&api_data=${API_APP_DATA}`
+    const url = `${HOST_URL}api/loginBill?api_data=${API_APP_DATA}&apiKey=${API_KEY}`
 
     const tokenResponse = await fetch(url, {
       method: "POST",

@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { json } from 'react-router-dom';
 import { useCoupon } from './useCoupon';
 import { useState } from 'react';
+import { usePaymentLogic } from './usePaymentLogic';
 
 export interface Subscription {
   id: string;
@@ -290,7 +291,7 @@ export const useSubscription = () => {
 
   const createNewSubscription = useMutation({
     mutationKey: ['create-new-subscription'],
-    mutationFn: async ({ subscriptionTierId, billingCycle }: { subscriptionTierId: string, billingCycle: string }) => {
+    mutationFn: async ({ subscriptionTierId, billingCycle, finalAmount }: { subscriptionTierId: string, billingCycle: string, finalAmount: number }) => {
       const { data: {session} } = await supabase.auth.getSession();
 
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-subscription`, {
@@ -303,8 +304,9 @@ export const useSubscription = () => {
           user_id: user?.id,
           subscription_tier_id: subscriptionTierId,
           billing_cycle: billingCycle,
-          coupon_used_at_start: !!appliedCoupon?.valid,
-          coupon_id: appliedCoupon?.valid ? appliedCoupon.coupon_id : null
+          used_coupon_on_start: !!appliedCoupon?.valid,
+          coupon_id: appliedCoupon?.valid ? appliedCoupon.coupon_id : null,
+          final_amount: finalAmount
         })
       });
 
