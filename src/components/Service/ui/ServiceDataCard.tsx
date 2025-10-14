@@ -37,17 +37,17 @@ const ServiceDataCard = ({
                             <ServiceImages serviceId={service?.id} />
                         </div>
                     </div>
-                    <div className='flex items-center gap-8 my-5'>
+                    <div className='flex flex-col md:flex-row md:items-center md:gap-8 my-5'>
                         <div className='flex items-center gap-4'>
                             <h3 className='text-lg font-semibold mt-4 text-nowrap'>تكلفة الخدمة</h3>
                             <h2 className='text-xl font-semibold text-primary text-nowrap'>{service?.price_range}</h2>
                         </div>
-                        <Separator orientation='vertical' className='h-5 mt-3' />
+                        <Separator orientation='vertical' className='h-5 mt-3 hidden md:block' />
                         <div className='flex items-center gap-4'>
                             <h3 className='text-lg font-semibold mt-4 text-nowrap'>مكان الخدمة</h3>
                             <h2 className='text-xl font-semibold text-primary text-nowrap'>{service?.location}</h2>
                         </div>
-                        <Separator orientation='vertical' className='h-5 mt-3' />
+                        <Separator orientation='vertical' className='h-5 mt-3 hidden md:block' />
                         <div className='flex items-center gap-4'>
                             <h3 className='text-lg font-semibold mt-4 text-nowrap'>الخبرة</h3>
                             <h2 className='text-xl font-semibold text-primary text-nowrap'>{service?.experience}</h2>

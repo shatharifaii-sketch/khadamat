@@ -1,5 +1,7 @@
 import { useCategoryServices } from '@/hooks/useServices'
 import ServiceCard from './ServiceCard';
+import { useNavigate } from 'react-router-dom';
+import { useServiceViews } from '@/hooks/useServiceViews';
 
 interface Props {
     category: string,
@@ -8,6 +10,8 @@ interface Props {
 
 const CategoryServices = ({ category, serviceId }: Props) => {
     const data = useCategoryServices(category, serviceId);
+    const navigate = useNavigate();
+    const { incrementView } = useServiceViews();
 
     console.log(data);
     return (
