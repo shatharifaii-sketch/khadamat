@@ -55,7 +55,8 @@ const PaymentForm = ({
   const createSubscription = () => {
     createNewSubscription.mutateAsync({
       subscriptionTierId,
-      billingCycle
+      billingCycle,
+      finalAmount,
     })
   }
 
