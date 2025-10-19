@@ -14,13 +14,13 @@ import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
 
 const UserSubscriptions = () => {
-    const { getUserSubscriptions, deactivateSubscription, deactivatingSubscription } = useSubscription();
+    const { getUserSubscriptions, deactivateSubscription, deactivatingSubscription, deactivateSubscriptionSuccess, deactivatingSubscriptionError } = useSubscription();
     const { getPaymentUrl } = usePaymentLogic();
     const [isPaymentTime, setIsPaymentTime] = useState<boolean>(false);
     const [openSubscribeModal, setOpenSubscribeModal] = useState<boolean>(false);
     const [openPaymentModal, setOpenPaymentModal] = useState<boolean>(false);
     const [openDeactivateModal, setOpenDeactivateModal] = useState<boolean>(false);
-    const [currency, setCurrency] = useState<string>('JOD');
+    const [currency, setCurrency] = useState<string>('ILS');
 
     if (!getUserSubscriptions.data) return null;
 
@@ -55,6 +55,12 @@ const UserSubscriptions = () => {
             setIsPaymentTime(false);
         }
     }, [activeSubscription]);
+
+    useEffect(() => {
+        if (deactivateSubscriptionSuccess) {
+            setOpenDeactivateModal(false);
+        }
+    }, [deactivateSubscriptionSuccess]);
 
     const handlePay = async () => {
         const baseUrl = "https://crosspayonline.com/api/loginBill";

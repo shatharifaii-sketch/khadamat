@@ -35,10 +35,10 @@ async function createSubscription(supabase: any, userId: string, subscriptionTie
 
     const { data: newSubscription, error: insertError } = await supabase.from("subscriptions").insert([
       {
-        userId,
+        user_id: userId,
         amount: billingCycle == "Monthly" ?
           subscriptionTier.price_monthly_value : subscriptionTier.price_yearly_value,
-        billingCycle,
+        billing_cycle: billingCycle,
         services_allowed: subscriptionTier.allowed_services,
         auto_renew: false,
         expires_at: subscriptionPeriod.toISOString(),
@@ -70,7 +70,7 @@ async function createTransaction(supabase: any, newSubscription: any, userId: st
     billingPeriodEnd.setMonth(billingPeriodEnd.getMonth() + (billingCycle === 'Monthly' ? 1 : 12));
 
     const { error: transactionError } = await supabase.from("subscription_transactions").insert({
-      userId,
+      user_id: userId,
       subscription_id: newSubscription.id,
       amount: newSubscription.amount,
       billing_period_start: billingPeriodStart.toISOString(),
@@ -81,14 +81,18 @@ async function createTransaction(supabase: any, newSubscription: any, userId: st
       coupon_used: newSubscription.used_coupon_on_start || false 
     })
 
-    if (transactionError) throw transactionError;
+    if (transactionError) {
+      const { error: deleteError } = await supabase.from("subscriptions").delete().eq("id", newSubscription.id);
+      if (deleteError) throw deleteError;
+      throw transactionError;
+    };
 
     return true;
 }
 
 //helper 5: Send welcome email to user
 async function sendEmail(supabase: any, userId: string, subscriptionTier: any, finalAmount: number, newSubscription: any) {
-  const { data: user, error: fetchError } = await supabase.from("profiels").select("*").eq("id", userId).maybeSingle();
+  const { data: user, error: fetchError } = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle();
 
   if (fetchError) throw fetchError;
 
