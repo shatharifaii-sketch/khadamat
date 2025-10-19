@@ -26,6 +26,7 @@ import UserLayout from "./layouts/UserLayout";
 import AdminDashboard from "./layouts/AdminDashboard";
 import SubscriptionPayment from "./pages/SubscriptionPayment";
 import CompletedPayment from "./pages/CompletedPayment";
+import ChatPage from "./pages/ChatPage";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,7 @@ function App() {
                   <Route path="about" element={<About />} />
                   <Route path="contact" element={<Contact />} />
                   <Route path="profile/:id" element={<UserProfilePage />} />
+                  <Route path="chat/:client_id&:service_id&:provider_id" element={<ChatPage />} />
                   <Route path="payment" element={<Payment />} />
                   <Route path="subscription-payment" element={<SubscriptionPayment />} />
                   <Route path="checkout" element={<Checkout />} />

@@ -374,6 +374,8 @@ export const useSubscription = () => {
     createNewSubscriptionError: createNewSubscription.error,
     createnNewSubscriptionSuccess: createNewSubscription.isSuccess,
     deactivateSubscription,
-    deactivatingSubscription: deactivateSubscription.isPending
+    deactivatingSubscription: deactivateSubscription.isPending,
+    deactivatingSubscriptionError: deactivateSubscription.error,
+    deactivateSubscriptionSuccess: deactivateSubscription.isSuccess,
   };
 };

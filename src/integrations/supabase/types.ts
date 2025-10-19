@@ -831,8 +831,9 @@ export type Database = {
       }
       subscription_transactions: {
         Row: {
+          amount: number | null
           billing_period_end: string | null
-          billling_period_start: string | null
+          billing_period_start: string | null
           coupon_id: string | null
           coupon_used: boolean | null
           created_at: string
@@ -845,8 +846,9 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          amount?: number | null
           billing_period_end?: string | null
-          billling_period_start?: string | null
+          billing_period_start?: string | null
           coupon_id?: string | null
           coupon_used?: boolean | null
           created_at?: string
@@ -859,8 +861,9 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          amount?: number | null
           billing_period_end?: string | null
-          billling_period_start?: string | null
+          billing_period_start?: string | null
           coupon_id?: string | null
           coupon_used?: boolean | null
           created_at?: string
@@ -873,6 +876,13 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "subscription_transactions_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "coupons"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "subscription_transactions_subscription_id_fkey"
             columns: ["subscription_id"]

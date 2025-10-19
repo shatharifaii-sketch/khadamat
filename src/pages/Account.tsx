@@ -27,6 +27,7 @@ import UploadProfileImage from '@/components/Account/UploadProfileImage';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import SubscriptionsLoading from '@/components/Account/SubscriptionsLoading';
 import UserSubscriptions from '@/components/Account/UserSubscriptions';
+import UserTransactions from '@/components/Account/UserTransactions';
 
 const Account = () => {
   const { user, loading } = useAuth();
@@ -234,7 +235,8 @@ const Account = () => {
         <div id="subscription-history">
           <Suspense fallback={<SubscriptionsLoading />}>
             <ErrorBoundary fallback={<div>فشل في تحميل تاريخ الاشتراكات</div>}>
-              <SubscriptionHistoryTable />
+              {/*<SubscriptionHistoryTable /> */}
+              <UserTransactions />
             </ErrorBoundary>
           </Suspense>
         </div>

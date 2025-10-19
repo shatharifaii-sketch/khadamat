@@ -2,7 +2,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { ArrowRight, ArrowLeft, AlertCircle } from 'lucide-react';
+import { ArrowRight, ArrowLeft, AlertCircle, Loader } from 'lucide-react';
 import PaymentMethodSelector from './PaymentMethodSelector';
 //import PaymentMethodForms from './PaymentMethodForms';
 import CouponInput from './CouponInput';
@@ -109,8 +109,15 @@ const PaymentForm = ({
               disabled={creatingNewSubscription}
               onClick={createSubscription}
             >
-              <ArrowRight className="ml-2" size={20} />
-              {subscription ? 'تحديث الاشتراك' : 'ابدأ الاشتراك'}
+              <ArrowRight className={creatingNewSubscription ? 'hidden' : 'ml-2'} size={20} />
+              {creatingNewSubscription ? (
+                <div className='flex gap-3 items-center'>
+                  <Loader className="animate-spin mr-2 inline-block" size={20} />
+                  جاري إنشاء الاشتراك
+                </div>
+              ) : (
+                subscription ? 'تحديث الاشتراك' : 'ابدأ الاشتراك'
+              )}
             </Button>
             
             <Button 
