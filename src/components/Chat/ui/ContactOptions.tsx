@@ -1,9 +1,11 @@
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Mail, Phone, Copy } from 'lucide-react';
+import { Mail, Phone, Copy, MessageCirclePlus } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAnalyticsTracking } from '@/hooks/useAnalyticsTracking';
 import { cn } from '@/lib/utils';
+import { useConversations } from '@/hooks/useConversations';
+import { start } from 'repl';
 
 interface ContactOptionsProps {
   serviceId?: string;
@@ -15,8 +17,9 @@ interface ContactOptionsProps {
   className?: string;
 }
 
-const ContactOptions = ({ serviceId, serviceName, providerName, email, phone, className }: ContactOptionsProps) => {
+const ContactOptions = ({ serviceId, serviceName, providerName, email, phone, className, providerId }: ContactOptionsProps) => {
   const { trackServiceAction } = useAnalyticsTracking();
+  const { startConversation } = useConversations();
 
   const handleEmailContact = () => {
     console.log('📧 Opening email client for service:', serviceName);
@@ -75,6 +78,15 @@ const ContactOptions = ({ serviceId, serviceName, providerName, email, phone, cl
     }
   };
 
+  const handleStartChat = () => {
+    startConversation.mutate({ serviceId, providerId, providerName });
+
+    trackServiceAction.mutate({
+      serviceId: serviceId!,
+      actionType: 'chat_start'
+    })
+  }
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -89,6 +101,16 @@ const ContactOptions = ({ serviceId, serviceName, providerName, email, phone, cl
           </div>
 
           <div className="space-y-2">
+            <div className="flex">
+              <Button
+                variant="outline"
+                className="flex-1 justify-start gap-2"
+                onClick={handleStartChat}
+              >
+                <MessageCirclePlus size={16} />
+                إرسال رسالة خاصة
+              </Button>
+            </div>
             <div className="flex gap-1">
               <Button
                 variant="ghost"

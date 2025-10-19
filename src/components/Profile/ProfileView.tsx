@@ -2,7 +2,7 @@ import React from 'react'
 import ProfileHeader from './ui/ProfileHeader';
 import { Tables } from '@/integrations/supabase/types';
 import ProfileDataCard from './ui/ProfileDataCard';
-import ContactOptions from '../Chat/ContactOptions';
+import ContactOptions from '../Chat/ui/ContactOptions';
 
 interface Props {
     profile: Tables<'profiles_with_email'>;

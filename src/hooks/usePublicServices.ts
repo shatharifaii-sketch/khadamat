@@ -2,6 +2,7 @@ import { useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-quer
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useServiceViews } from './useServiceViews';
+import { useAuth } from '@/contexts/AuthContext';
 
 export interface PublicService {
   id: string;
@@ -85,6 +86,8 @@ export const usePublicServices = () => {
 };
 
 export const useServiceData = (id: string) => {
+  const { user } = useAuth();
+
   const { data: service } = useSuspenseQuery({
     queryKey: ['public-service-data', id],
     queryFn: async () => {
@@ -108,9 +111,34 @@ export const useServiceData = (id: string) => {
       }
 
       console.log('Fetched services with publisher:', service);
-      return service;
+      return service as PublicService;
     }
   });
 
-  return service as PublicService;
+  const { data: conversation } = useQuery({
+    queryKey: ['conversation', id, user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+
+      const { data: conversation, error } = await supabase.from('conversations').select('*')
+        .eq('service_id', id)
+        .eq('client_id', user.id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching conversation:', error);
+        return null;
+      }
+
+      return conversation;
+    }
+  })
+
+  return {
+    service,
+    conversation
+  } as {
+    service: PublicService;
+    conversation: any;
+  };
 }
