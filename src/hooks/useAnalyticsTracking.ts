@@ -45,7 +45,7 @@ export const useAnalyticsTracking = () => {
       actionType 
     }: { 
       serviceId: string; 
-      actionType: 'view' | 'contact_click' | 'phone_click' | 'email_click';
+      actionType: 'view' | 'contact_click' | 'phone_click' | 'email_click' | 'chat_start';
     }) => {
       const { error } = await supabase
         .from('service_analytics')

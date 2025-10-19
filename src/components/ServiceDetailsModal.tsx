@@ -5,7 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { MapPin, Phone, PhoneCall, Copy, Star, User, ChevronLeft, ChevronRight } from 'lucide-react';
 import { categories } from './FindService/ServiceCategories';
 import { PublicService } from '@/hooks/usePublicServices';
-import ContactOptions from '@/components/Chat/ContactOptions';
+import ContactOptions from '@/components/Chat/ui/ContactOptions';
 import { toast } from 'sonner';
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';

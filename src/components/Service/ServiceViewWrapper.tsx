@@ -8,7 +8,7 @@ interface Props {
 }
 
 export const ServiceViewWrapper = ({ serviceId }: Props) => {
-  const service = useServiceData(serviceId);
+  const {service, conversation } = useServiceData(serviceId);
 
-  return <ServiceView service={service} />
+  return <ServiceView service={service} conversation={conversation} />
 }
