@@ -201,6 +201,20 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "conversations_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_with_email"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "conversations_service_id_fkey"
             columns: ["service_id"]
             isOneToOne: false
@@ -308,6 +322,7 @@ export type Database = {
           content: string
           conversation_id: string
           created_at: string
+          file_url: string | null
           id: string
           message_type: string
           read_at: string | null
@@ -317,6 +332,7 @@ export type Database = {
           content: string
           conversation_id: string
           created_at?: string
+          file_url?: string | null
           id?: string
           message_type?: string
           read_at?: string | null
@@ -326,6 +342,7 @@ export type Database = {
           content?: string
           conversation_id?: string
           created_at?: string
+          file_url?: string | null
           id?: string
           message_type?: string
           read_at?: string | null
@@ -337,6 +354,20 @@ export type Database = {
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey1"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey1"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_with_email"
             referencedColumns: ["id"]
           },
         ]
