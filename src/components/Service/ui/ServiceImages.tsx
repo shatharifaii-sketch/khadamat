@@ -40,8 +40,8 @@ const ServiceImages = ({ serviceId }: Props) => {
                 <CarouselNext className='bg-primary' />
                 <CarouselPrevious className='bg-primary' />
             </Carousel>
-            <div className="text-muted-foreground py-2 text-center text-sm">
-                Image {current} of {count}
+            <div className="text-muted-foreground py-2 text-center text-xs">
+                صورة {current} من {count}
             </div>
                 </>
             ) : (
