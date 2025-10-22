@@ -30,7 +30,7 @@ const ChatLayout = ({ service, children, setAttachment }: Props) => {
             <div className='w-full'>
                 <ChatServiceData service={service} images={images} setAttachment={setAttachment} />
             </div>
-            <div className='md:min-w-[500px] lg:min-w-[700px] w-full'>
+            <div className='md:min-w-[500px] lg:min-w-[900px] w-full'>
                 {children}
             </div>
         </div>

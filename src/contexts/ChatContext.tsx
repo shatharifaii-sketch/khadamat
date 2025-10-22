@@ -3,6 +3,17 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "./AuthContext";
 import { toast } from "sonner";
 
+export interface Message {
+    id: string;
+    sender_id: string;
+    conversation_id: string;
+    content: string;
+    created_at: string;
+    file_url: string;
+    read_at: string | null;
+    pending?: boolean;
+}
+
 const ChatContext = createContext(null);
 
 export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
@@ -39,15 +50,31 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
             .on(
                 "postgres_changes",
                 {
-                    event: "INSERT",
+                    event: "*",
                     schema: "public",
                     table: "messages",
                     filter: `conversation_id=eq.${activeConversation.id}`,
                 },
-                (payload) => setMessages((prev) => {
-                    if (prev.some((m) => m.id === payload.new.id)) return prev;
-                    return [...prev, payload.new];
-                })
+                (payload) => {
+                    console.log('payload received:', payload);
+
+                    switch (payload.eventType) {
+                        case 'INSERT':
+                            setMessages((prev) => [...prev, payload.new]);
+                            break;
+                        case 'UPDATE':
+                            setMessages((prev) => prev.map(
+                                (msg) => msg.id === payload.new.id ? payload.new : msg
+                            ));
+                            break;
+                        case 'DELETE':
+                            setMessages((prev) => prev.filter((msg) => msg.id !== payload.old.id));
+                            break;
+                        default:
+                            break;
+                    }
+
+                }
             )
             .subscribe();
 
@@ -116,6 +143,7 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
                 const fileExt = file.name.split('.').pop();
                 const fileName = `${user.id}/${activeConversation.id}/${Date.now()}.${fileExt}`;
 
+                console.log('Uploading image...', typeof file);
                 const { error: uploadError } = await supabase.storage
                     .from('messages-images')
                     .upload(fileName, file);
@@ -134,13 +162,13 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
             }
 
             const { data, error } = await supabase
-            .from("messages")
-            .insert([{
-                conversation_id: activeConversation.id,
-                content,
-                file_url: imageUrl || null,
-                sender_id: user.id
-            }]).select("*").maybeSingle();
+                .from("messages")
+                .insert([{
+                    conversation_id: activeConversation.id,
+                    content,
+                    file_url: imageUrl || null,
+                    sender_id: user.id
+                }]).select("*").maybeSingle();
 
             if (error) {
                 console.error('Error sending message:', error);
@@ -157,13 +185,60 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
         }
     }
 
+    const setReadAt = async (conversationId: string) => {
+        if (!user) return;
+        const readAt = new Date().toISOString();
+        setMessages((prev =>
+            prev.map(m =>
+                m.sender_id !== user?.id ? { ...m, read_at: readAt } : m
+            )
+        ))
+
+        const { error } = await supabase
+            .from('messages')
+            .update({ read_at: readAt })
+            .eq('conversation_id', conversationId)
+            .neq('sender_id', user?.id)
+            .is('read_at', null);
+
+        if (error) {
+            console.error('Error setting read_at:', error);
+            toast.error('حدث خطأ');
+        }
+    }
+
+    const deleteMessage = async (messageId: string) => {
+        removeLocalMessage(messageId);
+
+        const { error } = await supabase
+            .from('messages')
+            .delete()
+            .eq('conversation_id', activeConversation.id)
+            .eq('sender_id', user?.id)
+            .eq('id', messageId);
+
+        if (error) {
+            console.error('Error deleting message:', error);
+            toast.error('حدث خطاء في حذف الرسالة');
+
+            const { data: restored } = await supabase
+                .from('messages')
+                .select('*')
+                .eq('id', messageId)
+                .maybeSingle();
+            if (restored) setMessages(prev => [...prev, restored]);
+        }
+    }
+
     return (
         <ChatContext.Provider
             value={{
                 activeConversation,
                 setActiveConversation,
-                messages,
-                sendMessage
+                messages: messages as Message[],
+                sendMessage,
+                setReadAt,
+                userId: user?.id
             }}
         >
             {children}

@@ -23,7 +23,7 @@ const ChatViewWrapper = ({ conversationId, clientId, serviceId, providerId }: Co
     return (
         <ChatLayout setAttachment={setAttachment} service={conversation?.service}>
             <Card>
-                <CardHeader className='shadow-md z-50 w-full'>
+                <CardHeader className='rounded-t-md border-b-2'>
                     <ChatSimpleData provider={conversation.provider} />
                 </CardHeader>
                 <CardContent className={cn(
