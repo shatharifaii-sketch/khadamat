@@ -17,7 +17,7 @@ const ChatConversationView = () => {
   useEffect(() => {
     if (!containerRef.current) return;
     containerRef.current.scrollTop = containerRef.current.scrollHeight;
-  }, [activeConversation]);
+  }, [messages, activeConversation]);
 
   if (!activeConversation) {
     return (
