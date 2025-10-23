@@ -60,7 +60,13 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
 
                     switch (payload.eventType) {
                         case 'INSERT':
-                            setMessages((prev) => [...prev, payload.new]);
+                            setMessages((prev) => {
+                                // Check if message already exists to prevent duplicates
+                                const exists = prev.some(msg => msg.id === payload.new.id);
+                                console.log('INSERT - Message exists?', exists, 'Current messages:', prev.length);
+                                if (exists) return prev;
+                                return [...prev, payload.new];
+                            });
                             break;
                         case 'UPDATE':
                             setMessages((prev) => prev.map(
@@ -86,7 +92,13 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     const replaceLocalMessage = (tempId: string, realMessage: any) => {
-        setMessages((prev) => prev.map((msg) => msg.id === tempId ? realMessage : msg))
+        setMessages((prev) => {
+            console.log('Replacing temp message:', tempId, 'with real message:', realMessage.id);
+            console.log('Messages before replace:', prev.map(m => ({ id: m.id, pending: m.pending })));
+            const updated = prev.map((msg) => msg.id === tempId ? realMessage : msg);
+            console.log('Messages after replace:', updated.map(m => ({ id: m.id, pending: m.pending })));
+            return updated;
+        });
     }
 
     const removeLocalMessage = (tempId: string) => {
