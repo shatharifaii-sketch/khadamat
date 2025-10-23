@@ -28,7 +28,7 @@ const ChatViewWrapper = ({ conversationId, clientId, serviceId, providerId }: Co
                 </CardHeader>
                 <CardContent className={cn(
                     attachment 
-                    ? 'min-h-[350px]' 
+                    ? 'min-h-[350px] max-h-[400px]' 
                     : 'min-h-[480px] lg:min-h-[600px] max-h-[500px]',
                     'overflow-y-auto')}>
                     <ChatConversationView />
