@@ -27,10 +27,10 @@ const ChatLayout = ({ service, children, setAttachment }: Props) => {
 
     return (
         <div className='flex gap-5 justify-center items-center lg:items-start flex-col lg:flex-row'>
-            <div className='w-full'>
+            <div className='w-full min-w-[200px]'>
                 <ChatServiceData service={service} images={images} setAttachment={setAttachment} />
             </div>
-            <div className='md:min-w-[500px] lg:min-w-[900px] w-full'>
+            <div className='md:min-w-[500px] lg:min-w-[800px] w-full'>
                 {children}
             </div>
         </div>

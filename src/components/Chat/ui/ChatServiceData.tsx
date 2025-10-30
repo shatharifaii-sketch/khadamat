@@ -3,6 +3,7 @@ import { ChatServiceProps } from '../ChatLayout'
 import { ServiceImageProps } from '@/hooks/useServices';
 import { Paperclip } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
 interface Props {
     service: ChatServiceProps;
@@ -22,7 +23,7 @@ const ChatServiceData = ({ service, images, setAttachment }: Props) => {
                                         onClick={() => setAttachment(image.image_url)} className='absolute bottom-0 w-full backdrop-blur-sm bg-black/30 z-10 rounded-b-md opacity-0 hover:opacity-60 px-2 py-2 flex items-center gap-2 hover:cursor-pointer' variant='secondary' dir='rtl'>
                                         <Paperclip className='text-black' />
                                         <span className='text-xs text-black text-start opacity-100'>
-                                            أضف الى المرفقات
+                                            أضف الى الرسالة
                                         </span>
                                     </Button>
                                     <img className='border rounded-md max-h-70 w-[180px] lg:min-w-[300px]' src={image.image_url} alt={image.image_name} />
@@ -34,7 +35,7 @@ const ChatServiceData = ({ service, images, setAttachment }: Props) => {
                     )}
                 </div>
                 <div className='text-start'>
-                    <h1 className='text-2xl font-bold'>{service.title}</h1>
+                    <Link to={`/find-service/${service.id}`} className='text-2xl font-bold  hover:underline-offset-1'>{service.title}</Link>
                     <p className='text-muted-foreground'>{service.price_range}</p>
                     <p className='text-muted-foreground text-sm'>{service.location}</p>
                     <p className='text-muted-foreground text-sm'>{new Date(service.created_at).toLocaleDateString()}</p>

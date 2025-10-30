@@ -29,20 +29,21 @@ const ServiceImages = ({ serviceId }: Props) => {
             {images.length > 0 ? (
                 <>
                     <Carousel className='w-3/4 mx-auto py-3' setApi={setApi}>
-                <CarouselContent>
-                    {images.map((image) => (
-                        <CarouselItem 
-                        className='basis-full shrink-0 flex items-center justify-center'>
-                            <img className='border rounded-md object-contain max-h-70' src={image.image_url} alt={image.image_name} />
-                        </CarouselItem>
-                    ))}
-                </CarouselContent>
-                <CarouselNext className='bg-primary' />
-                <CarouselPrevious className='bg-primary' />
-            </Carousel>
-            <div className="text-muted-foreground py-2 text-center text-xs">
-                صورة {current} من {count}
-            </div>
+                        <CarouselContent>
+                            {images.map((image) => (
+                                <CarouselItem
+                                    key={image.id}
+                                    className='basis-full shrink-0 flex items-center justify-center'>
+                                    <img className='border rounded-md object-contain max-h-70' src={image.image_url} alt={image.image_name} />
+                                </CarouselItem>
+                            ))}
+                        </CarouselContent>
+                        <CarouselNext className='bg-primary' />
+                        <CarouselPrevious className='bg-primary' />
+                    </Carousel>
+                    <div className="text-muted-foreground py-2 text-center text-xs">
+                        صورة {current} من {count}
+                    </div>
                 </>
             ) : (
                 <div className='flex items-center justify-end'>

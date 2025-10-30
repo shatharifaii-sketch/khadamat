@@ -2,6 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "./AuthContext";
 import { toast } from "sonner";
+import { useLocation } from "react-router-dom";
 
 export interface Message {
     id: string;
@@ -12,22 +13,162 @@ export interface Message {
     file_url: string;
     read_at: string | null;
     pending?: boolean;
+    reply_to_id: string;
+    sender: {
+        id: string;
+        full_name: string;
+        profile_image_url: string;
+    };
 }
 
 const ChatContext = createContext(null);
+
+const getUserConversationsMessages = async ({ convo }: { convo: any}): Promise<Message[]> => {
+    const { data: messages, error: messagesError } = await supabase
+        .from('messages')
+        .select(`
+                    *,
+                    sender:messages_sender_id_fkey1(
+                        id,
+                        full_name,
+                        profile_image_url
+                    )
+        `)
+        .eq('conversation_id', convo.id)
+        .order('created_at', { ascending: false });
+
+    if (messagesError) {
+        console.error('Error fetching messages:', messagesError);
+        return;
+    }
+
+    if (!messages || messages.length === 0) return []
+
+    return messages as Message[] | [];
+}
+
+const getUserConversations = async ({ userId }: { userId: string }) => {
+    const { data: userConvos, error: convosError } = await supabase
+        .from('conversations')
+        .select('*')
+        .or(`client_id.eq.${userId},provider_id.eq.${userId}`)
+        .order('created_at', { ascending: false });
+
+    if (convosError) {
+        console.error('Error fetching conversations:', convosError);
+        return;
+    }
+
+    for (const convo of userConvos) {
+        const messages = await getUserConversationsMessages({ convo });
+        notifyUser({ messages, userId, convo });
+    }
+}
+
+const isOlderThan2Hours = (created_at: string | Date) =>
+    (Date.now() - new Date(created_at).getTime()) > 2 * 60 * 60 * 1000;
+
+const notifyUser = async ({ messages, userId, convo }: { messages: Message[] | any, userId: string, convo: any }) => {
+    for (const message of messages) {
+        if (message.sender_id !== userId && !message.read_at) {
+            toast("تم استلام رسالة جديدة", {
+                description: `رسالة جديدة من ${message.sender.full_name}`,
+                duration: 3000,
+                action: {
+                    label: 'عرض الرسالة',
+                    onClick: () => {
+                        window.location.href = `/chat/${convo.id}/${convo.client_id}/${convo.service_id}/${convo.provider_id}`
+                    }
+                }
+            });
+
+            const res = await sendEmailNotification({ message, userId });
+
+            if (!res.success) {
+                console.error('Error sending email notification:', res.error);
+            }
+
+            continue;
+        }
+    }
+}
+
+const sendEmailNotification = async ({ message, userId }: { message: Message | any, userId: string }) => {
+    if (!message.read_at && !isOlderThan2Hours(message.created_at)) {
+        return { success: true, message: 'Message is not older than 2 hours' }
+    }
+
+    const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-email-notification-dev`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+        },
+        body: JSON.stringify({
+            'message': message,
+            'user_id': userId
+        }),
+    })
+
+    if (!response.ok) {
+        console.error('Error sending email notification:', response);
+        return { success: false, error: 'Error sending email notification' }
+    }
+
+    return { success: true }
+}
+
+const updateMessageReadAt = async ({ message, userId }: { message: Message | any, userId: string }) => {
+    if (message.sender_id !== userId && !message.read_at) {
+        const { error } = await supabase
+            .from('messages')
+            .update({ read_at: new Date().toISOString() })
+            .eq('id', message.id);
+
+        if (error) {
+            console.error('Error updating message:', error);
+            toast.error('حدث خطاء في تحديث الرسالة');
+            return;
+        }
+    }
+}
 
 export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
     const { user } = useAuth();
     const [activeConversation, setActiveConversation] = useState(null);
     const [messages, setMessages] = useState([]);
+    const [unreadCount, setUnreadCount] = useState(0);
+    const [needNotifcations, setNeedNotifications] = useState<boolean>(true);
+    const location = useLocation();
+
+    useEffect(() => {
+        setNeedNotifications(!location.pathname.startsWith('/chat'))
+    }, [location.pathname])
+
+    useEffect(() => {
+        if (user) {
+            if (!activeConversation && needNotifcations) {
+                getUserConversations({ userId: user?.id });
+            };
+        }
+    }, [user, needNotifcations, activeConversation]);
 
     useEffect(() => {
         if (!activeConversation) return;
 
+        setMessages([])
+
         const loadMessages = async () => {
             const { data, error } = await supabase
                 .from('messages')
-                .select("*")
+                .select(`
+                    *,
+                    sender:messages_sender_id_fkey1(
+                        id,
+                        full_name,
+                        profile_image_url
+                    )
+                    `)
                 .eq('conversation_id', activeConversation.id)
                 .order('created_at');
 
@@ -36,7 +177,16 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
                 setMessages([]);
                 return;
             }
-            setMessages(data || []);
+
+            const filteredMessagesCount = data.filter((message: any) => message.sender_id !== user?.id && !message.read_at).length;
+
+            for (const message of data) {
+                updateMessageReadAt({ message, userId: user?.id });
+            }
+
+            setUnreadCount(prev => prev - filteredMessagesCount);
+
+            setMessages(data.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) || []);
         }
 
         loadMessages();
@@ -44,6 +194,8 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
 
     useEffect(() => {
         if (!activeConversation) return;
+
+        setMessages([]);
 
         const channel = supabase
             .channel(`messages:${activeConversation.id}`)
@@ -61,17 +213,17 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
                     switch (payload.eventType) {
                         case 'INSERT':
                             setMessages((prev) => {
-                                // Check if message already exists to prevent duplicates
                                 const exists = prev.some(msg => msg.id === payload.new.id);
-                                console.log('INSERT - Message exists?', exists, 'Current messages:', prev.length);
                                 if (exists) return prev;
                                 return [...prev, payload.new];
                             });
+
                             break;
                         case 'UPDATE':
                             setMessages((prev) => prev.map(
                                 (msg) => msg.id === payload.new.id ? payload.new : msg
                             ));
+                            
                             break;
                         case 'DELETE':
                             setMessages((prev) => prev.filter((msg) => msg.id !== payload.old.id));
@@ -86,6 +238,65 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
 
         return () => { channel.unsubscribe() };
     }, [activeConversation]);
+
+    useEffect(() => {
+        if (!user) return;
+
+        let channels: any[] = [];
+
+        const fetchAndSubscribe = async () => {
+            const { data: conversations, error: convosError } = await supabase
+                .from('conversations')
+                .select(`
+                    *,
+                    service:conversations_service_id_fkey(
+                        id,
+                        title
+                    )
+                    `)
+                .or(`client_id.eq.${user?.id},provider_id.eq.${user?.id}`)
+            
+            if (!conversations) return;
+
+            channels = conversations.map((conv: any) => {
+                supabase
+                    .channel(`messages:${conv.id}`)
+                    .on(
+                        "postgres_changes",
+                        {
+                            event: "INSERT",
+                            schema: "public",
+                            table: "messages",
+                            filter: `conversation_id=eq.${conv.id}`,
+                        },
+                        (payload) => {
+                            const message = payload.new;
+                            if (message.sender_id !== user.id) {
+                                toast(`رسالة جديدة من ${conv.service.title}`, {
+                                    position: "top-right",
+                                    duration: 3000,
+                                    action: {
+                                        label: 'عرض الرسالة',
+                                        onClick: () => {
+                                            window.location.href = `/chat/${conv.id}/${conv.client_id}/${conv.service_id}/${conv.provider_id}`
+                                        }
+                                    }
+                                });
+
+                                setUnreadCount((prev) => prev + 1);
+                            }
+                        }
+                    )
+                    .subscribe();
+            })
+
+            return () => {
+                channels.forEach((ch: any) => ch.unsubscribe());
+            }
+        }
+
+        fetchAndSubscribe();
+    }, [user]);
 
     const addLocalMessage = (message: any) => {
         setMessages((prev) => [...prev, message]);
@@ -163,6 +374,7 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
                 if (uploadError) {
                     console.error('Upload error:', uploadError);
                     toast.error('فشل في رفع الصورة');
+                    removeLocalMessage(tempId);
                     return;
                 }
 
@@ -250,7 +462,9 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
                 messages: messages as Message[],
                 sendMessage,
                 setReadAt,
-                userId: user?.id
+                userId: user?.id,
+                deleteMessage,
+                unreadCount
             }}
         >
             {children}

@@ -1,16 +1,19 @@
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { useChat } from '@/contexts/ChatContext';
+import { Message, useChat } from '@/contexts/ChatContext';
 import { Paperclip, SendHorizonal, X } from 'lucide-react'
 import { FormEvent, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner';
 
 interface Props {
+    /**TODO: add reply to message */
+    //replyToMessage: Message | null;
+    //setReplyToMessage: React.Dispatch<React.SetStateAction<Message | null>>
     attachment?: string | null;
     setAttachment: React.Dispatch<React.SetStateAction<string | null>>
 }
 
-const ChatMessageInput = ({ attachment, setAttachment }: Props) => {
+const ChatMessageInput = ({ attachment, setAttachment, /*replyToMessage, setReplyToMessage*/ }: Props) => {
     const [file, setFile] = useState<File | null>(null);
     const [previewURL, setPreviewURL] = useState<string | null>(attachment || null);
     const [message, setMessage] = useState<string>('')
@@ -32,6 +35,7 @@ const ChatMessageInput = ({ attachment, setAttachment }: Props) => {
         if (!selectedFile) return;
 
         setFile(selectedFile);
+        setAttachment(URL.createObjectURL(selectedFile));
         setPreviewURL(URL.createObjectURL(selectedFile));
     }
 
@@ -43,7 +47,7 @@ const ChatMessageInput = ({ attachment, setAttachment }: Props) => {
         e.preventDefault();
         if (message.trim() === '') return;
         try {
-            sendMessage({ content: message, file: file ? file : attachment });
+            sendMessage({ content: message, file: file || attachment });
             setMessage('');
             setAttachment(null);
             setFile(null);
@@ -56,6 +60,21 @@ const ChatMessageInput = ({ attachment, setAttachment }: Props) => {
 
     return (
         <div className='flex flex-col items-center justify-center w-full gap-5 '>
+            {/**TODO: add reply to message
+            {
+            replyToMessage && (
+                <div className='min-w-[200px] relative max-w-[250px]'>
+                    <Button onClick={() => {
+                        setReplyToMessage(null);
+                    }} className='absolute bg-red-500 rounded-full top-[-10px] right-[-10px] cursor-pointer text-white size-6 p-1' variant='destructive'>
+                        <X className='size-5' />
+                    </Button>
+                    <p>
+                        {replyToMessage.content}
+                    </p>
+                </div>
+            )}
+                 */}
             {previewURL && (
                 <div className='min-w-[200px] relative max-w-[250px]'>
                     <Button onClick={() => {

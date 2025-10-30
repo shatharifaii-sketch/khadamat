@@ -1,5 +1,5 @@
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
@@ -11,6 +11,7 @@ import EmptyState from '@/components/FindService/EmptyState';
 import LoadingGrid from '@/components/FindService/LoadingGrid';
 import { categories } from '@/components/FindService/ServiceCategories';
 import { useAnalytics } from '@/hooks/useAnalytics';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 const FindService = () => {
   const [searchParams] = useSearchParams();
@@ -137,11 +138,15 @@ const FindService = () => {
       ) : filteredServices.length === 0 ? (
         <EmptyState onClearFilters={clearFilters} />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
-          {filteredServices.map((service) => (
-            <EnhancedServiceCard key={service.id} service={service} />
-          ))}
-        </div>
+        <Suspense fallback={<LoadingGrid />}>
+          <ErrorBoundary>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
+              {filteredServices.map((service) => (
+                <EnhancedServiceCard key={service.id} service={service} />
+              ))}
+            </div>
+          </ErrorBoundary>
+        </Suspense>
       )}
     </div>
   );

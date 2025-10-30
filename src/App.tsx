@@ -28,6 +28,7 @@ import SubscriptionPayment from "./pages/SubscriptionPayment";
 import CompletedPayment from "./pages/CompletedPayment";
 import ChatPage from "./pages/ChatPage";
 import { ChatProvider } from "./contexts/ChatContext";
+import ConversationsPage from "./pages/ConversationsPage";
 
 const queryClient = new QueryClient();
 
@@ -37,39 +38,40 @@ function App() {
       <AuthProvider>
         <LanguageProvider>
           <TooltipProvider>
-            <Toaster />
+
             <BrowserRouter>
-              <PendingServiceHandler />
-              <Routes>
-                <Route path="/" element={<UserLayout />}>
-                  <Route path="" element={<Index />} />
-                  <Route path="post-service" element={<PostService />} />
-                  <Route path="completed-payment" element={<CompletedPayment />} />
-                  <Route path="find-service" element={<FindService />} />
-                  <Route path="find-service/:id" element={<ServicePage />} />
-                  <Route path="about" element={<About />} />
-                  <Route path="contact" element={<Contact />} />
-                  <Route path="profile/:id" element={<UserProfilePage />} />
-                  <Route path="chat/:id/:client_id/:service_id/:provider_id" element={
-                    <ChatProvider>
-                      <ChatPage />
-                    </ChatProvider>
-                  } />
-                  <Route path="payment" element={<Payment />} />
-                  <Route path="subscription-payment" element={<SubscriptionPayment />} />
-                  <Route path="checkout" element={<Checkout />} />
-                  <Route path="subscription-plans" element={<SubscriptionPlans />} />
-                  <Route path="faq" element={<FAQ />} />
-                  <Route path="account" element={<Account />} />
-                </Route>
-                <Route path="auth" element={<Auth />} />
-                <Route path="admin" element={<AdminDashboard />}>
-                  <Route path="" element={<Admin />} />
-                </Route>
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-              <Footer />
+              <ChatProvider>
+                <Toaster />
+                <PendingServiceHandler />
+                <Routes>
+                  <Route path="/" element={<UserLayout />}>
+                    <Route path="" element={<Index />} />
+                    <Route path="post-service" element={<PostService />} />
+                    <Route path="completed-payment" element={<CompletedPayment />} />
+                    <Route path="find-service" element={<FindService />} />
+                    <Route path="find-service/:id" element={<ServicePage />} />
+                    <Route path="about" element={<About />} />
+                    <Route path="contact" element={<Contact />} />
+                    <Route path="profile/:id" element={<UserProfilePage />} />
+                    <Route path="chat/:id/:client_id/:service_id/:provider_id" element={<ChatPage />} />
+                    <Route path="convos" element={<ConversationsPage />} />
+                    <Route path="payment" element={<Payment />} />
+                    <Route path="subscription-payment" element={<SubscriptionPayment />} />
+                    <Route path="checkout" element={<Checkout />} />
+                    <Route path="subscription-plans" element={<SubscriptionPlans />} />
+                    <Route path="faq" element={<FAQ />} />
+                    <Route path="account" element={<Account />} />
+                  </Route>
+                  <Route path="auth" element={<Auth />} />
+                  <Route path="admin" element={<AdminDashboard />}>
+                    <Route path="" element={<Admin />} />
+                  </Route>
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+                <Footer />
+              </ChatProvider>
             </BrowserRouter>
+
           </TooltipProvider>
         </LanguageProvider>
       </AuthProvider>
