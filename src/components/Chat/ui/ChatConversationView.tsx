@@ -3,11 +3,15 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Message, useChat } from '@/contexts/ChatContext'
 import { supabase } from '@/integrations/supabase/client'
 import { cn } from '@/lib/utils';
-import { set } from 'date-fns';
-import { ArrowDown, ChevronDown, Circle, CircleCheck, CircleCheckBig, Loader } from 'lucide-react';
+import { ArrowDown, ChevronDown, Circle, CircleCheck, CircleCheckBig, Loader, Reply } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react'
 
-const ChatConversationView = () => {
+/**TODO: Add reply to message */
+interface Props {
+  //setReplyToMessage: React.Dispatch<React.SetStateAction<Message | null>>
+}
+
+const ChatConversationView = ({ /*setReplyToMessage*/ }: Props) => {
   const { messages, activeConversation, userId, deleteMessage } = useChat();
   const containerRef = useRef<HTMLDivElement>(null);
   const [messageHover, setMessageHover] = useState(false);
@@ -33,6 +37,12 @@ const ChatConversationView = () => {
     setMessageHover(false);
     setMessageHoverId(null);
   }
+
+  /**TODO: Add reply to message */
+  /*const handleReplyToMessage = (message: Message) => {
+    setReplyToMessage(message);
+  }*/
+
   return (
     <div
       ref={containerRef}
@@ -58,7 +68,7 @@ const ChatConversationView = () => {
           }}
         >
           {
-            msg?.sender_id === userId && (
+            msg?.sender_id === userId ? (
               <Popover
               open={openPopoverId === msg?.id}
               onOpenChange={(open) => setOpenPopoverId(open ? msg.id : null)}
@@ -81,13 +91,26 @@ const ChatConversationView = () => {
                   </Button>
                 </PopoverContent>
               </Popover>
+            ) :
+            (
+              <>
+              {/**TODO: Add reply to message 
+                <div className={cn(
+                '',
+                messageHover && messageHoverId === msg?.id ? 'block' : 'hidden',
+              )}>
+                <Button onClick={() => handleReplyToMessage(msg)} variant='ghost'>
+                  <Reply className='size-4 text-muted-foreground' />
+                </Button>
+              </div>*/}
+              </>
             )
           }
           <div
             className={
               cn(
-                'p-2 rounded-lg max-w-[400px]',
-                msg?.sender_id === userId ? 'bg-muted ' : 'bg-primary ',
+                'p-2 rounded-lg max-w-[400px] min-w-[120px]',
+                msg?.sender_id === userId ? 'bg-muted ' : 'bg-primary/50 ',
               )
             }
           >
@@ -101,7 +124,7 @@ const ChatConversationView = () => {
             )}
             <p className='text-wrap'>{msg.content}</p>
             <div className='flex justify-between items-center'>
-              <span className='text-xs text-gray-400 mt-1 flex'>
+              <span className='text-xs text-gray-500 mt-1 flex'>
                 {new Date(msg.created_at).toLocaleTimeString('en-US', {
                   hour: 'numeric',
                   minute: 'numeric',

@@ -6,6 +6,7 @@ import { useAnalyticsTracking } from '@/hooks/useAnalyticsTracking';
 import { cn } from '@/lib/utils';
 import { useConversations } from '@/hooks/useConversations';
 import { start } from 'repl';
+import { useEffect } from 'react';
 
 interface ContactOptionsProps {
   serviceId?: string;
@@ -15,11 +16,29 @@ interface ContactOptionsProps {
   email: string;
   phone?: string;
   className?: string;
+  isConvo: boolean;
+  setIsConvo: (isConvo: boolean) => void;
 }
 
-const ContactOptions = ({ serviceId, serviceName, providerName, email, phone, className, providerId }: ContactOptionsProps) => {
+const ContactOptions = ({ 
+  serviceId, 
+  serviceName, 
+  providerName, 
+  email, 
+  phone, 
+  className, 
+  providerId, 
+  isConvo, 
+  setIsConvo 
+}: ContactOptionsProps) => {
   const { trackServiceAction } = useAnalyticsTracking();
-  const { startConversation } = useConversations();
+  const { startConversation, startConversationSuccess } = useConversations();
+
+  useEffect(() => {
+    if (startConversationSuccess) {
+      setIsConvo(true);
+    }
+  }, [startConversationSuccess])
 
   const handleEmailContact = () => {
     console.log('📧 Opening email client for service:', serviceName);
@@ -101,16 +120,18 @@ const ContactOptions = ({ serviceId, serviceName, providerName, email, phone, cl
           </div>
 
           <div className="space-y-2">
-            <div className="flex">
-              <Button
-                variant="outline"
-                className="flex-1 justify-start gap-2"
-                onClick={handleStartChat}
-              >
-                <MessageCirclePlus size={16} />
-                إرسال رسالة خاصة
-              </Button>
-            </div>
+            {!isConvo && (
+              <div className="flex">
+                <Button
+                  variant="outline"
+                  className="flex-1 justify-start gap-2"
+                  onClick={handleStartChat}
+                >
+                  <MessageCirclePlus size={16} />
+                  إرسال رسالة خاصة
+                </Button>
+              </div>
+            )}
             <div className="flex gap-1">
               <Button
                 variant="ghost"

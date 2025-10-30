@@ -25,8 +25,8 @@ const Reviews = ({
             <h2 className='text-xl font-bold mb-4'>التقييمات والمراجعات</h2>
 
             <Dialog open={creatingReview} onOpenChange={setCreatingReview}>
-                <DialogTrigger disabled={!userAllowed}>
-                    <Button disabled={!userAllowed} variant='ghost' className='text-primary'>اضافة تقييم <Plus /></Button>
+                <DialogTrigger disabled={!userAllowed}  className='text-primary'>
+                    اضافة تقييم <Plus />
                 </DialogTrigger>
                 <DialogContent>
                     <CreateReviewForm closeForm={() => setCreatingReview(false)} serviceId={serviceId} />

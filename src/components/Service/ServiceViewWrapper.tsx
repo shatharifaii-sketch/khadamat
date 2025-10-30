@@ -1,6 +1,6 @@
 import { useServiceData } from "@/hooks/usePublicServices";
 import ServiceView from "./ServiceView";
-import { useServiceViews } from "@/hooks/useServiceViews";
+import { useAuth } from "@/contexts/AuthContext";
 import { useEffect } from "react";
 
 interface Props {
@@ -8,7 +8,21 @@ interface Props {
 }
 
 export const ServiceViewWrapper = ({ serviceId }: Props) => {
-  const {service, conversation } = useServiceData(serviceId);
+  const { user } = useAuth();
+  const {
+    service,
+    isConvo,
+    convoId,
+    setConvoId,
+    setIsConvo
+  } = useServiceData(serviceId, user?.id);
 
-  return <ServiceView service={service} conversation={conversation} />
+  return <ServiceView 
+  service={service} 
+  convoId={convoId}
+  isConvo={isConvo}
+  setConvoId={setConvoId}
+  setIsConvo={setIsConvo}
+  userId={user?.id}
+  />
 }

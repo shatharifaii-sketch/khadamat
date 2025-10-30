@@ -55,12 +55,12 @@ const SubscriptionsModal = ({ cardClassName, switchClassName }: SubscriptionsMod
                                 <span className='text-sm'>عدد الخدمات المتاحة: {subscription.allowed_services}</span>
                             </CardHeader>
                             <CardContent>
-                                <CardDescription className='flex flex-col gap-4'>
+                                <div className='flex flex-col gap-4'>
                                     <div>
                                         <div className={cn('border-2 border-dashed rounded-lg p-2', subscription.class_name)}>
-                                            <p className={cn('flex items-center gap-2', subscription.class_name)}>
+                                            <span className={cn('flex items-center gap-2', subscription.class_name)}>
                                                 نقاط مهمة للاشتراك:
-                                            </p>
+                                            </span>
                                             <ul className='list-disc list-inside'>
                                                 {subscription.notes.map((note) => (
                                                     <li className='text-start' key={note}>{note}</li>
@@ -78,7 +78,7 @@ const SubscriptionsModal = ({ cardClassName, switchClassName }: SubscriptionsMod
                                             </Badge>
                                         </div>
                                     </div>
-                                </CardDescription>
+                                </div>
                             </CardContent>
                             <CardFooter>
                                 <Button

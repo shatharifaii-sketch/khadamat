@@ -20,7 +20,7 @@ export type Database = {
           admin_user_id: string
           created_at: string | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           new_values: Json | null
           old_values: Json | null
           record_id: string | null
@@ -32,7 +32,7 @@ export type Database = {
           admin_user_id: string
           created_at?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           new_values?: Json | null
           old_values?: Json | null
           record_id?: string | null
@@ -44,7 +44,7 @@ export type Database = {
           admin_user_id?: string
           created_at?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           new_values?: Json | null
           old_values?: Json | null
           record_id?: string | null
@@ -148,7 +148,7 @@ export type Database = {
           {
             foreignKeyName: "conversation_analytics_conversation_id_fkey"
             columns: ["conversation_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "conversations"
             referencedColumns: ["id"]
           },
@@ -326,6 +326,7 @@ export type Database = {
           id: string
           message_type: string
           read_at: string | null
+          reply_to_id: string | null
           sender_id: string
         }
         Insert: {
@@ -336,6 +337,7 @@ export type Database = {
           id?: string
           message_type?: string
           read_at?: string | null
+          reply_to_id?: string | null
           sender_id: string
         }
         Update: {
@@ -346,6 +348,7 @@ export type Database = {
           id?: string
           message_type?: string
           read_at?: string | null
+          reply_to_id?: string | null
           sender_id?: string
         }
         Relationships: [
@@ -531,7 +534,7 @@ export type Database = {
           attempts: number | null
           created_at: string | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           user_id: string | null
           window_start: string | null
         }
@@ -540,7 +543,7 @@ export type Database = {
           attempts?: number | null
           created_at?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           user_id?: string | null
           window_start?: string | null
         }
@@ -549,7 +552,7 @@ export type Database = {
           attempts?: number | null
           created_at?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           user_id?: string | null
           window_start?: string | null
         }
@@ -560,7 +563,7 @@ export type Database = {
           category: string | null
           created_at: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           location: string | null
           results_count: number | null
           search_query: string
@@ -571,7 +574,7 @@ export type Database = {
           category?: string | null
           created_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           location?: string | null
           results_count?: number | null
           search_query: string
@@ -582,7 +585,7 @@ export type Database = {
           category?: string | null
           created_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           location?: string | null
           results_count?: number | null
           search_query?: string
@@ -596,7 +599,7 @@ export type Database = {
           action_type: string
           created_at: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           referrer: string | null
           service_id: string
           user_agent: string | null
@@ -606,7 +609,7 @@ export type Database = {
           action_type: string
           created_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           referrer?: string | null
           service_id: string
           user_agent?: string | null
@@ -616,7 +619,7 @@ export type Database = {
           action_type?: string
           created_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           referrer?: string | null
           service_id?: string
           user_agent?: string | null
@@ -1039,7 +1042,7 @@ export type Database = {
           created_at: string
           details: Json | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           user_agent: string | null
           user_id: string
         }
@@ -1048,7 +1051,7 @@ export type Database = {
           created_at?: string
           details?: Json | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           user_agent?: string | null
           user_id: string
         }
@@ -1057,7 +1060,7 @@ export type Database = {
           created_at?: string
           details?: Json | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           user_agent?: string | null
           user_id?: string
         }
@@ -1195,7 +1198,7 @@ export type Database = {
         }[]
       }
       get_category_analytics: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           category: string
           searches: number
@@ -1220,7 +1223,7 @@ export type Database = {
         }[]
       }
       get_top_search_terms: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           count: number
           query: string
@@ -1233,10 +1236,7 @@ export type Database = {
         }
         Returns: boolean
       }
-      is_admin: {
-        Args: { uid: string }
-        Returns: boolean
-      }
+      is_admin: { Args: { uid: string }; Returns: boolean }
       log_admin_action: {
         Args: {
           _action_type: string
@@ -1247,14 +1247,8 @@ export type Database = {
         }
         Returns: undefined
       }
-      login_activity_summary: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
-      mark_message_as_read: {
-        Args: { message_id: string }
-        Returns: undefined
-      }
+      login_activity_summary: { Args: never; Returns: Json }
+      mark_message_as_read: { Args: { message_id: string }; Returns: undefined }
       monthly_login_activity: {
         Args: { months_back?: number }
         Returns: {
@@ -1262,10 +1256,7 @@ export type Database = {
           user_count: number
         }[]
       }
-      validate_admin_input: {
-        Args: { input_text: string }
-        Returns: boolean
-      }
+      validate_admin_input: { Args: { input_text: string }; Returns: boolean }
       validate_coupon: {
         Args: { coupon_code: string; user_id: string }
         Returns: {

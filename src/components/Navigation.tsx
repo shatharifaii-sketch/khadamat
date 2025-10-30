@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Menu, LogOut, PlusCircle, Search, Info, Shield } from 'lucide-react';
+import { Menu, LogOut, PlusCircle, Search, Info, Shield, MessageCircle } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -12,11 +12,13 @@ import LanguageSwitcher from './LanguageSwitcher';
 import { Avatar, AvatarImage } from './ui/avatar';
 import { GeneratedAvatar } from './GeneratedAvatar';
 import { isAdmin } from '@/hooks/useAdminFunctionality';
+import { useChat } from '@/contexts/ChatContext';
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const { user, signOut } = useAuth();
+  const { unreadCount } = useChat();
 
   const { profile } = useProfile();
 
@@ -51,15 +53,15 @@ const Navigation = () => {
 
 
   const AccountButton = ({ mobile = false }: { mobile?: boolean }) => (
-    <NavLink to="/account" onClick={mobile ? () => setIsOpen(false) : undefined}>
+    <NavLink to="/account" onClick={mobile ? () => setIsOpen(false) : undefined} className='flex items-center gap-4 justify-start'>
       <div className="flex items-center gap-2">
         {
           profile?.profile_image_url ? (
-          <Avatar className='size-7'>
-            <AvatarImage
-              src={profile?.profile_image_url}
-            />
-          </Avatar>
+            <Avatar className='size-7'>
+              <AvatarImage
+                src={profile?.profile_image_url}
+              />
+            </Avatar>
           ) : (
             <GeneratedAvatar
               seed={profile?.full_name}
@@ -69,6 +71,18 @@ const Navigation = () => {
           )
         }
         <span>حسابي</span>
+      </div>
+    </NavLink>
+  );
+
+  const ConvosButton = ({ mobile = false }: { mobile?: boolean }) => (
+    <NavLink to="/convos" onClick={mobile ? () => setIsOpen(false) : undefined} className='flex items-center gap-4 justify-start'>
+      <div className="flex items-center gap-2 relative">
+        <MessageCircle size={20} />
+        {unreadCount > 0 && (
+          <p className="absolute -top-2 -right-2 text-muted bg-red-500 rounded-full text-xs flex items-center justify-center size-5">{unreadCount}</p>
+        )}
+        {mobile && <span>المحادثات</span>}
       </div>
     </NavLink>
   );
@@ -116,8 +130,8 @@ const Navigation = () => {
           <div className="hidden md:flex items-center space-x-4 space-x-reverse">
             {user ? (
               <div className="flex items-center space-x-4 space-x-reverse">
-
                 <AccountButton />
+                <ConvosButton />
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button variant="ghost" size="sm" onClick={handleSignOut}>
@@ -180,6 +194,7 @@ const Navigation = () => {
                       <div className="space-y-4">
 
                         <AccountButton mobile />
+                        <ConvosButton />
                         <Button variant="ghost" size="sm" onClick={handleSignOut} className="w-full justify-start">
                           <LogOut size={20} className="ml-2" />
                           تسجيل الخروج

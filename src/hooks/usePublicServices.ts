@@ -1,8 +1,9 @@
 import { useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useServiceViews } from './useServiceViews';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 export interface PublicService {
   id: string;
@@ -85,60 +86,40 @@ export const usePublicServices = () => {
   });
 };
 
-export const useServiceData = (id: string) => {
-  const { user } = useAuth();
-
-  const { data: service } = useSuspenseQuery({
-    queryKey: ['public-service-data', id],
+export const useServiceData = (id: string, userId: string) => {
+  const [isConvo, setIsConvo] = useState<boolean>(false);
+  const [convoId, setConvoId] = useState<string>(null);
+  
+  const { data } = useSuspenseQuery({
+    queryKey: ['service-with-convo', id, userId],
     queryFn: async () => {
-      const { data: service, error } = await supabase
-        .from('services')
-        .select(`
-    *,
-    publisher:fk_services_user_id (
-      id,
-      full_name,
-      profile_image_url
-    )
-  `)
-        .eq('status', 'published')
-        .eq('id', id)
-        .single();
+      const [serviceRes] = await Promise.all([
+        supabase
+          .from('services')
+          .select(`
+            *,
+            publisher:fk_services_user_id (
+              id,
+              full_name,
+              profile_image_url
+            )
+          `)
+          .eq('status', 'published')
+          .eq('id', id)
+          .single(),
+          ]);
 
-      if (error) {
-        console.error('Error fetching public services:', error);
-        return [];
-      }
+      if (serviceRes.error) throw serviceRes.error;
 
-      console.log('Fetched services with publisher:', service);
-      return service as PublicService;
-    }
+      return {
+        service: serviceRes.data as PublicService,
+        isConvo,
+        convoId,
+        setConvoId,
+        setIsConvo
+      };
+    },
   });
 
-  const { data: conversation } = useQuery({
-    queryKey: ['conversation', id, user?.id],
-    queryFn: async () => {
-      if (!user) return null;
-
-      const { data: conversation, error } = await supabase.from('conversations').select('*')
-        .eq('service_id', id)
-        .eq('client_id', user.id)
-        .single();
-
-      if (error) {
-        console.error('Error fetching conversation:', error);
-        return null;
-      }
-
-      return conversation;
-    }
-  })
-
-  return {
-    service,
-    conversation
-  } as {
-    service: PublicService;
-    conversation: any;
-  };
+  return data;
 }
