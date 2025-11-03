@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { useConversations } from '@/hooks/useConversations';
 import { start } from 'repl';
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface ContactOptionsProps {
   serviceId?: string;
@@ -20,6 +21,8 @@ interface ContactOptionsProps {
   setIsConvo: (isConvo: boolean) => void;
   convoId: string | null;
   setConvoId: (id: string | null) => void;
+  userId: string;
+  publisherId: string
 }
 
 const ContactOptions = ({ 
@@ -33,10 +36,13 @@ const ContactOptions = ({
   isConvo, 
   setIsConvo,
   convoId, 
-  setConvoId
+  setConvoId,
+  userId,
+  publisherId
 }: ContactOptionsProps) => {
   const { trackServiceAction } = useAnalyticsTracking();
   const { startConversation, startConversationSuccess } = useConversations();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (startConversationSuccess) {
@@ -109,6 +115,7 @@ const ContactOptions = ({
     if (!data) return;
     setIsConvo(true);
     setConvoId(data.id);
+    navigate(`/chat/${data.id}/${userId}/${serviceId}/${publisherId}`);
   });
 
     trackServiceAction.mutate({
