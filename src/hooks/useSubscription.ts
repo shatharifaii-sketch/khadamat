@@ -268,7 +268,9 @@ export const useSubscription = () => {
   */
 
   // Check if user can post more services
-  const canPostService = async () => {
+  const {data:canPostService} = useQuery({
+    queryKey: ['can-post-service', user?.id],
+    queryFn: async () => {
     const subscription = getUserSubscription.data;
     if (!subscription || !user) return false;
     
@@ -284,10 +286,10 @@ export const useSubscription = () => {
     }
     
     const currentServiceCount = userServices?.length || 0;
-    console.log('Can post service check - Current:', currentServiceCount, 'Allowed:', subscription.services_allowed);
     
     return currentServiceCount < subscription.services_allowed;
-  };
+  }
+  })
 
   const createNewSubscription = useMutation({
     mutationKey: ['create-new-subscription'],

@@ -1,14 +1,7 @@
 import ServiceHeader from './ui/ServiceHeader'
 import ServiceDataCard from './ui/ServiceDataCard'
 import ContactOptions from '../Chat/ui/ContactOptions';
-import CategoryServices from './ui/CategoryServices';
-import { Separator } from '../ui/separator';
 import { PublicService } from '@/hooks/usePublicServices';
-import { useServiceViews } from '@/hooks/useServiceViews';
-import { Suspense, useEffect, useRef, useState } from 'react';
-import Reviews from './ui/Reviews';
-import ErrorBoundary from '../ErrorBoundary';
-import { useAuth } from '@/contexts/AuthContext';
 import { Link, NavLink } from 'react-router-dom';
 import { Button } from '../ui/button';
 import { MessageCircle } from 'lucide-react';
@@ -30,9 +23,7 @@ const ServiceView = ({
   setConvoId,
   setIsConvo,
   userId
-}: Props) => {
-  console.log('is convo: ', isConvo);
-  
+}: Props) => {  
   return (
     <div className='flex flex-col gap-10'>
       <ServiceHeader
@@ -52,9 +43,9 @@ const ServiceView = ({
           <NavLink
             to={`/chat/${
               convoId
-            }/${conversation.client_id}/${
-              conversation.service_id
-            }/${conversation.provider_id}`}
+            }/${userId}/${
+              service.id
+            }/${service.publisher.id}`}
           >
             <Button variant='ghost' className='shadow border'>
               <MessageCircle />
@@ -72,6 +63,8 @@ const ServiceView = ({
           phone={service?.phone}
           isConvo={isConvo}
           setIsConvo={setIsConvo}
+          convoId={convoId}
+          setConvoId={setConvoId}
         />
       </div>
 

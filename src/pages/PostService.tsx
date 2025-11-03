@@ -9,27 +9,24 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { LogIn, Loader2 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const PostService = () => {
-  const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const { user, loading } = useAuth();
-  const { getUserSubscription } = useSubscription();
   const { getUserServices } = useServices();
   const [services, setServices] = useState([]);
 
   const editServiceId = searchParams.get('edit');
   const isEditMode = !!editServiceId;
 
-  // Get the service data if we're in edit mode
-  if (isEditMode) {
-      const { data } = getUserServices;
-      if (data) {
-          setServices(data);
-      }
-  }
+  useEffect(() => {
+    if (isEditMode && getUserServices.data) {
+      setServices(getUserServices.data);
+    }
+  }, [isEditMode, getUserServices.data]);
+  
   const serviceToEdit = isEditMode ? services.find(service => service.id === editServiceId) : null;
 
   // Wait for auth to load
@@ -112,8 +109,6 @@ const PostService = () => {
         </div>
     );
   }
-
-  const subscription = getUserSubscription.data;
 
   return (
       <div className="max-w-4xl mx-auto py-12 px-4">

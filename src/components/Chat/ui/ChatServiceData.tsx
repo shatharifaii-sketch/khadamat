@@ -12,7 +12,7 @@ interface Props {
 }
 const ChatServiceData = ({ service, images, setAttachment }: Props) => {
     return (
-        <div className='flex justify-between w-full items-start lg:items-start lg:flex-col lg:gap-10' dir='ltr'>
+        <div className='flex justify-between w-full items-start lg:items-start lg:flex-col lg:gap-10 gap-20' dir='ltr'>
             <div className='flex gap-3 lg:flex-col'>
                 <div className='overflow-x-auto flex gap-2'>
                     {images.length > 0 ? (
@@ -42,7 +42,7 @@ const ChatServiceData = ({ service, images, setAttachment }: Props) => {
                 </div>
             </div>
             <div>
-                {service.description}
+                <p>{service.description}</p>
             </div>
         </div>
     )

@@ -25,7 +25,7 @@ const ServiceHeader = ({
   const categoryLabel = categories.find(cat => cat.value === category)?.label || category;
 
   return (
-    <div className='flex items-center justify-between'>
+    <div className='flex items-center md:justify-between flex-col-reverse md:flex-row'>
       <div>
         <NavLink
           to={`/profile/${publisherId}`}

@@ -84,6 +84,8 @@ export const useAdminData = () => {
         .select('*')
         .order('created_at', { ascending: false });
 
+      if (usersError) throw usersError;
+
       const { data: services, error: servicesError } = await supabase.from('services')
         .select(`
         *,
@@ -95,21 +97,34 @@ export const useAdminData = () => {
       image_name,
       image_url
         )`)
+        .neq('status', 'pending-approval')
         .order('created_at', { ascending: false });
+
+      if (servicesError) throw servicesError;
+      
+        const { data: pendingServices, error: pendingServicesError } = await supabase.from('services')
+        .select(`
+        *,
+        publisher:fk_services_user_id (
+          full_name
+        ),
+        service_images (
+        id,
+      image_name,
+      image_url
+        )`)
+        .eq('status', 'pending-approval')
+        .order('created_at', { ascending: false });
+
+      if (pendingServicesError) throw pendingServicesError;
 
 
       const { data: coupons, error: couponsError } = await supabase.from('coupons').select('*').order('created_at', { ascending: false });
 
-      console.log('Admin data:', { profiles, services, coupons });
-
-      if (usersError) throw usersError;
-      if (servicesError) throw servicesError;
       if (couponsError) throw couponsError;
 
       // Calculate accurate metrics
       const uniqueServiceProviders = services.map(service => service.user_id).filter((value, index, self) => self.indexOf(value) === index).length;
-
-      console.log('Unique service providers:', uniqueServiceProviders);
 
       const todayStart = new Date();
       todayStart.setHours(0, 0, 0, 0);
@@ -127,12 +142,19 @@ export const useAdminData = () => {
       };
 
 
-      return { profiles, services, stats, coupons };
+      return { 
+        profiles, 
+        services, 
+        stats, 
+        coupons,
+        pendingServices: pendingServices,
+      };
     },
     initialData: {
       profiles: [],
       services: [],
       coupons: [],
+      pendingServices: [],
       stats: {
         totalUsers: 0,
         serviceProviders: 0,
