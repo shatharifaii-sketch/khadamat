@@ -11,6 +11,7 @@ import { Badge } from '../ui/badge';
 import { NavLink } from 'react-router-dom';
 import ServiceForm from './ui/ServiceForm';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
+import PendingServiceData from './ui/PendingServiceData';
 
 interface Props {
   services: Service[];
@@ -20,8 +21,7 @@ interface Props {
 type SortOption = "name-ar" | "name-en" | "date-asc" | "date-desc";
 
 const PendingServicesManagement = ({ services }: Props) => {
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [editingService, setEditingService] = useState<Service | null>(null);
+  const [serviceToAccept, setServiceToAccept] = useState<Service | null>(null);
   const [sortOption, setSortOption] = useState<SortOption>('date-desc');
 
   const { deleteService } = useAdminFunctionality();
@@ -89,7 +89,7 @@ const PendingServicesManagement = ({ services }: Props) => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sortedServices.map((service) => (
+            {sortedServices.length > 0 ? (sortedServices.map((service) => (
               <TableRow key={service.id}>
                 <TableCell className="font-medium max-w-xs truncate">
                   {service.title}
@@ -109,9 +109,9 @@ const PendingServicesManagement = ({ services }: Props) => {
                         <Eye className="size-4" />
                       </NavLink>
                     </Button>
-                    <Dialog open={editingService?.id === service.id} onOpenChange={(open) => !open && setEditingService(null)}>
+                    <Dialog open={serviceToAccept?.id === service.id} onOpenChange={(open) => !open && setServiceToAccept(null)}>
                       <DialogTrigger asChild>
-                        <Button size="sm" variant="outline" onClick={() => setEditingService(service)}>
+                        <Button size="sm" variant="outline" onClick={() => setServiceToAccept(service)}>
                           <Edit className="size-4" />
                         </Button>
                       </DialogTrigger>
@@ -119,6 +119,10 @@ const PendingServicesManagement = ({ services }: Props) => {
                         <DialogHeader>
                           <DialogTitle>تحرير الخدمة</DialogTitle>
                         </DialogHeader>
+                        <PendingServiceData
+                          service={serviceToAccept || null}
+                          setServiceToAccept={setServiceToAccept}
+                        />
                       </DialogContent>
                     </Dialog>
 
@@ -147,7 +151,13 @@ const PendingServicesManagement = ({ services }: Props) => {
                   </div>
                 </TableCell>
               </TableRow>
-            ))}
+            ))) : (
+              <TableRow>
+                <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
+                  لا يوجد خدمات قيد المراجعة
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </CardContent>

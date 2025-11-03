@@ -31,6 +31,13 @@ const ServiceStatusIndicator = ({ status, views = 0, isNewlyPublished = false }:
           variant: 'outline' as const,
           className: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
         };
+      case 'pending-approval':
+        return {
+          icon: Clock,
+          label: 'قيد المراجعة',
+          variant: 'outline' as const,
+          className: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
+        };
       default:
         return {
           icon: AlertCircle,

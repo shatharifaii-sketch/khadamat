@@ -1,11 +1,11 @@
 import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { toast, useToast } from "./use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabaseAdmin } from "@/integrations/supabase/adminClient";
 import { User } from "@/components/Admin/ui/UserForm";
 import { Tables } from "@/integrations/supabase/types";
 import { json } from "react-router-dom";
+import { toast } from "sonner";
 
 interface UserProfile {
   id: string;
@@ -101,8 +101,8 @@ export const useAdminData = () => {
         .order('created_at', { ascending: false });
 
       if (servicesError) throw servicesError;
-      
-        const { data: pendingServices, error: pendingServicesError } = await supabase.from('services')
+
+      const { data: pendingServices, error: pendingServicesError } = await supabase.from('services')
         .select(`
         *,
         publisher:fk_services_user_id (
@@ -142,10 +142,10 @@ export const useAdminData = () => {
       };
 
 
-      return { 
-        profiles, 
-        services, 
-        stats, 
+      return {
+        profiles,
+        services,
+        stats,
         coupons,
         pendingServices: pendingServices,
       };
@@ -430,22 +430,47 @@ export const useAdminFunctionality = () => {
     }
   })
 
+  const acceptServicePost = useMutation({
+    mutationKey: ['accept-service-post'],
+    mutationFn: async (serviceId: string) => {
+      const { error } = await supabase
+        .from('services')
+        .update({ status: 'active' })
+        .eq('id', serviceId);
+
+      if (error) {
+        console.error('Error accepting service post:', error);
+        return { success: false, error: error.message };
+      };
+
+      return { success: true };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-data'] });
+      toast.success('تم تحديث الخدمة بنجاح!');
+    },
+    onError: (error: any) => {
+      console.error('Error updating service:', error);
+      toast.error(error.message || 'حدث خطأ في تحديث الخدمة');
+    }
+  })
+
   const createCoupon = useMutation({
     mutationKey: ['create-coupon'],
     mutationFn: async (formData: Partial<Tables<'coupons'>>) => {
       const { data, error } = await supabase
-      .from('coupons')
-      .insert({
-        code: formData.code.trim().toUpperCase() || '',
-        type: formData.type || 'fixed',
-        discount_amount: formData.discount_amount || 0,
-        discount_percentage: formData.discount_percentage || null,
-        usage_limit: formData.usage_limit || null,
-        used_count: 0,
-        description: formData.description || '',
-      })
-      .select()
-      .single();
+        .from('coupons')
+        .insert({
+          code: formData.code.trim().toUpperCase() || '',
+          type: formData.type || 'fixed',
+          discount_amount: formData.discount_amount || 0,
+          discount_percentage: formData.discount_percentage || null,
+          usage_limit: formData.usage_limit || null,
+          used_count: 0,
+          description: formData.description || '',
+        })
+        .select()
+        .single();
 
       if (error) {
         console.error('Error creating coupon:', error);
@@ -498,5 +523,6 @@ export const useAdminFunctionality = () => {
     deleteCoupon,
     createCoupon,
     createCouponSuccess: createCoupon.isSuccess,
+    acceptServicePost
   };
 }
