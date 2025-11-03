@@ -65,6 +65,8 @@ const ServiceView = ({
           setIsConvo={setIsConvo}
           convoId={convoId}
           setConvoId={setConvoId}
+          userId={userId}
+          publisherId={service?.publisher.id}
         />
       </div>
 
