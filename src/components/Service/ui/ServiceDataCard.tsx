@@ -11,8 +11,6 @@ interface Props {
 const ServiceDataCard = ({
     service
 }: Props) => {
-
-    console.log('service', service);
     return (
         <Card>
             <CardHeader>

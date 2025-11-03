@@ -150,7 +150,7 @@ export const useConversations = () => {
                     client_id: user.id,
                     provider_id: providerId,
                 }])
-                .select('*')
+                .select('id')
                 .single();
 
             if (error) {
@@ -160,9 +160,8 @@ export const useConversations = () => {
 
             toast.success(`تم بدء المحادثة مع ${providerName}`);
 
-            return () => {
-                //navigate(`/chat/${data.id}/${data.client_id}/${data.service_id}/${data.provider_id}`);
-                window.open(`/chat/${data.id}/${data.client_id}/${data.service_id}/${data.provider_id}`, '_blank');
+            return {
+                id: data.id
             }
         }
     });

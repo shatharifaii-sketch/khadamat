@@ -1,66 +1,30 @@
-import { useMemo, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2, Eye } from 'lucide-react';
-import { useAdminFunctionality } from '@/hooks/useAdminFunctionality';
-import ServiceForm from './ui/ServiceForm';
-import { NavLink } from 'react-router-dom';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { SelectLabel } from '@radix-ui/react-select';
+import { Service, useAdminFunctionality } from '@/hooks/useAdminFunctionality';
+import React, { useMemo, useState } from 'react'
 import { toast } from 'sonner';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
+import { Button } from '../ui/button';
+import { Edit, Eye, Plus, Trash2 } from 'lucide-react';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
+import { Badge } from '../ui/badge';
+import { NavLink } from 'react-router-dom';
+import ServiceForm from './ui/ServiceForm';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 
-export interface Service {
-  id: string;
-  title: string;
-  category: string;
-  description: string;
-  status: string;
-  price_range: string;
-  location: string;
-  phone: string;
-  email: string;
-  experience?: string;
-  views: number;
-  created_at: string;
-  updated_at: string;
-  user_id: string;
-  publisher: {
-    full_name: string;
-  };
-  service_images: {
-    id: string;
-    image_name: string;
-    image_url: string;
-  }[]
-}
-
-export interface UserProfile {
-  id: string;
-  full_name: string;
-  is_service_provider: boolean;
-}
-
-interface ServiceManagementProps {
+interface Props {
   services: Service[];
-  users: UserProfile[];
-  onServiceUpdated: () => void;
+  onServiceUpdated: () => void
 }
 
 type SortOption = "name-ar" | "name-en" | "date-asc" | "date-desc";
 
-export const ServiceManagement = ({ services, users, onServiceUpdated }: ServiceManagementProps) => {
+const PendingServicesManagement = ({ services }: Props) => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [sortOption, setSortOption] = useState<SortOption>('date-desc');
 
   const { deleteService } = useAdminFunctionality();
-
-  const serviceProviders = users.filter(user => user.is_service_provider);
 
   const sortedServices = useMemo(() => {
     if (!services) return [];
@@ -96,21 +60,7 @@ export const ServiceManagement = ({ services, users, onServiceUpdated }: Service
     <Card>
       <CardHeader className='flex flex-col gap-3'>
         <div className="flex items-center justify-between">
-          <CardTitle>إدارة الخدمات</CardTitle>
-          <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-            <DialogTrigger asChild>
-              <Button className="flex items-center gap-2">
-                <Plus className="h-4 w-4" />
-                إنشاء خدمة جديدة
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>إنشاء خدمة جديدة</DialogTitle>
-              </DialogHeader>
-              <ServiceForm serviceProviders={serviceProviders} closeForm={() => setIsCreateModalOpen(false)} />
-            </DialogContent>
-          </Dialog>
+          <CardTitle>إدارة الخدمات ت المنتظرة</CardTitle>
         </div>
         <Select value={sortOption} onValueChange={(value) => setSortOption(value as SortOption)}>
           <SelectTrigger>
@@ -148,8 +98,8 @@ export const ServiceManagement = ({ services, users, onServiceUpdated }: Service
                 <TableCell>{service.publisher?.full_name || 'غير محدد'}</TableCell>
                 <TableCell>{service.views}</TableCell>
                 <TableCell>
-                  <Badge variant={service.status === 'published' ? 'default' : 'secondary'}>
-                    {service.status === 'published' ? 'منشور' : service.status === 'draft' ? 'مسودة' : 'معطل'}
+                  <Badge variant='outline'>
+                    {service.status === 'pending-approval' ? 'قيد المراجعة' : 'موافق'}
                   </Badge>
                 </TableCell>
                 <TableCell className='flex justify-center'>
@@ -169,7 +119,6 @@ export const ServiceManagement = ({ services, users, onServiceUpdated }: Service
                         <DialogHeader>
                           <DialogTitle>تحرير الخدمة</DialogTitle>
                         </DialogHeader>
-                        <ServiceForm isEdit={true} serviceProviders={serviceProviders} service={editingService} closeForm={() => setEditingService(null)} />
                       </DialogContent>
                     </Dialog>
 
@@ -205,3 +154,5 @@ export const ServiceManagement = ({ services, users, onServiceUpdated }: Service
     </Card>
   );
 };
+
+export default PendingServicesManagement;

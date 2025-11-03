@@ -37,7 +37,7 @@ export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
     }
 
     // Check if user can post more services (for new services only)
-    const canPost = await canPostService();
+    const canPost = canPostService;
     if (!canPost) {
       // Save the service data before redirecting to payment
       savePendingService(formData);

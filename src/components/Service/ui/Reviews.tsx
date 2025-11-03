@@ -17,8 +17,6 @@ const Reviews = ({
     const { reviews, userAllowed } = useServiceReviews(serviceId);
     const [creatingReview, setCreatingReview] = useState<boolean>(false);
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
-
-    console.log({userAllowed});
   return (
     <div>
         <div className='flex items-center justify-between mb-6'>

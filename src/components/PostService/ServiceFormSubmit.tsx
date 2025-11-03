@@ -22,7 +22,7 @@ const ServiceFormSubmit = ({ isCreating, canPostService, isEditMode = false, sav
 
   useEffect(() => {
     const checkCanPost = async () => {
-      setPostService(await canPostServiceAsync());
+      setPostService(canPostServiceAsync);
     }
 
     checkCanPost();
@@ -30,7 +30,7 @@ const ServiceFormSubmit = ({ isCreating, canPostService, isEditMode = false, sav
   return (
     <div className="pt-6">
       <Button
-        type={isEditMode || canPostService ? 'submit' : 'button'}
+        type={isEditMode || postService ? 'submit' : 'button'}
         size="lg"
         className="w-full text-xl py-6"
         disabled={isCreating}
@@ -38,6 +38,7 @@ const ServiceFormSubmit = ({ isCreating, canPostService, isEditMode = false, sav
           if (!canPostService && !postService) {
             savePendingService();
             setOpenSubscribeModal(true);
+            return;
           }
         }}
       >

@@ -18,6 +18,8 @@ interface ContactOptionsProps {
   className?: string;
   isConvo: boolean;
   setIsConvo: (isConvo: boolean) => void;
+  convoId: string | null;
+  setConvoId: (id: string | null) => void;
 }
 
 const ContactOptions = ({ 
@@ -29,7 +31,9 @@ const ContactOptions = ({
   className, 
   providerId, 
   isConvo, 
-  setIsConvo 
+  setIsConvo,
+  convoId, 
+  setConvoId
 }: ContactOptionsProps) => {
   const { trackServiceAction } = useAnalyticsTracking();
   const { startConversation, startConversationSuccess } = useConversations();
@@ -98,7 +102,14 @@ const ContactOptions = ({
   };
 
   const handleStartChat = () => {
-    startConversation.mutate({ serviceId, providerId, providerName });
+    startConversation.mutateAsync({ 
+      serviceId, providerId, providerName 
+    },
+  ).then((data) => {
+    if (!data) return;
+    setIsConvo(true);
+    setConvoId(data.id);
+  });
 
     trackServiceAction.mutate({
       serviceId: serviceId!,

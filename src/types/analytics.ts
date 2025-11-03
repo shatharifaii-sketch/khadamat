@@ -18,6 +18,7 @@ export interface ServiceAnalytic {
     title: string;
     category: string;
   };
+  status?: string;
 }
 
 export interface ConversationAnalytic {

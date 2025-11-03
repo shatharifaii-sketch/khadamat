@@ -113,10 +113,6 @@ export const useServiceData = (id: string, userId: string) => {
 
       return {
         service: serviceRes.data as PublicService,
-        isConvo,
-        convoId,
-        setConvoId,
-        setIsConvo
       };
     },
   });

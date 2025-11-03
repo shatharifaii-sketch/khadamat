@@ -12,6 +12,7 @@ import { Json, Tables } from '@/integrations/supabase/types'
 import { Service } from '@/hooks/useAdminFunctionality'
 import { ServiceEditModal } from './ServiceEditModal'
 import CouponsManagement from './CouponsManagement'
+import PendingServicesManagement from './PendingServicesManagement'
 
 interface Props {
     analyticsSummary: AnalyticsSummary;
@@ -19,6 +20,7 @@ interface Props {
         services: Service[];
         profiles: Tables<'profiles'>[];
         coupons: Tables<'coupons'>[];
+        pendingServices: Service[];
     };
     stats: {
         publishedServices: number;
@@ -78,7 +80,7 @@ const AdminView = ({ analyticsSummary, adminData, stats, dailyStats, monthlyStat
 
             {/* Main Admin Tabs */}
             <Tabs defaultValue="analytics" className="space-y-6">
-                <TabsList className="grid w-full grid-cols-4">
+                <TabsList className="grid w-full grid-cols-5">
                     <TabsTrigger value="analytics" className="flex items-center gap-2">
                         <BarChart3 className="h-4 w-4" />
                         التحليلات
@@ -90,6 +92,10 @@ const AdminView = ({ analyticsSummary, adminData, stats, dailyStats, monthlyStat
                     <TabsTrigger value="services" className="flex items-center gap-2">
                         <Settings className="h-4 w-4" />
                         الخدمات
+                    </TabsTrigger>
+                    <TabsTrigger value="pending-services" className="flex items-center gap-2">
+                        <Settings className="h-4 w-4" />
+                        الخدمات المنتظرة
                     </TabsTrigger>
                     <TabsTrigger value="coupons" className="flex items-center gap-2">
                         <BadgePercent className="h-4 w-4" />
@@ -195,6 +201,14 @@ const AdminView = ({ analyticsSummary, adminData, stats, dailyStats, monthlyStat
                     <ServiceManagement
                         services={adminData.services}
                         users={adminData.profiles}
+                        onServiceUpdated={() => { }}
+                    />
+                </TabsContent>
+
+                {/** Pending Services Management */}
+                <TabsContent value="pending-services">
+                    <PendingServicesManagement
+                        services={adminData.pendingServices}
                         onServiceUpdated={() => { }}
                     />
                 </TabsContent>

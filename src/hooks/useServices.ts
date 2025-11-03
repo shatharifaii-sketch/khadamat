@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { PublicService } from './usePublicServices';
+import { useParams } from 'react-router-dom';
 
 export interface Service {
   id?: string;
@@ -41,12 +42,13 @@ export const useServices = () => {
       console.log('Service data:', serviceData);
       
       // Check user's service quota before creating
-      console.log('Checking service quota...');
+      console.log('Checking service quota...', user?.id);
       const { data: subscription, error: subError } = await supabase
         .from('subscriptions')
         .select('services_allowed, services_used')
-        .eq('user_id', user.id)
-        .maybeSingle();
+        .eq('user_id', user?.id)
+        .eq('status', 'active')
+        .single();
 
       if (subError) {
         console.error('Error checking subscription:', subError);
@@ -126,7 +128,7 @@ export const useServices = () => {
         .insert({
           ...serviceData,
           user_id: user.id,
-          status: 'published'
+          status: 'pending-approval'
         })
         .select()
         .single();
@@ -220,11 +222,7 @@ export const useServices = () => {
   const getUserServices = useQuery({
     queryKey: ['user-services', user?.id],
     queryFn: async () => {
-      if (!user) {
-        console.log('No user for getUserServices');
-        return [];
-      }
-      
+
       console.log('Fetching user services for:', user.id);
       
       const { data, error } = await supabase
@@ -241,7 +239,7 @@ export const useServices = () => {
       console.log('User services fetched:', data?.length, 'services');
       return data || [];
     },
-    enabled: !!user
+    enabled: !!user?.id
   });
 
   return {
