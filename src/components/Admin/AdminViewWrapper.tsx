@@ -5,7 +5,6 @@ import AdminView from './AdminView';
 
 const AdminViewWrapper = () => {
     const { adminData } = useAdminData();
-    console.log(adminData);
     const { analyticsSummary, loginStats, dailyStats, monthlyStats, yearlyStats } = useAdminAnalytics();
   return (
     <AdminView 
