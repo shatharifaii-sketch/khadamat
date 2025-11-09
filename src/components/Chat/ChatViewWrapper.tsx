@@ -6,7 +6,8 @@ import ChatLayout from './ChatLayout';
 import { Card, CardContent, CardFooter, CardHeader } from '../ui/card';
 import ChatMessageInput from './ui/ChatMessageInput';
 import { cn } from '@/lib/utils';
-import { Message, useChat } from '@/contexts/ChatContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 interface ConversationViewProps {
     conversationId: string;
@@ -16,8 +17,16 @@ interface ConversationViewProps {
 }
 
 const ChatViewWrapper = ({ conversationId, clientId, serviceId, providerId }: ConversationViewProps) => {
+    const { user } = useAuth();
+    const navigate = useNavigate();
+
+    if (!user) {
+        navigate('/login');
+    }
+
     const { conversation } = useConversationData({ conversationId });
     const [attachment, setAttachment] = useState<string | null>(null);
+
     /**TODO: add reply to message */
     //const [ replyToMessage, setReplyToMessage ] = useState<Message | null>(null);
 
@@ -28,18 +37,18 @@ const ChatViewWrapper = ({ conversationId, clientId, serviceId, providerId }: Co
                     <ChatSimpleData provider={conversation.provider} />
                 </CardHeader>
                 <CardContent className={cn(
-                    attachment 
-                    ? 'min-h-[350px] max-h-[400px]' 
-                    : 'min-h-[480px] lg:min-h-[600px] max-h-[500px]',
+                    attachment
+                        ? 'min-h-[350px] max-h-[400px]'
+                        : 'min-h-[480px] lg:min-h-[600px] max-h-[500px]',
                     'overflow-y-auto')}>
                     <ChatConversationView
                     //setReplyToMessage={setReplyToMessage}
                     />
                 </CardContent>
                 <CardFooter className='border-t-2 py-4'>
-                    <ChatMessageInput 
-                    attachment={attachment} 
-                    setAttachment={setAttachment}
+                    <ChatMessageInput
+                        attachment={attachment}
+                        setAttachment={setAttachment}
                     //replyToMessage={replyToMessage}
                     //setReplyToMessage={setReplyToMessage}
                     />

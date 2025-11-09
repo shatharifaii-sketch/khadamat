@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { useEmail } from '@/hooks/useEmail';
+import AppLoading from '@/components/AppLoading';
 
 interface AuthContextType {
   user: User | null;
@@ -20,9 +20,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    console.log('Setting up auth state listener...');
-    
+  useEffect(() => {    
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
@@ -139,7 +137,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <AuthContext.Provider value={value}>
-      {children}
+      {loading ? (
+        <AppLoading />
+      ) : (
+        <>{children}</>
+      )}
     </AuthContext.Provider>
   );
 };
