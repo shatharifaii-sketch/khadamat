@@ -1,13 +1,19 @@
 import { useConversations } from '@/hooks/useConversations'
-import React from 'react'
-import { Card } from '../ui/card';
 import ConvoLayout from './ConvoLayout';
 import { Separator } from '../ui/separator';
 import { ChevronLeft, List, Menu, SendHorizonal } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import ConvoLink from './ui/ConvoLink';
+import { useAuth } from '@/contexts/AuthContext';
 
 const ConversationsViewWrapper = () => {
+    const { user } = useAuth();
+    const navigate = useNavigate();
+
+    if (!user) {
+        navigate('/login');
+    }
+    
     const { conversations } = useConversations();
 
     return (

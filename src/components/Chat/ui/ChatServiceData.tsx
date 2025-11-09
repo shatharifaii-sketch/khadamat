@@ -4,6 +4,7 @@ import { ServiceImageProps } from '@/hooks/useServices';
 import { Paperclip } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import { truncateString } from '@/lib/utils';
 
 interface Props {
     service: ChatServiceProps;
@@ -41,8 +42,8 @@ const ChatServiceData = ({ service, images, setAttachment }: Props) => {
                     <p className='text-muted-foreground text-sm'>{new Date(service.created_at).toLocaleDateString()}</p>
                 </div>
             </div>
-            <div>
-                <p>{service.description}</p>
+            <div className='max-w-[400px]'>
+                <p>{truncateString(service.description, 500)}</p>
             </div>
         </div>
     )

@@ -13,6 +13,7 @@ import { Avatar, AvatarImage } from './ui/avatar';
 import { GeneratedAvatar } from './GeneratedAvatar';
 import { isAdmin } from '@/hooks/useAdminFunctionality';
 import { useChat } from '@/contexts/ChatContext';
+import { cn } from '@/lib/utils';
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -76,7 +77,7 @@ const Navigation = () => {
   );
 
   const ConvosButton = ({ mobile = false }: { mobile?: boolean }) => (
-    <NavLink to="/convos" onClick={mobile ? () => setIsOpen(false) : undefined} className='flex items-center gap-4 justify-start'>
+    <NavLink to="/convos" onClick={mobile ? () => setIsOpen(false) : undefined} className={cn('flex items-center gap-4 justify-start', { 'text-primary': location.pathname === '/convos' || location.pathname.startsWith('/chat') })}>
       <div className="flex items-center gap-2 relative">
         <MessageCircle size={20} />
         {unreadCount > 0 && (
@@ -194,7 +195,7 @@ const Navigation = () => {
                       <div className="space-y-4">
 
                         <AccountButton mobile />
-                        <ConvosButton />
+                        <ConvosButton mobile />
                         <Button variant="ghost" size="sm" onClick={handleSignOut} className="w-full justify-start">
                           <LogOut size={20} className="ml-2" />
                           تسجيل الخروج
