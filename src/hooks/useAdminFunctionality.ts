@@ -247,8 +247,7 @@ export const useAdminFunctionality = () => {
         { event: 'INSERT', schema: 'public', table: 'profiles' },
         (payload) => {
           console.log('New user registered:', payload.new);
-          toast({
-            title: "مستخدم جديد",
+          toast("مستخدم جديد",{
             description: `انضم ${payload.new.full_name || 'مستخدم جديد'} للموقع`,
           });
           queryClient.invalidateQueries({ queryKey: ['admin-data'] });
@@ -263,8 +262,7 @@ export const useAdminFunctionality = () => {
         { event: 'INSERT', schema: 'public', table: 'services' },
         (payload) => {
           console.log('New service posted:', payload.new);
-          toast({
-            title: "خدمة جديدة",
+          toast("خدمة جديدة", {
             description: `تم إضافة خدمة جديدة: ${payload.new.title}`,
           });
           queryClient.invalidateQueries({ queryKey: ['admin-data'] });
@@ -435,7 +433,7 @@ export const useAdminFunctionality = () => {
     mutationFn: async (serviceId: string) => {
       const { error } = await supabase
         .from('services')
-        .update({ status: 'active' })
+        .update({ status: 'published' })
         .eq('id', serviceId);
 
       if (error) {
