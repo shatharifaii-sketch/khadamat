@@ -39,10 +39,10 @@ const PendingServiceHandler = () => {
       await getUserSubscription.refetch();
       
       // Check if user can now post services (has subscription)
-      const canPost = await canPostService();
+      const canPost = canPostService;
       
       if (canPost) {
-        console.log('User can post service, creating pending service...');
+        console.log('User can post service, creating pending service... 22222222');
         setProcessingStatus('creating');
         
         await createService.mutateAsync({

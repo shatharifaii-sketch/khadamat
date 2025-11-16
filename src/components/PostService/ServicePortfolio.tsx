@@ -23,7 +23,7 @@ const ServicePortfolio = ({ onImagesChange }: ServicePortfolioProps) => {
       }));
       onImagesChange(transformedImages);
     }
-  }, [images, onImagesChange]);
+  }, [images]);
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();

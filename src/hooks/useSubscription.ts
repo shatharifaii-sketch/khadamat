@@ -272,7 +272,11 @@ export const useSubscription = () => {
     queryKey: ['can-post-service', user?.id],
     queryFn: async () => {
     const subscription = getUserSubscription.data;
-    if (!subscription || !user) return false;
+    if (!subscription || !user) return {
+      user: false,
+      subscription: false,
+      canPost: false
+    };
     
     // Get actual count of user's services
     const { data: userServices, error } = await supabase
@@ -282,12 +286,20 @@ export const useSubscription = () => {
       
     if (error) {
       console.error('Error checking user services for quota:', error);
-      return false;
+      return {
+        user: true,
+        subscription: true,
+        canPost: false
+      };
     }
     
     const currentServiceCount = userServices?.length || 0;
     
-    return currentServiceCount < subscription.services_allowed;
+    return {
+      user: true,
+      subscription: true,
+      canPost: currentServiceCount < subscription.services_allowed
+    };
   }
   })
 

@@ -3,6 +3,7 @@ import { Separator } from '@/components/ui/separator';
 import { Eye } from 'lucide-react';
 import ServiceImages from './ServiceImages';
 import { PublicService } from '@/hooks/usePublicServices';
+import { cn } from '@/lib/utils';
 
 interface Props {
     service: PublicService
@@ -35,7 +36,7 @@ const ServiceDataCard = ({
                             <ServiceImages serviceId={service?.id} />
                         </div>
                     </div>
-                    <div className='flex flex-col md:flex-row md:items-center md:gap-8 my-5'>
+                    <div className={cn('flex my-5', service?.experience.length > 15 || service?.location.length > 15 || service?.price_range.length > 15 ? 'flex-col' : 'flex-col md:flex-row md:items-center md:gap-8')}>
                         <div className='flex items-center gap-4'>
                             <h3 className='text-lg font-semibold mt-4 text-nowrap'>تكلفة الخدمة</h3>
                             <h2 className='text-xl font-semibold text-primary text-nowrap'>{service?.price_range}</h2>

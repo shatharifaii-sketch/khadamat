@@ -1,8 +1,8 @@
 import { Button } from '@/components/ui/button';
 import { Service } from '../ServiceManagement'
 import ServiceImages from '@/components/Service/ui/ServiceImages';
-import { useServices } from '@/hooks/useServices';
 import { useAdminFunctionality } from '@/hooks/useAdminFunctionality';
+import { Separator } from '@/components/ui/separator';
 
 interface Props {
     service: Service | null;
@@ -26,10 +26,11 @@ const PendingServiceData = ({
     if (!service) return null;
 
   return (
-    <div className='flex flex-col gap-6'>
-        <h1 className='flex flex-col'>
+    <div className='relative'>
+        <div className='flex flex-col gap-6 overflow-y-auto max-h-[60vh] pr-2'>
+            <h1 className='flex flex-col'>
             اسم الخدمة:
-            <span className='px-4'>
+            <span className='px-4 text-2xl'>
                 {service.title}
             </span>
         </h1>
@@ -57,7 +58,9 @@ const PendingServiceData = ({
                 <ServiceImages serviceId={service.id} />
             </div>
         </div>
-        <div>
+        </div>
+        <Separator className="mt-4" />
+        <div className='w-full'>
             <h3 className='text-lg font-semibold'>إقبل نشر الخدمة</h3>
             <div className='mt-3 flex items-center'>
                 <Button onClick={handleAccept} className='flex-1'>

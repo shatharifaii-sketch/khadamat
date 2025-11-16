@@ -10,6 +10,7 @@ import { useSubscriptionTiers } from '@/hooks/useSubscriptionTiers';
 import { Tables } from '@/integrations/supabase/types';
 import { useEnhancedPaymentLogic } from '@/hooks/useEnhancedPaymentLogic';
 import { usePaymentLogic } from '@/hooks/usePaymentLogic';
+import { DrawerDescription, DrawerHeader, DrawerTitle } from '../ui/drawer';
 
 interface SubscriptionsModalProps {
     cardClassName?: string;
@@ -31,7 +32,17 @@ const SubscriptionsModal = ({ cardClassName, switchClassName }: SubscriptionsMod
     }
 
     return (
-        <div className='flex flex-col gap-5'>
+        <>
+            <DrawerHeader className='flex items-center justify-between'>
+            <DrawerTitle className='text-2xl text-start'>
+              أنواع الاشتراك
+            </DrawerTitle>
+          </DrawerHeader>
+          <DrawerDescription className='flex flex-col gap-4 px-5 overflow-y-auto'>
+            <div>
+              <p>يجب على جميع الاشتراك بأحد العروض المتوفرة للحصول على قدرة نشر الخدمات</p>
+            </div>
+            <div className='flex flex-col gap-5'>
             <div className='border-2 border-dashed rounded-lg p-2 lg:px-4'>
                 <p className='text-lg mb-2'>اختر نوع الاشتراك المناسب:</p>
                 <div dir='ltr' className="flex flex-col items-center justify-center gap-2 mb-4">
@@ -97,6 +108,8 @@ const SubscriptionsModal = ({ cardClassName, switchClassName }: SubscriptionsMod
                 </div>
             </div>
         </div>
+          </DrawerDescription>
+        </>
     )
 }
 

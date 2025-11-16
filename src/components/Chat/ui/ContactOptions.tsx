@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Mail, Phone, Copy, MessageCirclePlus } from 'lucide-react';
+import { Mail, Phone, Copy, MessageCirclePlus, ArrowLeftToLine } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAnalyticsTracking } from '@/hooks/useAnalyticsTracking';
 import { cn } from '@/lib/utils';
@@ -17,12 +17,12 @@ interface ContactOptionsProps {
   email: string;
   phone?: string;
   className?: string;
-  isConvo: boolean;
-  setIsConvo: (isConvo: boolean) => void;
-  convoId: string | null;
-  setConvoId: (id: string | null) => void;
-  userId: string;
-  publisherId: string
+  isConvo?: boolean;
+  setIsConvo?: (isConvo: boolean) => void;
+  convoId?: string | null;
+  setConvoId?: (id: string | null) => void;
+  userId?: string;
+  publisherId?: string
 }
 
 const ContactOptions = ({ 
@@ -108,6 +108,23 @@ const ContactOptions = ({
   };
 
   const handleStartChat = () => {
+    if (!userId) {
+      toast('يرجى تسجيل الدخول لبدء المحادثة', {
+        icon: (
+          <>
+            <ArrowLeftToLine size={16} />
+          </>
+        ),
+        type: 'error',
+        action: {
+          label: 'تسجيل الدخول',
+          onClick: () => {
+            navigate('/auth');
+          }
+        }
+      });
+      return;
+    }
     startConversation.mutateAsync({ 
       serviceId, providerId, providerName 
     },

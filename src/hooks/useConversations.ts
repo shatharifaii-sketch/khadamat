@@ -93,6 +93,7 @@ export const useConversations = () => {
     const getConversations = useSuspenseQuery({
         queryKey: ['get-conversations', user?.id],
         queryFn: async () => {
+            if (!user) return [];
             const { data: conversations, error } = await supabase.from('conversations')
                 .select(`
                 *,
@@ -113,7 +114,7 @@ export const useConversations = () => {
                     updated_at
                 )
                 `)
-                .or(`client_id.eq.${user!.id},provider_id.eq.${user!.id}`)
+                .or(`client_id.eq.${user.id},provider_id.eq.${user.id}`)
                 .order('last_message_at', { ascending: false });
 
             if (error) {
@@ -143,6 +144,24 @@ export const useConversations = () => {
         mutationKey: ['start-conversation'],
         mutationFn: async ({ serviceId, providerId, providerName }: { serviceId: string; providerId: string; providerName: string }) => {
             if (!user) throw new Error('User not authenticated');
+
+            const { data: existingConvo, error: existingConvoError } = await supabase.from('conversations')
+                .select('id')
+                .eq('service_id', serviceId)
+                .eq('client_id', user.id)
+                .eq('provider_id', providerId)
+                .single();
+            
+            if (existingConvoError && existingConvoError.code !== 'PGRST116') {
+                toast.error('حدث خطأ أثناء بدء المحادثة');
+                console.error(existingConvoError);
+            }
+
+            if (existingConvo) {
+                return {
+                    id: existingConvo.id
+                }
+            }
 
             const { data, error } = await supabase.from('conversations')
                 .insert([{

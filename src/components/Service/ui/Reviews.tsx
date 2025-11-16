@@ -23,7 +23,7 @@ const Reviews = ({
             <h2 className='text-xl font-bold mb-4'>التقييمات والمراجعات</h2>
 
             <Dialog open={creatingReview} onOpenChange={setCreatingReview}>
-                <DialogTrigger disabled={!userAllowed}  className='text-primary'>
+                <DialogTrigger disabled={!userAllowed}  className='text-primary flex items-center gap-2'>
                     اضافة تقييم <Plus />
                 </DialogTrigger>
                 <DialogContent>

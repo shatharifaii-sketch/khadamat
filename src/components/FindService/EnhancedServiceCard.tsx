@@ -5,11 +5,12 @@ import { MapPin, Phone, Mail, Eye, Star, MessageCircle, Heart } from 'lucide-rea
 import ContactOptions from '@/components/Chat/ui/ContactOptions';
 import { useServiceViews } from '@/hooks/useServiceViews';
 
-import { useAuth } from '@/contexts/AuthContext';
 import { categories } from '@/components/FindService/ServiceCategories';
 import type { PublicService } from '@/hooks/usePublicServices';
 import { truncateString } from '@/lib/utils';
 import { NavLink, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface EnhancedServiceCardProps {
   service: PublicService;
@@ -17,9 +18,11 @@ interface EnhancedServiceCardProps {
 
 const EnhancedServiceCard = ({ service }: EnhancedServiceCardProps) => {
   const { incrementView } = useServiceViews();
-  const navigate = useNavigate()
-
+  const navigate = useNavigate();
   const { user } = useAuth();
+
+  const [isConvo, setIsConvo] = useState<boolean>(false);
+  const [convoId, setConvoId] = useState<string>(null);
 
   const categoryLabel = categories.find(cat => cat.value === service.category)?.label || service.category;
 
@@ -42,11 +45,11 @@ const EnhancedServiceCard = ({ service }: EnhancedServiceCardProps) => {
               <Button 
               variant='link'
               onClick={handleViewService}
-              className='text-lg hover:no-underline px-0'>
+              className='text-lg hover:no-underline px-0 text-wrap text-start'>
                 {service.title}
               </Button>
               <NavLink 
-              to={`/profile/${service.publisher?.id}`} className='text-sm text-muted-foreground flex items-center gap-2 hover:text-primary transition-colors'
+              to={`/profile/${service.publisher?.id}`} className='text-sm text-muted-foreground flex items-center gap-2 hover:text-primary transition-colors mt-2'
               >
               {service.publisher?.full_name}
               
@@ -94,6 +97,12 @@ const EnhancedServiceCard = ({ service }: EnhancedServiceCardProps) => {
             providerName={service.publisher?.full_name || 'مقدم الخدمة'}
             email={service.email}
             phone={service.phone}
+            isConvo={isConvo}
+            setIsConvo={setIsConvo}
+            convoId={convoId}
+            setConvoId={setConvoId}
+            userId={user?.id}
+            publisherId={service.publisher?.id}
           />
         </div>
       </CardContent>
