@@ -2,11 +2,10 @@
 import { Button } from '@/components/ui/button';
 import { Suspense, useEffect, useState } from 'react';
 import SubscriptionsModal from './SubscriptionsModal';
-import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from '../ui/drawer';
+import { Drawer, DrawerClose, DrawerContent, DrawerFooter } from '../ui/drawer';
 import ErrorBoundary from '../ErrorBoundary';
-import { usePendingService } from '@/hooks/usePendingService';
-import { ServiceFormData } from '@/types/service';
 import { useServiceForm } from '@/hooks/useServiceForm';
+import PaymentModal from './PaymentModal';
 
 interface ServiceFormSubmitProps {
   isCreating: boolean;
@@ -15,27 +14,30 @@ interface ServiceFormSubmitProps {
   savePendingService?: () => void;
 }
 
-const ServiceFormSubmit = ({ isCreating, canPostService, isEditMode = false, savePendingService }: ServiceFormSubmitProps) => {
+const ServiceFormSubmit = ({ isCreating, canPostService: editMode, isEditMode = false, savePendingService }: ServiceFormSubmitProps) => {
   const [openSubscribeModal, setOpenSubscribeModal] = useState<boolean>(false);
   const { canPostServiceAsync } = useServiceForm();
-  const [postService, setPostService] = useState<boolean>(canPostService);
+  const [sub, setSub] = useState<boolean>(false);
+  const [allowed, setAllowed] = useState<boolean>(false);
 
   useEffect(() => {
     const checkCanPost = async () => {
-      setPostService(canPostServiceAsync);
+      setSub(canPostServiceAsync.subscription);
+      setAllowed(canPostServiceAsync.canPost);
     }
 
     checkCanPost();
-  })
+  }, [canPostServiceAsync]);
+
   return (
     <div className="pt-6">
       <Button
-        type={isEditMode || postService ? 'submit' : 'button'}
+        type={isEditMode || allowed ? 'submit' : 'button'}
         size="lg"
         className="w-full text-xl py-6"
         disabled={isCreating}
         onClick={() => {
-          if (!canPostService && !postService) {
+          if (!editMode && !allowed) {
             savePendingService();
             setOpenSubscribeModal(true);
             return;
@@ -43,12 +45,12 @@ const ServiceFormSubmit = ({ isCreating, canPostService, isEditMode = false, sav
         }}
       >
         {isCreating ?
-          (isEditMode ? 'جاري التحديث...' : 'جاري النشر...') :
-          (isEditMode ? 'حفظ التعديلات' :
-            canPostService || postService ? 'انشر الخدمة' : 'اشترك الان و انشر الخدمة')
+          (isEditMode ? 'جاري التحديث...' : 'جاري النشر...')
+          :
+          (isEditMode ? 'حفظ التعديلات' : allowed && sub ? 'انشر الخدمة' : 'اشترك أو إدفع الان و انشر الخدمة')
         }
       </Button>
-      {!canPostService && !isEditMode && (
+      {!isEditMode && !sub && !allowed && (
         <p className="text-center text-muted-foreground mt-4 text-large">
           سيتم توجيهك لصفحة الدفع أولاً
         </p>
@@ -60,21 +62,12 @@ const ServiceFormSubmit = ({ isCreating, canPostService, isEditMode = false, sav
         onOpenChange={() => setOpenSubscribeModal(false)}
       >
         <DrawerContent className='h-screen w-full sm:w-4/5 lg:w-2/5 transition-all rounded-none'>
-          <DrawerHeader className='flex items-center justify-between'>
-            <DrawerTitle className='text-2xl text-start'>
-              أنواع الاشتراك
-            </DrawerTitle>
-          </DrawerHeader>
-          <DrawerDescription className='flex flex-col gap-4 px-5 overflow-y-auto'>
-            <div>
-              <p>يجب على جميع الاشتراك بأحد العروض المتوفرة للحصول على قدرة نشر الخدمات</p>
-            </div>
-            <Suspense fallback={<div>Loading...</div>}>
-              <ErrorBoundary fallback={<div>Something went wrong</div>}>
-                <SubscriptionsModal />
-              </ErrorBoundary>
-            </Suspense>
-          </DrawerDescription>
+          <Suspense fallback={<div>Loading...</div>}>
+            <ErrorBoundary fallback={<div>Something went wrong</div>}>
+              {(!allowed && !sub) || (allowed && !sub) && <SubscriptionsModal />}
+              {!allowed && sub && <PaymentModal />}
+            </ErrorBoundary>
+          </Suspense>
           <DrawerFooter>
             <DrawerClose className='flex'>
               <Button variant='ghost' className='flex-1'>إلغاء</Button>

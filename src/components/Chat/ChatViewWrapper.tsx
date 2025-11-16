@@ -16,6 +16,8 @@ interface ConversationViewProps {
     providerId: string;
 }
 
+//TODO: LIMIT MESSAGE MEDIA SIZE, NUMBER AND TYPE
+
 const ChatViewWrapper = ({ conversationId, clientId, serviceId, providerId }: ConversationViewProps) => {
     const { user } = useAuth();
     const navigate = useNavigate();

@@ -4,10 +4,11 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { usePendingService } from '@/hooks/usePendingService';
 import { toast } from 'sonner';
 import { Service, ServiceFormData } from '@/types/service';
+import { useImageUpload } from './useImageUpload';
 
 export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
   const navigate = useNavigate();
-  const { createService, updateService, isCreating, isUpdating } = useServices();
+  const { createService, updateService, isCreating, isUpdating, saveImages } = useServices();
   const { canPostService } = useSubscription();
   const { savePendingService, clearPendingService } = usePendingService();
   
@@ -39,6 +40,7 @@ export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
     // Check if user can post more services (for new services only)
     const canPost = canPostService;
     if (!canPost) {
+      clearPendingService();
       // Save the service data before redirecting to payment
       savePendingService(formData);
       
@@ -48,7 +50,7 @@ export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
     }
 
     try {
-      await createService.mutateAsync({
+      const result = await createService.mutateAsync({
         title: formData.title,
         category: formData.category,
         description: formData.description,
@@ -56,12 +58,20 @@ export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
         location: formData.location,
         phone: formData.phone,
         email: formData.email,
-        experience: formData.experience
+        experience: formData.experience,
       });
-      
+
+      //TODO: Handle image uploads here if necessary
+      if (formData.images && formData.images.length > 0) {
+        await saveImages({
+          serviceId: result.id,
+          images: formData.images
+        });
+      }
+    
       // Clear pending service data after successful creation
       clearPendingService();
-      
+
       // Navigate to account page to see the service
       navigate('/account');
     } catch (error) {

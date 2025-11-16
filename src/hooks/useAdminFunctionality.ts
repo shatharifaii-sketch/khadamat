@@ -58,6 +58,9 @@ interface SaveImageProps {
 
 export const isAdmin = (): boolean => {
   const { user } = useAuth();
+
+  if (!user) return false;
+  
   const { data, error } = useQuery({
     queryKey: ['is-admin', user?.id],
     queryFn: async () => {

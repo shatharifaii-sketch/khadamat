@@ -5,6 +5,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { PublicService } from './usePublicServices';
 import { useParams } from 'react-router-dom';
+import { useImageUpload } from './useImageUpload';
+import { ServiceFormData } from '@/types/service';
 
 export interface Service {
   id?: string;
@@ -31,15 +33,43 @@ export const useServices = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
+  const saveImages = async ({serviceId, images}: {serviceId: string, images: ServiceFormData['images']}) => {
+      if (!user || images.length === 0 || !serviceId) {
+        console.error('No user or images found when trying to upload service images');
+
+        return
+      }
+
+      console.log('Uploading service images for service:', serviceId);
+
+      for (const image of images) {
+        const { data, error } = await supabase
+          .from('service_images')
+          .insert({
+            service_id: serviceId,
+            image_url: image.image_url,
+            image_name: image.image_name
+          })
+          .single();
+
+        if (error) {
+          console.error('Error uploading service image:', error);
+          return;
+        }
+
+        console.log('Service image uploaded successfully:', data);
+      }
+
+      toast.success('تم تحميل صور الخدمة بنجاح!');
+      return true;
+  }
+
   const createService = useMutation({
     mutationFn: async (serviceData: Service) => {
       if (!user) {
         console.error('No user found when trying to create service');
         throw new Error('يجب تسجيل الدخول أولاً');
       }
-      
-      console.log('Creating service for user:', user.id);
-      console.log('Service data:', serviceData);
       
       // Check user's service quota before creating
       console.log('Checking service quota...', user?.id);
@@ -54,8 +84,6 @@ export const useServices = () => {
         console.error('Error checking subscription:', subError);
         throw new Error('خطأ في التحقق من الاشتراك: ' + subError.message);
       }
-
-      console.log('Subscription data:', subscription);
 
       // For new subscription model: Check actual service count vs allowed
       const { data: userServices, error: servicesError } = await supabase
@@ -163,6 +191,8 @@ export const useServices = () => {
       queryClient.invalidateQueries({ queryKey: ['public-services'] });
       queryClient.invalidateQueries({ queryKey: ['user-subscription'] });
       queryClient.invalidateQueries({ queryKey: ['home-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-data'] });
+      queryClient.invalidateQueries({ queryKey: ['service-images'] });
       toast.success('تم نشر الخدمة بنجاح!');
     },
     onError: (error: any) => {
@@ -246,6 +276,7 @@ export const useServices = () => {
     createService,
     updateService,
     getUserServices,
+    saveImages,
     isCreating: createService.isPending,
     isUpdating: updateService.isPending
   };

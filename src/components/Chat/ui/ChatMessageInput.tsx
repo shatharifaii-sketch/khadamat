@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Message, useChat } from '@/contexts/ChatContext';
+import { useChat } from '@/contexts/ChatContext';
 import { Paperclip, SendHorizonal, X } from 'lucide-react'
 import { FormEvent, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner';

@@ -359,7 +359,9 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
             if (file && typeof file === 'object') {
                 if (!validateFile(file)) {
                     removeLocalMessage(tempId);
-                    toast.error('فشل في رفع الصورة');
+                    toast.error('فشل في رفع الصورة', {
+                        description: 'الملف أكبر من 10 ميجابايت أو غير مدعوم'
+                    });
                     return;
                 };
 
