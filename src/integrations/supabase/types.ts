@@ -317,6 +317,62 @@ export type Database = {
         }
         Relationships: []
       }
+      invoices: {
+        Row: {
+          amount: number | null
+          created_at: string
+          id: number
+          subscription_id: string | null
+          subscription_transaction_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          id?: number
+          subscription_id?: string | null
+          subscription_transaction_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          id?: number
+          subscription_id?: string | null
+          subscription_transaction_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_subscription_transaction_id_fkey"
+            columns: ["subscription_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_with_email"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           content: string
@@ -407,12 +463,10 @@ export type Database = {
           discount_applied: number | null
           id: string
           original_amount: number | null
+          paid_for: string | null
           payment_data: Json | null
           payment_method: string
-          services_quota: number
           status: string
-          subscription_tier: string | null
-          transaction_id: string | null
           updated_at: string | null
           user_id: string
         }
@@ -423,12 +477,10 @@ export type Database = {
           discount_applied?: number | null
           id?: string
           original_amount?: number | null
+          paid_for?: string | null
           payment_data?: Json | null
           payment_method: string
-          services_quota?: number
           status?: string
-          subscription_tier?: string | null
-          transaction_id?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -439,12 +491,10 @@ export type Database = {
           discount_applied?: number | null
           id?: string
           original_amount?: number | null
+          paid_for?: string | null
           payment_data?: Json | null
           payment_method?: string
-          services_quota?: number
           status?: string
-          subscription_tier?: string | null
-          transaction_id?: string | null
           updated_at?: string | null
           user_id?: string
         }
