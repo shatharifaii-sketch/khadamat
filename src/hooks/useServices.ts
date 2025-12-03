@@ -222,7 +222,8 @@ export const useServices = () => {
           phone: serviceData.phone,
           email: serviceData.email,
           experience: serviceData.experience,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
+          status: 'pending-approval'
         })
         .eq('id', serviceData.id)
         .eq('user_id', user.id) // Ensure user can only update their own services
@@ -241,7 +242,11 @@ export const useServices = () => {
       queryClient.invalidateQueries({ queryKey: ['services'] });
       queryClient.invalidateQueries({ queryKey: ['user-services'] });
       queryClient.invalidateQueries({ queryKey: ['public-services'] });
-      toast.success('تم تحديث الخدمة بنجاح!');
+      queryClient.invalidateQueries({ queryKey: ['admin-data'] });
+      toast('تم تحديث الخدمة بنجاح!', { 
+        description: 'انتظر الموافقة من الإدارة.', 
+        type: 'success'
+      });
     },
     onError: (error: any) => {
       console.error('Error updating service:', error);
@@ -254,7 +259,6 @@ export const useServices = () => {
     queryFn: async () => {
 
       console.log('Fetching user services for:', user.id);
-      
       const { data, error } = await supabase
         .from('services')
         .select('*')

@@ -51,7 +51,7 @@ const ServiceHeader = ({
           <Badge variant="secondary" className="text-sm font-medium">
             {categoryLabel}
           </Badge>
-          <h1 className='text-4xl text-wrap'>{title}</h1>
+          <h1 className='md:text-4xl text-wrap text-2xl'>{title}</h1>
         </div>
         <p className='text-end text-muted-foreground text-sm mt-3'>{updatedAt.split('T')[0]}</p>
       </div>

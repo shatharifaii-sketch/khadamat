@@ -59,7 +59,7 @@ const ActivityChart = ({ dailyStats, monthlyStats, yearlyStats }: StatProps) => 
                     نشاط المستخدمين خلال فترة معينة
                 </CardDescription>
             </CardHeader>
-            <CardContent className='w-full h-[400px] flex flex-col md:flex-row gap-5'>
+            <CardContent className='w-full px-2 h-[400px] flex flex-col md:flex-row gap-5'>
                 <div className='flex flex-col md:flex-row gap-5'>
                 <ul className='grid grid-cols-3 md:flex md:flex-col gap-2 w-full justify-around md:justify-start'>
                     <li>
