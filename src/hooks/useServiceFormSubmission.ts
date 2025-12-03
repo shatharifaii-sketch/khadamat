@@ -2,9 +2,8 @@ import { useNavigate } from 'react-router-dom';
 import { useServices } from '@/hooks/useServices';
 import { useSubscription } from '@/hooks/useSubscription';
 import { usePendingService } from '@/hooks/usePendingService';
-import { toast } from 'sonner';
 import { Service, ServiceFormData } from '@/types/service';
-import { useImageUpload } from './useImageUpload';
+import { toast } from 'sonner';
 
 export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
   const navigate = useNavigate();
@@ -27,7 +26,9 @@ export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
           location: formData.location,
           phone: formData.phone,
           email: formData.email,
-          experience: formData.experience
+          experience: formData.experience,
+        }).finally(() => {
+          toast('تم تحديث الخدمة بنجاح! انتظر الموافقة من الإدارة.', { type: 'success' });
         });
         
         navigate('/account');

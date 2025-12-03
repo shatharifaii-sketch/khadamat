@@ -23,7 +23,14 @@ interface Props {
 }
 
 const ChatLayout = ({ service, children, setAttachment }: Props) => {
-    const images = useServiceImages(service?.id);
+    const [images, setImages] = useState([]);
+    const serviceImages = useServiceImages(service?.id);
+    
+    useEffect(() => {
+        if (serviceImages) {
+            setImages(serviceImages);
+        }
+    }, [serviceImages]);
 
     return (
         <div className='flex gap-5 justify-center items-center lg:items-start flex-col lg:flex-row'>

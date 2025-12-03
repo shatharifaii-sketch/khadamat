@@ -1,4 +1,5 @@
 import ErrorBoundary from '@/components/ErrorBoundary';
+import UserProfileQueryError from '@/components/ErrorViews/UserProfileQueryError';
 import ProfileLoading from '@/components/Profile/ProfileLoading';
 import ProfileView from '@/components/Profile/ProfileView';
 import ProfileViewWrapper from '@/components/Profile/ProfileViewWrapper';
@@ -34,7 +35,7 @@ const UserProfilePage = () => {
                 </h1>
             </div>
             <Suspense fallback={<ProfileLoading />}>
-            <ErrorBoundary fallback={<div>Something went wrong</div>}>
+            <ErrorBoundary fallback={<UserProfileQueryError />}>
                 <ProfileViewWrapper userId={userId} />
             </ErrorBoundary>
         </Suspense>

@@ -34,6 +34,7 @@ import { isAdmin, Service, useAdminData, useAdminFunctionality } from '@/hooks/u
 import ErrorBoundary from '@/components/ErrorBoundary';
 import AdminViewWrapper from '@/components/Admin/AdminViewWrapper';
 import AdminLoading from '@/components/Admin/AdminLoading';
+import AdminDataQueryError from '@/components/ErrorViews/AdminDataQueryError';
 
 const Admin = () => {
 return (
@@ -50,7 +51,7 @@ return (
         </div>
 
         <Suspense fallback={<AdminLoading />}>
-          <ErrorBoundary fallback={<div>Something went wrong</div>}>
+          <ErrorBoundary fallback={<AdminDataQueryError />}>
             <AdminViewWrapper />
           </ErrorBoundary>
         </Suspense>
