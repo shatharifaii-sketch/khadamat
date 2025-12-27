@@ -100,5 +100,12 @@ export const usePublisherProfile = (userId: string) => {
     }
   })
 
+  const sendReport = useMutation({
+    mutationKey: ['send-report'],
+    mutationFn: async (reportData: { reported_user_id: string; description: string; }) => {
+      
+    }
+  })
+
   return { profile: getProfile, services: getServices };
 }

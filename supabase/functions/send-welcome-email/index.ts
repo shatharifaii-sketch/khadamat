@@ -5,39 +5,36 @@
 // Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { ServerClient } from "npm:postmark";
+import { Resend } from "npm:resend@latest";
 
-const client = new ServerClient(Deno.env.get("POSTMARK_SERVER_API_TOKEN"));
+const resend = new Resend(Deno.env.get("RESEND_API_KEY")!);
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "authorization, content-type",
+};
 
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, {
-      headers: {
-        "Access-Control-Allow-Origin": "*", // or your frontend URL
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",
-      },
+      headers: corsHeaders,
     });
   }
 
   if (req.method !== "POST") {
-    return new Response("Method Not Allowed", { status: 405 });
+    return new Response("Method Not Allowed", { status: 405, headers: corsHeaders });
   }
   
   try {
     const { name, email } = await req.json();
 
-    const result = await client.sendEmailWithTemplate({
-      From: `"اهلا بك (via Khedemtak Support)" <${Deno.env.get("APP_SUPPORT_EMAIL")}>`,
-      To: email,
-      TemplateId: Deno.env.get("POSTMARK_WELCOME_TEMPLATE_ID"),
-      TemplateModel: {
-        name,
-        product_name: Deno.env.get("APP_NAME"),
-        action_url: Deno.env.get("POSTMARK_WELCOME_TEMPLATE_ACTION_URL"),
-        support_email: Deno.env.get("APP_SUPPORT_EMAIL"),
-        sender_name: Deno.env.get("EMAIL_SENDER_NAME"),
-        help_url: Deno.env.get("APP_HELP_URL")
+    const result = await resend.emails.send({
+      from: "welcome <support@mail.khedemtak.com>",
+      to: email,
+      template: {
+        id: "welcome",
+        variables: {}
       }
     });
 

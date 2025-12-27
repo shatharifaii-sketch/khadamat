@@ -102,13 +102,8 @@ const PendingServicesManagement = ({ services }: Props) => {
                     {service.status === 'pending-approval' ? 'قيد المراجعة' : 'موافق'}
                   </Badge>
                 </TableCell>
-                <TableCell className='flex justify-center'>
+                <TableCell className='flex justify-end'>
                   <div className="flex gap-2">
-                    <Button variant='link' size='sm' className='outline-primary outline outline-1'>
-                      <NavLink to={`/find-service/${service.id}`}>
-                        <Eye className="size-4" />
-                      </NavLink>
-                    </Button>
                     <Dialog open={serviceToAccept?.id === service.id} onOpenChange={(open) => !open && setServiceToAccept(null)}>
                       <DialogTrigger asChild>
                         <Button size="sm" variant="outline" onClick={() => setServiceToAccept(service)}>

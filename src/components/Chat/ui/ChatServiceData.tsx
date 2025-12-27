@@ -18,7 +18,7 @@ const ChatServiceData = ({ service, images, setAttachment }: Props) => {
         <div className='flex justify-between w-full items-start lg:items-start lg:flex-col lg:gap-10 gap-20' dir='ltr'>
             <div className='flex gap-3 lg:flex-col'>
                     {images.length > 0 ? (
-                        <div className='overflow-auto flex lg:flex-col gap-2 w-[200px] h-[160px] lg:w-[350px] lg:h-[500px]'>
+                        <div className='overflow-auto flex lg:flex-col gap-2 w-[200px] h-[130px] lg:w-[350px] lg:max-h-[500px] lg:min-h-[210px]'>
                             {images.map(image => (
                                 <div className='relative min-w-[200px] flex items-center object-center' key={image.id} onMouseEnter={() => setImageHovered(image.id)} onMouseLeave={() => setImageHovered(null)}>
                                     <Button 
