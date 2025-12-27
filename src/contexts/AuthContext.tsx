@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {    
+  useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signUp = async (email: string, password: string, fullName?: string) => {
     console.log('Attempting sign up for:', email);
     const redirectUrl = `${window.location.origin}/`;
-    
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -62,24 +62,37 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
       }
     });
-    
+
     if (error) {
       console.error('Sign up error:', error);
     } else {
       console.log('Sign up successful');
+
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-welcome-email-dev`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+        },
+        body: JSON.stringify({ email, name: 'monir' })
+      });
+
+      if (!response.ok) {
+        console.error('Error sending welcome email:', response);
+      }
     }
-    
+
     return { data, error };
   };
 
   const signIn = async (email: string, password: string) => {
     console.log('Attempting sign in for:', email);
-    
+
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password
     });
-    
+
     if (error) {
       console.error('Sign in error:', error);
     } else {
@@ -89,16 +102,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         .insert({
           activity_type: 'login',
           user_id: data.user?.id,
-          details: {"page":"home"}
+          details: { "page": "home" }
         });
-      
+
       if (error) {
         console.error('Error tracking login:', error);
         throw new Error('Error tracking login');
       }
-        
+
     }
-    
+
     return { data, error };
   };
 
@@ -108,22 +121,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     console.log('Signing out...');
 
     // Log activity **before** signing out
-  const { error: activityError } = await supabase
-    .from('user_activity')
-    .insert({
-      activity_type: 'logout',
-      user_id: userId,
-      details: { page: "home" }
-    });
+    const { error: activityError } = await supabase
+      .from('user_activity')
+      .insert({
+        activity_type: 'logout',
+        user_id: userId,
+        details: { page: "home" }
+      });
 
-  if (activityError) {
-    console.error('Error tracking logout:', activityError);
-    throw new Error('Error tracking logout');
-  }
+    if (activityError) {
+      console.error('Error tracking logout:', activityError);
+      throw new Error('Error tracking logout');
+    }
 
-  // Now sign out
-  await supabase.auth.signOut();
-  console.log('Sign out successful');
+    // Now sign out
+    await supabase.auth.signOut();
+    console.log('Sign out successful');
   };
 
   const value = {
@@ -155,22 +168,22 @@ export const useAuth = () => {
   const signInWithGoogle = async () => {
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: 'http://localhost:8080/',
+        provider: 'google',
+        options: {
+          redirectTo: 'http://localhost:8080/',
 
+        }
+      });
+
+      if (error) {
+        console.error('Google sign-in error:', error);
+        return { error };
       }
-    });
 
-    if (error) {
-      console.error('Google sign-in error:', error);
-      return {error};
-    }
-
-    return { data };
+      return { data };
     } catch (err) {
       console.error('Google sign-in error:', err);
-      return { error: err}
+      return { error: err }
     }
   }
 

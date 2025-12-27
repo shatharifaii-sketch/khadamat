@@ -1,8 +1,8 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { ServerClient } from "npm:postmark";
+import { Resend } from "npm:resend@latest";
 
-const client = new ServerClient(Deno.env.get("POSTMARK_SERVER_API_TOKEN"));
+const resend = new Resend(Deno.env.get("RESEND_API_KEY")!);
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -30,77 +30,78 @@ async function getExistingActiveSubscription(supabase: any, userId: string) {
 
 //helper 3: Create subscription and update tier user count
 async function createSubscription(supabase: any, userId: string, subscriptionTier: any, billingCycle: string, used_coupon_on_start: boolean, coupon_id: string | null, trialEndsAt: Date) {
-    const subscriptionPeriod = new Date();
-    subscriptionPeriod.setFullYear(subscriptionPeriod.getFullYear() + 1);
+  const subscriptionPeriod = new Date();
+  subscriptionPeriod.setFullYear(subscriptionPeriod.getFullYear() + 1);
 
-    const { data: newSubscription, error: insertError } = await supabase.from("subscriptions").insert([
-      {
-        user_id: userId,
-        amount: billingCycle == "Monthly" ?
-          subscriptionTier.price_monthly_value : subscriptionTier.price_yearly_value,
-        billing_cycle: billingCycle,
-        services_allowed: subscriptionTier.allowed_services,
-        auto_renew: false,
-        expires_at: subscriptionPeriod.toISOString(),
-        is_in_trial: true,
-        trial_expires_at: trialEndsAt.toISOString(),
-        tier_id: subscriptionTier.id,
-        status: "active",
-        next_payment_date: trialEndsAt.toISOString(),
-        used_coupon_on_start: used_coupon_on_start || false,
-        coupon_id: coupon_id || null,
-      }
-    ]).select().maybeSingle();
+  const { data: newSubscription, error: insertError } = await supabase.from("subscriptions").insert([
+    {
+      user_id: userId,
+      amount: billingCycle == "Monthly" ?
+        subscriptionTier.price_monthly_value : subscriptionTier.price_yearly_value,
+      billing_cycle: billingCycle,
+      services_allowed: subscriptionTier.allowed_services,
+      auto_renew: false,
+      expires_at: subscriptionPeriod.toISOString(),
+      is_in_trial: true,
+      trial_expires_at: trialEndsAt.toISOString(),
+      tier_id: subscriptionTier.id,
+      status: "active",
+      next_payment_date: trialEndsAt.toISOString(),
+      used_coupon_on_start: used_coupon_on_start || false,
+      coupon_id: coupon_id || null,
+    }
+  ]).select().maybeSingle();
 
-    if (insertError) throw insertError;
+  if (insertError) throw insertError;
 
-    const { error } = await supabase.from("subscription_tiers").update(
-      { users: subscriptionTier.users + 1 }
-    ).eq("id", subscriptionTier.id);
+  const { error } = await supabase.from("subscription_tiers").update(
+    { users: subscriptionTier.users + 1 }
+  ).eq("id", subscriptionTier.id);
 
-    if (error) throw error;
+  if (error) throw error;
 
-    return newSubscription;
+  return newSubscription;
 }
 
 //helper 4: Create transaction record for next payment
 async function createTransaction(supabase: any, newSubscription: any, userId: string, billingCycle: string, trialEndsAt: Date) {
   const billingPeriodStart = new Date(trialEndsAt);
-    const billingPeriodEnd = new Date(billingPeriodStart);
-    billingPeriodEnd.setMonth(billingPeriodEnd.getMonth() + (billingCycle === 'Monthly' ? 1 : 12));
+  const billingPeriodEnd = new Date(billingPeriodStart);
+  billingPeriodEnd.setMonth(billingPeriodEnd.getMonth() + (billingCycle === 'Monthly' ? 1 : 12));
 
-    const { error: transactionError } = await supabase.from("subscription_transactions").insert({
-      user_id: userId,
-      subscription_id: newSubscription.id,
-      amount: newSubscription.amount,
-      billing_period_start: billingPeriodStart.toISOString(),
-      billing_period_end: billingPeriodEnd.toISOString(),
-      payment_status: 'pending',
-      currency: newSubscription.currency,
-      coupon_id: newSubscription.coupon_id || null,
-      coupon_used: newSubscription.used_coupon_on_start || false 
-    })
+  const { error: transactionError } = await supabase.from("subscription_transactions").insert({
+    user_id: userId,
+    subscription_id: newSubscription.id,
+    amount: newSubscription.amount,
+    billing_period_start: billingPeriodStart.toISOString(),
+    billing_period_end: billingPeriodEnd.toISOString(),
+    payment_status: 'pending',
+    currency: newSubscription.currency,
+    coupon_id: newSubscription.coupon_id || null,
+    coupon_used: newSubscription.used_coupon_on_start || false
+  })
 
-    if (transactionError) {
-      const { error: deleteError } = await supabase.from("subscriptions").delete().eq("id", newSubscription.id);
-      if (deleteError) throw deleteError;
-      throw transactionError;
-    };
+  if (transactionError) {
+    const { error: deleteError } = await supabase.from("subscriptions").delete().eq("id", newSubscription.id);
+    if (deleteError) throw deleteError;
+    throw transactionError;
+  };
 
-    return true;
+  return true;
 }
 
 //helper 5: Send welcome email to user
 async function sendEmail(supabase: any, userId: string, subscriptionTier: any, finalAmount: number, newSubscription: any) {
-  const { data: user, error: fetchError } = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle();
+  const { data: user, error: fetchError } = await supabase.from("profiles_with_email").select("*").eq("id", userId).maybeSingle();
 
   if (fetchError) throw fetchError;
 
-  const result = await client.sendEmailWithTemplate({
-      From: `"اهلا بك (via Khedemtak Support)" <${Deno.env.get("APP_SUPPORT_EMAIL")}>`,
-      To: Deno.env.get("APP_SUPPORT_EMAIL"),
-      TemplateId: Deno.env.get("POSTMARK_WELCOME_TEMPLATE_ID"),
-      TemplateModel: {
+  const {data, error} = await resend.emails.send({
+    From: `"اهلا بك (via Khedemtak Support)" <${Deno.env.get("APP_SUPPORT_EMAIL")}>`,
+    To: user?.email,
+    Template: {
+      Id: "new-subscription",
+      Variables: {
         name: user?.full_name || 'مستخدم',
         product_name: Deno.env.get("APP_NAME"),
         help_url: Deno.env.get("APP_HELP_URL"),
@@ -108,13 +109,14 @@ async function sendEmail(supabase: any, userId: string, subscriptionTier: any, f
         due_date: new Date(newSubscription.next_payment_date).toLocaleDateString(),
         coupon_used: newSubscription.used_coupon_on_start ? 'نعم' : 'لا',
       }
-    });
-
-    if (result.ErrorCode && result.Message !== "OK") {
-      throw new Error(result.Message);
     }
+  });
 
-    return result.Message;
+  if (error) {
+    throw new Error(error);
+  }
+
+  return data;
 }
 
 // Main function to handle the request
