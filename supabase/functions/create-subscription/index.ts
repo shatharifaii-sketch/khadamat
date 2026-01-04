@@ -92,20 +92,23 @@ async function createTransaction(supabase: any, newSubscription: any, userId: st
 
 //helper 5: Send welcome email to user
 async function sendEmail(supabase: any, userId: string, subscriptionTier: any, finalAmount: number, newSubscription: any) {
-  const { data: user, error: fetchError } = await supabase.from("profiles_with_email").select("*").eq("id", userId).maybeSingle();
+  const { data: user, error: fetchError } = await supabase.from("profiles_with_email").select("*").eq("id", userId).single();
+  
 
-  if (fetchError) throw fetchError;
+  if (fetchError) {
+    throw fetchError
+  };
 
   const {data, error} = await resend.emails.send({
-    From: `"اهلا بك (via Khedemtak Support)" <${Deno.env.get("APP_SUPPORT_EMAIL")}>`,
-    To: user?.email,
-    Template: {
-      Id: "new-subscription",
-      Variables: {
+    from: `"اهلا بك (via Khedemtak Support)" <${Deno.env.get("APP_SUPPORT_EMAIL")}>`,
+    to: user?.email,
+    template: {
+      id: "new-subscription",
+      variables: {
         name: user?.full_name || 'مستخدم',
         product_name: Deno.env.get("APP_NAME"),
         help_url: Deno.env.get("APP_HELP_URL"),
-        total: finalAmount,
+        total: finalAmount.toString(),
         due_date: new Date(newSubscription.next_payment_date).toLocaleDateString(),
         coupon_used: newSubscription.used_coupon_on_start ? 'نعم' : 'لا',
       }
@@ -116,7 +119,7 @@ async function sendEmail(supabase: any, userId: string, subscriptionTier: any, f
     throw new Error(error);
   }
 
-  return data;
+  return true;
 }
 
 // Main function to handle the request
@@ -160,7 +163,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    if (await sendEmail(supabase, user_id, subscriptionTier, final_amount, newSubscription) !== "OK") {
+    if (!(await sendEmail(supabase, user_id, subscriptionTier, final_amount, newSubscription))) {
       return new Response(
         JSON.stringify({ success: false, message: "Error sending welcome email" }),
         { headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }, status: 500 }

@@ -324,7 +324,7 @@ export const useSubscription = () => {
         })
       });
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         console.log('Error creating new subscription:', response);
         throw new Error('error');
       }
