@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Menu, LogOut, PlusCircle, Search, Info, Shield, MessageCircle } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
 import { useRealTimeNotifications } from '@/hooks/useRealTimeNotifications';
@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils';
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { unreadCount } = useChat();
 
@@ -26,13 +27,13 @@ const Navigation = () => {
   // Enable real-time notifications
   const { isConnected } = useRealTimeNotifications();
 
-  const admin = isAdmin() || user?.email === 'shatharifaii@gmail.com';
+  const admin = isAdmin();
   const isServiceProvider = profile?.is_service_provider || false;
 
   const isActive = (path: string) => location.pathname === path;
 
   const handleSignOut = () => {
-    signOut();
+    signOut().finally(() => navigate('/'));
     setIsOpen(false);
   };
 

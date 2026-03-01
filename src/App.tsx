@@ -29,6 +29,7 @@ import CompletedPayment from "./pages/CompletedPayment";
 import ChatPage from "./pages/ChatPage";
 import { ChatProvider } from "./contexts/ChatContext";
 import ConversationsPage from "./pages/ConversationsPage";
+import ScrollToTop from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,7 @@ function App() {
 
             <BrowserRouter>
               <ChatProvider>
+                <ScrollToTop />
                 <Toaster />
                 <PendingServiceHandler />
                 <Routes>

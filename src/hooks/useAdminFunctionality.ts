@@ -58,18 +58,18 @@ interface SaveImageProps {
 
 export const isAdmin = (): boolean => {
   const { user } = useAuth();
-
-  if (!user) return false;
   
   const { data, error } = useQuery({
-    queryKey: ['is-admin', user?.id],
+    queryKey: ['is-admin'],
     queryFn: async () => {
+      if (!user) return false;
       const { data, error } = await supabase.rpc('is_admin', { uid: user?.id });
 
       if (error) throw error;
       return data;
     }
-  })
+  }
+)
 
   if (error) throw error;
 
@@ -78,6 +78,8 @@ export const isAdmin = (): boolean => {
 
 export const useAdminData = () => {
   const admin = isAdmin();
+
+  if (!admin) return null;
 
   const { data: adminData } = useSuspenseQuery({
     queryKey: ['admin-data'],
@@ -153,19 +155,6 @@ export const useAdminData = () => {
         pendingServices: pendingServices,
       };
     },
-    initialData: {
-      profiles: [],
-      services: [],
-      coupons: [],
-      pendingServices: [],
-      stats: {
-        totalUsers: 0,
-        serviceProviders: 0,
-        totalServices: 0,
-        publishedServices: 0,
-        todaySignups: 0
-      }
-    }
   });
 
   return {
