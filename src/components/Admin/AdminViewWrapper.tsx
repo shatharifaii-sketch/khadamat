@@ -1,11 +1,18 @@
 import { useAdminAnalytics } from '@/hooks/useAdminAnalytics';
-import { useAdminData } from '@/hooks/useAdminFunctionality';
+import { isAdmin, useAdminData } from '@/hooks/useAdminFunctionality';
 import React from 'react'
 import AdminView from './AdminView';
+import { Navigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
 const AdminViewWrapper = () => {
+    const { user } = useAuth();
+    const admin = isAdmin();
+
     const { adminData } = useAdminData();
     const { analyticsSummary, loginStats, dailyStats, monthlyStats, yearlyStats } = useAdminAnalytics();
+
+    if (!user || !admin) return <Navigate to="/" />
   return (
     <AdminView 
       adminData={adminData}
