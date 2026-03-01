@@ -5,6 +5,7 @@ import { PublicService } from '@/hooks/usePublicServices';
 import { Link, NavLink } from 'react-router-dom';
 import { Button } from '../ui/button';
 import { MessageCircle } from 'lucide-react';
+import ReportDrawer from '../ReportDrawer';
 
 interface Props {
   service: PublicService;
@@ -67,6 +68,11 @@ const ServiceView = ({
           setConvoId={setConvoId}
           userId={userId}
           publisherId={service?.publisher.id}
+        />
+        <ReportDrawer
+          itemId={service?.id}
+          itemType='service'
+          itemLabel={service?.title}
         />
       </div>
 

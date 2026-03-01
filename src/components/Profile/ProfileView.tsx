@@ -3,6 +3,7 @@ import ProfileHeader from './ui/ProfileHeader';
 import { Tables } from '@/integrations/supabase/types';
 import ProfileDataCard from './ui/ProfileDataCard';
 import ContactOptions from '../Chat/ui/ContactOptions';
+import ReportDrawer from '../ReportDrawer';
 
 interface Props {
     profile: Tables<'profiles_with_email'>;
@@ -33,6 +34,11 @@ const ProfileView = ({
             email={profile.email}
             phone={profile.phone}
           />
+          <ReportDrawer
+          itemId={profile?.id}
+          itemType='user'
+          itemLabel={profile?.full_name}
+        />
         </div>
     </div>
   )

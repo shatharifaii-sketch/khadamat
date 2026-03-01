@@ -29,6 +29,9 @@ import CompletedPayment from "./pages/CompletedPayment";
 import ChatPage from "./pages/ChatPage";
 import { ChatProvider } from "./contexts/ChatContext";
 import ConversationsPage from "./pages/ConversationsPage";
+import PaymentSuccess from "./pages/payments/PaymentSuccess";
+import PaymentFailed from "./pages/payments/PaymentFailed";
+import ScrollToTop from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +44,7 @@ function App() {
 
             <BrowserRouter>
               <ChatProvider>
+                <ScrollToTop />
                 <Toaster />
                 <PendingServiceHandler />
                 <Routes>
@@ -62,11 +66,21 @@ function App() {
                     <Route path="faq" element={<FAQ />} />
                     <Route path="account" element={<Account />} />
                   </Route>
+
                   <Route path="auth" element={<Auth />} />
+
+
                   <Route path="admin" element={<AdminDashboard />}>
                     <Route path="" element={<Admin />} />
                   </Route>
+
+
+                  <Route path="payment-success" element={<PaymentSuccess /> } />
+                  <Route path="payment-failed" element={<PaymentFailed /> } />
+
+
                   <Route path="*" element={<NotFound />} />
+
                 </Routes>
                 <Footer />
               </ChatProvider>
