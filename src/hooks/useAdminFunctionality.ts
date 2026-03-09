@@ -152,19 +152,6 @@ export const useAdminData = () => {
         coupons,
         pendingServices: pendingServices,
       };
-    },
-    initialData: {
-      profiles: [],
-      services: [],
-      coupons: [],
-      pendingServices: [],
-      stats: {
-        totalUsers: 0,
-        serviceProviders: 0,
-        totalServices: 0,
-        publishedServices: 0,
-        todaySignups: 0
-      }
     }
   });
 

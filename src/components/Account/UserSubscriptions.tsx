@@ -12,8 +12,13 @@ import SubscriptionsModal from '../PostService/SubscriptionsModal';
 import { usePaymentLogic } from '@/hooks/usePaymentLogic';
 import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
+import { User } from '@supabase/supabase-js';
 
-const UserSubscriptions = () => {
+interface UserSubscriptionsProps { 
+    user: User
+}
+
+const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
     const { getUserSubscriptions, deactivateSubscription, deactivatingSubscription, deactivateSubscriptionSuccess, deactivatingSubscriptionError } = useSubscription();
     const { getPaymentUrl } = usePaymentLogic();
     const [isPaymentTime, setIsPaymentTime] = useState<boolean>(false);
@@ -209,7 +214,7 @@ const UserSubscriptions = () => {
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
-                        <Button variant='ghost' onClick={() => setOpenDeactivateModal(false)}>الغاء</Button>
+                        <Button variant='ghost' onClick={() => setOpenPaymentModal((prev) => !prev)}>الغاء</Button>
                         <Button variant='default' onClick={startPayment}>{deactivatingSubscription ? 'جاري المعالجة...' : 'نعم'}</Button>
                     </DialogFooter>
                 </DialogContent>
@@ -232,7 +237,7 @@ const UserSubscriptions = () => {
                         </div>
                         <Suspense fallback={<div>Loading...</div>}>
                             <ErrorBoundary fallback={<div>Something went wrong</div>}>
-                                <SubscriptionsModal />
+                                <SubscriptionsModal user={user} />
                             </ErrorBoundary>
                         </Suspense>
                     </DrawerDescription>

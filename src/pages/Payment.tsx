@@ -2,8 +2,6 @@ import PaymentOrderSummary from '@/components/Payment/PaymentOrderSummary';
 import PaymentForm from '@/components/Payment/PaymentForm';
 import PaymentHeader from '@/components/Payment/PaymentHeader';
 import { useEnhancedPaymentLogic } from '@/hooks/useEnhancedPaymentLogic';
-import { useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
 
 const Payment = () => {
 const paymentLogic = useEnhancedPaymentLogic();

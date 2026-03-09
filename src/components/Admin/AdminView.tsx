@@ -46,8 +46,8 @@ interface Props {
 
 const AdminView = ({ analyticsSummary, adminData, stats, dailyStats, monthlyStats, yearlyStats }: Props) => {
     const [selectedService, setSelectedService] = useState<Service | null>(null);
-      const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
-      
+    const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
+
     return (
         <div>
             {/* Simple Statistics */}
@@ -222,15 +222,15 @@ const AdminView = ({ analyticsSummary, adminData, stats, dailyStats, monthlyStat
             </Tabs>
 
             {/** Service Edit Modal  */}
-        <ServiceEditModal 
-          service={selectedService}
-          isOpen={isServiceModalOpen}
-          onClose={() => {
-            setIsServiceModalOpen(false);
-            setSelectedService(null);
-          }}
-          onServiceUpdated={() => {}}
-        /> 
+            <ServiceEditModal
+                service={selectedService}
+                isOpen={isServiceModalOpen}
+                onClose={() => {
+                    setIsServiceModalOpen(false);
+                    setSelectedService(null);
+                }}
+                onServiceUpdated={() => { }}
+            />
         </div>
     )
 }

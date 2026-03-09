@@ -226,7 +226,7 @@ const Account = () => {
           <Suspense fallback={<>
             <p>تحميل الاشتراكات</p></>}>
             <ErrorBoundary fallback={<div>فشل في تحميل  الاشتراكات</div>}>
-              <UserSubscriptions />
+              <UserSubscriptions user={user} />
             </ErrorBoundary>
           </Suspense>
         </div>
