@@ -56,10 +56,8 @@ interface SaveImageProps {
   serviceId: string;
 }
 
-export const isAdmin = (): boolean => {
+export const useIsAdmin = (): boolean => {
   const { user } = useAuth();
-
-  if (!user) return false;
   
   const { data, error } = useQuery({
     queryKey: ['is-admin', user?.id],
@@ -68,16 +66,17 @@ export const isAdmin = (): boolean => {
 
       if (error) throw error;
       return data;
-    }
+    },
+    enabled: !!user
   })
 
   if (error) throw error;
 
-  return data;
+  return data ?? false;
 }
 
 export const useAdminData = () => {
-  const admin = isAdmin();
+  const admin = useIsAdmin();
 
   const { data: adminData } = useSuspenseQuery({
     queryKey: ['admin-data'],
@@ -165,7 +164,7 @@ export const useAdminFunctionality = () => {
   const { user } = useAuth();
 
   // Admin check - in a real app, you'd check this from the database
-  const admin = isAdmin();
+  const admin = useIsAdmin();
 
   const createUser = useMutation({
     mutationFn: async (formData: Partial<User>) => {

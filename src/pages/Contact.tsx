@@ -97,7 +97,6 @@ const Contact = () => {
   const inquiryTypes = [
     { value: 'general', label: 'استفسار عام' },
     { value: 'technical', label: 'مشكلة تقنية' },
-    { value: 'billing', label: 'استفسار عن الفواتير' },
     { value: 'service', label: 'مشكلة في الخدمة' },
     { value: 'partnership', label: 'شراكة أو تعاون' },
     { value: 'feedback', label: 'اقتراح أو ملاحظة' }

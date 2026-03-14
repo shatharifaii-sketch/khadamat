@@ -10,7 +10,6 @@ import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, Dr
 import ErrorBoundary from '../ErrorBoundary';
 import SubscriptionsModal from '../PostService/SubscriptionsModal';
 import { usePaymentLogic } from '@/hooks/usePaymentLogic';
-import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
 import { User } from '@supabase/supabase-js';
 
@@ -134,7 +133,9 @@ const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
                                 </CardContent>
                                 <CardFooter>
                                     <Button onClick={() => setOpenDeactivateModal(true)} disabled={deactivatingSubscription} className='flex-1'>
-                                        الغاء تفعيل الاشتراك
+                                        {
+                                            new Date(activeSubscription.expires_at).getTime() < new Date().getTime() ? 'تجديد الاشتراك' : 'ايقاف الاشتراك'
+                                        }
                                     </Button>
                                 </CardFooter>
                             </Card>

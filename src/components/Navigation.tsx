@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Menu, LogOut, PlusCircle, Search, Info, Shield, MessageCircle } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
 import { useRealTimeNotifications } from '@/hooks/useRealTimeNotifications';
@@ -11,7 +11,7 @@ import { useProfile } from '@/hooks/useProfile';
 import LanguageSwitcher from './LanguageSwitcher';
 import { Avatar, AvatarImage } from './ui/avatar';
 import { GeneratedAvatar } from './GeneratedAvatar';
-import { isAdmin } from '@/hooks/useAdminFunctionality';
+import { useIsAdmin } from '@/hooks/useAdminFunctionality';
 import { useChat } from '@/contexts/ChatContext';
 import { cn } from '@/lib/utils';
 
@@ -20,19 +20,20 @@ const Navigation = () => {
   const location = useLocation();
   const { user, signOut } = useAuth();
   const { unreadCount } = useChat();
+  const navigate = useNavigate();
 
   const { profile } = useProfile();
 
   // Enable real-time notifications
   const { isConnected } = useRealTimeNotifications();
 
-  const admin = isAdmin() || user?.email === 'shatharifaii@gmail.com';
+  const admin = useIsAdmin();
   const isServiceProvider = profile?.is_service_provider || false;
 
   const isActive = (path: string) => location.pathname === path;
 
   const handleSignOut = () => {
-    signOut();
+    signOut().then(() => navigate('/', { replace: true }));
     setIsOpen(false);
   };
 

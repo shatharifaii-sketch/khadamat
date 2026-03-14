@@ -18,6 +18,9 @@ interface StripeActions {
 }
 
 const createStripeCheckoutSession = async ({ priceId, userId, email }: { priceId: string, userId: string, email: string }) => {
+    if (!priceId) return;
+    if (!userId) return;
+
     const { data, response, error } = await supabase.functions.invoke(
         "create-checkout-session",
         {
@@ -54,9 +57,6 @@ const verifyStripeSessionId = async (sessionId: string) => {
 }
 
 const useStripe = (): StripeActions => {
-    const { user } = useAuth();
-
-    if (!user) return null;
 
     const {
         mutate: createCheckoutSession,
@@ -69,7 +69,6 @@ const useStripe = (): StripeActions => {
         onSuccess: (sessionUrl) => {
             console.log(sessionUrl);
             window.open(sessionUrl, "_blank", "noopener,noreferrer");
-
         },
         onError: (error) => {
             console.log(error);

@@ -13,7 +13,7 @@ const Footer = () => {
           <span className="text-2xl font-bold text-primary">خدمتك</span>
         </div>
         <p className="text-muted-foreground text-large mb-6">
-          منصتك للخدمات المهنية في فلسطين
+          منصتك للخدمات في فلسطين
         </p>
         <div className="flex flex-wrap justify-center gap-6 text-large mb-6">
           <Link to="/about" className="text-muted-foreground hover:text-primary">من نحن</Link>

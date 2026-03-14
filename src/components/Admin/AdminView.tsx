@@ -156,7 +156,9 @@ const AdminView = ({ analyticsSummary, adminData, stats, dailyStats, monthlyStat
                                         {analyticsSummary.topSearchTerms.slice(0, 5).map((term, index) => (
                                             <div key={term.query} className="flex justify-between items-center">
                                                 <span className="font-medium">#{index + 1} {term.query}</span>
-                                                <Badge variant="secondary">{term.count} مرة</Badge>
+                                                <Badge variant="secondary">
+                                                    <span> {term.count > 1 && term.count < 10 ? 'مرات' : 'مرة'} </span> {term.count}
+                                                </Badge>
                                             </div>
                                         ))}
                                     </div>

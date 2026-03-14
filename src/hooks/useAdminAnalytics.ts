@@ -64,7 +64,12 @@ export const useAdminAnalytics = () => {
     queryKey: ['admin-analytics-summary'],
     queryFn: async (): Promise<AnalyticsSummary> => {
       // Get basic counts
-      const [searchesResult, viewsResult, contactsResult, conversationsResult] = await Promise.all([
+      const [
+        searchesResult, 
+        viewsResult, 
+        contactsResult, 
+        conversationsResult
+      ] = await Promise.all([
         supabase.from('search_analytics').select('id', { count: 'exact', head: true }),
         supabase.from('service_analytics').select('id', { count: 'exact', head: true }).eq('action_type', 'view'),
         supabase.from('service_analytics').select('id', { count: 'exact', head: true }).neq('action_type', 'view'),
@@ -72,12 +77,16 @@ export const useAdminAnalytics = () => {
       ]);
 
       // Get top search terms - manual aggregation
-      const { data: searchData } = await supabase
+      const { data: searchData, error } = await supabase
         .from('search_analytics')
         .select('search_query')
         .limit(1000);
+      
+      if (error) throw error;
+      
+      const filteredSearchData = (searchData || []).filter((item) => item.search_query !== null && item.search_query !== '' && item.search_query !== ' ');
 
-      const searchTermCounts = (searchData || []).reduce((acc: Record<string, number>, item) => {
+      const searchTermCounts = (filteredSearchData || []).reduce((acc: Record<string, number>, item) => {
         acc[item.search_query] = (acc[item.search_query] || 0) + 1;
         return acc;
       }, {});

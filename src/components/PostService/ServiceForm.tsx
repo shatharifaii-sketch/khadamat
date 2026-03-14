@@ -12,8 +12,7 @@ import ServicePortfolio from './ServicePortfolio';
 import ServiceFormSubmit from './ServiceFormSubmit';
 import { useEffect } from 'react';
 import { PENDING_SERVICE_KEY, usePendingService } from '@/hooks/usePendingService';
-
-//TODO: ADD IMAGSE UPLOAD HANDLER
+import ServiceImages from '../Service/ui/EditServiceImages';
 
 interface ServiceFormProps {
   serviceToEdit?: Service | null;
@@ -32,6 +31,8 @@ const ServiceForm = ({ serviceToEdit }: ServiceFormProps) => {
     pendingService,
     getFieldError
   } = useServiceForm(serviceToEdit);
+
+  console.log(serviceToEdit);
 
   const { clearPendingService, savePendingService } = usePendingService();
 
@@ -93,9 +94,12 @@ const ServiceForm = ({ serviceToEdit }: ServiceFormProps) => {
             onExperienceChange={(value) => handleInputChange('experience', value)}
           />
 
-          <ServicePortfolio onImagesChange={(images) => {
+          <ServiceImages
+           onImagesChange={(images) => {
             handleInputChange('images', images);
-          }} />
+          }}
+            serviceImages={serviceToEdit.images}
+          />
 
           <ServiceFormSubmit
             savePendingService={() => {

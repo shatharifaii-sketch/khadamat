@@ -35,12 +35,33 @@ serve(async (req: Request) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
+    const { data, error } = await supabase.auth.admin.generateLink({
+      type: 'signup',
+      email: email,
+      options: {
+        redirectTo: 'http://localhost:8080/login'
+      }
+    })
+
+    if (error) {
+      console.error("Error generating link: ", error);
+      return new Response(JSON.stringify({ success: false, error }), {
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
+        status: 400
+      })
+    }
+
     const result = await resend.emails.send({
       from: "welcome <support@mail.khedemtak.com>",
       to: email,
       template: {
         id: "welcome",
         variables: {
+          otp: data.properties.email_otp,
+          action_link: data.properties.redirect_to
         }
       }
     });

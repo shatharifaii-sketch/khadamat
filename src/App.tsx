@@ -32,6 +32,8 @@ import ConversationsPage from "./pages/ConversationsPage";
 import PaymentSuccess from "./pages/payments/PaymentSuccess";
 import PaymentFailed from "./pages/payments/PaymentFailed";
 import ScrollToTop from "./components/ScrollToTop";
+import EmailVerification from "./pages/verify/EmailVerification";
+import CodeVerification from "./pages/verify/CodeVerification";
 
 const queryClient = new QueryClient();
 
@@ -43,11 +45,17 @@ function App() {
           <TooltipProvider>
 
             <BrowserRouter>
+              <Routes>
+                {/* <Route path="/verify-email/token=:token" element={<EmailVerification />} /> */}
+                <Route path="/verify-code" element={<CodeVerification />} />
+              </Routes>
+
               <ChatProvider>
                 <ScrollToTop />
                 <Toaster />
                 <PendingServiceHandler />
                 <Routes>
+                  
                   <Route path="/" element={<UserLayout />}>
                     <Route path="" element={<Index />} />
                     <Route path="post-service" element={<PostService />} />

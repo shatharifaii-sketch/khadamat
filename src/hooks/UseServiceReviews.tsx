@@ -2,7 +2,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client"
 import { Tables } from "@/integrations/supabase/types";
 import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query"
-import { isAdmin } from "./useAdminFunctionality";
+import { useIsAdmin } from "./useAdminFunctionality";
 
 type Review = Tables<'service_reviews'>;
 
@@ -21,7 +21,7 @@ export interface PublicReview extends Review {
 export const useServiceReviews = (serviceId: string) => {
     const queryClient = useQueryClient();
     const { user } = useAuth();
-    const admin = isAdmin();
+    const admin = useIsAdmin();
     const { data: userAllowed } = useQuery({
         queryKey: ['number-of-user-reviews'],
         queryFn: async () => {
