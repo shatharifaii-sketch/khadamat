@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePendingService } from '@/hooks/usePendingService';
-import { Service, ServiceFormData } from '@/types/service';
+import { ServiceFormData } from '@/types/service';
+import { Service } from './useAdminFunctionality';
 
 export const useServiceFormState = (serviceToEdit?: Service | null) => {
   const { user } = useAuth();
@@ -38,7 +39,7 @@ export const useServiceFormState = (serviceToEdit?: Service | null) => {
         phone: serviceToEdit.phone,
         email: serviceToEdit.email,
         experience: serviceToEdit.experience || '',
-        images: serviceToEdit.images,
+        images: serviceToEdit.service_images,
       });
     } else if (pendingService && !isEditMode) {
       console.log('Loading pending service data into form');

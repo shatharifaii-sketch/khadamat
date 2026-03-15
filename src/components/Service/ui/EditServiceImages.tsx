@@ -8,12 +8,16 @@ import ServiceImageComponent from './ServiceImageComponent';
 //TODO: refresh images when deleted
 
 interface ServicePortfolioProps {
-    serviceImages?: Array<{ id: string; image_url: string; image_name: string }> | [];
+    serviceImages?: Array<{ 
+        id: string; 
+        image_url: string; 
+        image_name: string 
+    }> | [];
     onImagesChange?: (images: Array<{ id: string; image_url: string; image_name: string }>) => void;
 }
 
 const ServiceImages = ({ onImagesChange, serviceImages }: ServicePortfolioProps) => {
-    const { images, uploading, handleFileSelect, removeImage, deleteImage } = useImageUpload();
+    const { images, uploading, handleFileSelect, removeImage, deleteImage, deletingImage } = useImageUpload();
     const fileInputRef = useRef<HTMLInputElement>(null);
     let allImagesCount = images.length + (serviceImages ? serviceImages.length : 0);
 
@@ -26,8 +30,6 @@ const ServiceImages = ({ onImagesChange, serviceImages }: ServicePortfolioProps)
             allImagesCount += images.length;
         }
     }, [images]);
-
-    console.log(serviceImages);
 
     const handleDrop = (e: React.DragEvent) => {
         e.preventDefault();
@@ -65,6 +67,7 @@ const ServiceImages = ({ onImagesChange, serviceImages }: ServicePortfolioProps)
                                 image={image}
                                 removeImage={deleteImage}
                                 imageUrl={image.image_url}
+                                deletingImage={deletingImage}
                             />
                         ))}
                     </div>
@@ -73,7 +76,7 @@ const ServiceImages = ({ onImagesChange, serviceImages }: ServicePortfolioProps)
             )}
             <div className='space-y-2'>
                 <Label className="text-large font-semibold">
-                    صور الخدمة
+                    أضف صور للخدمة
                 </Label>
 
                 {/* Upload Area */}
@@ -103,7 +106,7 @@ const ServiceImages = ({ onImagesChange, serviceImages }: ServicePortfolioProps)
 
                 {/* Uploaded Images Grid */}
                 {images.length > 0 && (
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                         {images.map((image) => (
                             <ServiceImageComponent
                                 key={image.id}

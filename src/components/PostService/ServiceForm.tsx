@@ -1,7 +1,6 @@
 
 import { Card, CardContent } from '@/components/ui/card';
 import { useServiceForm } from '@/hooks/useServiceForm';
-import { Service } from '@/types/service';
 import ServiceFormHeader from './ServiceFormHeader';
 import ServiceBasicInfo from './ServiceBasicInfo';
 import ServicePricing from './ServicePricing';
@@ -13,6 +12,7 @@ import ServiceFormSubmit from './ServiceFormSubmit';
 import { useEffect } from 'react';
 import { PENDING_SERVICE_KEY, usePendingService } from '@/hooks/usePendingService';
 import ServiceImages from '../Service/ui/EditServiceImages';
+import { Service } from '@/hooks/useAdminFunctionality';
 
 interface ServiceFormProps {
   serviceToEdit?: Service | null;
@@ -31,8 +31,6 @@ const ServiceForm = ({ serviceToEdit }: ServiceFormProps) => {
     pendingService,
     getFieldError
   } = useServiceForm(serviceToEdit);
-
-  console.log(serviceToEdit);
 
   const { clearPendingService, savePendingService } = usePendingService();
 
@@ -94,18 +92,18 @@ const ServiceForm = ({ serviceToEdit }: ServiceFormProps) => {
             onExperienceChange={(value) => handleInputChange('experience', value)}
           />
 
+          {/* <ServicePortfolio onImagesChange={(images) => {
+            handleInputChange('images', images);
+          }} /> */}
           <ServiceImages
            onImagesChange={(images) => {
             handleInputChange('images', images);
           }}
-            serviceImages={serviceToEdit.images}
+            serviceImages={serviceToEdit?.service_images}
           />
 
           <ServiceFormSubmit
             savePendingService={() => {
-              console.log('Saving pending service data...', formData);
-              //savePendingService(formData);
-
               localStorage.setItem(PENDING_SERVICE_KEY, JSON.stringify(formData));
             }}
             isCreating={isCreating || isUpdating}

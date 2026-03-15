@@ -77,11 +77,11 @@ export const UserManagement = ({ users }: UserManagementProps) => {
   };
 
   const openEditModal = (user: UserProfile) => {
-    console.log(user);
+    console.log(user, editingUser);
     setEditingUser(user);
     setFormData({
       id: editingUser?.id || '',
-      email: user.email || '',
+      email: editingUser?.email || '',
       full_name: user.full_name || '',
       phone: user.phone || '',
       location: user.location || '',

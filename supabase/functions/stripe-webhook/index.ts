@@ -87,12 +87,12 @@ async function handleCheckoutSessionCompleted(session: any) {
 
 async function handleInvoicePaymentPaid(invoice: any) {
   try {
-    const {data: sub, error: subError} = await supabase
+    const { data: sub, error: subError } = await supabase
       .from('subscriptions')
       .select('id')
       .eq('user_id', invoice.metadata.user_id)
       .maybeSingle();
-    
+
     if (subError) {
       console.log('invoice payment error: ', subError);
       return false;
@@ -103,7 +103,7 @@ async function handleInvoicePaymentPaid(invoice: any) {
       .select('*')
       .eq('stripe_invoice_id', invoice.id)
       .maybeSingle();
-    
+
     if (invoiceError) {
       console.log('invoice payment error: ', invoiceError);
       return false;
@@ -133,7 +133,7 @@ async function handleInvoicePaymentPaid(invoice: any) {
         stripe_product_id: invoice.lines.data[0].pricing.price_details.product,
         stripe_customer_id: invoice.customer,
       })
-    
+
     if (transactionError) {
       console.log('invoice payment transaction error: ', transactionError);
       return false;
@@ -165,28 +165,6 @@ async function handleSubscriptionCreated(subscription: any) {
     const subscriptionStart = new Date(subscription.items.data[0].created * 1000);
     const paymentsStart = new Date(subscription.items.data[0].current_period_start * 1000);
     const nextPaymentDate = new Date(subscription.items.data[0].current_period_end * 1000);
-
-    console.log('subscription data: ', subscription);
-    console.log('subscription tier data: ', subscriptionTier);
-
-    const { data: existingSub, error: subError } = await supabase
-      .from('subscriptions')
-      .select('*')
-      .eq('status', 'active')
-      .or(
-        `stripe_subscription_id.eq.${subscription.id},user_id.eq.${subscription.metadata.user_id}`
-      )
-      .maybeSingle();
-    
-    if (subError) {
-      console.log('subscription creation SUB error: ', subError);
-      return false;
-    };
-
-    if (existingSub) {
-      console.log('Subscription already exists in database. Skipping.');
-      return false;
-    };
 
     const { data, error } = await supabase
       .from('subscriptions')
@@ -409,7 +387,7 @@ Deno.serve(async (req: Request) => {
       // The subscription becomes past_due. Notify your customer and send them to the
       // customer portal to update their payment information.
       const invoicePaymentFailedResponse = await handleInvoicePaymentFailed(
-        data.object  
+        data.object
       )
 
       if (!invoicePaymentFailedResponse) {
@@ -424,6 +402,25 @@ Deno.serve(async (req: Request) => {
 
       break;
     case 'customer.subscription.created':
+      const { data: existingSub, error: subError } = await supabase
+        .from('subscriptions')
+        .select('*')
+        .eq('status', 'active')
+        .or(
+          `stripe_subscription_id.eq.${data.object.id},user_id.eq.${data.object.metadata.user_id}`
+        )
+        .maybeSingle();
+
+      if (subError) {
+        console.log('subscription creation SUB error: ', subError);
+        return false;
+      };
+
+      if (existingSub) {
+        console.log('Subscription already exists in database. Skipping.');
+        return false;
+      };
+
       const createSubResponse = await handleSubscriptionCreated(
         data.object
       );

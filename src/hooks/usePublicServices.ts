@@ -1,9 +1,7 @@
 import { useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useServiceViews } from './useServiceViews';
-import { useAuth } from '@/contexts/AuthContext';
-import { toast } from 'sonner';
+import { Service } from './useAdminFunctionality';
 
 export interface PublicService {
   id: string;
@@ -87,10 +85,7 @@ export const usePublicServices = () => {
 };
 
 export const useServiceData = (id: string, userId: string) => {
-  const [isConvo, setIsConvo] = useState<boolean>(false);
-  const [convoId, setConvoId] = useState<string>(null);
-  
-  const { data } = useSuspenseQuery({
+const { data } = useSuspenseQuery({
     queryKey: ['service-with-convo', id, userId],
     queryFn: async () => {
       const [serviceRes] = await Promise.all([
@@ -113,6 +108,59 @@ export const useServiceData = (id: string, userId: string) => {
 
       return {
         service: serviceRes.data as PublicService,
+      };
+    },
+  });
+
+  return data;
+}
+
+export const useServiceToEditData = (id: string, userId: string) => {
+  if (!userId || !id) return { service: null };
+  const { data } = useSuspenseQuery({
+    queryKey: ['service-edit-data', id, userId],
+    queryFn: async () => {
+      const { data: serviceData, error: serviceError } = await 
+        supabase
+          .from('services')
+          .select(`
+            *,
+            publisher:fk_services_user_id (
+              full_name
+            )
+            `)
+          .eq('user_id', userId)
+          .eq('id', id)
+          .single();
+
+      if (serviceError) {
+        console.log('Error fetching service data:', serviceError);
+        throw serviceError;
+      };
+
+      const { data: images, error: imagesError } = await supabase
+        .from('service_images')
+        .select('*')
+        .eq('service_id', id);
+
+      if (imagesError) {
+        console.log('Error fetching service images:', imagesError);
+        throw imagesError;
+      };
+
+      const serviceImage = images.map((image) => ({
+        id: image.id,
+        image_name: image.image_name,
+        image_url: image.image_url
+      })) as Service['service_images'];
+
+      const serviceRes = {
+        ...serviceData,
+        service_images: serviceImage,
+      };
+      
+      return {
+        service: serviceRes as Service,
       };
     },
   });

@@ -4,7 +4,7 @@ import { usePendingService } from '@/hooks/usePendingService';
 import { useServiceFormState } from '@/hooks/useServiceFormState';
 import { useServiceFormValidation } from '@/hooks/useServiceFormValidation';
 import { useServiceFormSubmission } from '@/hooks/useServiceFormSubmission';
-import { Service } from '@/types/service';
+import { Service } from './useAdminFunctionality';
 
 export const useServiceForm = (serviceToEdit?: Service | null) => {
   const { pendingService } = usePendingService();
@@ -52,7 +52,7 @@ export const useServiceForm = (serviceToEdit?: Service | null) => {
     isEditMode,
     isCreating,
     isUpdating,
-    canPostService: isEditMode ? true : false, // For display purposes, actual check is in handleSubmit
+    canPostService: !!isEditMode, // For display purposes, actual check is in handleSubmit
     pendingService,
     getFieldError,
     hasValidationErrors,

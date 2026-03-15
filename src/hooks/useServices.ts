@@ -34,6 +34,7 @@ export const useServices = () => {
   const queryClient = useQueryClient();
 
   const saveImages = async ({serviceId, images}: {serviceId: string, images: ServiceFormData['images']}) => {
+    console.log('saving service images: ', images);
       if (!user || images.length === 0 || !serviceId) {
         console.error('No user or images found when trying to upload service images');
 
@@ -101,9 +102,7 @@ export const useServices = () => {
       
       // If no subscription exists or user already has services equal to or more than allowed
       if (!subscription || currentServiceCount >= (subscription.services_allowed || 0)) {
-        const message = !subscription 
-          ? 'لا يوجد اشتراك نشط. يرجى الدفع لنشر الخدمات.'
-          : 'لقد استنفدت حصتك من الخدمات. يرجى الدفع لنشر المزيد من الخدمات.';
+        const message = subscription ? 'لقد استنفدت حصتك من الخدمات. يرجى الدفع لنشر المزيد من الخدمات.' : 'لا يوجد اشتراك نشط. يرجى الدفع لنشر الخدمات.'
         throw new Error(message);
       }
       
