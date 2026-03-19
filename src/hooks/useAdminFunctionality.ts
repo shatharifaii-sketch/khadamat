@@ -60,8 +60,9 @@ export const useIsAdmin = (): boolean => {
   const { user } = useAuth();
   
   const { data, error } = useQuery({
-    queryKey: ['is-admin', user?.id],
+    queryKey: ['is-admin'],
     queryFn: async () => {
+      if (!user) return false;
       const { data, error } = await supabase.rpc('is_admin', { uid: user?.id });
 
       if (error) throw error;
@@ -77,6 +78,8 @@ export const useIsAdmin = (): boolean => {
 
 export const useAdminData = () => {
   const admin = useIsAdmin();
+
+  if (!admin) return null;
 
   const { data: adminData } = useSuspenseQuery({
     queryKey: ['admin-data'],

@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils';
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { unreadCount } = useChat();
   const navigate = useNavigate();
