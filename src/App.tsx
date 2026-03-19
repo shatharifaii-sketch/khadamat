@@ -31,7 +31,6 @@ import { ChatProvider } from "./contexts/ChatContext";
 import ConversationsPage from "./pages/ConversationsPage";
 import PaymentSuccess from "./pages/payments/PaymentSuccess";
 import PaymentFailed from "./pages/payments/PaymentFailed";
-import ScrollToTop from "./components/ScrollToTop";
 import CodeVerification from "./pages/verify/CodeVerification";
 import ScrollToTop from "./components/ScrollToTop";
 

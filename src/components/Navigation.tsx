@@ -21,7 +21,6 @@ const Navigation = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { unreadCount } = useChat();
-  const navigate = useNavigate();
 
   const { profile } = useProfile();
 

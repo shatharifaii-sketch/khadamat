@@ -6,7 +6,9 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import Stripe from "npm:stripe";
+import { Resend } from "npm:resend@latest";
 
+const resend = new Resend(Deno.env.get("RESEND_API_KEY")!);
 const stripe = new Stripe(Deno.env.get("STRIPE_TEST_SEC_KEY")!);
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -20,7 +22,7 @@ async function handleInvoiceCreated(invoice: any) {
       .from('invoices')
       .insert({
         user_id: invoice.lines.data[0].metadata.user_id,
-        amount: invoice.amount_due,
+        amount: invoice.amount_due / 100,
         stripe_invoice_id: invoice.id,
         status: invoice.status,
         subtotal: invoice.subtotal,
@@ -37,10 +39,33 @@ async function handleInvoiceCreated(invoice: any) {
 
     if (error) {
       console.log('Error creating invoice in database: ', error);
-      return false;
     };
 
-    console.log('invoice created in database: ', data);
+    const { data: resendData, error: resendError } = await resend.emails.send({
+      from: "Khedemtak <support@mail.khedemtak.com>",
+      to: invoice.lines.data[0].metadata.email,
+      template: {
+        id: "invoice-created",
+        variables: {
+          name: invoice.customer_name,
+          total: invoice.amount_due / 100,
+          action_link: invoice.hosted_invoice_url,
+          help_url: Deno.env.get("APP_HELP_URL"),
+        },
+      },
+      attachments: [
+        {
+          path: invoice.invoice_pdf,
+          type: "application/pdf",
+          name: `invoice-${data.created_at}.pdf`,
+        }
+      ]
+    })
+
+    if (resendError) {
+      console.log('Error sending invoice email: ', resendError);
+      return false;
+    }
 
     return true;
   } catch (error) {
@@ -152,6 +177,27 @@ async function handleInvoicePaymentPaid(invoice: any) {
       return false;
     };
 
+    const { data: resendData, error: resendError } = await resend.emails.send({
+      from: "Khedemtak <support@mail.khedemtak.com>",
+      to: invoice.lines.data[0].metadata.email,
+      template: {
+        id: "payment-confirmation",
+        variables: {
+          name: invoice.customer_name,
+          total: invoice.amount_paid,
+          subscription_date: new Date(sub.started_at).toISOString(),
+          due_date: billingPeriodEnd.toISOString(),
+          action_link: Deno.env.get('APP_ACCOUNT_PAGE'),
+          help_url: Deno.env.get('APP_HELP_URL'),
+        }
+      }
+    });
+
+    if (resendError) {
+      console.log('invoice payment resend error: ', resendError);
+      return false;
+    }
+
     return true;
   } catch (error) {
     console.log('error with invoice payment: ', error);
@@ -214,6 +260,41 @@ async function handleSubscriptionCreated(subscription: any) {
 
     if (invoiceError) {
       console.log('subscription creation INVOICE error: ', invoiceError);
+      return false;
+    };
+
+    const { data: userData, error: userDataError } = await supabase
+      .from('profiles')
+      .select('full_name')
+      .eq('id', subscription.metadata.user_id)
+      .maybeSingle();
+
+    if (userDataError) {
+      console.log('subscription creation USER error: ', userDataError);
+    };
+
+    const { data: resendData, error: resendError } = await resend.emails.send({
+      from: "Khedemtak <support@mail.khedemtak.com>",
+      to: subscription.metadata.email,
+      template: {
+        id: "subscription-created",
+        variables: {
+          name: userData.full_name ?? 'مستخدم',
+          tier: subscriptionTier.name,
+          free_trial_period: subscriptionTier.free_trial_period_text,
+          billing_cycle: subscriptionTier.billing_cycle === 'yearly' ? 'سنوي' : 'شهري',
+          subscription_date: subscriptionStart.toISOString(),
+          due_date: nextPaymentDate.toISOString(),
+          first_payment_date: paymentsStart.toISOString(),
+          total: subscription.items.data[0].plan.amount / 100,
+          action_link: Deno.env.get('APP_ACCOUNT_PAGE'),
+          help_url: Deno.env.get('APP_HELP_URL'),
+        }
+      }
+    });
+
+    if (resendError) {
+      console.log('subscription creation resend error: ', resendError);
       return false;
     };
 
