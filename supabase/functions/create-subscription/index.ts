@@ -3,6 +3,10 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "npm:resend@latest";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY")!);
+const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,7 +15,7 @@ const corsHeaders = {
 };
 
 //helper 1: Get subscription tier details
-async function getTier(supabase: any, tierId: string) {
+async function getTier(tierId: string) {
   const { data: subscriptionTier, error: tierError } = await supabase.from("subscription_tiers").select("*").eq("id", tierId).maybeSingle();
 
   if (tierError) throw tierError;
@@ -20,7 +24,7 @@ async function getTier(supabase: any, tierId: string) {
 }
 
 //helper 2: Check if user already has an active subscription
-async function getExistingActiveSubscription(supabase: any, userId: string) {
+async function getExistingActiveSubscription(userId: string) {
   const { data: existingSubscription, error: fetchError } = await supabase.from("subscriptions").select("*").eq("user_id", userId).eq('status', 'active').maybeSingle();
 
   if (fetchError) throw fetchError;
@@ -29,7 +33,7 @@ async function getExistingActiveSubscription(supabase: any, userId: string) {
 }
 
 //helper 3: Create subscription and update tier user count
-async function createSubscription(supabase: any, userId: string, subscriptionTier: any, billingCycle: string, used_coupon_on_start: boolean, coupon_id: string | null, trialEndsAt: Date) {
+async function createSubscription(userId: string, subscriptionTier: any, billingCycle: string, used_coupon_on_start: boolean, coupon_id: string | null, trialEndsAt: Date) {
   const subscriptionPeriod = new Date();
   subscriptionPeriod.setFullYear(subscriptionPeriod.getFullYear() + 1);
 
@@ -64,7 +68,7 @@ async function createSubscription(supabase: any, userId: string, subscriptionTie
 }
 
 //helper 4: Create transaction record for next payment
-async function createTransaction(supabase: any, newSubscription: any, userId: string, billingCycle: string, trialEndsAt: Date) {
+async function createTransaction(newSubscription: any, userId: string, billingCycle: string, trialEndsAt: Date) {
   const billingPeriodStart = new Date(trialEndsAt);
   const billingPeriodEnd = new Date(billingPeriodStart);
   billingPeriodEnd.setMonth(billingPeriodEnd.getMonth() + (billingCycle === 'Monthly' ? 1 : 12));
@@ -91,7 +95,7 @@ async function createTransaction(supabase: any, newSubscription: any, userId: st
 }
 
 //helper 5: Send welcome email to user
-async function sendEmail(supabase: any, userId: string, subscriptionTier: any, finalAmount: number, newSubscription: any) {
+async function sendEmail(userId: string, subscriptionTier: any, finalAmount: number, newSubscription: any) {
   const { data: user, error: fetchError } = await supabase.from("profiles_with_email").select("*").eq("id", userId).single();
   
 
@@ -135,16 +139,12 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
 
     const { user_id, subscription_tier_id, billing_cycle, used_coupon_on_start, coupon_id, final_amount }: { user_id: string, subscription_tier_id: string, billing_cycle: string, used_coupon_on_start: boolean, coupon_id: string | null, final_amount: number } = await req.json();
 
-    const subscriptionTier = await getTier(supabase, subscription_tier_id);
+    const subscriptionTier = await getTier(subscription_tier_id);
 
-    if (await getExistingActiveSubscription(supabase, user_id)) {
+    if (await getExistingActiveSubscription(user_id)) {
       return new Response(
         JSON.stringify({ success: false, message: "User already has an active subscription" }),
         { headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }, status: 400 }
@@ -154,16 +154,16 @@ Deno.serve(async (req) => {
     const trialEndsAt = new Date();
     trialEndsAt.setMonth(trialEndsAt.getMonth() + 3);
 
-    const newSubscription = await createSubscription(supabase, user_id, subscriptionTier, billing_cycle, used_coupon_on_start, coupon_id, trialEndsAt);
+    const newSubscription = await createSubscription(user_id, subscriptionTier, billing_cycle, used_coupon_on_start, coupon_id, trialEndsAt);
 
-    if (!(await createTransaction(supabase, newSubscription, user_id, billing_cycle, trialEndsAt))) {
+    if (!(await createTransaction(newSubscription, user_id, billing_cycle, trialEndsAt))) {
       return new Response(
         JSON.stringify({ success: false, message: "Error creating subscription transaction" }),
         { headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }, status: 500 }
       );
     }
 
-    if (!(await sendEmail(supabase, user_id, subscriptionTier, final_amount, newSubscription))) {
+    if (!(await sendEmail(user_id, subscriptionTier, final_amount, newSubscription))) {
       return new Response(
         JSON.stringify({ success: false, message: "Error sending welcome email" }),
         { headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }, status: 500 }

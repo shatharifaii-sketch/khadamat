@@ -96,7 +96,7 @@ const SubscriptionHistoryTable = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paymentHistory.map((payment: PaymentHistory) => (
+              {/* paymentHistory.map((payment: PaymentHistory) => (
                 <TableRow key={payment.id}>
                   <TableCell>
                     {new Date(payment.created_at).toLocaleDateString('ar')}
@@ -119,7 +119,7 @@ const SubscriptionHistoryTable = () => {
                     {getStatusBadge(payment.status)}
                   </TableCell>
                 </TableRow>
-              ))}
+              )) */}
             </TableBody>
           </Table>
         )}

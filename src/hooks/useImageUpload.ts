@@ -16,6 +16,7 @@ export const useImageUpload = () => {
   const [images, setImages] = useState<UploadedImage[]>([]);
   const [uploading, setUploading] = useState(false);
   const queryClient = useQueryClient();
+  const [deletingImage, setDeletingImage] = useState<boolean>(false);
 
   const validateFile = (file: File): boolean => {
     // Check file type
@@ -80,14 +81,14 @@ export const useImageUpload = () => {
 
     setUploading(true);
     const fileArray = Array.from(files);
-    
+
     try {
       const uploadPromises = fileArray.map(file => uploadImage(file));
       const uploadedImages = await Promise.all(uploadPromises);
-      
+
       const validImages = uploadedImages.filter(img => img !== null) as UploadedImage[];
       setImages(prev => [...prev, ...validImages]);
-      
+
       if (validImages.length > 0) {
         toast.success(`تم رفع ${validImages.length} صورة بنجاح`);
       }
@@ -101,6 +102,8 @@ export const useImageUpload = () => {
 
   const removeImage = async (imageId: string) => {
     try {
+      setDeletingImage((prev) => prev || true);
+
       // Remove from storage
       const { error } = await supabase.storage
         .from('service-images')
@@ -114,8 +117,10 @@ export const useImageUpload = () => {
 
       // Remove from state
       setImages(prev => prev.filter(img => img.id !== imageId));
+      setDeletingImage(false);
       toast.success('تم حذف الصورة');
     } catch (error) {
+      setDeletingImage(false);
       console.error('Error removing image:', error);
       toast.error('حدث خطأ في حذف الصورة');
     }
@@ -147,28 +152,39 @@ export const useImageUpload = () => {
     const bucket = parts[bucketIndex];
     const filePath = parts.slice(bucketIndex + 1).join("/");
 
-    const { error: storageError } = await supabase.storage
-      .from(bucket)
-      .remove([filePath]);
+    try {
+      setDeletingImage((prev) => prev || true);
+
+      const { error: storageError } = await supabase.storage
+        .from(bucket)
+        .remove([filePath]);
+
+      if (storageError) {
+        console.error('Error deleting image from storage:', storageError);
+        return;
+      }
+
+      const { error: dbError } = await supabase.from('service_images')
+        .delete()
+        .eq('id', imageId);
+
+
+      if (dbError) {
+        console.error('Error deleting image from DB:', dbError);
+        return;
+      }
+
+      console.log('Image deleted successfully');
+
       
-    if (storageError) {
-      console.error('Error deleting image from storage:', storageError);
-      return;
+      queryClient.invalidateQueries({ queryKey: ['admin-data'] });
+      queryClient.invalidateQueries({ queryKey: ['service-images'] });
+      queryClient.invalidateQueries({ queryKey: ['service-edit-data'] });
+      setDeletingImage(false);
+    } catch (error) {
+      setDeletingImage(false);
+      console.error('Error deleting image:', error);
     }
-
-    const { error: dbError } = await supabase.from('service_images')
-      .delete()
-      .eq('id', imageId);
-
-    
-    if (dbError) {
-      console.error('Error deleting image from DB:', dbError);
-      return;
-    }
-
-    console.log('Image deleted successfully');
-
-    queryClient.invalidateQueries({ queryKey: ['admin-data']})
   }
 
   return {
@@ -178,6 +194,7 @@ export const useImageUpload = () => {
     removeImage,
     clearImages,
     setImages,
-    deleteImage
+    deleteImage,
+    deletingImage
   };
 };

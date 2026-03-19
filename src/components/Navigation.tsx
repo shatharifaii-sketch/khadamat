@@ -11,7 +11,7 @@ import { useProfile } from '@/hooks/useProfile';
 import LanguageSwitcher from './LanguageSwitcher';
 import { Avatar, AvatarImage } from './ui/avatar';
 import { GeneratedAvatar } from './GeneratedAvatar';
-import { isAdmin } from '@/hooks/useAdminFunctionality';
+import { useIsAdmin } from '@/hooks/useAdminFunctionality';
 import { useChat } from '@/contexts/ChatContext';
 import { cn } from '@/lib/utils';
 
@@ -21,19 +21,20 @@ const Navigation = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { unreadCount } = useChat();
+  const navigate = useNavigate();
 
   const { profile } = useProfile();
 
   // Enable real-time notifications
   const { isConnected } = useRealTimeNotifications();
 
-  const admin = isAdmin();
+  const admin = useIsAdmin();
   const isServiceProvider = profile?.is_service_provider || false;
 
   const isActive = (path: string) => location.pathname === path;
 
   const handleSignOut = () => {
-    signOut().finally(() => navigate('/'));
+    signOut().then(() => navigate('/', { replace: true }));
     setIsOpen(false);
   };
 

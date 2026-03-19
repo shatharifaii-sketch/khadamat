@@ -1,33 +1,23 @@
 
-import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { useSubscription } from '@/hooks/useSubscription';
-import { useServices } from '@/hooks/useServices';
 import PostServiceHeader from '@/components/PostService/PostServiceHeader';
 import ServiceForm from '@/components/PostService/ServiceForm';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { LogIn, Loader2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useServiceToEditData } from '@/hooks/usePublicServices';
 
 const PostService = () => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const { user, loading } = useAuth();
-  const { getUserServices } = useServices();
-  const [services, setServices] = useState([]);
-
   const editServiceId = searchParams.get('edit');
-  const isEditMode = !!editServiceId;
+  const { user, loading } = useAuth();
+  const {service} = useServiceToEditData(editServiceId ?? '', user.id ?? '');
 
-  useEffect(() => {
-    if (isEditMode && getUserServices.data) {
-      setServices(getUserServices.data);
-    }
-  }, [isEditMode, getUserServices.data]);
+  const isEditMode = !!editServiceId;
   
-  const serviceToEdit = isEditMode ? services.find(service => service.id === editServiceId) : null;
 
   // Wait for auth to load
   if (loading) {
@@ -75,7 +65,7 @@ const PostService = () => {
   }
 
   // Show loading while fetching service data in edit mode
-  if (isEditMode && !serviceToEdit && getUserServices.isLoading) {
+  if (isEditMode && !service) {
     return (
         <div className="max-w-4xl mx-auto py-12 px-4">
           <div className="text-center">
@@ -87,7 +77,7 @@ const PostService = () => {
   }
 
   // Show error if service not found in edit mode
-  if (isEditMode && !serviceToEdit && !getUserServices.isLoading) {
+  if (isEditMode && !service) {
     return (
 
         <div className="max-w-4xl mx-auto py-12 px-4">
@@ -118,13 +108,13 @@ const PostService = () => {
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <h3 className="text-lg font-semibold text-blue-900 mb-1">تعديل الخدمة</h3>
               <p className="text-blue-700">
-                تقوم بتعديل خدمة: <span className="font-medium">{serviceToEdit?.title}</span>
+                تقوم بتعديل خدمة: <span className="font-medium">{service?.title}</span>
               </p>
             </div>
           )}
         </PostServiceHeader>
 
-        <ServiceForm serviceToEdit={isEditMode ? serviceToEdit : null} />
+        <ServiceForm serviceToEdit={isEditMode ? service : null} />
       </div>
   );
 };

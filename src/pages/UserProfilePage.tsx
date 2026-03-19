@@ -20,16 +20,6 @@ const UserProfilePage = () => {
   return (
     <div className='max-w-4xl mx-auto py-12 px-4 space-y-10'>
             <div className="flex items-center justify-center gap-2">
-              <Popover>
-                  <PopoverTrigger>
-                    <EllipsisVertical className='size-4 text-muted-foreground' />
-                  </PopoverTrigger>
-                  <PopoverContent>
-                    <Button variant='ghost' className='w-full flex justify-start'>
-                      ابدأ شكوى
-                    </Button>
-                  </PopoverContent>
-                </Popover>
                 <h1 className="text-4xl font-bold">
                   حساب المستخدم
                 </h1>

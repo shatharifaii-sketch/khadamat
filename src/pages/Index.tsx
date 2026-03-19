@@ -180,6 +180,7 @@ const Index = () => {
               <Suspense fallback={<div>Loading...</div>}>
               <ErrorBoundary fallback={<div>Something went wrong</div>}>
                 <SubscriptionModal 
+                user={user}
                 cardClassName='shadow-xl'
                 switchClassName='transition-all bg-secondary text-muted-foreground px-4 py-2 rounded-full' />
               </ErrorBoundary>

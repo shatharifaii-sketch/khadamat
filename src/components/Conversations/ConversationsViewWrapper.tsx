@@ -16,9 +16,11 @@ const ConversationsViewWrapper = () => {
     
     const { conversations } = useConversations();
 
+    console.log(conversations)
+
     return (
         <ConvoLayout>
-            {conversations.length > 0 ? (conversations.map((convo) => (
+            {conversations && conversations.length > 0 ? (conversations.map((convo) => (
                 <div key={convo.id}>
                     <Link to={`/chat/${convo.id}/${convo.client_id}/${convo.service_id}/${convo.provider_id}`} key={convo.id} className='py-2 flex justify-between items-center hover:bg-muted px-2'>
                         <ConvoLink convo={convo} />

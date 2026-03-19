@@ -16,6 +16,7 @@ const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [passwordConfirm, setPasswordConfirm] = useState('');
   const [loading, setLoading] = useState(false);
   const { signIn, signUp, user, signInWithGoogle } = useAuth();
   const { sendWelcomeEmail } = useEmail();
@@ -61,7 +62,7 @@ const Auth = () => {
           navigate(from, { replace: true });
         }
       } else {
-        const { data, error } = await signUp(email, password, fullName);
+        const { data, error } = await signUp(email, password, fullName, passwordConfirm);
         if (error) {
           console.error('Sign up error:', error);
           if (error.message.includes('User already registered')) {
@@ -73,8 +74,7 @@ const Auth = () => {
           }
         } else {
           toast.success('تم إنشاء الحساب بنجاح! يرجى تفقد بريدك الإلكتروني لتأكيد الحساب');
-          sendWelcomeEmail.mutate({ name: fullName, email: data.user.email })
-          setIsLogin(true);
+          navigate('/confirm-email', { state: { email } });
         }
       }
     } catch (error: any) {
@@ -152,6 +152,19 @@ const Auth = () => {
                   required
                 />
               </div>
+              {!isLogin && (
+              <div className="space-y-2">
+                <Label htmlFor="password">تأكيد كلمة المرور</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="أدخل كلمة المرور"
+                  value={passwordConfirm}
+                  onChange={(e) => setPasswordConfirm(e.target.value)}
+                  required
+                />
+              </div>
+              )}
 
               <Button 
                 type="submit" 

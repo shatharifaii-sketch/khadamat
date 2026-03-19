@@ -64,6 +64,23 @@ export interface EnrichedConversation {
     last_message_sender_name: string | null;
 }
 
+const removeEmptyConvo = async (conversationId: string) => {
+    try {
+        const {error} = await supabase.from('conversations').delete().eq('id', conversationId);
+
+        if (error) {
+            console.error(error);
+            return false;
+        }
+
+
+        return true;
+    } catch (error) {
+        console.error(error);
+        return false;
+    }
+}
+
 const getConvoMessagesData = async (conversationId: string, userId: string) => {
     const { data: messages, error } = await supabase.from('messages').select(
         `
@@ -122,9 +139,18 @@ export const useConversations = () => {
                 throw error;
             }
 
+            console.log(conversations);
+
             const enrichedConversations = await Promise.all(
                 conversations.map(async (convo) => {
                     const { lastMessage, unreadMessagesCount } = await getConvoMessagesData(convo.id, user!.id);
+
+                    console.log(lastMessage, unreadMessagesCount);
+
+                    if (!lastMessage) {
+                        return await removeEmptyConvo(convo.id);
+                        
+                    }
 
                     return {
                         ...convo,

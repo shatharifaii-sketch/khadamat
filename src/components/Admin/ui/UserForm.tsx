@@ -5,6 +5,7 @@ import { Switch } from '@/components/ui/switch'
 import React, { useEffect, useState } from 'react'
 import { UserProfile } from '../UserManagement'
 import { useAdminFunctionality } from '@/hooks/useAdminFunctionality'
+import { Textarea } from '@/components/ui/textarea'
 
 export interface User {
   id: string;
@@ -90,6 +91,14 @@ const UserForm = ({ editingUser, closeForm }: Props) => {
                   <Input
                     id="location"
                     value={formData.location}
+                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="bio">الوصف</Label>
+                  <Textarea
+                    id="bio"
+                    value={formData.bio}
                     onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                   />
                 </div>

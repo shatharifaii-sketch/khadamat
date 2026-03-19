@@ -180,7 +180,7 @@ const Account = () => {
                     <TrendingUp className="h-5 w-5" />
                     خدماتي المنشورة
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className='mt-2'>
                     إدارة ومتابعة أداء خدماتك
                   </CardDescription>
                 </div>
@@ -226,7 +226,7 @@ const Account = () => {
           <Suspense fallback={<>
             <p>تحميل الاشتراكات</p></>}>
             <ErrorBoundary fallback={<div>فشل في تحميل  الاشتراكات</div>}>
-              <UserSubscriptions />
+              <UserSubscriptions user={user} />
             </ErrorBoundary>
           </Suspense>
         </div>

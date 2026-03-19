@@ -2,8 +2,9 @@ import { useNavigate } from 'react-router-dom';
 import { useServices } from '@/hooks/useServices';
 import { useSubscription } from '@/hooks/useSubscription';
 import { usePendingService } from '@/hooks/usePendingService';
-import { Service, ServiceFormData } from '@/types/service';
+import { ServiceFormData } from '@/types/service';
 import { toast } from 'sonner';
+import { Service } from './useAdminFunctionality';
 
 export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
     // If we're editing, update the service
     if (isEditMode && serviceToEdit) {
       try {
+        console.log('Updating service:', serviceToEdit.id, formData);
         await updateService.mutateAsync({
           id: serviceToEdit.id,
           title: formData.title,
@@ -30,6 +32,13 @@ export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
         }).finally(() => {
           toast('تم تحديث الخدمة بنجاح! انتظر الموافقة من الإدارة.', { type: 'success' });
         });
+
+        if (formData.images && formData.images.length > 0) {
+        await saveImages({
+          serviceId: serviceToEdit.id,
+          images: formData.images
+        });
+      }
         
         navigate('/account');
       } catch (error) {

@@ -856,6 +856,159 @@ export type Database = {
           },
         ]
       }
+      stripe_checkout_sessions: {
+        Row: {
+          attrs: Json | null
+          customer: string | null
+          id: string | null
+          payment_intent: string | null
+          subscription: string | null
+        }
+        Insert: {
+          attrs?: Json | null
+          customer?: string | null
+          id?: string | null
+          payment_intent?: string | null
+          subscription?: string | null
+        }
+        Update: {
+          attrs?: Json | null
+          customer?: string | null
+          id?: string | null
+          payment_intent?: string | null
+          subscription?: string | null
+        }
+        Relationships: []
+      }
+      stripe_customer_data: {
+        Row: {
+          attrs: Json | null
+          created: string | null
+          description: string | null
+          email: string | null
+          id: string | null
+          name: string | null
+        }
+        Insert: {
+          attrs?: Json | null
+          created?: string | null
+          description?: string | null
+          email?: string | null
+          id?: string | null
+          name?: string | null
+        }
+        Update: {
+          attrs?: Json | null
+          created?: string | null
+          description?: string | null
+          email?: string | null
+          id?: string | null
+          name?: string | null
+        }
+        Relationships: []
+      }
+      stripe_invoices: {
+        Row: {
+          attrs: Json | null
+          currency: string | null
+          customer: string | null
+          id: string | null
+          period_end: string | null
+          period_start: string | null
+          status: string | null
+          subscription: string | null
+          total: number | null
+        }
+        Insert: {
+          attrs?: Json | null
+          currency?: string | null
+          customer?: string | null
+          id?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          status?: string | null
+          subscription?: string | null
+          total?: number | null
+        }
+        Update: {
+          attrs?: Json | null
+          currency?: string | null
+          customer?: string | null
+          id?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          status?: string | null
+          subscription?: string | null
+          total?: number | null
+        }
+        Relationships: []
+      }
+      stripe_prices: {
+        Row: {
+          active: boolean | null
+          attrs: Json | null
+          created: string | null
+          currency: string | null
+          id: string | null
+          product: string | null
+          type: string | null
+          unit_amount: number | null
+        }
+        Insert: {
+          active?: boolean | null
+          attrs?: Json | null
+          created?: string | null
+          currency?: string | null
+          id?: string | null
+          product?: string | null
+          type?: string | null
+          unit_amount?: number | null
+        }
+        Update: {
+          active?: boolean | null
+          attrs?: Json | null
+          created?: string | null
+          currency?: string | null
+          id?: string | null
+          product?: string | null
+          type?: string | null
+          unit_amount?: number | null
+        }
+        Relationships: []
+      }
+      stripe_products: {
+        Row: {
+          active: boolean | null
+          attrs: Json | null
+          created: string | null
+          default_price: string | null
+          description: string | null
+          id: string | null
+          name: string | null
+          updated: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          attrs?: Json | null
+          created?: string | null
+          default_price?: string | null
+          description?: string | null
+          id?: string | null
+          name?: string | null
+          updated?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          attrs?: Json | null
+          created?: string | null
+          default_price?: string | null
+          description?: string | null
+          id?: string | null
+          name?: string | null
+          updated?: string | null
+        }
+        Relationships: []
+      }
       subscription_tiers: {
         Row: {
           allowed_services: number | null
@@ -866,11 +1019,14 @@ export type Database = {
           free_trial_period: number | null
           free_trial_period_text: string | null
           id: string
-          notes: string[] | null
+          notes: Json | null
           price_monthly_title: string | null
           price_monthly_value: number | null
           price_yearly_title: string | null
           price_yearly_value: number | null
+          stripe_monthly_price_id: string
+          stripe_product_id: string
+          stripe_yearly_price_id: string
           tier: number | null
           title: string | null
           users: number
@@ -884,11 +1040,14 @@ export type Database = {
           free_trial_period?: number | null
           free_trial_period_text?: string | null
           id?: string
-          notes?: string[] | null
+          notes?: Json | null
           price_monthly_title?: string | null
           price_monthly_value?: number | null
           price_yearly_title?: string | null
           price_yearly_value?: number | null
+          stripe_monthly_price_id: string
+          stripe_product_id: string
+          stripe_yearly_price_id: string
           tier?: number | null
           title?: string | null
           users?: number
@@ -902,11 +1061,14 @@ export type Database = {
           free_trial_period?: number | null
           free_trial_period_text?: string | null
           id?: string
-          notes?: string[] | null
+          notes?: Json | null
           price_monthly_title?: string | null
           price_monthly_value?: number | null
           price_yearly_title?: string | null
           price_yearly_value?: number | null
+          stripe_monthly_price_id?: string
+          stripe_product_id?: string
+          stripe_yearly_price_id?: string
           tier?: number | null
           title?: string | null
           users?: number
@@ -1116,6 +1278,45 @@ export type Database = {
         }
         Relationships: []
       }
+      user_reports: {
+        Row: {
+          created_at: string
+          id: number
+          report_description: string | null
+          reported_id: string | null
+          reporter_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          report_description?: string | null
+          reported_id?: string | null
+          reporter_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          report_description?: string | null
+          reported_id?: string | null
+          reporter_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_reports_reported_id_fkey"
+            columns: ["reported_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_reports_reported_id_fkey"
+            columns: ["reported_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_with_email"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -1271,6 +1472,10 @@ export type Database = {
           unread_count: number
           updated_at: string
         }[]
+      }
+      get_subscription_data_with_stripe: {
+        Args: { tier_id: string }
+        Returns: Json
       }
       get_top_search_terms: {
         Args: never

@@ -10,10 +10,14 @@ import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, Dr
 import ErrorBoundary from '../ErrorBoundary';
 import SubscriptionsModal from '../PostService/SubscriptionsModal';
 import { usePaymentLogic } from '@/hooks/usePaymentLogic';
-import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
+import { User } from '@supabase/supabase-js';
 
-const UserSubscriptions = () => {
+interface UserSubscriptionsProps { 
+    user: User
+}
+
+const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
     const { getUserSubscriptions, deactivateSubscription, deactivatingSubscription, deactivateSubscriptionSuccess, deactivatingSubscriptionError } = useSubscription();
     const { getPaymentUrl } = usePaymentLogic();
     const [isPaymentTime, setIsPaymentTime] = useState<boolean>(false);
@@ -21,10 +25,13 @@ const UserSubscriptions = () => {
     const [openPaymentModal, setOpenPaymentModal] = useState<boolean>(false);
     const [openDeactivateModal, setOpenDeactivateModal] = useState<boolean>(false);
     const [currency, setCurrency] = useState<string>('ILS');
+    
 
     if (!getUserSubscriptions.data) return null;
 
     const { activeSubscription, inactiveSubscriptions } = getUserSubscriptions.data;
+
+    const isPayable = new Date() > new Date(activeSubscription.next_payment_date) && !activeSubscription.is_in_trial;
 
     const handleDeactivate = async () => {
         deactivateSubscription.mutateAsync({ subscriptionId: activeSubscription.id });
@@ -85,7 +92,7 @@ const UserSubscriptions = () => {
                     <div className='flex flex-col gap-2'>
                         <CardTitle className="flex items-center gap-2">
                             <Star className="h-5 w-5 text-primary" />
-                            <div>الاشتراكات</div>
+                            <div>معلومات الاشتراك</div>
                         </CardTitle>
                         <CardDescription>
                             إدارة ومتابعة اشتراكاتك
@@ -102,7 +109,7 @@ const UserSubscriptions = () => {
                                 <CardHeader className='flex flex-row items-start justify-between'>
                                     <div className='text-lg font-bold'>
                                         {activeSubscription.subscription_tier.title}
-                                        <p className='text-muted-foreground text-sm'>{activeSubscription.billing_cycle === "Monthly" ? "شهري" : "سنوي"}</p>
+                                        <p className='text-muted-foreground text-sm'>{activeSubscription.billing_cycle === "monthly" ? "شهري" : "سنوي"}</p>
                                     </div>
                                     <Badge>
                                         {activeSubscription.status === 'active' ? 'جاري' : 'متوقف'}
@@ -123,13 +130,14 @@ const UserSubscriptions = () => {
                                         <Separator />
                                         <div className='flex flex-col text-sm'>
                                             <p>تاريخ الاشتراك: <span>{new Date(activeSubscription.created_at).toLocaleDateString('ar')}</span></p>
-                                            <p>تاريخ انتهاء الاشتراك: <span>{new Date(activeSubscription.expires_at).toLocaleDateString('ar')}</span></p>
                                         </div>
                                     </div>
                                 </CardContent>
                                 <CardFooter>
                                     <Button onClick={() => setOpenDeactivateModal(true)} disabled={deactivatingSubscription} className='flex-1'>
-                                        الغاء تفعيل الاشتراك
+                                        {
+                                            new Date(activeSubscription.expires_at).getTime() < new Date().getTime() ? 'تجديد الاشتراك' : 'ايقاف الاشتراك'
+                                        }
                                     </Button>
                                 </CardFooter>
                             </Card>
@@ -150,7 +158,10 @@ const UserSubscriptions = () => {
                                     </div>
                                     <div className='flex flex-col'>
                                         <p className='text-sm text-muted-foreground'>في حال لم يحن تاريخ الدفع المحدد فلا يصح بدء عملية الدفع!</p>
-                                        <Button onClick={() => setOpenPaymentModal(true)} className='flex-1 mt-3'>
+                                        <Button 
+                                        onClick={() => setOpenPaymentModal(true)} className='flex-1 mt-3'
+                                        disabled={!isPayable}
+                                        >
                                             ابدأ عمليه الدفع
                                         </Button>
                                         {/*<button onClick={handlePay} className='flex-1 mt-3 bg-green-600 text-white p-2 rounded-md'>
@@ -209,7 +220,7 @@ const UserSubscriptions = () => {
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
-                        <Button variant='ghost' onClick={() => setOpenDeactivateModal(false)}>الغاء</Button>
+                        <Button variant='ghost' onClick={() => setOpenPaymentModal((prev) => !prev)}>الغاء</Button>
                         <Button variant='default' onClick={startPayment}>{deactivatingSubscription ? 'جاري المعالجة...' : 'نعم'}</Button>
                     </DialogFooter>
                 </DialogContent>
@@ -228,11 +239,11 @@ const UserSubscriptions = () => {
                     </DrawerHeader>
                     <DrawerDescription className='flex flex-col gap-4 px-5 overflow-y-auto'>
                         <div>
-                            <p>يجب على جميع الاشتراك بأحد العروض المتوفرة للحصول على قدرة نشر الخدمات</p>
+                            <p>يجب على الجميع الاشتراك بأحد العروض المتوفرة للحصول على قدرة نشر الخدمات</p>
                         </div>
                         <Suspense fallback={<div>Loading...</div>}>
                             <ErrorBoundary fallback={<div>Something went wrong</div>}>
-                                <SubscriptionsModal />
+                                <SubscriptionsModal setDrawerOpen={() => setOpenSubscribeModal(false)} user={user} />
                             </ErrorBoundary>
                         </Suspense>
                     </DrawerDescription>

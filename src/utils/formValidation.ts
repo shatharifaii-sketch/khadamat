@@ -17,6 +17,10 @@ export const validateEmail = (email: string): ValidationResult => {
   return { isValid: true, message: '' };
 };
 
+const normalizeArabicDigits = (value: string) => {
+  return value.replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 1632));
+};
+
 export const validatePhone = (phone: string): ValidationResult => {
   if (!phone.trim()) {
     return { isValid: false, message: 'رقم الهاتف مطلوب' };
@@ -24,7 +28,9 @@ export const validatePhone = (phone: string): ValidationResult => {
   
   // Palestinian phone number patterns
   const phoneRegex = /^(059|056|057|058|052)\d{7}$/;
-  const cleanPhone = phone.replace(/[\s-]/g, '');
+  const cleanPhone = normalizeArabicDigits(phone).replace(/[\s-]/g, '');;
+
+  console.log(cleanPhone);
   
   if (!phoneRegex.test(cleanPhone)) {
     return { isValid: false, message: 'يرجى إدخال رقم هاتف صحيح (مثال: 0599123456)' };

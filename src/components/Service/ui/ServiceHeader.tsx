@@ -43,17 +43,17 @@ const ServiceHeader = ({
               className="size-7"
             />
           )}
-          <h2>{publisherName}</h2>
+          <h2 className='text-sm md:text-lg font-semibold'>{publisherName}</h2>
         </NavLink>
       </div>
       <div className=''>
         <div className='flex justify-start gap-2'>
-          <Badge variant="secondary" className="text-sm font-medium">
+          <Badge variant="secondary" className="text-sm font-medium text-center p-1">
             {categoryLabel}
           </Badge>
           <h1 className='md:text-4xl text-wrap text-2xl'>{title}</h1>
         </div>
-        <p className='text-end text-muted-foreground text-sm mt-3'>{updatedAt.split('T')[0]}</p>
+        <p className='text-start md:text-end text-muted-foreground text-sm mt-3'>{updatedAt.split('T')[0]}</p>
       </div>
     </div>
   )

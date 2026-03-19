@@ -6,12 +6,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { useEffect, useState } from "react";
 import { UserProfile } from "../ServiceManagement";
 import { useAdminFunctionality } from "@/hooks/useAdminFunctionality";
-import ServiceImages from "./ServiceImages";
+import { serviceCategories } from "@/components/PostService/ServiceCategoryData";
+import { locations } from "@/components/FindService/ServiceCategories";
+import ServiceImages from "@/components/Service/ui/EditServiceImages";
 
 interface Props {
     isEdit?: boolean;
     serviceProviders: UserProfile[];
-    service?: Service; //TODO: Define service type
+    service?: Service;
     closeForm: () => void
 }
 
@@ -33,19 +35,6 @@ interface Service {
     }[];
 }
 
-const serviceCategories = [
-    'تنظيف المنازل',
-    'صيانة السيارات',
-    'التدريس الخصوصي',
-    'التصوير',
-    'التصميم الجرافيكي',
-    'البناء والترميم',
-    'الكهرباء',
-    'السباكة',
-    'الطبخ والتموين',
-    'الحدائق والزراعة'
-];
-
 const ServiceForm = ({ isEdit, serviceProviders, service, closeForm }: Props) => {
     const { createService, updateService, createServiceSuccess, updateServiceSuccess } = useAdminFunctionality();
 
@@ -64,10 +53,10 @@ const ServiceForm = ({ isEdit, serviceProviders, service, closeForm }: Props) =>
     });
 
     useEffect(() => {
-  if (createServiceSuccess || updateServiceSuccess) {
-    closeForm();
-  }
-}, [createServiceSuccess, updateServiceSuccess, closeForm]);
+        if (createServiceSuccess || updateServiceSuccess) {
+            closeForm();
+        }
+    }, [createServiceSuccess, updateServiceSuccess, closeForm]);
 
 
     useEffect(() => {
@@ -100,11 +89,17 @@ const ServiceForm = ({ isEdit, serviceProviders, service, closeForm }: Props) =>
                                 <SelectValue placeholder="اختر الفئة" />
                             </SelectTrigger>
                             <SelectContent>
-                                {serviceCategories.map((category) => (
-                                    <SelectItem key={category} value={category}>
-                                        {category}
-                                    </SelectItem>
-                                ))}
+                                {serviceCategories.map((category) => {
+                                    const Icon = category.icon;
+                                    return (
+                                        <SelectItem key={category.value} value={category.value}>
+                                            <div className="flex items-center gap-2">
+                                                <Icon size={18} />
+                                                <span>{category.label}</span>
+                                            </div>
+                                        </SelectItem>
+                                    );
+                                })}
                             </SelectContent>
                         </Select>
                     </div>
@@ -149,11 +144,20 @@ const ServiceForm = ({ isEdit, serviceProviders, service, closeForm }: Props) =>
 
                     <div>
                         <Label htmlFor="location">الموقع</Label>
-                        <Input
-                            id="location"
-                            value={formData.location}
-                            onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                        />
+                        <Select
+                                value={formData.location} onValueChange={(value) => setFormData({ ...formData, location: value })}
+                              >
+                                <SelectTrigger id="location">
+                                  <SelectValue placeholder="اختر المنطقة أو المحافظة" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {locations.map((loc) => (
+                                    <SelectItem key={loc} value={loc}>
+                                      {loc}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
                     </div>
 
                     <div>
@@ -202,10 +206,10 @@ const ServiceForm = ({ isEdit, serviceProviders, service, closeForm }: Props) =>
 
                 </div>
                 <ServiceImages
-                onImagesChange={(images) => {
-                    setFormData((prev) => ({ ...prev, service_images: images }));
-                }}
-                serviceImages={service ? service.service_images : []} />
+                    onImagesChange={(images) => {
+                        setFormData((prev) => ({ ...prev, service_images: images }));
+                    }}
+                    serviceImages={service ? service.service_images : []} />
             </div>
 
             <Button
