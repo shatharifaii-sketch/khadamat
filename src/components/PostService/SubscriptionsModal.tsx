@@ -15,13 +15,15 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 interface SubscriptionsModalProps {
     cardClassName?: string;
     switchClassName?: string;
-    user?: User
+    user?: User;
+    setDrawerOpen?: (isOpen: boolean) => void;
 }
 
-const SubscriptionsModal = ({ cardClassName, switchClassName, user }: SubscriptionsModalProps) => {
+const SubscriptionsModal = ({ cardClassName, switchClassName, user, setDrawerOpen }: SubscriptionsModalProps) => {
     const navigate = useNavigate();
     const [yearly, setYearly] = useState<boolean>(false);
     const [selectedSubscription, setSelectedSubscription] = useState(null);
+    const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
     const { subscriptionTiersData } = useSubscriptionTiers();
     const { createCheckoutSession, isCreatingCheckoutSessionPending, isCreateCheckoutSessionError, isCreateCheckoutSessionSuccess } = useStripe();
@@ -38,6 +40,9 @@ const SubscriptionsModal = ({ cardClassName, switchClassName, user }: Subscripti
             userId: user?.id,
             email: user?.email
         });
+
+        setIsPaymentModalOpen(false);
+        setDrawerOpen && setDrawerOpen(false);
     }
 
     return (
@@ -101,7 +106,7 @@ const SubscriptionsModal = ({ cardClassName, switchClassName, user }: Subscripti
                                         </div>
                                     </CardContent>
                                     <CardFooter>
-                                        <Dialog>
+                                        <Dialog open={isPaymentModalOpen} onOpenChange={setIsPaymentModalOpen}>
                                             <DialogTrigger asChild>
                                                 <Button
                                                     onClick={() => handleSubscriptionSelect(subscription)}
@@ -162,7 +167,8 @@ const SubscriptionsModal = ({ cardClassName, switchClassName, user }: Subscripti
                                                 )}
                                                 <DialogFooter>
                                                     <Button
-                                                        onClick={() => handleNavigationToPaymentWindow(yearly ? subscription.stripe_yearly_price_id : subscription.stripe_monthly_price_id)}
+                                                        onClick={() => 
+                                                            handleNavigationToPaymentWindow(yearly ? subscription.stripe_yearly_price_id : subscription.stripe_monthly_price_id)}
                                                         variant='default'
                                                         className='bg-white text-muted-foreground flex-1 shadow-md border hover:text-white'
                                                         disabled={isCreatingCheckoutSessionPending}

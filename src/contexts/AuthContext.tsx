@@ -3,14 +3,16 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import AppLoading from '@/components/AppLoading';
+import { toast } from 'sonner';
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName?: string) => Promise<{ error: any, data: { user: User, session: Session } | { user: null, session: null } }>;
+  signUp: (email: string, password: string, fullName: string, passwordConfirm: string) => Promise<{ error: any, data: { user: User, session: Session } | { user: null, session: null } }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
+  verifyOtp: (email: string, token: string) => Promise<{ error?: any, data?: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -48,38 +50,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, []);
 
-  const signUp = async (email: string, password: string, fullName?: string) => {
+  const signUp = async (email: string, password: string, fullName: string, passwordConfirm: string) => {
     console.log('Attempting sign up for:', email);
-    const redirectUrl = `${window.location.origin}/`;
+    const { data, error, response }: any = await supabase.functions.invoke('register-user', {
+      body: JSON.stringify({ email, password, name: fullName, passwordConfirm })
+    })
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: {
-          full_name: fullName
-        }
+    console.log('Sign up response:', response);
+
+    if (!data.success || error) {
+      console.error('Sign up error: ', error || null);
+
+      if (error.code === 'email_exists') {
+        toast.error('Email already exists');
+        return { error: 'Email already exists', data: { user: null, session: null } };
       }
-    });
 
-    if (error) {
-      console.error('Sign up error:', error);
-    } else {
-      console.log('Sign up successful');
-
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-welcome-email-dev`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
-        },
-        body: JSON.stringify({ email, name: fullName })
-      });
-
-      if (!response.ok) {
-        console.error('Error sending welcome email:', response);
-      }
+      return { error: error, data: { user: null, session: null } };
     }
 
     return { data, error };
@@ -139,13 +126,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     console.log('Sign out successful');
   };
 
+  const verifyOtp = async (email: string, token: string) => {
+    const { error } = await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: 'email'
+    });
+
+    if (error) {
+      console.error('Error verifying OTP:', error);
+      return { error };
+    }
+
+    return { data: 'OTP verified successfully' };
+  }
+
   const value = {
     user,
     session,
     loading,
     signUp,
     signIn,
-    signOut
+    signOut,
+    verifyOtp
   };
 
   return (

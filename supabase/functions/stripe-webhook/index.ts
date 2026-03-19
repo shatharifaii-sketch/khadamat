@@ -90,11 +90,12 @@ async function handleInvoicePaymentPaid(invoice: any) {
     const { data: sub, error: subError } = await supabase
       .from('subscriptions')
       .select('id')
-      .eq('user_id', invoice.metadata.user_id)
+      .eq('user_id', invoice.lines.data[0].metadata.user_id)
+      .eq('stripe_subscription_id', invoice.lines.data[0].parent.subscription_item_details.subscription)
       .maybeSingle();
 
     if (subError) {
-      console.log('invoice payment error: ', subError);
+      console.log('invoice payment subscription error: ', subError);
       return false;
     }
 
@@ -110,16 +111,16 @@ async function handleInvoicePaymentPaid(invoice: any) {
     }
 
     const paymentDate = new Date(invoice.status_transitions.paid_at * 1000);
-    const billingPeriodStart = new Date(invoice.period.start * 1000);
-    const billingPeriodEnd = new Date(invoice.period.end * 1000);
+    const billingPeriodStart = new Date(invoice.lines.data[0].period.start * 1000);
+    const billingPeriodEnd = new Date(invoice.lines.data[0].period.end * 1000);
 
-    const { error: transactionError } = await supabase
+    const { data, error: transactionError } = await supabase
       .from('subscription_transactions')
       .insert({
-        user_id: invoice.metadata.user_id,
+        user_id: invoice.lines.data[0].metadata.user_id,
         invoice_id: inv.id,
         subscription_id: sub.id,
-        amount: invoice.amount,
+        amount: invoice.amount_paid,
         currency: invoice.currency,
         payment_date: paymentDate.toISOString(),
         payment_status: 'paid',
@@ -132,12 +133,24 @@ async function handleInvoicePaymentPaid(invoice: any) {
         stripe_price_id: invoice.lines.data[0].pricing.price_details.price,
         stripe_product_id: invoice.lines.data[0].pricing.price_details.product,
         stripe_customer_id: invoice.customer,
+        billing_reason: invoice.billing_reason
       })
+      .select('id')
+      .maybeSingle();
 
     if (transactionError) {
       console.log('invoice payment transaction error: ', transactionError);
       return false;
     }
+
+    const { error: invoiceUpdateError } = await supabase.from('invoices').update({
+      subscription_transaction_id: data.id
+    }).eq('id', inv.id);
+
+    if (invoiceUpdateError) {
+      console.log('subscription transaction INVOICE update error: ', invoiceError);
+      return false;
+    };
 
     return true;
   } catch (error) {
@@ -176,9 +189,10 @@ async function handleSubscriptionCreated(subscription: any) {
         started_at: subscriptionStart,
         last_payment_date: paymentsStart,
         next_payment_date: nextPaymentDate,
+        expires_at: nextPaymentDate,
         amount: subscription.items.data[0].plan.amount / 100,
         status: subscription.items.data[0].plan.active ? 'active' : 'inactive',
-        trial_expires_at: paymentsStart,
+        trial_expires_at: nextPaymentDate,
         stripe_subscription_id: subscription.id,
         stripe_subscription_item_id: subscription.items.data[0].id,
         stripe_customer_id: subscription.customer,
@@ -186,7 +200,7 @@ async function handleSubscriptionCreated(subscription: any) {
         stripe_price_id: subscription.items.data[0].price.id,
         latest_stripe_invoice_id: subscription.latest_invoice
       })
-      .select('user_id, tier_id, billing_cycle')
+      .select('id, user_id, tier_id, billing_cycle')
       .maybeSingle();
 
     if (error) {
@@ -196,7 +210,7 @@ async function handleSubscriptionCreated(subscription: any) {
 
     const { error: invoiceError } = await supabase.from('invoices').update({
       subscription_id: data.id
-    }).eq('stripe_invoice_id', subscription.latest_invoice);
+    }).eq('user_id', subscription.metadata.user_id).eq('stripe_invoice_id', subscription.latest_invoice);
 
     if (invoiceError) {
       console.log('subscription creation INVOICE error: ', invoiceError);
@@ -247,7 +261,6 @@ async function handleCustomerCreated(customer: any) {
 
 async function handleInvoicePaymentFailed(invoice: any) {
   try {
-    console.log('creating invoice in database');
     const { data, error } = await supabase
       .from('invoices')
       .update({
@@ -262,8 +275,6 @@ async function handleInvoicePaymentFailed(invoice: any) {
       console.log('Error creating invoice in database: ', error);
       return false;
     };
-
-    console.log('invoice created in database: ', data);
 
     return true;
   } catch (error) {
@@ -363,7 +374,7 @@ Deno.serve(async (req: Request) => {
       }
 
       break;
-    case 'invoice_payment.paid':
+    case 'invoice.paid':
       // Continue to provision the subscription as payments continue to be made.
       // Store the status in your database and check when a user accesses your service.
       // This approach helps you avoid hitting rate limits.
@@ -417,8 +428,13 @@ Deno.serve(async (req: Request) => {
       };
 
       if (existingSub) {
-        console.log('Subscription already exists in database. Skipping.');
-        return false;
+        return new Response("Subscription already exists and active: ", {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        })
       };
 
       const createSubResponse = await handleSubscriptionCreated(
