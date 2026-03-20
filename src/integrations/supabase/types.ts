@@ -320,26 +320,56 @@ export type Database = {
       invoices: {
         Row: {
           amount: number | null
+          billing_reason: string | null
           created_at: string
           id: number
+          status: string | null
+          stripe_customer_id: string | null
+          stripe_invoice_id: string | null
+          stripe_price_id: string | null
+          stripe_product_id: string | null
+          stripe_subscription_id: string | null
+          stripe_subscription_item_id: string | null
           subscription_id: string | null
           subscription_transaction_id: string | null
+          subtotal: number | null
+          url: string | null
           user_id: string | null
         }
         Insert: {
           amount?: number | null
+          billing_reason?: string | null
           created_at?: string
           id?: number
+          status?: string | null
+          stripe_customer_id?: string | null
+          stripe_invoice_id?: string | null
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          stripe_subscription_id?: string | null
+          stripe_subscription_item_id?: string | null
           subscription_id?: string | null
           subscription_transaction_id?: string | null
+          subtotal?: number | null
+          url?: string | null
           user_id?: string | null
         }
         Update: {
           amount?: number | null
+          billing_reason?: string | null
           created_at?: string
           id?: number
+          status?: string | null
+          stripe_customer_id?: string | null
+          stripe_invoice_id?: string | null
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          stripe_subscription_id?: string | null
+          stripe_subscription_item_id?: string | null
           subscription_id?: string | null
           subscription_transaction_id?: string | null
+          subtotal?: number | null
+          url?: string | null
           user_id?: string | null
         }
         Relationships: [
@@ -511,6 +541,7 @@ export type Database = {
           location: string | null
           phone: string | null
           profile_image_url: string | null
+          stripe_customer_id: string | null
           updated_at: string
         }
         Insert: {
@@ -523,6 +554,7 @@ export type Database = {
           location?: string | null
           phone?: string | null
           profile_image_url?: string | null
+          stripe_customer_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -535,6 +567,7 @@ export type Database = {
           location?: string | null
           phone?: string | null
           profile_image_url?: string | null
+          stripe_customer_id?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -1009,6 +1042,33 @@ export type Database = {
         }
         Relationships: []
       }
+      stripe_subscriptions: {
+        Row: {
+          attrs: Json | null
+          currency: string | null
+          current_period_end: string | null
+          current_period_start: string | null
+          customer: string | null
+          id: string | null
+        }
+        Insert: {
+          attrs?: Json | null
+          currency?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          customer?: string | null
+          id?: string | null
+        }
+        Update: {
+          attrs?: Json | null
+          currency?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          customer?: string | null
+          id?: string | null
+        }
+        Relationships: []
+      }
       subscription_tiers: {
         Row: {
           allowed_services: number | null
@@ -1080,13 +1140,23 @@ export type Database = {
           amount: number | null
           billing_period_end: string | null
           billing_period_start: string | null
+          billing_reason: string | null
           coupon_id: string | null
           coupon_used: boolean | null
           created_at: string
           currency: string | null
           id: string
+          invoice_id: number | null
+          invoice_url: string | null
           payment_date: string | null
           payment_status: string | null
+          status: string
+          stripe_customer_id: string | null
+          stripe_invoice_id: string | null
+          stripe_price_id: string | null
+          stripe_product_id: string | null
+          stripe_subscription_id: string | null
+          stripe_subscription_item_id: string | null
           subscription_id: string | null
           updated_at: string | null
           user_id: string | null
@@ -1095,13 +1165,23 @@ export type Database = {
           amount?: number | null
           billing_period_end?: string | null
           billing_period_start?: string | null
+          billing_reason?: string | null
           coupon_id?: string | null
           coupon_used?: boolean | null
           created_at?: string
           currency?: string | null
           id?: string
+          invoice_id?: number | null
+          invoice_url?: string | null
           payment_date?: string | null
           payment_status?: string | null
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_invoice_id?: string | null
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          stripe_subscription_id?: string | null
+          stripe_subscription_item_id?: string | null
           subscription_id?: string | null
           updated_at?: string | null
           user_id?: string | null
@@ -1110,13 +1190,23 @@ export type Database = {
           amount?: number | null
           billing_period_end?: string | null
           billing_period_start?: string | null
+          billing_reason?: string | null
           coupon_id?: string | null
           coupon_used?: boolean | null
           created_at?: string
           currency?: string | null
           id?: string
+          invoice_id?: number | null
+          invoice_url?: string | null
           payment_date?: string | null
           payment_status?: string | null
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_invoice_id?: string | null
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          stripe_subscription_id?: string | null
+          stripe_subscription_item_id?: string | null
           subscription_id?: string | null
           updated_at?: string | null
           user_id?: string | null
@@ -1127,6 +1217,13 @@ export type Database = {
             columns: ["coupon_id"]
             isOneToOne: false
             referencedRelation: "coupons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_transactions_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
             referencedColumns: ["id"]
           },
           {
@@ -1151,12 +1248,18 @@ export type Database = {
           is_in_trial: boolean
           is_payment_pastdue: boolean | null
           last_payment_date: string | null
+          latest_stripe_invoice_id: string | null
           next_payment_date: string | null
           payment_method: string | null
           services_allowed: number | null
           services_used: number | null
           started_at: string
           status: string
+          stripe_customer_id: string | null
+          stripe_price_id: string | null
+          stripe_product_id: string | null
+          stripe_subscription_id: string | null
+          stripe_subscription_item_id: string | null
           subscription_ended_at: string | null
           tier_id: string | null
           trial_expires_at: string | null
@@ -1176,12 +1279,18 @@ export type Database = {
           is_in_trial?: boolean
           is_payment_pastdue?: boolean | null
           last_payment_date?: string | null
+          latest_stripe_invoice_id?: string | null
           next_payment_date?: string | null
           payment_method?: string | null
           services_allowed?: number | null
           services_used?: number | null
           started_at?: string
           status?: string
+          stripe_customer_id?: string | null
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          stripe_subscription_id?: string | null
+          stripe_subscription_item_id?: string | null
           subscription_ended_at?: string | null
           tier_id?: string | null
           trial_expires_at?: string | null
@@ -1201,12 +1310,18 @@ export type Database = {
           is_in_trial?: boolean
           is_payment_pastdue?: boolean | null
           last_payment_date?: string | null
+          latest_stripe_invoice_id?: string | null
           next_payment_date?: string | null
           payment_method?: string | null
           services_allowed?: number | null
           services_used?: number | null
           started_at?: string
           status?: string
+          stripe_customer_id?: string | null
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          stripe_subscription_id?: string | null
+          stripe_subscription_item_id?: string | null
           subscription_ended_at?: string | null
           tier_id?: string | null
           trial_expires_at?: string | null

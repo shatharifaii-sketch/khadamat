@@ -15,6 +15,29 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
 );
 
+function formatDate(date?: string | Date | null) {
+  if (!date) return '—';
+
+  return new Intl.DateTimeFormat('ar-EG', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  }).format(new Date(date));
+}
+
+async function getSubscriptionWithRetry(retries: number, delay: number, subscriptionId: string, userId: string) {
+  for (let i = 0; i < retries; i++) {
+    const { data } = await supabase.from('subscriptions').select('id').eq('stripe_subscription_id', subscriptionId).eq('user_id', userId).maybeSingle();
+
+    if (data) return data;
+
+    await new Promise((res) => setTimeout(res, delay));
+  }
+
+  return null;
+}
+
+
 async function handleInvoiceCreated(invoice: any) {
   try {
     console.log('creating invoice in database');
@@ -48,18 +71,11 @@ async function handleInvoiceCreated(invoice: any) {
         id: "invoice-created",
         variables: {
           name: invoice.customer_name,
-          total: invoice.amount_due / 100,
+          total: (invoice.amount_due / 100).toString(),
           action_link: invoice.hosted_invoice_url,
           help_url: Deno.env.get("APP_HELP_URL"),
         },
-      },
-      attachments: [
-        {
-          path: invoice.invoice_pdf,
-          type: "application/pdf",
-          name: `invoice-${data.created_at}.pdf`,
-        }
-      ]
+      }
     })
 
     if (resendError) {
@@ -112,58 +128,71 @@ async function handleCheckoutSessionCompleted(session: any) {
 
 async function handleInvoicePaymentPaid(invoice: any) {
   try {
-    const { data: sub, error: subError } = await supabase
-      .from('subscriptions')
-      .select('id')
-      .eq('user_id', invoice.lines.data[0].metadata.user_id)
-      .eq('stripe_subscription_id', invoice.lines.data[0].parent.subscription_item_details.subscription)
-      .maybeSingle();
+    const userId = invoice.lines.data[0].metadata.user_id;
+    const subscriptionId = invoice.lines.data[0].parent.subscription_item_details.subscription;
 
-    if (subError) {
-      console.log('invoice payment subscription error: ', subError);
-      return false;
-    }
-
-    const { data: inv, error: invoiceError } = await supabase
+    // --- 1. UPSERT INVOICE (idempotent, removes dependency on invoice.created)
+    const { data: inv, error: invoiceUpsertError } = await supabase
       .from('invoices')
+      .upsert(
+        {
+          user_id: userId,
+          stripe_invoice_id: invoice.id,
+          status: invoice.status,
+          amount: invoice.amount_paid / 100,
+          currency: invoice.currency,
+          url: invoice.invoice_pdf,
+          stripe_customer_id: invoice.customer,
+          billing_reason: invoice.billing_reason,
+        },
+        { onConflict: 'stripe_invoice_id' }
+      )
       .select('*')
-      .eq('stripe_invoice_id', invoice.id)
       .maybeSingle();
 
-    if (invoiceError) {
-      console.log('invoice payment error: ', invoiceError);
+    if (invoiceUpsertError || !inv) {
+      console.log('invoice upsert error:', invoiceUpsertError);
       return false;
     }
 
-    const paymentDate = new Date(invoice.status_transitions.paid_at * 1000);
-    const billingPeriodStart = new Date(invoice.lines.data[0].period.start * 1000);
-    const billingPeriodEnd = new Date(invoice.lines.data[0].period.end * 1000);
+    // --- 2. RETRY FETCH SUBSCRIPTION (handles race condition)
+    const sub = await getSubscriptionWithRetry(5, 500, subscriptionId, userId);
 
+    const subscriptionDbId = sub?.id ?? null;
+
+    // --- 3. PREPARE DATES SAFELY
+    const paymentDate = new Date(invoice.status_transitions.paid_at * 1000);
+    const billingStart = new Date(invoice.lines.data[0].period.start * 1000);
+    const billingEnd = new Date(invoice.lines.data[0].period.end * 1000);
+
+    // --- 4. UPSERT TRANSACTION (prevents duplicates)
     const { data, error: transactionError } = await supabase
       .from('subscription_transactions')
-      .insert({
+      .upsert({
         user_id: invoice.lines.data[0].metadata.user_id,
         invoice_id: inv.id,
-        subscription_id: sub.id,
+        subscription_id: subscriptionDbId,
         amount: invoice.amount_paid,
         currency: invoice.currency,
         payment_date: paymentDate.toISOString(),
         payment_status: 'paid',
-        billing_period_start: billingPeriodStart.toISOString(),
-        billing_period_end: billingPeriodEnd.toISOString(),
+        billing_period_start: billingStart.toISOString(),
+        billing_period_end: billingEnd.toISOString(),
         invoice_url: invoice.invoice_pdf,
         stripe_invoice_id: invoice.id,
-        stripe_subscription_id: invoice.lines.data[0].parent.subscription_item_details.subscription,
+        stripe_subscription_id: subscriptionId,
         stripe_subscription_item_id: invoice.lines.data[0].parent.subscription_item_details.subscription_item,
         stripe_price_id: invoice.lines.data[0].pricing.price_details.price,
         stripe_product_id: invoice.lines.data[0].pricing.price_details.product,
         stripe_customer_id: invoice.customer,
         billing_reason: invoice.billing_reason
-      })
-      .select('id')
+      },
+        { onConflict: 'stripe_invoice_id' }
+      )
+      .select('id, created_at')
       .maybeSingle();
 
-    if (transactionError) {
+    if (transactionError || !data) {
       console.log('invoice payment transaction error: ', transactionError);
       return false;
     }
@@ -173,20 +202,32 @@ async function handleInvoicePaymentPaid(invoice: any) {
     }).eq('id', inv.id);
 
     if (invoiceUpdateError) {
-      console.log('subscription transaction INVOICE update error: ', invoiceError);
+      console.log('subscription transaction INVOICE update error: ', invoiceUpdateError);
       return false;
     };
 
-    const { data: resendData, error: resendError } = await resend.emails.send({
+    // --- 6. PREVENT DUPLICATE EMAILS
+    const { data: existingTx } = await supabase
+      .from('subscription_transactions')
+      .select('id, email_sent')
+      .eq('stripe_invoice_id', invoice.id)
+      .maybeSingle();
+
+    if (existingTx?.email_sent) {
+      return true;
+    }
+
+    const { error: resendError } = await resend.emails.send({
       from: "Khedemtak <support@mail.khedemtak.com>",
       to: invoice.lines.data[0].metadata.email,
       template: {
         id: "payment-confirmation",
         variables: {
           name: invoice.customer_name,
-          total: invoice.amount_paid,
-          subscription_date: new Date(sub.started_at).toISOString(),
-          due_date: billingPeriodEnd.toISOString(),
+          total: (invoice.amount_paid / 100).toString(),
+          subscription_date: formatDate(billingStart),
+          invoice_url: invoice.hosted_invoice_url,
+          due_date: formatDate(billingEnd),
           action_link: Deno.env.get('APP_ACCOUNT_PAGE'),
           help_url: Deno.env.get('APP_HELP_URL'),
         }
@@ -197,6 +238,8 @@ async function handleInvoicePaymentPaid(invoice: any) {
       console.log('invoice payment resend error: ', resendError);
       return false;
     }
+
+    await supabase.from('subscription_transactions').update({ email_sent: true }).eq('id', data.id);
 
     return true;
   } catch (error) {
@@ -280,13 +323,13 @@ async function handleSubscriptionCreated(subscription: any) {
         id: "subscription-created",
         variables: {
           name: userData.full_name ?? 'مستخدم',
-          tier: subscriptionTier.name,
+          tier: subscriptionTier.title,
           free_trial_period: subscriptionTier.free_trial_period_text,
           billing_cycle: subscriptionTier.billing_cycle === 'yearly' ? 'سنوي' : 'شهري',
-          subscription_date: subscriptionStart.toISOString(),
-          due_date: nextPaymentDate.toISOString(),
-          first_payment_date: paymentsStart.toISOString(),
-          total: subscription.items.data[0].plan.amount / 100,
+          subscription_date: formatDate(subscriptionStart),
+          due_date: formatDate(nextPaymentDate),
+          first_payment_date: formatDate(paymentsStart),
+          total: (subscription.items.data[0].plan.amount / 100).toString(),
           action_link: Deno.env.get('APP_ACCOUNT_PAGE'),
           help_url: Deno.env.get('APP_HELP_URL'),
         }
@@ -307,8 +350,6 @@ async function handleSubscriptionCreated(subscription: any) {
 
 async function handleCustomerCreated(customer: any) {
   try {
-    console.log('customer created: ', customer);
-
     const { data: profileId, error: profileIdError } = await supabase
       .from('profiles_with_email')
       .select('id')
@@ -440,6 +481,35 @@ Deno.serve(async (req: Request) => {
       break;
     case 'invoice.created':
       console.log(data.object)
+      const { data: existingInv, error: invError } = await supabase
+        .from('invoices')
+        .select('*')
+        .eq('status', 'paid')
+        .eq('stripe_invoice_id', data.object.id)
+        .eq('user_id', data.object.lines.data[0].metadata.user_id)
+        .maybeSingle();
+
+      if (invError) {
+        console.log('invoice creation error: ', invError);
+        return new Response("Error in invoice.created: ", {
+          status: 400,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        })
+      };
+
+      if (existingInv) {
+        return new Response("Invoice already exists and active: ", {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        })
+      };
+
       const createInvoiceResponse = await handleInvoiceCreated(
         data.object,
       );
@@ -505,7 +575,13 @@ Deno.serve(async (req: Request) => {
 
       if (subError) {
         console.log('subscription creation SUB error: ', subError);
-        return false;
+        return new Response("Error in customer.subscription.created: ", {
+          status: 400,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        })
       };
 
       if (existingSub) {

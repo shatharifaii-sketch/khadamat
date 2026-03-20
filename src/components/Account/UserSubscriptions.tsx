@@ -1,5 +1,5 @@
 import { Subscription, useSubscription } from '@/hooks/useSubscription';
-import React, { Suspense, useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Clock, Star, TrendingUp } from 'lucide-react';
 import { Badge } from '../ui/badge';
@@ -11,14 +11,14 @@ import ErrorBoundary from '../ErrorBoundary';
 import SubscriptionsModal from '../PostService/SubscriptionsModal';
 import { usePaymentLogic } from '@/hooks/usePaymentLogic';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
-import { User } from '@supabase/supabase-js';
+import { User } from '../Admin/ui/UserForm';
 
 interface UserSubscriptionsProps { 
     user: User
 }
 
 const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
-    const { getUserSubscriptions, deactivateSubscription, deactivatingSubscription, deactivateSubscriptionSuccess, deactivatingSubscriptionError } = useSubscription();
+    const { getUserSubscriptions, deactivateSubscription, deactivatingSubscription, deactivateSubscriptionSuccess } = useSubscription();
     const { getPaymentUrl } = usePaymentLogic();
     const [isPaymentTime, setIsPaymentTime] = useState<boolean>(false);
     const [openSubscribeModal, setOpenSubscribeModal] = useState<boolean>(false);
@@ -31,10 +31,15 @@ const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
 
     const { activeSubscription, inactiveSubscriptions } = getUserSubscriptions.data;
 
-    const isPayable = new Date() > new Date(activeSubscription.next_payment_date) && !activeSubscription.is_in_trial;
+    const isPayable = activeSubscription ? new Date() > new Date(activeSubscription.next_payment_date) && !activeSubscription.is_in_trial : false;
 
     const handleDeactivate = async () => {
-        deactivateSubscription.mutateAsync({ subscriptionId: activeSubscription.id });
+        deactivateSubscription.mutateAsync({
+            sub_id: activeSubscription.id,
+            email: user.email,
+            name: user.full_name,
+            stripe_sub_id: activeSubscription.stripe_subscription_id
+        });
     }
 
     const startPayment = () => {
@@ -68,21 +73,6 @@ const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
             setOpenDeactivateModal(false);
         }
     }, [deactivateSubscriptionSuccess]);
-
-    const handlePay = async () => {
-        const baseUrl = "https://crosspayonline.com/api/loginBill";
-        const apiData = import.meta.env.VITE_BILLPS_APP_DATA.trim();
-        const apiKey = import.meta.env.VITE_BILLPS_API_KEY.trim();
-
-        const url = `${baseUrl}?api_data=${apiData}&apiKey=${apiKey}`;
-        console.log("URL:", url);
-
-        const res = await fetch(url);
-        const data = await res.json();
-
-        console.log(data);
-    };
-
 
 
     return (
@@ -260,10 +250,10 @@ const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
                 <Label className='text-lg'>الاشتراكات السابقة</Label>
                 {
                     inactiveSubscriptions ? (
-                        <div className='flex gap-3'>
+                        <div className='grid grid-cols-2 w-full gap-3 overflow-y-auto max-h-[300px] border p-2 rounded-md'>
                             {
                                 inactiveSubscriptions.map((subscription: Subscription) => (
-                                    <Card key={subscription.id} className=''>
+                                    <Card key={subscription.id} className='col-span-1'>
                                         <CardHeader className='flex flex-row items-start justify-between w-[300px]'>
                                             <div className='text-lg font-bold'>
                                                 {subscription.subscription_tier.title}

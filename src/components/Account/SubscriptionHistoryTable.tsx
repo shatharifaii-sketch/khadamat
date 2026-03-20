@@ -44,7 +44,7 @@ const SubscriptionHistoryTable = () => {
     }
   };
 
-  const formatAmount = (payment: PaymentHistory) => {
+  const formatAmount = (payment: any) => {
     if (payment.amount === 0) {
       return 'مجاني';
     }
@@ -89,14 +89,12 @@ const SubscriptionHistoryTable = () => {
               <TableRow>
                 <TableHead className="text-right">التاريخ</TableHead>
                 <TableHead className="text-right">المبلغ</TableHead>
-                <TableHead className="text-right">طريقة الدفع</TableHead>
                 <TableHead className="text-right">نوع الاشتراك</TableHead>
-                <TableHead className="text-right">مدة الخدمة</TableHead>
                 <TableHead className="text-right">الحالة</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {/* paymentHistory.map((payment: PaymentHistory) => (
+              {paymentHistory.map((payment: any) => (
                 <TableRow key={payment.id}>
                   <TableCell>
                     {new Date(payment.created_at).toLocaleDateString('ar')}
@@ -105,21 +103,15 @@ const SubscriptionHistoryTable = () => {
                     {formatAmount(payment)}
                   </TableCell>
                   <TableCell>
-                    {payment.paymentMethodText || getPaymentMethodText(payment.payment_method)}
-                  </TableCell>
-                  <TableCell>
                     <Badge variant="outline">
                       {getSubscriptionTierText(payment.subscription_tier)}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {payment.actualDuration || (payment.subscription_tier === 'yearly' ? '12 شهر' : '1 شهر')}
-                  </TableCell>
-                  <TableCell>
                     {getStatusBadge(payment.status)}
                   </TableCell>
                 </TableRow>
-              )) */}
+              ))}
             </TableBody>
           </Table>
         )}

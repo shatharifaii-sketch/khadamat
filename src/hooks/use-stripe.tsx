@@ -1,6 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useMutation } from "@tanstack/react-query";
+import { Subscription } from "./useSubscription";
 
 interface CheckoutSession {
     url: string;
@@ -53,7 +54,32 @@ const verifyStripeSessionId = async (sessionId: string) => {
         return error;
     }
 
-    return data;
+    const { data: userSub, error: userSubError } = await supabase
+        .from('subscriptions')
+        .select(`*, 
+          subscription_tier:subscriptions_tier_id_fkey (
+            id,
+            title,
+            allowed_services,
+            price_monthly_title,
+            price_yearly_title,
+            price_monthly_value,
+            price_yearly_value,
+            class_name,
+            badge_class_name,
+            free_trial_period_text,
+            notes
+          )`)
+        .eq('user_id', data.subscription.metadata.user_id)
+        .eq('status', 'active')
+        .single();
+    
+    if (userSubError) {
+        console.log(error);
+        return error;
+    }
+
+    return userSub as Subscription;
 }
 
 const useStripe = (): StripeActions => {
@@ -76,7 +102,7 @@ const useStripe = (): StripeActions => {
     });
 
     const {
-        mutate: verifySession,
+        mutateAsync: verifySession,
         isPending: isVerifyingSessionPending,
         isError: isVerifySessionError,
         isSuccess: isVerifySessionSuccess,

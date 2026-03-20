@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, useSuspenseQuery, UseMutateFunction } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -29,6 +29,7 @@ export interface Subscription {
   last_payment_date: string;
   subscription_ended_at: string;
   used_coupon_on_start: boolean;
+  stripe_subscription_id: string;
   coupon_id?: string;
   subscription_tier: {
     id: string;
@@ -38,7 +39,18 @@ export interface Subscription {
     price_yearly_title: string;
     price_monthly_value: number;
     price_yearly_value: number;
+    class_name: string;
+    badge_class_name: string;
+    free_trial_period_text: string;
+    notes: string[];
   }
+}
+
+type CancelSubscriptionInput = {
+  sub_id: string;
+  email: string;
+  name: string;
+  stripe_sub_id: string;
 }
 
 export interface PaymentTransaction {
@@ -56,6 +68,34 @@ export interface PaymentTransaction {
   original_amount?: number;
 }
 
+async function cancelSubscription({
+  sub_id,
+  email,
+  name,
+  stripe_sub_id
+}: CancelSubscriptionInput) {
+  const { data, error } = await supabase.functions.invoke(
+    'cancel-subscription', {
+    body: JSON.stringify({
+      sub_id,
+      email,
+      name,
+      stripe_sub_id
+    })
+  }
+  )
+
+  if (error) {
+    console.log(error);
+    throw error;
+  }
+
+  return {
+    data,
+    success: true
+  }
+}
+
 export const useSubscription = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -67,7 +107,7 @@ export const useSubscription = () => {
     queryKey: ['user-subscription', user?.id],
     queryFn: async () => {
       if (!user) return null;
-            
+
       const { data, error } = await supabase
         .from('subscriptions')
         .select(`*, 
@@ -78,7 +118,11 @@ export const useSubscription = () => {
             price_monthly_title,
             price_yearly_title,
             price_monthly_value,
-            price_yearly_value
+            price_yearly_value,
+            class_name,
+badge_class_name,
+free_trial_period_text,
+notes
           )`)
         .eq('user_id', user.id)
         .eq('status', 'active')
@@ -88,7 +132,7 @@ export const useSubscription = () => {
         console.error('Error fetching subscription:', error);
         throw error;
       }
-      
+
       return data as Subscription | null;
     },
   });
@@ -97,7 +141,7 @@ export const useSubscription = () => {
     queryKey: ['user-subscriptions', user?.id],
     queryFn: async () => {
       if (!user) return null;
-            
+
       const { data: activeSubscription, error: activeSubscriptionError } = await supabase
         .from('subscriptions')
         .select(`*, 
@@ -108,7 +152,11 @@ export const useSubscription = () => {
             price_monthly_title,
             price_yearly_title,
             price_monthly_value,
-            price_yearly_value
+            price_yearly_value,
+            class_name,
+badge_class_name,
+free_trial_period_text,
+notes
           )`)
         .eq('user_id', user.id)
         .eq('status', 'active')
@@ -129,7 +177,11 @@ export const useSubscription = () => {
             price_monthly_title,
             price_yearly_title,
             price_monthly_value,
-            price_yearly_value
+            price_yearly_value,
+            class_name,
+badge_class_name,
+free_trial_period_text,
+notes
           )`)
         .eq('user_id', user.id)
         .eq('status', 'inactive');
@@ -138,10 +190,10 @@ export const useSubscription = () => {
         console.error('Error fetching subscription:', inactiveSubscriptionsError);
         throw inactiveSubscriptionsError;
       }
-      
-      return { 
-        activeSubscription, 
-        inactiveSubscriptions 
+
+      return {
+        activeSubscription,
+        inactiveSubscriptions
       } as {
         activeSubscription: Subscription;
         inactiveSubscriptions: Subscription[];
@@ -268,45 +320,45 @@ export const useSubscription = () => {
   */
 
   // Check if user can post more services
-  const {data:canPostService} = useQuery({
+  const { data: canPostService } = useQuery({
     queryKey: ['can-post-service', user?.id],
     queryFn: async () => {
-    const subscription = getUserSubscription.data;
-    if (!subscription || !user) return {
-      user: false,
-      subscription: false,
-      canPost: false
-    };
-    
-    // Get actual count of user's services
-    const { data: userServices, error } = await supabase
-      .from('services')
-      .select('id')
-      .eq('user_id', user.id);
-      
-    if (error) {
-      console.error('Error checking user services for quota:', error);
+      const subscription = getUserSubscription.data;
+      if (!subscription || !user) return {
+        user: false,
+        subscription: false,
+        canPost: false
+      };
+
+      // Get actual count of user's services
+      const { data: userServices, error } = await supabase
+        .from('services')
+        .select('id')
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Error checking user services for quota:', error);
+        return {
+          user: true,
+          subscription: true,
+          canPost: false
+        };
+      }
+
+      const currentServiceCount = userServices?.length || 0;
+
       return {
         user: true,
         subscription: true,
-        canPost: false
+        canPost: currentServiceCount < subscription.services_allowed
       };
     }
-    
-    const currentServiceCount = userServices?.length || 0;
-    
-    return {
-      user: true,
-      subscription: true,
-      canPost: currentServiceCount < subscription.services_allowed
-    };
-  }
   })
 
   const createNewSubscription = useMutation({
     mutationKey: ['create-new-subscription'],
     mutationFn: async ({ subscriptionTierId, billingCycle, finalAmount }: { subscriptionTierId: string, billingCycle: string, finalAmount: number }) => {
-      const { data: {session} } = await supabase.auth.getSession();
+      const { data: { session } } = await supabase.auth.getSession();
 
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-subscription`, {
         method: 'POST',
@@ -334,8 +386,8 @@ export const useSubscription = () => {
       return data.subscription;
     },
     onSuccess() {
-        queryClient.invalidateQueries({ queryKey: ['user-subscription'] });
-        toast.success('تم انشاء الاشتراك بنجاح! يمكنك الآن نشر خدماتك.');
+      queryClient.invalidateQueries({ queryKey: ['user-subscription'] });
+      toast.success('تم انشاء الاشتراك بنجاح! يمكنك الآن نشر خدماتك.');
     },
     onError(error: any) {
       console.error('Error creating new subscription:', error);
@@ -345,24 +397,7 @@ export const useSubscription = () => {
 
   const deactivateSubscription = useMutation({
     mutationKey: ['deactivate-subscription'],
-    mutationFn: async ({ subscriptionId }: { subscriptionId: string }) => {
-      if (!user?.id) throw new Error('User not authenticated.');
-
-    const { error } = await supabase
-      .from('subscriptions')
-      .update({ 
-        status: 'inactive',
-        subscription_ended_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', subscriptionId)
-
-    console.log('Deactivating subscription:', subscriptionId);
-
-    if (error) throw error;
-
-    return json({ success: true });
-    },
+    mutationFn: cancelSubscription,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-subscription', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['user-subscriptions', user?.id] });
