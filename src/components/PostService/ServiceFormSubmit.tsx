@@ -1,11 +1,12 @@
-
 import { Button } from '@/components/ui/button';
 import { Suspense, useEffect, useState } from 'react';
 import SubscriptionsModal from './SubscriptionsModal';
-import { Drawer, DrawerClose, DrawerContent, DrawerFooter } from '../ui/drawer';
+import { Drawer, DrawerContent } from '../ui/drawer';
 import ErrorBoundary from '../ErrorBoundary';
 import { useServiceForm } from '@/hooks/useServiceForm';
 import PaymentModal from './PaymentModal';
+import { DialogTitle } from '@radix-ui/react-dialog';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ServiceFormSubmitProps {
   isCreating: boolean;
@@ -15,6 +16,7 @@ interface ServiceFormSubmitProps {
 }
 
 const ServiceFormSubmit = ({ isCreating, canPostService: editMode, isEditMode = false, savePendingService }: ServiceFormSubmitProps) => {
+  const { user } = useAuth();
   const [openSubscribeModal, setOpenSubscribeModal] = useState<boolean>(false);
   const { canPostServiceAsync } = useServiceForm();
   const [sub, setSub] = useState<boolean>(false);
@@ -22,12 +24,16 @@ const ServiceFormSubmit = ({ isCreating, canPostService: editMode, isEditMode = 
 
   useEffect(() => {
     const checkCanPost = async () => {
-      setSub(canPostServiceAsync.subscription);
-      setAllowed(canPostServiceAsync.canPost);
+      canPostServiceAsync?.subscription ? setSub(canPostServiceAsync?.subscription) : setSub(false);
+      canPostServiceAsync?.canPost ? setAllowed(canPostServiceAsync?.canPost) : setAllowed(false);
+
+      if (!canPostServiceAsync?.canPost) {
+        setOpenSubscribeModal(true);
+      }
     }
 
     checkCanPost();
-  }, [canPostServiceAsync]);
+  }, [canPostServiceAsync, setSub, setAllowed]);
 
   return (
     <div className="pt-6">
@@ -59,20 +65,15 @@ const ServiceFormSubmit = ({ isCreating, canPostService: editMode, isEditMode = 
       <Drawer
         direction='right'
         open={openSubscribeModal}
-        onOpenChange={() => setOpenSubscribeModal(false)}
       >
         <DrawerContent className='h-screen w-full sm:w-4/5 lg:w-2/5 transition-all rounded-none'>
+          <DialogTitle></DialogTitle>
           <Suspense fallback={<div>Loading...</div>}>
             <ErrorBoundary fallback={<div>Something went wrong</div>}>
-              {(!allowed && !sub) || (allowed && !sub) && <SubscriptionsModal />}
+              {((!allowed && !sub) || (allowed && !sub)) && <SubscriptionsModal user={user} />}
               {!allowed && sub && <PaymentModal />}
             </ErrorBoundary>
           </Suspense>
-          <DrawerFooter>
-            <DrawerClose className='flex'>
-              <Button variant='ghost' className='flex-1'>إلغاء</Button>
-            </DrawerClose>
-          </DrawerFooter>
         </DrawerContent>
       </Drawer>
     </div>

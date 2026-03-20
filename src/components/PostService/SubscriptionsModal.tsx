@@ -9,8 +9,8 @@ import { Calendar, CheckCircle, Star } from 'lucide-react';
 import { useSubscriptionTiers } from '@/hooks/useSubscriptionTiers';
 import { Drawer, DrawerDescription, DrawerHeader, DrawerTitle } from '../ui/drawer';
 import useStripe from '@/hooks/use-stripe';
-import { User } from '@supabase/supabase-js';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
+import { User } from '../Admin/ui/UserForm';
 
 interface SubscriptionsModalProps {
     cardClassName?: string;
@@ -20,7 +20,6 @@ interface SubscriptionsModalProps {
 }
 
 const SubscriptionsModal = ({ cardClassName, switchClassName, user, setDrawerOpen }: SubscriptionsModalProps) => {
-    const navigate = useNavigate();
     const [yearly, setYearly] = useState<boolean>(false);
     const [selectedSubscription, setSelectedSubscription] = useState(null);
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
@@ -29,8 +28,6 @@ const SubscriptionsModal = ({ cardClassName, switchClassName, user, setDrawerOpe
     const { createCheckoutSession, isCreatingCheckoutSessionPending, isCreateCheckoutSessionError, isCreateCheckoutSessionSuccess } = useStripe();
 
     const handleSubscriptionSelect = (subscriptionTier: any) => {
-        const serviceData = JSON.parse(localStorage.getItem('serviceData') || '{}');
-
         setSelectedSubscription(subscriptionTier);
     }
 
@@ -168,7 +165,7 @@ const SubscriptionsModal = ({ cardClassName, switchClassName, user, setDrawerOpe
                                                 <DialogFooter>
                                                     <Button
                                                         onClick={() => 
-                                                            handleNavigationToPaymentWindow(yearly ? subscription.stripe_yearly_price_id : subscription.stripe_monthly_price_id)}
+                                                            handleNavigationToPaymentWindow(yearly ? selectedSubscription.stripe_yearly_price_id : selectedSubscription.stripe_monthly_price_id)}
                                                         variant='default'
                                                         className='bg-white text-muted-foreground flex-1 shadow-md border hover:text-white'
                                                         disabled={isCreatingCheckoutSessionPending}

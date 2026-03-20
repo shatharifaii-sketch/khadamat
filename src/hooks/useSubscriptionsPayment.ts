@@ -2,12 +2,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useSuspenseQuery } from "@tanstack/react-query"
 
-interface SubscriptionTransaction {
+export interface SubscriptionTransaction {
     id: string;
     currency: string;
     payment_date: string;
-    payment_status: string;
     coupon_used: boolean;
+    payment_status: string;
+    invoice_url: string;
     coupon?: {
         code: string;
         type: string;
@@ -29,7 +30,7 @@ export const useSubscriptionsPayment = () => {
     const { user } = useAuth();
 
     const getUserTransactions = useSuspenseQuery({
-        queryKey: ['subscriptions-transactions', user?.id],
+        queryKey: ['subscriptions-transactions'],
         queryFn: async () => {
             const { data, error } = await supabase
                 .from('subscription_transactions')
@@ -48,7 +49,7 @@ export const useSubscriptionsPayment = () => {
                         type
                     )
                     `)
-                .eq('user_id', user?.id)
+                .eq('user_id', user.id)
                 .order('created_at', { ascending: false });
 
             if (error) throw error;

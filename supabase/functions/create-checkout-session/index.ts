@@ -33,6 +33,8 @@ Deno.serve(async (req: Request) => {
   try {
     const { priceId, userId, email, subscriptionTierId } = await req.json();
 
+    console.log(priceId);
+
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       customer_email: email,

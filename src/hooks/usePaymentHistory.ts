@@ -31,7 +31,7 @@ export const usePaymentHistory = () => {
       if (!user) return [];
       
       const { data, error } = await supabase
-        .from('payment_transactions')
+        .from('subscription_transactions')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
@@ -39,21 +39,17 @@ export const usePaymentHistory = () => {
       if (error) throw error;
       
       // Enhance the payment data with additional calculated fields
-      const enhancedData = (data || []).map(payment => ({
-        ...payment,
-        // Calculate actual service duration based on subscription tier
-        actualDuration: payment.subscription_tier === 'yearly' ? '12 شهر' : '1 شهر',
-        // Format discount display
-        hasDiscount: payment.discount_applied && payment.discount_applied > 0,
-        finalAmount: payment.amount,
-        originalAmount: payment.original_amount || payment.amount,
-        // Status with Arabic translation
-        statusText: getStatusText(payment.status),
-        // Payment method with Arabic translation  
-        paymentMethodText: getPaymentMethodText(payment.payment_method)
-      }));
-      
-      return enhancedData;
+      return (data || []).map(payment => ({
+              ...payment,
+              // Format discount display
+              hasDiscount: payment.coupon_used,
+              finalAmount: payment.amount,
+              originalAmount: /*payment.original_amount ||*/ payment.amount,
+              // Status with Arabic translation
+              statusText: getStatusText(payment.payment_status),
+              // Payment method with Arabic translation  
+              paymentMethodText: 'Stripe'
+            }));
     },
     refetchInterval: 30000 // Refresh every 30 seconds to catch status updates
   });
