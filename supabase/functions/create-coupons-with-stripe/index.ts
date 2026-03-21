@@ -3,7 +3,7 @@
 // This enables autocomplete, go to definition, etc.
 
 // Setup type definitions for built-in Supabase Runtime APIs
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 import Stripe from "npm:stripe";
 
 const stripe = new Stripe(Deno.env.get("STRIPE_TEST_SEC_KEY")!);
@@ -14,8 +14,7 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-Deno.serve(async (req: Request) => {
-  // Handle CORS preflight
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", {
       status: 200,
@@ -31,52 +30,63 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { priceId, userId, email, subscriptionTierId } = await req.json();
+    const { formData } = await req.json();
 
-    console.log(priceId);
+    const percent = formData.discount_percentage ? Number(formData.discount_percentage) : null;
 
-    const session = await stripe.checkout.sessions.create({
-      mode: "subscription",
-      customer_email: email,
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
-      allow_promotion_codes: true,
-      success_url:
-        "http://localhost:8080/payment-success?session_id={CHECKOUT_SESSION_ID}",
-      cancel_url: "http://localhost:8080/payment-failed",
-      client_reference_id: userId,
-      metadata: {
-        user_id: userId,
-        email: email,
-        subscription_tier_id: subscriptionTierId
+    const amount = formData.discount_amount ? Number(formData.discount_amount) : null;
+
+    if (!percent && !amount) {
+      throw new Error('Discount percentage or amount is required.');
+    }
+
+    if (percent && amount) {
+      throw new Error('Only one of discount percentage or amount is allowed.');
+    }
+
+    const couponPayload: any = {
+      duration: 'once',
+      max_redemptions: formData.usage_limit || 1,
+    }
+
+    if (percent) {
+      couponPayload.percent_off = percent;
+    }
+
+    if (amount) {
+      couponPayload.amount_off = amount;
+      couponPayload.currency = 'ils';
+    }
+
+    if (formData.expires_at) {
+      couponPayload.redeem_by = Math.floor(
+        new Date(formData.expires_at).getTime() / 1000
+      );
+    }
+
+    const couponResponse = await stripe.coupons.create(couponPayload);
+
+    const promotionCodeResponse = await stripe.promotionCodes.create({
+      promotion: {
+        type: 'coupon',
+        coupon: couponResponse.id
       },
-      subscription_data: {
-        trial_period_days: 120,
-        metadata: {
-          user_id: userId,
-          email: email,
-          subscription_tier_id: subscriptionTierId
-        }
-      }
+      code: formData.code.trim().toUpperCase() || '',
+      max_redemptions: formData.usage_limit || 1,
     });
 
     return new Response(
       JSON.stringify({
         success: true,
-        sessionUrl: session.url,
-      }),
-      {
-        status: 200,
-        headers: {
-          ...corsHeaders,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+        coupon: couponResponse,
+        promotionCode: promotionCodeResponse,
+    }), {
+      headers: {
+        ...corsHeaders,
+        "Content-Type": "application/json",
+      },
+      status: 200
+    })
   } catch (error) {
     console.error("Checkout error:", error);
 
@@ -94,14 +104,14 @@ Deno.serve(async (req: Request) => {
       }
     );
   }
-});
+})
 
 /* To invoke locally:
 
   1. Run `supabase start` (see: https://supabase.com/docs/reference/cli/supabase-start)
   2. Make an HTTP request:
 
-  curl -i --location --request POST 'http://127.0.0.1:54321/functions/v1/create-checkout-session' \
+  curl -i --location --request POST 'http://127.0.0.1:54321/functions/v1/create-coupons-with-stripe' \
     --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0' \
     --header 'Content-Type: application/json' \
     --data '{"name":"Functions"}'

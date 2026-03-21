@@ -17,25 +17,27 @@ export const validateEmail = (email: string): ValidationResult => {
   return { isValid: true, message: '' };
 };
 
-const normalizeArabicDigits = (value: string) => {
-  return value.replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 1632));
+const normalizeDigits = (value: string) => {
+  return value
+    .replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 1632))
+    .replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - 1776));
 };
 
 export const validatePhone = (phone: string): ValidationResult => {
   if (!phone.trim()) {
     return { isValid: false, message: 'رقم الهاتف مطلوب' };
   }
-  
-  // Palestinian phone number patterns
-  const phoneRegex = /^(059|056|057|058|052)\d{7}$/;
-  const cleanPhone = normalizeArabicDigits(phone).replace(/[\s-]/g, '');;
 
-  console.log(cleanPhone);
-  
+  const cleanPhone = normalizeDigits(phone)
+    .replace(/[\s-]/g, '')
+    .replace(/^\+?970/, '0');
+
+  const phoneRegex = /^(059|056|057|058|052)\d{7}$/;
+
   if (!phoneRegex.test(cleanPhone)) {
     return { isValid: false, message: 'يرجى إدخال رقم هاتف صحيح (مثال: 0599123456)' };
   }
-  
+
   return { isValid: true, message: '' };
 };
 
