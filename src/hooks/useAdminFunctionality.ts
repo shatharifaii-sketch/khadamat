@@ -448,6 +448,15 @@ export const useAdminFunctionality = () => {
   const createCoupon = useMutation({
     mutationKey: ['create-coupon'],
     mutationFn: async (formData: Partial<Tables<'coupons'>>) => {
+      const { data: couponData, error: couponError } = await supabase.functions.invoke('create-coupons-with-stripe', {
+        body: JSON.stringify({ formData })
+      });
+
+      if (couponError) {
+        console.log('Error creating coupon:', couponError);
+        throw couponError;
+      };
+
       const { data, error } = await supabase
         .from('coupons')
         .insert({
@@ -458,6 +467,9 @@ export const useAdminFunctionality = () => {
           usage_limit: formData.usage_limit || null,
           used_count: 0,
           description: formData.description || '',
+          expires_at: formData.expires_at || null,
+          stripe_coupon_id: couponData.coupon.id,
+          stripe_promo_id: couponData.promotionCode.id
         })
         .select()
         .single();

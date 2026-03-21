@@ -2,7 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MapPin, Phone, Calendar, Edit, Eye, TrendingUp } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import ServiceStatusIndicator from './ServiceStatusIndicator';
 import { useServiceAnalytics } from '@/hooks/useServiceAnalytics';
 
@@ -46,7 +46,11 @@ const ServiceManagementCard = ({ service }: ServiceManagementCardProps) => {
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <CardTitle className="text-lg mb-1">{service.title}</CardTitle>
+            <CardTitle className="text-lg mb-1">
+              <Link to={service.status === 'published' ? `/find-service/${service.id}` : '#'}>
+                {service.title}
+              </Link>
+            </CardTitle>
             <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
               {service.description}
             </p>

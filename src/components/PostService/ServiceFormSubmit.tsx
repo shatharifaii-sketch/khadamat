@@ -23,16 +23,17 @@ const ServiceFormSubmit = ({ isCreating, canPostService: editMode, isEditMode = 
   const [allowed, setAllowed] = useState<boolean>(false);
 
   useEffect(() => {
-    const checkCanPost = async () => {
-      canPostServiceAsync?.subscription ? setSub(canPostServiceAsync?.subscription) : setSub(false);
-      canPostServiceAsync?.canPost ? setAllowed(canPostServiceAsync?.canPost) : setAllowed(false);
+    if (!isEditMode) {
+      const checkCanPost = async () => {
+        canPostServiceAsync?.subscription ? setSub(canPostServiceAsync?.subscription) : setSub(false);
+        canPostServiceAsync?.canPost ? setAllowed(canPostServiceAsync?.canPost) : setAllowed(false);
+      }
 
-      if (!canPostServiceAsync?.canPost) {
+      checkCanPost();
+      if (!sub) {
         setOpenSubscribeModal(true);
       }
     }
-
-    checkCanPost();
   }, [canPostServiceAsync, setSub, setAllowed]);
 
   return (

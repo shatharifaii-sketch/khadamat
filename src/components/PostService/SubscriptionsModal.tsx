@@ -5,12 +5,13 @@ import { Switch } from '../ui/switch';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '../ui/badge';
-import { Calendar, CheckCircle, Star } from 'lucide-react';
+import { Star } from 'lucide-react';
 import { useSubscriptionTiers } from '@/hooks/useSubscriptionTiers';
 import { Drawer, DrawerDescription, DrawerHeader, DrawerTitle } from '../ui/drawer';
 import useStripe from '@/hooks/use-stripe';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { User } from '../Admin/ui/UserForm';
+import { toast } from 'sonner';
 
 interface SubscriptionsModalProps {
     cardClassName?: string;
@@ -23,6 +24,7 @@ const SubscriptionsModal = ({ cardClassName, switchClassName, user, setDrawerOpe
     const [yearly, setYearly] = useState<boolean>(false);
     const [selectedSubscription, setSelectedSubscription] = useState(null);
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+    const navigate = useNavigate()
 
     const { subscriptionTiersData } = useSubscriptionTiers();
     const { createCheckoutSession, isCreatingCheckoutSessionPending, isCreateCheckoutSessionError, isCreateCheckoutSessionSuccess } = useStripe();
@@ -32,11 +34,11 @@ const SubscriptionsModal = ({ cardClassName, switchClassName, user, setDrawerOpe
     }
 
     const handleNavigationToPaymentWindow = (price_id: string) => {
-        createCheckoutSession({
-            priceId: price_id,
-            userId: user?.id,
-            email: user?.email
-        });
+        if (!user) {
+            toast.error('يرجى تسجيل الدخول');
+            return navigate('/auth');
+        };
+        createCheckoutSession({ priceId: price_id, userId: user.id, email: user.email });
 
         setIsPaymentModalOpen(false);
         setDrawerOpen && setDrawerOpen(false);
@@ -119,10 +121,10 @@ const SubscriptionsModal = ({ cardClassName, switchClassName, user, setDrawerOpe
                                                     <DialogTitle>
                                                         أنت الآن على وشك الإنتقال إلى بوابة الدفع!
                                                     </DialogTitle>
-                                                </DialogHeader>
-                                                <DialogDescription>
+                                                    <DialogDescription>
                                                     هل أنت متأكد من انك تريد الانتقال لبوابة الدفع؟
                                                 </DialogDescription>
+                                                </DialogHeader>
                                                 {selectedSubscription && (
                                                     <Card key={selectedSubscription.id} className={cn('col-span-1 flex flex-col justify-between', selectedSubscription.class_name, cardClassName)}>
                                                         <CardHeader className='text-2xl text-center font-bold'>

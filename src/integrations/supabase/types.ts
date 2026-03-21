@@ -282,6 +282,8 @@ export type Database = {
           discount_percentage: number | null
           expires_at: string | null
           id: string
+          stripe_coupon_id: string | null
+          stripe_promo_id: string | null
           type: Database["public"]["Enums"]["coupon_type"]
           updated_at: string
           usage_limit: number | null
@@ -296,6 +298,8 @@ export type Database = {
           discount_percentage?: number | null
           expires_at?: string | null
           id?: string
+          stripe_coupon_id?: string | null
+          stripe_promo_id?: string | null
           type: Database["public"]["Enums"]["coupon_type"]
           updated_at?: string
           usage_limit?: number | null
@@ -310,6 +314,8 @@ export type Database = {
           discount_percentage?: number | null
           expires_at?: string | null
           id?: string
+          stripe_coupon_id?: string | null
+          stripe_promo_id?: string | null
           type?: Database["public"]["Enums"]["coupon_type"]
           updated_at?: string
           usage_limit?: number | null
@@ -322,6 +328,7 @@ export type Database = {
           amount: number | null
           billing_reason: string | null
           created_at: string
+          currency: string | null
           id: number
           status: string | null
           stripe_customer_id: string | null
@@ -340,6 +347,7 @@ export type Database = {
           amount?: number | null
           billing_reason?: string | null
           created_at?: string
+          currency?: string | null
           id?: number
           status?: string | null
           stripe_customer_id?: string | null
@@ -358,6 +366,7 @@ export type Database = {
           amount?: number | null
           billing_reason?: string | null
           created_at?: string
+          currency?: string | null
           id?: number
           status?: string | null
           stripe_customer_id?: string | null
@@ -1145,6 +1154,7 @@ export type Database = {
           coupon_used: boolean | null
           created_at: string
           currency: string | null
+          email_sent: boolean | null
           id: string
           invoice_id: number | null
           invoice_url: string | null
@@ -1170,6 +1180,7 @@ export type Database = {
           coupon_used?: boolean | null
           created_at?: string
           currency?: string | null
+          email_sent?: boolean | null
           id?: string
           invoice_id?: number | null
           invoice_url?: string | null
@@ -1195,6 +1206,7 @@ export type Database = {
           coupon_used?: boolean | null
           created_at?: string
           currency?: string | null
+          email_sent?: boolean | null
           id?: string
           invoice_id?: number | null
           invoice_url?: string | null
