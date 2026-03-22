@@ -65,9 +65,9 @@ export const useAdminAnalytics = () => {
     queryFn: async (): Promise<AnalyticsSummary> => {
       // Get basic counts
       const [
-        searchesResult, 
-        viewsResult, 
-        contactsResult, 
+        searchesResult,
+        viewsResult,
+        contactsResult,
         conversationsResult
       ] = await Promise.all([
         supabase.from('search_analytics').select('id', { count: 'exact', head: true }),
@@ -77,13 +77,18 @@ export const useAdminAnalytics = () => {
       ]);
 
       // Get top search terms - manual aggregation
+      const now = new Date();
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(now.getDate() - 30);
+
       const { data: searchData, error } = await supabase
         .from('search_analytics')
         .select('search_query')
+        .gte('created_at', thirtyDaysAgo.toISOString())
         .limit(1000);
-      
+
       if (error) throw error;
-      
+
       const filteredSearchData = (searchData || []).filter((item) => item.search_query !== null && item.search_query !== '' && item.search_query !== ' ');
 
       const searchTermCounts = (filteredSearchData || []).reduce((acc: Record<string, number>, item) => {

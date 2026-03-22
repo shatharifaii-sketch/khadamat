@@ -65,7 +65,12 @@ const SubscriptionsModal = ({ cardClassName, switchClassName, user, setDrawerOpe
                             <p className='text-muted-foreground/50'>حدد خطة الدفع</p>
                         </div>
                         <div className='grid grid-cols-1 md:grid-cols-2 w-full gap-4'>
-                            {(subscriptionTiersData ?? []).map((subscription) => (
+                            {(subscriptionTiersData ?? []).map((subscription) => {
+                                const [open, setOpen] = useState(false);
+
+                                isCreateCheckoutSessionSuccess && setOpen(false);
+                                isCreateCheckoutSessionSuccess && setDrawerOpen && setDrawerOpen(false);
+                                return (
                                 <Card key={subscription.id} className={cn('col-span-1 flex flex-col justify-between', subscription.class_name, cardClassName)}>
                                     <CardHeader className='text-2xl text-center font-bold'>
                                         {subscription?.title}
@@ -103,7 +108,7 @@ const SubscriptionsModal = ({ cardClassName, switchClassName, user, setDrawerOpe
                                         </div>
                                     </CardContent>
                                     <CardFooter>
-                                        <Dialog open={isPaymentModalOpen} onOpenChange={setIsPaymentModalOpen}>
+                                        <Dialog open={open} onOpenChange={setOpen}>
                                             <DialogTrigger asChild>
                                                 <Button
                                                     onClick={() => handleSubscriptionSelect(subscription)}
@@ -177,7 +182,8 @@ const SubscriptionsModal = ({ cardClassName, switchClassName, user, setDrawerOpe
                                         </Dialog>
                                     </CardFooter>
                                 </Card>
-                            ))}
+                            )
+                            })}
                         </div>
                         <div className='px-5 mt-5 mb-2'>
                             <p>- الاشتراك يتجدد تلقائيا في حال عدم الالغاء</p>
