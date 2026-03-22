@@ -21,20 +21,21 @@ const ServiceFormSubmit = ({ isCreating, canPostService: editMode, isEditMode = 
   const { canPostServiceAsync } = useServiceForm();
   const [sub, setSub] = useState<boolean>(false);
   const [allowed, setAllowed] = useState<boolean>(false);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    if (!isEditMode) {
-      const checkCanPost = async () => {
-        canPostServiceAsync?.subscription ? setSub(canPostServiceAsync?.subscription) : setSub(false);
-        canPostServiceAsync?.canPost ? setAllowed(canPostServiceAsync?.canPost) : setAllowed(false);
-      }
-
-      checkCanPost();
-      if (!sub) {
-        setOpenSubscribeModal(true);
-      }
+    if (!isEditMode && canPostServiceAsync) {
+      setSub(!!canPostServiceAsync.subscription);
+      setAllowed(!!canPostServiceAsync.canPost);
+      setIsReady(true);
     }
-  }, [canPostServiceAsync, setSub, setAllowed]);
+  }, [canPostServiceAsync]);
+
+  useEffect(() => {
+    if (isReady && !sub) {
+      setOpenSubscribeModal(true);
+    }
+  }, [isReady]);
 
   return (
     <div className="pt-6">
