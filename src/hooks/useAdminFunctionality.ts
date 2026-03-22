@@ -79,8 +79,6 @@ export const useIsAdmin = (): boolean => {
 export const useAdminData = () => {
   const admin = useIsAdmin();
 
-  if (!admin) return null;
-
   const { data: adminData } = useSuspenseQuery({
     queryKey: ['admin-data'],
     queryFn: async () => {

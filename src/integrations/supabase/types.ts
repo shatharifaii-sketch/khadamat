@@ -86,6 +86,7 @@ export type Database = {
           name: string
           phone: string | null
           status: string
+          subject: string | null
           updated_at: string
         }
         Insert: {
@@ -96,6 +97,7 @@ export type Database = {
           name: string
           phone?: string | null
           status?: string
+          subject?: string | null
           updated_at?: string
         }
         Update: {
@@ -106,6 +108,7 @@ export type Database = {
           name?: string
           phone?: string | null
           status?: string
+          subject?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -647,6 +650,39 @@ export type Database = {
           ip_address?: unknown
           user_id?: string | null
           window_start?: string | null
+        }
+        Relationships: []
+      }
+      reports: {
+        Row: {
+          created_at: string
+          email: string
+          id: number
+          name: string
+          object_id: string | null
+          object_type: string | null
+          phone_number: string | null
+          report_message: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: number
+          name: string
+          object_id?: string | null
+          object_type?: string | null
+          phone_number?: string | null
+          report_message: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: number
+          name?: string
+          object_id?: string | null
+          object_type?: string | null
+          phone_number?: string | null
+          report_message?: string
         }
         Relationships: []
       }
@@ -1267,9 +1303,12 @@ export type Database = {
           services_used: number | null
           started_at: string
           status: string
+          stripe_coupon_id: string | null
           stripe_customer_id: string | null
+          stripe_discount_id: string | null
           stripe_price_id: string | null
           stripe_product_id: string | null
+          stripe_promotion_id: string | null
           stripe_subscription_id: string | null
           stripe_subscription_item_id: string | null
           subscription_ended_at: string | null
@@ -1298,9 +1337,12 @@ export type Database = {
           services_used?: number | null
           started_at?: string
           status?: string
+          stripe_coupon_id?: string | null
           stripe_customer_id?: string | null
+          stripe_discount_id?: string | null
           stripe_price_id?: string | null
           stripe_product_id?: string | null
+          stripe_promotion_id?: string | null
           stripe_subscription_id?: string | null
           stripe_subscription_item_id?: string | null
           subscription_ended_at?: string | null
@@ -1329,9 +1371,12 @@ export type Database = {
           services_used?: number | null
           started_at?: string
           status?: string
+          stripe_coupon_id?: string | null
           stripe_customer_id?: string | null
+          stripe_discount_id?: string | null
           stripe_price_id?: string | null
           stripe_product_id?: string | null
+          stripe_promotion_id?: string | null
           stripe_subscription_id?: string | null
           stripe_subscription_item_id?: string | null
           subscription_ended_at?: string | null

@@ -1,8 +1,8 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { Message, useChat } from "@/contexts/ChatContext";
+import { useChat } from "@/contexts/ChatContext";
 import { supabase } from "@/integrations/supabase/client";
-import { useMutation, useQuery, useSuspenseQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -74,10 +74,10 @@ const removeEmptyConvo = async (conversationId: string) => {
         }
 
 
-        return true;
+        return [];
     } catch (error) {
         console.error(error);
-        return false;
+        return [];
     }
 }
 

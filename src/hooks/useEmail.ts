@@ -47,6 +47,22 @@ async function sendReport(formData: {
     return data
 }
 
+async function sendEmailUpdate({email, name}: {email: string, name: string}) {
+    const { data, error } = await supabase.functions.invoke(
+        "send-email-update-email",
+        {
+            body: JSON.stringify({ email })
+        }
+    )
+
+    if (error) {
+        console.log(error);
+        throw error;
+    }
+
+    return data;
+}
+
 export const useEmail = () => {
     const sendContactEmail = useMutation({
         mutationKey: ['send-contact-email'],
@@ -60,8 +76,15 @@ export const useEmail = () => {
         retry: false
     })
 
+    const sendEmailUpdateEmail = useMutation({
+        mutationKey: ['send-email-update-email'],
+        mutationFn: sendEmailUpdate,
+        retry: false
+    })
+
     return {
         sendContactEmail,
-        sendReportEmail
+        sendReportEmail,
+        sendEmailUpdateEmail
     }
 }
