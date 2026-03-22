@@ -25,6 +25,27 @@ function formatDate(date?: string | Date | null) {
   }).format(new Date(date));
 }
 
+async function checkDiscount(subscriptionId: string) {
+  try {
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
+      expand: ['discounts.data.coupon', 'discounts.data.promotion_code']
+    });
+
+    const discount = subscription.discounts?.data?.[0];
+
+    if (!discount) return null;
+
+    return {
+      discount_id: discount.id,
+      coupon_id: discount.coupon?.id ?? null,
+      promotion_code_id: discount.promotion_code?.id ?? null
+    }
+  } catch (error) {
+    console.log('discount fetch error: ', error);
+    return null;
+  }
+}
+
 async function getSubscriptionWithRetry(retries: number, delay: number, subscriptionId: string, userId: string) {
   for (let i = 0; i < retries; i++) {
     const { data } = await supabase.from('subscriptions').select('id').eq('stripe_subscription_id', subscriptionId).eq('user_id', userId).maybeSingle();
@@ -250,6 +271,10 @@ async function handleInvoicePaymentPaid(invoice: any) {
 
 async function handleSubscriptionCreated(subscription: any) {
   try {
+    const discount = subscription.discounts?.length
+      ? await checkDiscount(subscription.id)
+      : null;
+    
     const { data: subscriptionTier, error: tierError } = await supabase
       .from('subscription_tiers')
       .select('*')
@@ -270,7 +295,7 @@ async function handleSubscriptionCreated(subscription: any) {
 
     const { data, error } = await supabase
       .from('subscriptions')
-      .insert({
+      .upsert({
         user_id: subscription.metadata.user_id,
         tier_id: subscriptionTier.id,
         currency: subscription.currency,
@@ -287,8 +312,15 @@ async function handleSubscriptionCreated(subscription: any) {
         stripe_customer_id: subscription.customer,
         stripe_product_id: subscription.items.data[0].plan.product,
         stripe_price_id: subscription.items.data[0].price.id,
-        latest_stripe_invoice_id: subscription.latest_invoice
-      })
+        latest_stripe_invoice_id: subscription.latest_invoice,
+        stripe_discount_id: discount?.discount_id ?? null,
+        stripe_coupon_id: discount?.coupon_id ?? null,
+        stripe_promotion_id: discount?.promotion_code_id ?? null
+      },
+      {
+        onConflict: 'stripe_subscription_id'
+      }
+    )
       .select('id, user_id, tier_id, billing_cycle')
       .maybeSingle();
 

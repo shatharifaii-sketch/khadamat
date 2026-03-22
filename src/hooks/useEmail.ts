@@ -1,32 +1,67 @@
+import { supabase } from "@/integrations/supabase/client"
 import { useMutation } from "@tanstack/react-query"
 
-interface WelcomeEmail {
-    name: string;
-    email: string;
+async function sendContact(formData: {
+    name: string,
+    email: string,
+    phone: string,
+    subject: string,
+    message: string,
+    inquiryType: string
+}) {
+    const { data, error } = await supabase.functions.invoke(
+        "send-contact-email",
+        {
+            body: JSON.stringify(formData)
+        }
+    )
+
+    if (error) {
+        console.log(error);
+        throw error;
+    }
+
+    return data
+}
+
+async function sendReport(formData: {
+    name: string,
+    email: string,
+    phone: string,
+    report_message: string,
+    object_type: string,
+    object_id: string
+}) {
+    const { data, error } = await supabase.functions.invoke(
+        "send-report-email",
+        {
+            body: JSON.stringify(formData)
+        }
+    )
+
+    if (error) {
+        console.log(error);
+        throw error;
+    }
+
+    return data
 }
 
 export const useEmail = () => {
-    const sendWelcomeEmail = useMutation({
-        mutationKey: ['send-welcome-email'],
-        mutationFn: async ({name, email}: WelcomeEmail) => {
-            const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-welcome-email-dev`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
-                },
-                body: JSON.stringify({ name, email }),
-            });
+    const sendContactEmail = useMutation({
+        mutationKey: ['send-contact-email'],
+        mutationFn: sendContact,
+        retry: false
+    })
 
-            if (response.ok) {
-                return await response.json();
-            }
-
-            return response;
-        }
-    });
+    const sendReportEmail = useMutation({
+        mutationKey: ['send-report-email'],
+        mutationFn: sendReport,
+        retry: false
+    })
 
     return {
-        sendWelcomeEmail
+        sendContactEmail,
+        sendReportEmail
     }
 }

@@ -8,8 +8,6 @@ import { Download } from 'lucide-react';
 function UserTransactions() {
     const { paymentTransactions } = useSubscriptionsPayment();
 
-    console.log(paymentTransactions);
-
     return (
         <Card>
             <CardHeader className='text-2xl'>
@@ -46,9 +44,9 @@ function UserTransactions() {
                                     {payment.payment_status}
                                 </TableCell>
                                 <TableCell>
-                                    <a href={payment.invoice_url} className='flex gap-2 items-center border w-fit px-2 py-1 rounded-md border-black'>
+                                    <a href={payment.invoice_url} className='flex gap-2 items-center w-fit px-2 py-1 rounded-md bg-primary text-white hover:bg-primary/80 active:bg-primary/60'>
                                         تحميل الفاتورة
-                                        <Download />
+                                        <Download size={17} />
                                     </a>
                                 </TableCell>
                             </TableRow>
