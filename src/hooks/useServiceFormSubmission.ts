@@ -30,7 +30,7 @@ export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
           email: formData.email,
           experience: formData.experience,
         }).finally(() => {
-          toast('تم تحديث الخدمة بنجاح! انتظر الموافقة من الإدارة.', { type: 'success' });
+          toast.success('تم تحديث الخدمة بنجاح! انتظر الموافقة من الإدارة.');
         });
 
         if (formData.images && formData.images.length > 0) {

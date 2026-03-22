@@ -19,7 +19,7 @@ const Auth = () => {
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [loading, setLoading] = useState(false);
   const { signIn, signUp, user, signInWithGoogle } = useAuth();
-  const { sendWelcomeEmail } = useEmail();
+  
   const navigate = useNavigate();
   const location = useLocation();
 

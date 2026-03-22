@@ -109,13 +109,12 @@ const ContactOptions = ({
 
   const handleStartChat = () => {
     if (!userId) {
-      toast('يرجى تسجيل الدخول لبدء المحادثة', {
+      toast.error('يرجى تسجيل الدخول لبدء المحادثة', {
         icon: (
           <>
             <ArrowLeftToLine size={16} />
           </>
         ),
-        type: 'error',
         action: {
           label: 'تسجيل الدخول',
           onClick: () => {
