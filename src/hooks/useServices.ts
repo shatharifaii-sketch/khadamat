@@ -242,9 +242,8 @@ export const useServices = () => {
       queryClient.invalidateQueries({ queryKey: ['user-services'] });
       queryClient.invalidateQueries({ queryKey: ['public-services'] });
       queryClient.invalidateQueries({ queryKey: ['admin-data'] });
-      toast('تم تحديث الخدمة بنجاح!', { 
+      toast.success('تم تحديث الخدمة بنجاح!', { 
         description: 'انتظر الموافقة من الإدارة.', 
-        type: 'success'
       });
     },
     onError: (error: any) => {

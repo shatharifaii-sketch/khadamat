@@ -9,7 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { Home } from 'lucide-react';
 import GoogleSignInButton from '@/components/GoogleSignInButton';
-import { useEmail } from '@/hooks/useEmail';
+
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -19,7 +19,7 @@ const Auth = () => {
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [loading, setLoading] = useState(false);
   const { signIn, signUp, user, signInWithGoogle } = useAuth();
-  const { sendWelcomeEmail } = useEmail();
+  
   const navigate = useNavigate();
   const location = useLocation();
 

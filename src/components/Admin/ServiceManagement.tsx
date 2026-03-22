@@ -85,9 +85,8 @@ export const ServiceManagement = ({ services, users, onServiceUpdated }: Service
         description: "تم حذف الخدمة بنجاح"
       });
     } catch (error: any) {
-      toast("خطأ", {
+      toast.error("خطأ", {
         description: error.message || "حدث خطأ أثناء حذف الخدمة",
-        type: "error"
       });
     }
   };
