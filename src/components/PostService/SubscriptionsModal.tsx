@@ -217,7 +217,7 @@ const SubscriptionsModal = ({ cardClassName, switchClassName, user, setDrawerOpe
                         </div>
                     </div>
                 </div>
-            </DrawerDescription>
+            </DescWrapper>
         </>
     )
 }
