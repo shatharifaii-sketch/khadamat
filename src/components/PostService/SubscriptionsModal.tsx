@@ -18,6 +18,7 @@ interface SubscriptionsModalProps {
     switchClassName?: string;
     user?: User;
     setDrawerOpen?: (isOpen: boolean) => void;
+    asDrawer?: boolean;
 }
 
 interface SubscriptionCardProps {
