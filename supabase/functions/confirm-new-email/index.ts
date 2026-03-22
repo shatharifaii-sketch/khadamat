@@ -4,10 +4,8 @@
 
 // Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
-import { Resend } from "npm:resend@latest";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY")!);
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
@@ -18,27 +16,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
-
-async function generateEmailLinks(email: string) {
-  const { data, error } = await supabase.auth.admin.generateLink({
-    type: 'email_change_new',
-    email,
-  });
-
-  if (error) {
-    console.error("Error generating link: ", error);
-    return {
-      success: false,
-      error
-    };
-  }
-
-  return {
-    success: true,
-    link: data.properties.action_link,
-    otp: data.properties.email_otp
-  }
-}
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -55,39 +32,10 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-    try {
-    const { password } = await req.json();
-
-    
-
-    return new Response(
-      JSON.stringify({
-        success: true,
-        error: null
-      }), {
-      status: 200,
-      headers: {
-        ...corsHeaders,
-        "Content-Type": "application/json",
-      },
-    }
-    )
+  try {
+    const { email } = await req.json();
   } catch (error) {
-    console.error("subscription cancellation error:", error);
-
-    return new Response(
-      JSON.stringify({
-        success: false,
-        error: error.message,
-      }),
-      {
-        status: 400,
-        headers: {
-          ...corsHeaders,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    
   }
 })
 
@@ -96,7 +44,7 @@ Deno.serve(async (req: Request) => {
   1. Run `supabase start` (see: https://supabase.com/docs/reference/cli/supabase-start)
   2. Make an HTTP request:
 
-  curl -i --location --request POST 'http://127.0.0.1:54321/functions/v1/send-email-update-email' \
+  curl -i --location --request POST 'http://127.0.0.1:54321/functions/v1/confirm-new-email' \
     --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0' \
     --header 'Content-Type: application/json' \
     --data '{"name":"Functions"}'

@@ -23,7 +23,7 @@ export const useProfile = () => {
     queryKey: ['profile', user?.id],
     queryFn: async () => {
       if (!user) return null;
-      
+
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -39,7 +39,7 @@ export const useProfile = () => {
   const updateProfile = useMutation({
     mutationFn: async (profileData: Partial<UserProfile>) => {
       if (!user) throw new Error('User must be authenticated');
-      
+
       const { data, error } = await supabase
         .from('profiles')
         .update(profileData)
@@ -60,11 +60,57 @@ export const useProfile = () => {
     }
   });
 
+  const confirmEmail = useMutation({
+    mutationFn: async ({ email, code }: { email: string; code: string; }) => {
+      if (!user) throw new Error('User must be authenticated');
+
+      const { data, error } = await supabase.auth.verifyOtp({
+        email,
+        token: code,
+        type: 'email_change'
+      });
+
+      if (error) {
+        console.error('Error verifying OTP:', error);
+        return { error };
+      }
+
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+      toast.success('تم تحديث الملف الشخصي بنجاح!');
+    },
+    onError: (error: any) => {
+      console.error('Error updating profile:', error);
+      toast.error('حدث خطأ في تحديث الملف الشخصي');
+    }
+  });
+
+  const changePassword = useMutation({
+    mutationFn: async (password: string) => {
+      if (!user) throw new Error('User must be authenticated');
+
+      const { data, error } = await supabase.auth.updateUser({
+        password
+      });
+
+      if (error) {
+        console.error('Error changing password:', error);
+        return { error };
+      }
+
+      return data;
+    }
+  })
+
   return {
     profile: getProfile.data,
     updateProfile,
     isLoading: getProfile.isLoading,
-    isUpdating: updateProfile.isPending
+    isUpdating: updateProfile.isPending,
+    confirmEmail,
+    changePassword
   };
 };
 
@@ -77,8 +123,8 @@ export const usePublisherProfile = (userId: string) => {
         .select('*')
         .eq('id', userId)
         .maybeSingle();
-      
-        console.log('Publisher profile:', profile);
+
+      console.log('Publisher profile:', profile);
 
       if (error) throw error;
       return profile;
@@ -94,7 +140,7 @@ export const usePublisherProfile = (userId: string) => {
         .from('services')
         .select('*')
         .eq('user_id', getProfile.id);
-      
+
       if (error) throw error;
       return services;
     }
@@ -103,7 +149,7 @@ export const usePublisherProfile = (userId: string) => {
   const sendReport = useMutation({
     mutationKey: ['send-report'],
     mutationFn: async (reportData: { reported_user_id: string; description: string; }) => {
-      
+
     }
   })
 

@@ -30,6 +30,7 @@ import UserSubscriptions from '@/components/Account/UserSubscriptions';
 import UserTransactions from '@/components/Account/UserTransactions';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import ChangeEmailComponent from '@/components/Account/ChangeEmailComponent';
+import ChangePasswordComponent from '@/components/Account/ChangePasswordComponent';
 
 const Account = () => {
   const { user, loading } = useAuth();
@@ -261,17 +262,7 @@ const Account = () => {
               </div>
 
               <div className="space-y-2">
-                <Label>كلمة المرور</Label>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    // This would typically open a password change modal or navigate to a password change page
-                    alert('سيتم إضافة وظيفة تغيير كلمة المرور قريباً');
-                  }}
-                  className="w-full"
-                >
-                  تغيير كلمة المرور
-                </Button>
+                <ChangePasswordComponent />
               </div>
             </div>
           </CardContent>
