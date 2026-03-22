@@ -47,18 +47,26 @@ async function sendReport(formData: {
     return data
 }
 
-async function sendEmailUpdate({email, name}: {email: string, name: string}) {
-    const { data, error } = await supabase.functions.invoke(
-        "send-email-update-email",
-        {
-            body: JSON.stringify({ email })
-        }
-    )
+async function sendEmailUpdate({email, name, user_id}: {email: string, name: string, user_id: string}) {
+    const { data, error } = await supabase.auth.updateUser({
+        email
+    });
 
     if (error) {
         console.log(error);
         throw error;
     }
+    // const { data, error } = await supabase.functions.invoke(
+    //     "send-email-update-email",
+    //     {
+    //         body: JSON.stringify({ email })
+    //     }
+    // )
+
+    // if (error) {
+    //     console.log(error);
+    //     throw error;
+    // }
 
     return data;
 }

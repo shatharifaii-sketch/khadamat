@@ -24,14 +24,17 @@ const ChangeEmailComponent = ({
     const [error, setError] = useState('');
 
     const handleEmailChange = () => {
+        return;
         if (!email || !user.id) return;
         sendEmailUpdateEmail.mutate({
             email,
             name: user.user_metadata.full_name,
+            user_id: user.id
         });
     }
 
     const handleConfirmEmail = () => {
+        return;
         if (!confCode || !email) return;
         confirmEmail.mutate({
             email,
