@@ -170,14 +170,18 @@ const SubscriptionsModal = ({ cardClassName, switchClassName, user, setDrawerOpe
         setDrawerOpen && setDrawerOpen(false);
     }
 
+    const HeaderWrapper = asDrawer ? DrawerHeader : 'div';
+    const TitleWrapper = asDrawer ? DrawerTitle : 'h2';
+    const DescWrapper = asDrawer ? DrawerDescription : 'div';
+
     return (
         <>
-            <DrawerHeader className='flex items-center justify-between'>
-                <DrawerTitle className='text-2xl text-start'>
+            <HeaderWrapper className='flex items-center justify-between'>
+                <TitleWrapper className='text-2xl text-start'>
                     أنواع الاشتراك
-                </DrawerTitle>
-            </DrawerHeader>
-            <DrawerDescription className='flex flex-col gap-4 px-5 overflow-y-auto'>
+                </TitleWrapper>
+            </HeaderWrapper>
+            <DescWrapper className='flex flex-col gap-4 px-5 overflow-y-auto'>
                 <div>
                     <p>اختار نوع الاشتراك المناسب لك لتتمكن من نشر خدمتك.</p>
                 </div>
