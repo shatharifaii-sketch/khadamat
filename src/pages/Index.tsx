@@ -182,6 +182,7 @@ const Index = () => {
                 <SubscriptionModal 
                 user={user}
                 cardClassName='shadow-xl'
+                asDrawer={false}
                 switchClassName='transition-all bg-secondary text-muted-foreground px-4 py-2 rounded-full' />
               </ErrorBoundary>
             </Suspense>
