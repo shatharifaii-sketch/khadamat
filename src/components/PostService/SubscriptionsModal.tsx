@@ -148,7 +148,7 @@ const SubscriptionCard = ({ subscription, yearly, selectedSubscription, cardClas
     );
 };
 
-const SubscriptionsModal = ({ cardClassName, switchClassName, user, setDrawerOpen }: SubscriptionsModalProps) => {
+const SubscriptionsModal = ({ cardClassName, switchClassName, user, setDrawerOpen, asDrawer = true }: SubscriptionsModalProps) => {
     const [yearly, setYearly] = useState<boolean>(false);
     const [selectedSubscription, setSelectedSubscription] = useState(null);
     const navigate = useNavigate()
