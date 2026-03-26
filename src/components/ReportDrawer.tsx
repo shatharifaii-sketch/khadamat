@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "./ui/button"
 import { Drawer, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "./ui/drawer"
 import { Input } from "./ui/input";
@@ -29,6 +29,7 @@ const ReportDrawer = ({
         object_id: itemId
     });
     const { sendReportEmail } = useEmail();
+    const [openDrawer, setOpenDrawer] = useState(false);
     const [openEmailDialog, setOpenEmailDialog] = useState(false);
     
 
@@ -44,8 +45,11 @@ const ReportDrawer = ({
         } catch (error) {
             console.error('Contact form error:', error);
             toast.error('حدث خطأ أثناء إرسال الرسالة. يرجى المحاولة مرة أخرى.');
-        } finally {
-            if (sendReportEmail.isSuccess) {
+        }
+    };
+
+    useEffect(() => {
+        if (sendReportEmail.isSuccess) {
                 setOpenEmailDialog(true);
                 setFormData({
                     name: '',
@@ -55,14 +59,16 @@ const ReportDrawer = ({
                     object_type: itemType,
                     object_id: itemId
                 });
+
+                toast.success('تم تقديم البلاغ بنجاح');
+                setOpenDrawer(false);
             }
-        }
-    };
+    }, [sendReportEmail.isSuccess, sendReportEmail.mutateAsync])
 
 
     return (
         <>
-            <Drawer>
+            <Drawer open={openDrawer} onOpenChange={setOpenDrawer}>
                 <DrawerTrigger asChild>
                     <Button variant="outline" className="">
                         قدم شكوى

@@ -19,7 +19,7 @@ const Auth = () => {
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [loading, setLoading] = useState(false);
   const { signIn, signUp, user, signInWithGoogle } = useAuth();
-  
+
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -63,16 +63,7 @@ const Auth = () => {
         }
       } else {
         const { data, error } = await signUp(email, password, fullName, passwordConfirm);
-        if (error) {
-          console.error('Sign up error:', error);
-          if (error.message.includes('User already registered')) {
-            toast.error('هذا البريد الإلكتروني مسجل مسبقاً');
-          } else if (error.message.includes('Password should be')) {
-            toast.error('كلمة المرور يجب أن تحتوي على 6 أحرف على الأقل');
-          } else {
-            toast.error('حدث خطأ في إنشاء الحساب: ' + error.message);
-          }
-        } else {
+        if (!error) {
           toast.success('تم إنشاء الحساب بنجاح! يرجى تفقد بريدك الإلكتروني لتأكيد الحساب');
           navigate('/confirm-email', { state: { email } });
         }
@@ -84,7 +75,7 @@ const Auth = () => {
       setLoading(false);
     }
   };
-  
+
   const handleGoogleSignIn = async () => {
     signInWithGoogle();
   }
@@ -107,7 +98,7 @@ const Auth = () => {
               {isLogin ? 'تسجيل الدخول' : 'إنشاء حساب جديد'}
             </CardTitle>
             <CardDescription>
-              {isLogin 
+              {isLogin
                 ? 'أدخل بياناتك لتسجيل الدخول إلى حسابك'
                 : 'أنشئ حساباً جديداً للبدء في استخدام المنصة'
               }
@@ -128,7 +119,7 @@ const Auth = () => {
                   />
                 </div>
               )}
-              
+
               <div className="space-y-2">
                 <Label htmlFor="email">البريد الإلكتروني</Label>
                 <Input
@@ -140,7 +131,7 @@ const Auth = () => {
                   required
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="password">كلمة المرور</Label>
                 <Input
@@ -153,29 +144,34 @@ const Auth = () => {
                 />
               </div>
               {!isLogin && (
-              <div className="space-y-2">
-                <Label htmlFor="password">تأكيد كلمة المرور</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="أدخل كلمة المرور"
-                  value={passwordConfirm}
-                  onChange={(e) => setPasswordConfirm(e.target.value)}
-                  required
-                />
-              </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password">تأكيد كلمة المرور</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="أدخل كلمة المرور"
+                    value={passwordConfirm}
+                    onChange={(e) => setPasswordConfirm(e.target.value)}
+                    required
+                  />
+                </div>
+              )}
+              {isLogin && (
+                <Link to="/forgot-password" className="text-sm text-primary hover:underline text-end">
+                  نسيت كلمة المرور؟
+                </Link>
               )}
 
-              <Button 
-                type="submit" 
-                className="w-full" 
+              <Button
+                type="submit"
+                className="w-full"
                 size="lg"
                 disabled={loading}
               >
-                {loading 
-                  ? 'جاري المعالجة...' 
-                  : isLogin 
-                    ? 'تسجيل الدخول' 
+                {loading
+                  ? 'جاري المعالجة...'
+                  : isLogin
+                    ? 'تسجيل الدخول'
                     : 'إنشاء الحساب'
                 }
               </Button>

@@ -52,24 +52,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signUp = async (email: string, password: string, fullName: string, passwordConfirm: string) => {
     console.log('Attempting sign up for:', email);
-    const { data, error, response }: any = await supabase.functions.invoke('register-user', {
+    const response: any = await supabase.functions.invoke('register-user', {
       body: JSON.stringify({ email, password, name: fullName, passwordConfirm })
     })
 
-    console.log('Sign up response:', response);
+    if (!response.data.success) {
+      const err = response.data.error;
 
-    if (!data.success || error) {
-      console.error('Sign up error: ', error || null);
-
-      if (error.code === 'email_exists') {
-        toast.error('Email already exists');
-        return { error: 'Email already exists', data: { user: null, session: null } };
+      if (err.code === 'email_exists') {
+        toast.error('البريد الإلكتروني مستخدم بالفعل');
       }
 
-      return { error: error, data: { user: null, session: null } };
+      return { data: null, error: err };
     }
 
-    return { data, error };
+    return { data: response.data, error: response.error };
   };
 
   const signIn = async (email: string, password: string) => {
@@ -126,7 +123,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(null);
       setSession(null);
       setLoading(false);
-      
+
     });
     console.log('Sign out successful');
   };

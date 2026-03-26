@@ -35,10 +35,11 @@ const ChangeEmailComponent = ({
 
     const handleConfirmEmail = () => {
         return;
-        if (!confCode || !email) return;
+        if (!user.email || !email) return;
+
         confirmEmail.mutate({
-            email,
-            code: confCode
+            oldEmail: user.email,
+            newEmail: email
         });
     }
 
@@ -65,15 +66,16 @@ const ChangeEmailComponent = ({
             {!user.user_metadata.email_verified && <p className="text-destructive">البريد الإلكتروني غير مفعل</p>}
             {error && <p className="text-destructive">{error}</p>}
             <div className='flex gap-2'>
-                <Button 
-                className='min-w-32'
-                onClick={() => {
-                    if (changeEmail) {
-                        handleEmailChange
-                    } else {
-                        setChangeEmail(true);
-                    }
-                }}>
+                <Button
+                    className='min-w-32'
+                    onClick={() => {
+                        if (changeEmail) {
+                            //handleEmailChange
+                            handleConfirmEmail();
+                        } else {
+                            setChangeEmail(true);
+                        }
+                    }}>
                     {changeEmail ? "تأكيد" : "تغيير البريد الإلكتروني"}
                 </Button>
                 {changeEmail && <Button variant="outline" onClick={() => setChangeEmail(false)}>الغاء</Button>}
@@ -87,18 +89,18 @@ const ChangeEmailComponent = ({
                         </DialogDescription>
                     </DialogHeader>
                     <div>
-                        <Input 
-                        placeholder='الرمز'
-                        value={confCode}
-                        onChange={(e) => setConfCode(e.target.value)}
+                        <Input
+                            placeholder='الرمز'
+                            value={confCode}
+                            onChange={(e) => setConfCode(e.target.value)}
                         />
                         {confCode.length > 6 && <p className='text-destructive mt-1 text-xs'>الرمز لا يتجاوز 6 ارقام</p>}
                     </div>
                     <DialogFooter>
-                        <Button 
-                        disabled={(confCode.length > 6) || confirmEmail.isPending} 
-                        onClick={handleConfirmEmail}
-                        className='flex-1'>
+                        <Button
+                            disabled={(confCode.length > 6) || confirmEmail.isPending}
+                            onClick={handleConfirmEmail}
+                            className='flex-1'>
                             تأكيد
                         </Button>
                     </DialogFooter>

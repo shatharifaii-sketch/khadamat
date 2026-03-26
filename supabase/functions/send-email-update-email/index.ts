@@ -19,24 +19,64 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-async function generateEmailLinks(email: string) {
-  const { data, error } = await supabase.auth.admin.generateLink({
-    type: 'email_change_new',
-    email,
-  });
+async function generateEmailLinks(oldEmail: string, newEmail: string) {
+  try {
+    const { data, error } = await supabase.auth.admin.generateLink({
+      type: 'email_change_new',
+      email: oldEmail,
+      newEmail,
+      redirectTo: 'http://localhost:8080/'
+    });
 
-  if (error) {
+    if (error) {
+      console.error("Error generating link: ", error);
+      throw error;
+    }
+
+    return {
+      success: true,
+      link: data.properties.action_link,
+      otp: data.properties.email_otp
+    }
+  } catch (error) {
     console.error("Error generating link: ", error);
     return {
       success: false,
       error
     };
   }
+}
 
-  return {
-    success: true,
-    link: data.properties.action_link,
-    otp: data.properties.email_otp
+async function sendEmail(email: string, name: string, link: string) {
+  try {
+    const { data, error } = await resend.emails.send({
+      from: "Support <support@mail.khedemtak.com>",
+      to: email,
+      template: {
+        id: "email-verification",
+        variables: {
+          name,
+          action_url: link
+        }
+      }
+    });
+
+    if (error) {
+      console.error("Error sending email: ", error);
+      throw error;
+    }
+
+    return {
+      success: true,
+      data
+    }
+  } catch (error) {
+    console.log(error);
+
+    return {
+      success: false,
+      error
+    };
   }
 }
 
@@ -55,10 +95,57 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-    try {
-    const { password } = await req.json();
+  try {
+    const { oldEmail, newEmail, name } = await req.json();
 
-    
+    if (!oldEmail || !newEmail) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Emails are required",
+        }),
+        {
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+
+    const { success, link, otp } = await generateEmailLinks(oldEmail, newEmail);
+
+    if (!success) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: link,
+        }),
+        {
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+
+    const { success: emailSuccess } = await sendEmail(newEmail, name, link);
+
+    if (!emailSuccess) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Error sending email",
+        }),
+        {
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
 
     return new Response(
       JSON.stringify({

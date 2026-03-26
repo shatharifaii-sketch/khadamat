@@ -1,8 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, Search } from 'lucide-react';
-import Navigation from '@/components/Navigation';
 
 import { useHomeStats } from '@/hooks/useHomeStats';
 import StatsSection from '@/components/Home/StatsSection';
