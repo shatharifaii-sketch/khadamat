@@ -61,21 +61,23 @@ export const useProfile = () => {
   });
 
   const confirmEmail = useMutation({
-    mutationFn: async ({ email, code }: { email: string; code: string; }) => {
+    mutationFn: async ({ oldEmail, newEmail }: { oldEmail: string; newEmail: string; }) => {
       if (!user) throw new Error('User must be authenticated');
 
-      const { data, error } = await supabase.auth.verifyOtp({
-        email,
-        token: code,
-        type: 'email_change'
-      });
+      const response = await supabase.functions.invoke('send-email-update-email', { body: JSON.stringify({ 
+        oldEmail, 
+        newEmail,
+        name: user.user_metadata.full_name
+      }) });
 
-      if (error) {
-        console.error('Error verifying OTP:', error);
-        return { error };
+      if (!response.data.success) {
+        console.error('Error verifying OTP:', response.data.error);
+        return { error: response.data.error };
       }
+      
+      toast.success('أرسلنا لك رابط التحقق');
 
-      return data;
+      return response.data.success;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['profile'] });
@@ -97,12 +99,12 @@ export const useProfile = () => {
 
       if (error) {
         console.error('Error changing password:', error);
-        return { error };
+        throw error;
       }
 
       return data;
     }
-  })
+  });
 
   return {
     profile: getProfile.data,

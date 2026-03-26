@@ -87,35 +87,38 @@ const ChatMessageInput = ({ attachment, setAttachment, /*replyToMessage, setRepl
                     <img src={previewURL} alt="image file" className='border rounded-md' />
                 </div>
             )}
-            <form className='flex w-full items-center gap-4' dir='ltr' onSubmit={handleSendMessage}>
-                <div className='flex-1'>
+            <form className='flex md:flex-row flex-col w-full items-center gap-4' dir='ltr' onSubmit={handleSendMessage}>
+                <div className='flex-1 mb-1'>
                     <Input
                         type='text'
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         placeholder="Type a message" className='w-full' />
                 </div>
-                <div>
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        onChange={handleFileChange}
-                        className="hidden"
-                    />
-                    <Button
-                        type='button'
-                        onClick={handleOpenFilePicker}
-                        variant={previewURL ? 'ghost' : 'outline'}
-                        disabled={!!previewURL}
-                    >
-                        <Paperclip />
+                <div className='flex items-center gap-2'>
+                    <div className='w-1/2'>
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            onChange={handleFileChange}
+                            className="hidden"
+                        />
+                        <Button
+                            type='button'
+                            onClick={handleOpenFilePicker}
+                            variant={previewURL ? 'ghost' : 'outline'}
+                            disabled={!!previewURL}
+                            className='w-full'
+                        >
+                            <Paperclip />
+                        </Button>
+                    </div>
+                    <Button type='submit' variant='default' className='w-1/2'>
+                        <SendHorizonal className='w-20 h-20' />
+                        ارسال
                     </Button>
                 </div>
-                <Button type='submit' variant='default'>
-                    <SendHorizonal className='w-20 h-20' />
-                    ارسال
-                </Button>
             </form>
         </div>
     )

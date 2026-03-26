@@ -4,8 +4,8 @@
 
 // Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "npm:resend@latest";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY")!);
 const supabase = createClient(
@@ -35,10 +35,10 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { password } = await req.json();
+    const { email } = await req.json();
 
-    if (!password) {
-      return new Response(JSON.stringify({ success: false, error: "Password is required" }), {
+    if (!email) {
+      return new Response(JSON.stringify({ success: false, error: "Email is required" }), {
         headers: {
           "Content-Type": "application/json",
           "Access-Control-Allow-Origin": "*",
@@ -47,14 +47,16 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    const { data, error } = await supabase.auth.updateUser(
-      {
-        password: password
-      }
-    );
+    const { data, error } = await supabase.auth.admin.generateLink({
+      type: "recovery",
+      email: email,
+      options: {
+        redirectTo: "http://localhost:8080/reset-password",
+      },
+    });
 
     if (error) {
-      console.error("Error changing password:", error);
+      console.error("Error generating link: ", error);
       return new Response(JSON.stringify({ success: false, error }), {
         headers: {
           "Content-Type": "application/json",
@@ -64,7 +66,31 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    return new Response(JSON.stringify({ success: true, user }), {
+    const resetLink = data.properties.action_link;
+
+    const { data: resendData, error: resendError } = await resend.emails.send({
+      from: "Support <support@mail.khedemtak.com>",
+      to: email,
+      template: {
+        id: "password-reset",
+        variables: {
+          confirmation_url: resetLink,
+        },
+      },
+    })
+
+    if (resendError) {
+      console.error("Error sending email: ", resendError);
+      return new Response(JSON.stringify({ success: false, error: resendError }), {
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
+        status: 500,
+      });
+    }
+
+    return new Response(JSON.stringify({ success: true, resendData }), {
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
@@ -72,14 +98,14 @@ Deno.serve(async (req: Request) => {
       status: 200,
     });
   } catch (error) {
-    console.log(error);
-    return new Response(JSON.stringify({
-      success: false,
-      error: (error as Error).message
-    }), {
-      headers: corsHeaders,
-      status: 500
-    })
+    console.error("Error sending email: ", error);
+    return new Response(JSON.stringify({ success: false, error }), {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+      status: 400,
+    });
   }
 })
 
@@ -88,8 +114,8 @@ Deno.serve(async (req: Request) => {
   1. Run `supabase start` (see: https://supabase.com/docs/reference/cli/supabase-start)
   2. Make an HTTP request:
 
-  curl -i --location --request POST 'http://127.0.0.1:54321/functions/v1/reset-password' \
-    --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0' \
+  curl -i --location --request POST 'http://127.0.0.1:54321/functions/v1/send-password-change-email' \
+    --header 'Authorization: Bearer ' \
     --header 'Content-Type: application/json' \
     --data '{"name":"Functions"}'
 

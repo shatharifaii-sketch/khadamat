@@ -89,13 +89,13 @@ Deno.serve(async (req: Request) => {
     const { email, name, password, passwordConfirm } = await req.json();
 
     if (password !== passwordConfirm) {
+      console.error("Passwords do not match");
       return new Response(
         JSON.stringify({
           success: false,
           error: "Passwords do not match",
         }),
         {
-          status: 400,
           headers: {
             ...corsHeaders,
             "Content-Type": "application/json",
@@ -113,13 +113,13 @@ Deno.serve(async (req: Request) => {
     })
 
     if (error) {
+      console.error("Error creating user: ", error);
       return new Response(
         JSON.stringify({
           success: false,
           error: error,
         }),
         {
-          status: 400,
           headers: {
             ...corsHeaders,
             "Content-Type": "application/json",
@@ -137,7 +137,6 @@ Deno.serve(async (req: Request) => {
           error: linkResponse.error,
         }),
         {
-          status: 400,
           headers: {
             ...corsHeaders,
             "Content-Type": "application/json",
@@ -155,7 +154,6 @@ Deno.serve(async (req: Request) => {
           error: emailResponse.error,
         }),
         {
-          status: 400,
           headers: {
             ...corsHeaders,
             "Content-Type": "application/json",
@@ -169,7 +167,6 @@ Deno.serve(async (req: Request) => {
         success: true,
       }),
       {
-        status: 200,
         headers: {
           ...corsHeaders,
           "Content-Type": "application/json",

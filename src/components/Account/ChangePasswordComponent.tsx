@@ -15,7 +15,6 @@ const ChangePasswordComponent = () => {
     const { changePassword } = useProfile();
     const [open, setOpen] = useState(false);
     const [formData, setFormData] = useState({
-        currentPassword: '',
         newPassword: '',
         confirmPassword: ''
     });
@@ -23,13 +22,6 @@ const ChangePasswordComponent = () => {
 
     const validate = (): FormError[] => {
         const newErrors: FormError[] = [];
-
-        if (!formData.currentPassword) {
-            newErrors.push({
-                field: 'currentPassword',
-                message: 'كلمة المرور الحالية مطلوبة'
-            });
-        }
 
         if (!formData.newPassword) {
             newErrors.push({
@@ -87,14 +79,13 @@ const ChangePasswordComponent = () => {
         if (changePassword.isSuccess) {
             setOpen(false);
             setFormData({
-                currentPassword: '',
                 newPassword: '',
                 confirmPassword: ''
             });
         }
 
         if (changePassword.isError) {
-            setErrors([{ field: 'server', message: 'حدث خطأ ما' }]);
+            setErrors([{ field: 'server', message: changePassword.error?.message || 'حدث خطأ ما' }]);
             toast.error('فشل في تغيير كلمة المرور');
         }
     }, [changePassword.isSuccess, changePassword.isError, changePassword.mutateAsync]);
@@ -119,18 +110,6 @@ const ChangePasswordComponent = () => {
                         </DialogDescription>
                     </DialogHeader>
                     <div className='flex flex-col gap-2'>
-                        <div>
-                            <Label>كلمة المرور الحالية</Label>
-                            <Input
-                                value={formData.currentPassword}
-                                onChange={(e) => handleChange('currentPassword', e.target.value)}
-                            />
-                            {getError('currentPassword') && (
-                                <p className="text-red-500 text-sm mt-1">
-                                    {getError('currentPassword')}
-                                </p>
-                            )}
-                        </div>
                         <div>
                             <Label>كلمة المرور الجديدة</Label>
                             <Input

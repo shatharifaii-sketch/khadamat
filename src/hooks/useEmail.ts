@@ -71,6 +71,24 @@ async function sendEmailUpdate({email, name, user_id}: {email: string, name: str
     return data;
 }
 
+async function sendPasswordUpdate({email}: {email: string}) {
+    const { data, error } = await supabase.functions.invoke(
+        "send-password-change-email",
+        {
+            body: JSON.stringify({ email })
+        }
+    )
+
+    if (error) {
+        console.log(error);
+        throw error;
+    }
+
+    console.log(data);
+
+    return data
+}
+
 export const useEmail = () => {
     const sendContactEmail = useMutation({
         mutationKey: ['send-contact-email'],
@@ -90,9 +108,16 @@ export const useEmail = () => {
         retry: false
     })
 
+    const sendPasswordUpdateEmail = useMutation({
+        mutationKey: ['send-password-update-email'],
+        mutationFn: sendPasswordUpdate,
+        retry: false
+    })
+
     return {
         sendContactEmail,
         sendReportEmail,
-        sendEmailUpdateEmail
+        sendEmailUpdateEmail,
+        sendPasswordUpdateEmail
     }
 }
