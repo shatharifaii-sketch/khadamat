@@ -24,22 +24,21 @@ const ChangeEmailComponent = ({
     const [error, setError] = useState('');
 
     const handleEmailChange = () => {
-        return;
         if (!email || !user.id) return;
         sendEmailUpdateEmail.mutate({
-            email,
-            name: user.user_metadata.full_name,
-            user_id: user.id
+            oldEmail: user.email,
+            newEmail: email,
+            name: user.user_metadata.full_name
         });
     }
 
     const handleConfirmEmail = () => {
-        return;
         if (!user.email || !email) return;
 
         confirmEmail.mutate({
-            oldEmail: user.email,
-            newEmail: email
+            otp: confCode,
+            email: email,
+            user_id: user.id
         });
     }
 
@@ -53,6 +52,18 @@ const ChangeEmailComponent = ({
             setError(sendEmailUpdateEmail.error.message);
         }
     }, [sendEmailUpdateEmail.mutate, sendEmailUpdateEmail.isSuccess, sendEmailUpdateEmail.isError]);
+
+    useEffect(() => {
+        if (confirmEmail.isSuccess) {
+            setChangeEmail(false);
+            setOpen(false);
+        }
+
+        if (confirmEmail.isError) {
+            setError(confirmEmail.error.message);
+            setOpen(false);
+        }
+    }, [confirmEmail.isSuccess, confirmEmail.mutate, confirmEmail.isError]);
 
     return (
         <>
@@ -70,12 +81,12 @@ const ChangeEmailComponent = ({
                     className='min-w-32'
                     onClick={() => {
                         if (changeEmail) {
-                            //handleEmailChange
-                            handleConfirmEmail();
+                            handleEmailChange();
                         } else {
                             setChangeEmail(true);
                         }
-                    }}>
+                    }}
+                    disabled={sendEmailUpdateEmail.isPending}>
                     {changeEmail ? "تأكيد" : "تغيير البريد الإلكتروني"}
                 </Button>
                 {changeEmail && <Button variant="outline" onClick={() => setChangeEmail(false)}>الغاء</Button>}

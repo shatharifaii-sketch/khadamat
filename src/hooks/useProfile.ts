@@ -61,27 +61,36 @@ export const useProfile = () => {
   });
 
   const confirmEmail = useMutation({
-    mutationFn: async ({ oldEmail, newEmail }: { oldEmail: string; newEmail: string; }) => {
+    mutationFn: async ({ otp, email, user_id }: { otp: string; email: string; user_id: string; }) => {
       if (!user) throw new Error('User must be authenticated');
 
-      const response = await supabase.functions.invoke('send-email-update-email', { body: JSON.stringify({ 
-        oldEmail, 
-        newEmail,
-        name: user.user_metadata.full_name
-      }) });
+      const { error } = await supabase.auth.verifyOtp({
+        email,
+        token: otp,
+        type: 'email_change'
+      });
+
+      if (error) {
+        toast.error(error.code === "otp_expired" ? ' انتهت صلاحية الرمز' : 'حدث خطاء في التحقق من البريد الألكتروني');
+        console.error('Error verifying OTP:', error);
+        return { error };
+      }
+
+      toast.success('تم التحقق من البريد الألكتروني');
+
+      const response = await supabase.functions.invoke('confirm-new-email', { body: JSON.stringify({ email, user_id }) });
 
       if (!response.data.success) {
+        toast.error('حدث خطاء في التحقق من البريد الألكتروني');
         console.error('Error verifying OTP:', response.data.error);
         return { error: response.data.error };
       }
-      
-      toast.success('أرسلنا لك رابط التحقق');
 
-      return response.data.success;
+      return 'OTP verified successfully';
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['profile'] });
-      toast.success('تم تحديث الملف الشخصي بنجاح!');
+      window.location.reload();
     },
     onError: (error: any) => {
       console.error('Error updating profile:', error);

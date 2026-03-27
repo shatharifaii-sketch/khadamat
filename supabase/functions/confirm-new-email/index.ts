@@ -33,9 +33,51 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { email } = await req.json();
+    const { email, user_id } = await req.json();
+
+    if (!email || !user_id) {
+      return new Response(JSON.stringify({ success: false, error: "Email is required" }), {
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
+      });
+    }
+
+    const { data, error } = await supabase.auth.admin.updateUserById(
+      user_id,
+      {
+        email: email
+      }
+    );
+
+    if (error) {
+      console.log(error);
+      return new Response(JSON.stringify({ success: false, error }), {
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
+      });
+    }
+
+    return new Response(JSON.stringify({ success: true, data }), {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+
   } catch (error) {
-    
+    console.log(error);
+
+    return new Response(JSON.stringify({ success: false, error }), {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+      status: 400
+    });
   }
 })
 

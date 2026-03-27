@@ -497,6 +497,27 @@ export type Database = {
         }
         Relationships: []
       }
+      password_reset_tokens: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: number
+          token: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: number
+          token?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: number
+          token?: string | null
+        }
+        Relationships: []
+      }
       payment_transactions: {
         Row: {
           amount: number
