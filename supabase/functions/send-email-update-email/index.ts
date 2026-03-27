@@ -25,7 +25,9 @@ async function generateEmailLinks(oldEmail: string, newEmail: string) {
       type: 'email_change_new',
       email: oldEmail,
       newEmail,
-      redirectTo: 'http://localhost:8080/'
+      options: {
+        redirectTo: 'http://localhost:8080/'
+      }
     });
 
     if (error) {
@@ -47,7 +49,7 @@ async function generateEmailLinks(oldEmail: string, newEmail: string) {
   }
 }
 
-async function sendEmail(email: string, name: string, link: string) {
+async function sendEmail(email: string, name: string, link: string, otp: string) {
   try {
     const { data, error } = await resend.emails.send({
       from: "Support <support@mail.khedemtak.com>",
@@ -56,7 +58,7 @@ async function sendEmail(email: string, name: string, link: string) {
         id: "email-verification",
         variables: {
           name,
-          action_url: link
+          otp
         }
       }
     });
@@ -130,7 +132,7 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const { success: emailSuccess } = await sendEmail(newEmail, name, link);
+    const { success: emailSuccess } = await sendEmail(newEmail, name, link, otp);
 
     if (!emailSuccess) {
       return new Response(
