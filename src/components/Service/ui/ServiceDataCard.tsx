@@ -43,8 +43,18 @@ const ServiceDataCard = ({
                         </div>
                         <Separator orientation='vertical' className='h-5 mt-3 hidden md:block' />
                         <div className='flex flex-col sm:flex-row items-start sm:items-center gap-4'>
-                            <h3 className='text-lg font-semibold mt-4 text-nowrap'>مكان الخدمة</h3>
-                            <h2 className='text-xl font-semibold text-primary text-nowrap'>{service?.location}</h2>
+                            {service?.is_online ? (
+                                <>
+                                    <h2 className='text-xl font-semibold text-primary text-nowrap'>
+                                        خدمة رقمية اونلاين
+                                    </h2>
+                                </>
+                            ) : (
+                                <>
+                                    <h3 className='text-lg font-semibold mt-4 text-nowrap'>مكان الخدمة</h3>
+                                    <h2 className='text-xl font-semibold text-primary text-nowrap'>{service?.location}</h2>
+                                </>
+                            )}
                         </div>
                         <Separator orientation='vertical' className='h-5 mt-3 hidden md:block' />
                         <div className='flex flex-col sm:flex-row items-start sm:items-center gap-4'>
@@ -62,8 +72,8 @@ const ServiceDataCard = ({
                         </div>
                     </div>
                 </CardContent>
-            </CardHeader>
-        </Card>
+            </CardHeader >
+        </Card >
     )
 }
 
