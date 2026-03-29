@@ -10,6 +10,7 @@ export interface PendingServiceData {
   phone: string;
   email: string;
   experience: string;
+  is_online: boolean;
   images: { id: string; image_name: string; image_url: string }[];
 }
 

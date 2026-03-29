@@ -27,6 +27,10 @@ export const useServiceFormValidation = () => {
       case 'phone':
         validateField(field, validatePhone(formData.phone));
         break;
+      case 'is_online':
+        // No validation needed for boolean field, but we can mark it as touched
+        setFieldTouched(field);
+        break;
       case 'location':
         validateField(field, validateRequired(formData.location, 'المنطقة'));
         break;

@@ -34,6 +34,7 @@ export interface Service {
   created_at: string;
   updated_at: string;
   user_id: string;
+  is_online?: boolean;
   publisher: {
     full_name: string;
   };

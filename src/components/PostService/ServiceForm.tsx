@@ -70,6 +70,8 @@ const ServiceForm = ({ serviceToEdit }: ServiceFormProps) => {
           />
 
           <ServiceLocation
+            is_online={formData.is_online}
+            onOnlineChange={(value) => handleInputChange('is_online', value)}
             location={formData.location}
             onLocationChange={(value) => handleInputChange('location', value)}
             onLocationBlur={() => handleFieldBlur('location')}

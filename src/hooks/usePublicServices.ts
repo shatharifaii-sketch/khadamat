@@ -16,6 +16,7 @@ export interface PublicService {
   views: number;
   created_at: string;
   user_id: string;
+  is_online?: boolean;
   updated_at: string;
   publisher: {
     id: string;

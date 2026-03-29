@@ -18,6 +18,7 @@ export const useServiceFormState = (serviceToEdit?: Service | null) => {
     phone: '',
     email: user?.email || '',
     experience: '',
+    is_online: false,
     images: [
       {
         id: '',
@@ -39,6 +40,7 @@ export const useServiceFormState = (serviceToEdit?: Service | null) => {
         phone: serviceToEdit.phone,
         email: serviceToEdit.email,
         experience: serviceToEdit.experience || '',
+        is_online: serviceToEdit.is_online || false,
         images: serviceToEdit.service_images,
       });
     } else if (pendingService && !isEditMode) {
@@ -54,7 +56,7 @@ export const useServiceFormState = (serviceToEdit?: Service | null) => {
     }
   }, [user?.email, isEditMode]);
 
-  const handleInputChange = (field: string, value: string | { id: string; image_name: string; image_url: string; }[]) => {
+  const handleInputChange = (field: string, value: string | { id: string; image_name: string; image_url: string; }[] | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 

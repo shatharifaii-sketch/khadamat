@@ -897,6 +897,7 @@ export type Database = {
           email: string
           experience: string | null
           id: string
+          is_online: boolean | null
           location: string
           phone: string
           price_range: string
@@ -913,6 +914,7 @@ export type Database = {
           email: string
           experience?: string | null
           id?: string
+          is_online?: boolean | null
           location: string
           phone: string
           price_range: string
@@ -929,6 +931,7 @@ export type Database = {
           email?: string
           experience?: string | null
           id?: string
+          is_online?: boolean | null
           location?: string
           phone?: string
           price_range?: string
