@@ -177,7 +177,7 @@ const SubscriptionsModal = ({ cardClassName, switchClassName, user, setDrawerOpe
     return (
         <>
             <HeaderWrapper className='flex items-center justify-between'>
-                <TitleWrapper className='text-2xl text-start'>
+                <TitleWrapper className={cn('text-2xl w-full', asDrawer ? 'text-start' : 'text-center')}>
                     أنواع الاشتراك
                 </TitleWrapper>
             </HeaderWrapper>
