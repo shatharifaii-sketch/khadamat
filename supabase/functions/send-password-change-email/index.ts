@@ -51,7 +51,7 @@ Deno.serve(async (req: Request) => {
       type: "recovery",
       email: email,
       options: {
-        redirectTo: "http://localhost:8080/reset-password",
+        redirectTo: "https://khedemtak.com/reset-password" //"http://localhost:8080/reset-password",
       },
     });
 

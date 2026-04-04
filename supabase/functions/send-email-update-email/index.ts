@@ -26,7 +26,7 @@ async function generateEmailLinks(oldEmail: string, newEmail: string) {
       email: oldEmail,
       newEmail,
       options: {
-        redirectTo: 'http://localhost:8080/'
+        redirectTo: 'https://khedemtak.com' //'http://localhost:8080/'
       }
     });
 
