@@ -135,8 +135,6 @@ export const usePublisherProfile = (userId: string) => {
         .eq('id', userId)
         .maybeSingle();
 
-      console.log('Publisher profile:', profile);
-
       if (error) throw error;
       return profile;
     }

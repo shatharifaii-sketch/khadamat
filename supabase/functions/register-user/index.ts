@@ -20,7 +20,7 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
 );
 
-async function sendWelcomeEmail(email: string, name: string, link: string, otp: string,) {
+async function sendWelcomeEmail(email: string, name: string, otp: string,) {
   const { data, error } = await resend.emails.send({
     from: "welcome <support@mail.khedemtak.com>",
     to: email,
@@ -28,7 +28,6 @@ async function sendWelcomeEmail(email: string, name: string, link: string, otp: 
       id: "welcome",
       variables: {
         name,
-        action_url: link,
         otp
       }
     }
@@ -145,7 +144,7 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const emailResponse = await sendWelcomeEmail(email, name, linkResponse.link, linkResponse.otp);
+    const emailResponse = await sendWelcomeEmail(email, name, linkResponse.otp);
 
     if (!emailResponse.success) {
       return new Response(

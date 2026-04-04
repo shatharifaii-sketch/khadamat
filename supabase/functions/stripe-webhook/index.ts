@@ -94,7 +94,7 @@ async function handleInvoiceCreated(invoice: any) {
           name: invoice.customer_name,
           total: (invoice.amount_due / 100).toString(),
           action_link: invoice.hosted_invoice_url,
-          help_url: Deno.env.get("APP_HELP_URL"),
+          help_url: Deno.env.get("APP_HELP_URL_LIVE"),//Deno.env.get("APP_HELP_URL"),
         },
       }
     })
@@ -249,8 +249,8 @@ async function handleInvoicePaymentPaid(invoice: any) {
           subscription_date: formatDate(billingStart),
           invoice_url: invoice.hosted_invoice_url,
           due_date: formatDate(billingEnd),
-          action_link: Deno.env.get('APP_ACCOUNT_PAGE'),
-          help_url: Deno.env.get('APP_HELP_URL'),
+          action_link: Deno.env.get('APP_ACCOUNT_PAGE_LIVE'),//Deno.env.get('APP_ACCOUNT_PAGE'),
+          help_url: Deno.env.get('APP_HELP_URL_LIVE'),//Deno.env.get('APP_HELP_URL'),
         }
       }
     });
@@ -362,8 +362,8 @@ async function handleSubscriptionCreated(subscription: any) {
           due_date: formatDate(nextPaymentDate),
           first_payment_date: formatDate(paymentsStart),
           total: (subscription.items.data[0].plan.amount / 100).toString(),
-          action_link: Deno.env.get('APP_ACCOUNT_PAGE'),
-          help_url: Deno.env.get('APP_HELP_URL'),
+          action_link: Deno.env.get('APP_ACCOUNT_PAGE_LIVE'),//Deno.env.get('APP_ACCOUNT_PAGE'),
+          help_url: Deno.env.get('APP_HELP_URL_LIVE'),//Deno.env.get('APP_HELP_URL'),
         }
       }
     });

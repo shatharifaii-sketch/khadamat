@@ -84,7 +84,7 @@ export const useAdminData = () => {
     queryKey: ['admin-data'],
     queryFn: async () => {
       const { data: profiles, error: usersError } = await supabase
-        .from('profiles')
+        .from('profiles_with_email')
         .select('*')
         .order('created_at', { ascending: false });
 
