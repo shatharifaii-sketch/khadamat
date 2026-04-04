@@ -1,8 +1,8 @@
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { serviceCategories } from './ServiceCategoryData';
 import FormField from '@/components/ui/form-field';
 import { useEffect } from 'react';
+import { categories } from '../FindService/ServiceCategories';
 
 interface ServiceBasicInfoProps {
   title: string;
@@ -55,7 +55,7 @@ const ServiceBasicInfo = ({
             <SelectValue placeholder="اختر فئة الخدمة" />
           </SelectTrigger>
           <SelectContent>
-            {serviceCategories.map((category) => {
+            {categories.map((category) => {
               const Icon = category.icon;
               return (
                 <SelectItem key={category.value} value={category.value}>

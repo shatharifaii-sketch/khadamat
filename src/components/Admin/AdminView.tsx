@@ -7,7 +7,7 @@ import { Badge } from '../ui/badge'
 import { AnalyticsSummary } from '@/types/analytics'
 import ErrorBoundary from '../ErrorBoundary'
 import { ServiceManagement } from './ServiceManagement'
-import { UserManagement } from './UserManagement'
+import { UserManagement, UserProfile } from './UserManagement'
 import { Json, Tables } from '@/integrations/supabase/types'
 import { Service } from '@/hooks/useAdminFunctionality'
 import { ServiceEditModal } from './ServiceEditModal'
@@ -18,7 +18,7 @@ interface Props {
     analyticsSummary: AnalyticsSummary;
     adminData: {
         services: Service[];
-        profiles: Tables<'profiles'>[];
+        profiles: UserProfile[];
         coupons: Tables<'coupons'>[];
         pendingServices: Service[];
     };

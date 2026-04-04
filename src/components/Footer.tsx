@@ -31,7 +31,7 @@ const Footer = () => {
             <Facebook size={24} />
           </a>
           <a 
-            href="https://instagram.com" 
+            href="https://www.instagram.com/khedemtak/?utm_source=ig_web_button_share_sheet" 
             target="_blank" 
             rel="noopener noreferrer"
             className="text-muted-foreground hover:text-primary transition-colors"
