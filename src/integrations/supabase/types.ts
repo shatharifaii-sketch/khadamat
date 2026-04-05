@@ -204,6 +204,20 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "conversations_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_with_email"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "conversations_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
