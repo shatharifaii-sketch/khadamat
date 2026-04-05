@@ -8,14 +8,14 @@ import { EllipsisVertical } from 'lucide-react';
 import { useState } from 'react';
 
 interface Props {
-    provider: {
+    user: {
         id: string;
         full_name: string;
         profile_image_url: string;
     };
 }
 
-const ChatSimpleData = ({provider}: Props) => {
+const ChatSimpleData = ({user}: Props) => {
   const [reportDesc, setReportDesc] = useState<string>('');
 
   const handleReport = () => {
@@ -36,7 +36,7 @@ const ChatSimpleData = ({provider}: Props) => {
                       </DialogTrigger>
                       <DialogContent>
                         <DialogHeader>
-                          <h1 className='text-lg font-bold'>إبدأ شكوى ضد {provider.full_name}</h1>
+                          <h1 className='text-lg font-bold'>إبدأ شكوى ضد {user.full_name}</h1>
                         </DialogHeader>
                         <DialogDescription>
                           <h4 className='font-bold'>شرح المشكلة</h4>
@@ -53,16 +53,16 @@ const ChatSimpleData = ({provider}: Props) => {
                 </Popover>
         </div>
         <div className='flex items-center gap-2 justify-end'>
-            <h1>{provider.full_name}</h1>
-            {provider.profile_image_url ? (
+            <h1>{user.full_name}</h1>
+            {user.profile_image_url ? (
                     <Avatar className='size-10'>
                         <AvatarImage
-                            src={provider.profile_image_url}
+                            src={user.profile_image_url}
                         />
                     </Avatar>
                 ) : (
                     <GeneratedAvatar
-                        seed={provider.full_name}
+                        seed={user.full_name}
                         variant="initials"
                         className="size-10"
                     />

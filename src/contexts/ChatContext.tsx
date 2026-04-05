@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "./AuthContext";
 import { toast } from "sonner";
 import { useLocation } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 
 export interface Message {
     id: string;
@@ -23,7 +24,7 @@ export interface Message {
 
 const ChatContext = createContext(null);
 
-const getUserConversationsMessages = async ({ convo }: { convo: any}): Promise<Message[]> => {
+const getUserConversationsMessages = async ({ convo }: { convo: any }): Promise<Message[]> => {
     const { data: messages, error: messagesError } = await supabase
         .from('messages')
         .select(`
@@ -140,6 +141,71 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
     const [unreadCount, setUnreadCount] = useState(0);
     const [needNotifcations, setNeedNotifications] = useState<boolean>(true);
     const location = useLocation();
+    const queryClient = useQueryClient();
+
+    const updateConversationsCache = (message: any) => {
+        queryClient.setQueryData(
+            ['get-conversations', user?.id],
+            (old: any[]) => {
+                if (!old) return old;
+
+                return old.map((convo) => {
+                    if (convo.id !== message.conversation_id) return convo;
+
+                    return {
+                        ...convo,
+                        last_message: message.content,
+                        last_message_sender_id: message.sender_id,
+                        last_message_at: message.created_at,
+                        unread_messages_count: message.sender_id !== user.id ? convo.unread_messages_count + 1 : convo.unread_messages_count
+                    };
+                }).sort(
+                    (a, b) =>
+                        new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime()
+                );
+            }
+        );
+    };
+
+    const handleIncomingMessage = async (rawMessage: any) => {
+        const message = await enrichMessage(rawMessage);
+
+        updateConversationsCache(message);
+        const isActiveChat = activeConversation?.id === message.conversation_id;
+
+        if (message.sender_id !== user?.id && needNotifcations && !isActiveChat) {
+            toast("تم استلام رسالة جديدة", {
+                description: `رسالة جديدة من ${message.sender.full_name}`,
+                duration: 3000,
+                action: {
+                    label: 'عرض الرسالة',
+                    onClick: () => {
+                        window.location.href = `/chat/${message.conversation_id}/${message.sender_id}/${message.file_url}/${message.sender_id}`
+                    }
+                }
+            });
+        }
+
+        if (activeConversation?.id === message.conversation_id) {
+            setMessages((prev) => {
+                const exists = prev.some(m => m.id === message.id);
+                if (exists) return prev;
+                return [...prev, message];
+            });
+
+            if (message.sender_id !== user?.id) {
+                updateMessageReadAt({ message, userId: user?.id });
+            }
+        }
+    }
+
+    const enrichMessage = async (message: any) => {
+        const { data: sender } = await supabase.from('profiles').select('id, full_name, profile_image_url').eq('id', message.sender_id).single();
+
+        return {
+            ...message, sender
+        }
+    }
 
     useEffect(() => {
         setNeedNotifications(!location.pathname.startsWith('/chat'))
@@ -208,8 +274,6 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
                     filter: `conversation_id=eq.${activeConversation.id}`,
                 },
                 (payload) => {
-                    console.log('payload received:', payload);
-
                     switch (payload.eventType) {
                         case 'INSERT':
                             setMessages((prev) => {
@@ -223,7 +287,7 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
                             setMessages((prev) => prev.map(
                                 (msg) => msg.id === payload.new.id ? payload.new : msg
                             ));
-                            
+
                             break;
                         case 'DELETE':
                             setMessages((prev) => prev.filter((msg) => msg.id !== payload.old.id));
@@ -242,60 +306,26 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
     useEffect(() => {
         if (!user) return;
 
-        let channels: any[] = [];
+        const channel = supabase
+            .channel('messages-global')
+            .on(
+                'postgres_changes',
+                {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'messages',
+                },
+                (payload) => {
+                    const message = payload.new;
 
-        const fetchAndSubscribe = async () => {
-            const { data: conversations, error: convosError } = await supabase
-                .from('conversations')
-                .select(`
-                    *,
-                    service:conversations_service_id_fkey(
-                        id,
-                        title
-                    )
-                    `)
-                .or(`client_id.eq.${user?.id},provider_id.eq.${user?.id}`)
-            
-            if (!conversations) return;
+                    handleIncomingMessage(message);
+                }
+            )
+            .subscribe();
 
-            channels = conversations.map((conv: any) => {
-                supabase
-                    .channel(`messages:${conv.id}`)
-                    .on(
-                        "postgres_changes",
-                        {
-                            event: "INSERT",
-                            schema: "public",
-                            table: "messages",
-                            filter: `conversation_id=eq.${conv.id}`,
-                        },
-                        (payload) => {
-                            const message = payload.new;
-                            if (message.sender_id !== user.id) {
-                                toast(`رسالة جديدة من ${conv.service.title}`, {
-                                    position: "top-right",
-                                    duration: 3000,
-                                    action: {
-                                        label: 'عرض الرسالة',
-                                        onClick: () => {
-                                            window.location.href = `/chat/${conv.id}/${conv.client_id}/${conv.service_id}/${conv.provider_id}`
-                                        }
-                                    }
-                                });
-
-                                setUnreadCount((prev) => prev + 1);
-                            }
-                        }
-                    )
-                    .subscribe();
-            })
-
-            return () => {
-                channels.forEach((ch: any) => ch.unsubscribe());
-            }
-        }
-
-        fetchAndSubscribe();
+        return () => {
+            supabase.removeChannel(channel);
+        };
     }, [user]);
 
     const addLocalMessage = (message: any) => {

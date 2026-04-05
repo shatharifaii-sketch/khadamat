@@ -1,3 +1,4 @@
+import { locations } from "@/components/FindService/ServiceCategories";
 
 export interface ValidationResult {
   isValid: boolean;
@@ -47,6 +48,20 @@ export const validateRequired = (value: string, fieldName: string): ValidationRe
   }
   return { isValid: true, message: '' };
 };
+
+export const validateLocation = (value: string, fieldName: string): ValidationResult => {
+  if (!value.trim()) {
+    return { isValid: true, message: '' }; // Location is optional, so it's valid if empty
+  } else {
+    const isValid = locations.includes(value);
+
+    return {
+      isValid,
+      message: isValid ? '' : `يرجى اختيار ${fieldName} من القائمة`
+    };
+  }
+
+}
 
 export const validateTitle = (title: string): ValidationResult => {
   if (!title.trim()) {

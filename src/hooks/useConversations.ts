@@ -20,6 +20,11 @@ export interface Conversation {
         full_name: string;
         profile_image_url: string;
     };
+    client: {
+        id: string;
+        full_name: string;
+        profile_image_url: string;
+    };
     service: {
         id: string;
         title: string;
@@ -30,7 +35,7 @@ export interface Conversation {
         email: string;
         created_at: string;
         updated_at: string;
-    }
+    };
 }
 
 export interface EnrichedConversation {
@@ -43,6 +48,11 @@ export interface EnrichedConversation {
     created_at: string;
     updated_at: string;
     provider: {
+        id: string;
+        full_name: string;
+        profile_image_url: string;
+    };
+    client: {
         id: string;
         full_name: string;
         profile_image_url: string;
@@ -105,7 +115,6 @@ const getConvoMessagesData = async (conversationId: string, userId: string) => {
 
 export const useConversations = () => {
     const { user } = useAuth();
-    const navigate = useNavigate();
 
     const getConversations = useSuspenseQuery({
         queryKey: ['get-conversations', user?.id],
@@ -115,6 +124,11 @@ export const useConversations = () => {
                 .select(`
                 *,
                 provider:conversations_provider_id_fkey (
+                    id,
+                    full_name,
+                    profile_image_url
+                ),
+                client:conversations_client_id_fkey (
                     id,
                     full_name,
                     profile_image_url
@@ -132,24 +146,21 @@ export const useConversations = () => {
                 )
                 `)
                 .or(`client_id.eq.${user.id},provider_id.eq.${user.id}`)
-                .order('last_message_at', { ascending: false });
+                .order('last_message_at', { ascending: false })
+                .returns<Conversation[]>();
 
             if (error) {
                 console.error(error);
                 throw error;
             }
 
-            console.log(conversations);
-
             const enrichedConversations = await Promise.all(
                 conversations.map(async (convo) => {
                     const { lastMessage, unreadMessagesCount } = await getConvoMessagesData(convo.id, user!.id);
 
-                    console.log(lastMessage, unreadMessagesCount);
-
                     if (!lastMessage) {
-                        return await removeEmptyConvo(convo.id);
-                        
+                        //await removeEmptyConvo(convo.id);
+                        return null;
                     }
 
                     return {
@@ -162,7 +173,7 @@ export const useConversations = () => {
                 })
             )
 
-            return enrichedConversations as EnrichedConversation[];
+            return enrichedConversations.filter(Boolean) as EnrichedConversation[];
         }
     })
 
@@ -233,6 +244,11 @@ export const useConversationData = ({ conversationId }: { conversationId: string
                     full_name,
                     profile_image_url
                 ),
+                client:conversations_client_id_fkey (
+                    id,
+                    full_name,
+                    profile_image_url
+                ),
                 service:conversations_service_id_fkey (
                     id,
                     title,
@@ -246,7 +262,8 @@ export const useConversationData = ({ conversationId }: { conversationId: string
                 )
                 `)
                 .eq('id', conversationId)
-                .single();
+                .single()
+                .returns<Conversation>();
 
             if (error) {
                 console.error(error);

@@ -16,8 +16,6 @@ const ConversationsViewWrapper = () => {
     
     const { conversations } = useConversations();
 
-    console.log(conversations)
-
     return (
         <ConvoLayout>
             {conversations && conversations.length > 0 ? (conversations.map((convo) => (
