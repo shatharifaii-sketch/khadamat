@@ -85,24 +85,24 @@ async function handleInvoiceCreated(invoice: any) {
       console.log('Error creating invoice in database: ', error);
     };
 
-    const { data: resendData, error: resendError } = await resend.emails.send({
-      from: "Khedemtak <support@mail.khedemtak.com>",
-      to: invoice.lines.data[0].metadata.email,
-      template: {
-        id: "invoice-created",
-        variables: {
-          name: invoice.customer_name,
-          total: (invoice.amount_due / 100).toString(),
-          action_link: invoice.hosted_invoice_url,
-          help_url: Deno.env.get("APP_HELP_URL_LIVE"),//Deno.env.get("APP_HELP_URL"),
-        },
-      }
-    })
+    // const { data: resendData, error: resendError } = await resend.emails.send({
+    //   from: "Khedemtak <support@mail.khedemtak.com>",
+    //   to: invoice.lines.data[0].metadata.email,
+    //   template: {
+    //     id: "invoice-created",
+    //     variables: {
+    //       name: invoice.customer_name,
+    //       total: (invoice.amount_due / 100).toString(),
+    //       action_link: invoice.hosted_invoice_url,
+    //       help_url: Deno.env.get("APP_HELP_URL_LIVE"),//Deno.env.get("APP_HELP_URL"),
+    //     },
+    //   }
+    // })
 
-    if (resendError) {
-      console.log('Error sending invoice email: ', resendError);
-      return false;
-    }
+    // if (resendError) {
+    //   console.log('Error sending invoice email: ', resendError);
+    //   return false;
+    // }
 
     return true;
   } catch (error) {
