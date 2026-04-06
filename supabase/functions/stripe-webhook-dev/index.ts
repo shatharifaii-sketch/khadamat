@@ -9,7 +9,7 @@ import Stripe from "npm:stripe";
 import { Resend } from "npm:resend@latest";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY")!);
-const stripe = new Stripe(Deno.env.get("STRIPE_LIVE_SEC_KEY")!);
+const stripe = new Stripe(Deno.env.get("STRIPE_TEST_SEC_KEY")!);
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
@@ -48,7 +48,7 @@ async function checkDiscount(subscriptionId: string) {
 
 async function getSubscriptionWithRetry(retries: number, delay: number, subscriptionId: string, userId: string) {
   for (let i = 0; i < retries; i++) {
-    const { data } = await supabase.from('subscriptions').select('id').eq('stripe_subscription_id', subscriptionId).eq('user_id', userId).maybeSingle();
+    const { data } = await supabase.from('subscriptions_dev').select('id').eq('stripe_subscription_id', subscriptionId).eq('user_id', userId).maybeSingle();
 
     if (data) return data;
 
@@ -63,7 +63,7 @@ async function handleInvoiceCreated(invoice: any) {
   try {
     console.log('creating invoice in database');
     const { data, error } = await supabase
-      .from('invoices')
+      .from('invoices_dev')
       .insert({
         user_id: invoice.lines.data[0].metadata.user_id,
         amount: invoice.amount_due / 100,
@@ -128,7 +128,7 @@ async function handleCheckoutSessionCompleted(session: any) {
     }
 
     const { error: invoiceError } = await supabase
-      .from('invoices')
+      .from('invoices_dev')
       .update({
         user_id: session.client_reference_id,
       })
@@ -154,7 +154,7 @@ async function handleInvoicePaymentPaid(invoice: any) {
 
     // --- 1. UPSERT INVOICE (idempotent, removes dependency on invoice.created)
     const { data: inv, error: invoiceUpsertError } = await supabase
-      .from('invoices')
+      .from('invoices_dev')
       .upsert(
         {
           user_id: userId,
@@ -218,7 +218,7 @@ async function handleInvoicePaymentPaid(invoice: any) {
       return false;
     }
 
-    const { error: invoiceUpdateError } = await supabase.from('invoices').update({
+    const { error: invoiceUpdateError } = await supabase.from('invoices_dev').update({
       subscription_transaction_id: data.id
     }).eq('id', inv.id);
 
@@ -276,7 +276,7 @@ async function handleSubscriptionCreated(subscription: any) {
       : null;
     
     const { data: subscriptionTier, error: tierError } = await supabase
-      .from('subscription_tiers')
+      .from('subscription_tiers_dev')
       .select('*')
       .eq(
         'stripe_product_id',
@@ -294,7 +294,7 @@ async function handleSubscriptionCreated(subscription: any) {
     const nextPaymentDate = new Date(subscription.items.data[0].current_period_end * 1000);
 
     const { data, error } = await supabase
-      .from('subscriptions')
+      .from('subscriptions_dev')
       .upsert({
         user_id: subscription.metadata.user_id,
         tier_id: subscriptionTier.id,
@@ -329,7 +329,7 @@ async function handleSubscriptionCreated(subscription: any) {
       return false;
     };
 
-    const { error: invoiceError } = await supabase.from('invoices').update({
+    const { error: invoiceError } = await supabase.from('invoices_dev').update({
       subscription_id: data.id
     }).eq('user_id', subscription.metadata.user_id).eq('stripe_invoice_id', subscription.latest_invoice);
 
@@ -416,7 +416,7 @@ async function handleCustomerCreated(customer: any) {
 async function handleInvoicePaymentFailed(invoice: any) {
   try {
     const { data, error } = await supabase
-      .from('invoices')
+      .from('invoices_dev')
       .update({
         status: invoice.status,
         url: invoice.invoice_pdf,
@@ -430,7 +430,7 @@ async function handleInvoicePaymentFailed(invoice: any) {
       return false;
     };
 
-    const { error: subError } = await supabase.from('subscriptions').update({
+    const { error: subError } = await supabase.from('subscriptions_dev').update({
       status: 'past_due'
     }).eq('stripe_subscription_id', invoice.lines.data[0].parent.subscription_item_details.subscription)
 
@@ -472,7 +472,7 @@ Deno.serve(async (req: Request) => {
   let data;
   let eventType;
 
-  const webhookSecret = Deno.env.get("VITE_STRIPE_LIVE_WEBHOOK_SIGNING_SEC");
+  const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET")!;
   console.log("wh sec: ", webhookSecret);
 
   if (webhookSecret) {
@@ -522,7 +522,7 @@ Deno.serve(async (req: Request) => {
       break;
     case 'invoice.created':
       const { data: existingInv, error: invError } = await supabase
-        .from('invoices')
+        .from('invoices_dev')
         .select('*')
         .eq('status', 'paid')
         .eq('stripe_invoice_id', data.object.id)
@@ -605,7 +605,7 @@ Deno.serve(async (req: Request) => {
       break;
     case 'customer.subscription.created':
       const { data: existingSub, error: subError } = await supabase
-        .from('subscriptions')
+        .from('subscriptions_dev')
         .select('*')
         .eq('status', 'active')
         .or(

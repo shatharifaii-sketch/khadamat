@@ -6,7 +6,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 import Stripe from "npm:stripe";
 
-const stripe = new Stripe(Deno.env.get("STRIPE_TEST_SEC_KEY")!);
+const stripe = new Stripe(Deno.env.get("STRIPE_LIVE_SEC_KEY")!);
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",

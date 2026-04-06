@@ -8,7 +8,7 @@ import Stripe from "npm:stripe";
 import { Resend } from "npm:resend@latest";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY")!);
-const stripe = new Stripe(Deno.env.get("STRIPE_LIVE_SEC_KEY")!);
+const stripe = new Stripe(Deno.env.get("STRIPE_TEST_SEC_KEY")!);
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",

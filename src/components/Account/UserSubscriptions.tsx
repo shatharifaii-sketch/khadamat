@@ -13,7 +13,7 @@ import { usePaymentLogic } from '@/hooks/usePaymentLogic';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
 import { User } from '../Admin/ui/UserForm';
 
-interface UserSubscriptionsProps { 
+interface UserSubscriptionsProps {
     user: User
 }
 
@@ -25,7 +25,7 @@ const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
     const [openPaymentModal, setOpenPaymentModal] = useState<boolean>(false);
     const [openDeactivateModal, setOpenDeactivateModal] = useState<boolean>(false);
     const [currency, setCurrency] = useState<string>('ILS');
-    
+
 
     if (!getUserSubscriptions.data) return null;
 
@@ -108,13 +108,17 @@ const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
                                 <CardContent>
                                     <div className="flex flex-col items-start justify-between gap-3">
                                         <div className='flex flex-col gap-2'>
-                                            <div className='flex items-center gap-2'>
-                                                <Badge className='flex items-center gap-2 justify-start py-2 text-sm' variant='secondary'>
-                                                    <span>{activeSubscription.is_in_trial}</span>
-                                                    <Clock className='h-4 w-4 text-primary' />فترة التجربة
-                                                </Badge>
-                                                <p className='text-xs text-muted-foreground'>تاريخ انتهاء التجربة: <span>{new Date(activeSubscription.trial_expires_at).toLocaleDateString('ar')}</span></p>
-                                            </div>
+                                            {
+                                                activeSubscription.is_in_trial && (
+                                                    <div className='flex items-center gap-2'>
+                                                        <Badge className='flex items-center gap-2 justify-start py-2 text-sm' variant='secondary'>
+                                                            <span>{activeSubscription.is_in_trial}</span>
+                                                            <Clock className='h-4 w-4 text-primary' />فترة التجربة
+                                                        </Badge>
+                                                        <p className='text-xs text-muted-foreground'>تاريخ انتهاء التجربة: <span>{new Date(activeSubscription.trial_expires_at).toLocaleDateString('ar')}</span></p>
+                                                    </div>
+                                                )
+                                            }
                                             <span className='text-sm flex items-center gap-2 justify-start px-2'><span className='text-primary'>{activeSubscription.services_used}/{activeSubscription.services_allowed}</span> خدمات منشورة</span>
                                         </div>
                                         <Separator />
@@ -131,7 +135,7 @@ const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
                                     </Button>
                                 </CardFooter>
                             </Card>
-                            <Card className='w-1/2 shadow-lg'>
+                            <Card className='w-1/2 shadow-lg relative'>
                                 <CardHeader>
                                     <CardTitle>
                                         الدفع
@@ -148,9 +152,9 @@ const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
                                     </div>
                                     <div className='flex flex-col'>
                                         <p className='text-sm text-muted-foreground'>في حال لم يحن تاريخ الدفع المحدد فلا يصح بدء عملية الدفع!</p>
-                                        <Button 
-                                        onClick={() => setOpenPaymentModal(true)} className='flex-1 mt-3'
-                                        disabled={!isPayable}
+                                        <Button
+                                            onClick={() => setOpenPaymentModal(true)} className='flex-1 mt-3'
+                                            disabled={true}
                                         >
                                             ابدأ عمليه الدفع
                                         </Button>
@@ -159,6 +163,7 @@ const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
                                         </button>*/}
                                     </div>
                                 </CardContent>
+                                <div className='absolute inset-0 z-50 backdrop-blur-md rounded-lg'></div>
                             </Card>
                         </div>
 
