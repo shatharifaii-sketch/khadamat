@@ -163,7 +163,7 @@ const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
                                         </button>*/}
                                     </div>
                                 </CardContent>
-                                <div className='absolute inset-0 z-50 backdrop-blur-md rounded-lg'></div>
+                                {/* <div className='absolute inset-0 z-50 backdrop-blur-md rounded-lg'></div> */}
                             </Card>
                         </div>
 

@@ -46,6 +46,24 @@ async function checkDiscount(subscriptionId: string) {
   }
 }
 
+async function deactivateSubOnPaymentFailure(stripe_sub_id: string) {
+  try {
+    const { error: subErro } = await supabase.from('subscriptions_dev').update({
+      status: 'inactive'
+    }).eq('stripe_subscription_id', stripe_sub_id);
+
+    if (subErro) {
+      console.log('subscription creation SUB error: ', subErro);
+      return false;
+    };
+
+    return true;
+  } catch (error) {
+    console.log('Error deactivating subscription: ', error);
+    return false;
+  }
+}
+
 async function getSubscriptionWithRetry(retries: number, delay: number, subscriptionId: string, userId: string) {
   for (let i = 0; i < retries; i++) {
     const { data } = await supabase.from('subscriptions_dev').select('id').eq('stripe_subscription_id', subscriptionId).eq('user_id', userId).maybeSingle();
@@ -188,7 +206,7 @@ async function handleInvoicePaymentPaid(invoice: any) {
 
     // --- 4. UPSERT TRANSACTION (prevents duplicates)
     const { data, error: transactionError } = await supabase
-      .from('subscription_transactions')
+      .from('subscription_transactions_dev')
       .upsert({
         user_id: invoice.lines.data[0].metadata.user_id,
         invoice_id: inv.id,
@@ -229,7 +247,7 @@ async function handleInvoicePaymentPaid(invoice: any) {
 
     // --- 6. PREVENT DUPLICATE EMAILS
     const { data: existingTx } = await supabase
-      .from('subscription_transactions')
+      .from('subscription_transactions_dev')
       .select('id, email_sent')
       .eq('stripe_invoice_id', invoice.id)
       .maybeSingle();
@@ -430,12 +448,7 @@ async function handleInvoicePaymentFailed(invoice: any) {
       return false;
     };
 
-    const { error: subError } = await supabase.from('subscriptions_dev').update({
-      status: 'past_due'
-    }).eq('stripe_subscription_id', invoice.lines.data[0].parent.subscription_item_details.subscription)
-
-    if (subError) {
-      console.log('subscription creation SUB error: ', subError);
+    if (!(await deactivateSubOnPaymentFailure(invoice.lines.data[0].parent.subscription_item_details.subscription))) {
       return false;
     };
 
@@ -585,6 +598,7 @@ Deno.serve(async (req: Request) => {
 
       break;
     case 'invoice.payment_failed':
+      console.log('Payment failed for invoice: ', data.object);
       // The payment failed or the customer doesn't have a valid payment method.
       // The subscription becomes past_due. Notify your customer and send them to the
       // customer portal to update their payment information.

@@ -23,7 +23,7 @@ const createStripeCheckoutSession = async ({ priceId, userId, email }: { priceId
     if (!userId) return;
 
     const { data, response, error } = await supabase.functions.invoke(
-        "create-checkout-session",
+        "create-checkout-session-dev",
         {
             body: JSON.stringify({
                 priceId,

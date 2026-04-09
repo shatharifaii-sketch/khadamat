@@ -429,6 +429,95 @@ export type Database = {
           },
         ]
       }
+      invoices_dev: {
+        Row: {
+          amount: number | null
+          billing_reason: string | null
+          created_at: string
+          currency: string | null
+          id: number
+          status: string | null
+          stripe_customer_id: string | null
+          stripe_invoice_id: string | null
+          stripe_price_id: string | null
+          stripe_product_id: string | null
+          stripe_subscription_id: string | null
+          stripe_subscription_item_id: string | null
+          subscription_id: string | null
+          subscription_transaction_id: string | null
+          subtotal: number | null
+          url: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount?: number | null
+          billing_reason?: string | null
+          created_at?: string
+          currency?: string | null
+          id?: number
+          status?: string | null
+          stripe_customer_id?: string | null
+          stripe_invoice_id?: string | null
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          stripe_subscription_id?: string | null
+          stripe_subscription_item_id?: string | null
+          subscription_id?: string | null
+          subscription_transaction_id?: string | null
+          subtotal?: number | null
+          url?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number | null
+          billing_reason?: string | null
+          created_at?: string
+          currency?: string | null
+          id?: number
+          status?: string | null
+          stripe_customer_id?: string | null
+          stripe_invoice_id?: string | null
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          stripe_subscription_id?: string | null
+          stripe_subscription_item_id?: string | null
+          subscription_id?: string | null
+          subscription_transaction_id?: string | null
+          subtotal?: number | null
+          url?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_dev_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions_dev"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_dev_subscription_transaction_id_fkey"
+            columns: ["subscription_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_transactions_dev"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_dev_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_dev_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_with_email"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           content: string
@@ -1218,6 +1307,72 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_tiers_dev: {
+        Row: {
+          allowed_services: number | null
+          badge_class_name: string | null
+          class_name: string | null
+          created_at: string
+          free_trial: boolean | null
+          free_trial_period: number | null
+          free_trial_period_text: string | null
+          id: string
+          notes: Json | null
+          price_monthly_title: string | null
+          price_monthly_value: number | null
+          price_yearly_title: string | null
+          price_yearly_value: number | null
+          stripe_monthly_price_id: string
+          stripe_product_id: string
+          stripe_yearly_price_id: string
+          tier: number | null
+          title: string | null
+          users: number
+        }
+        Insert: {
+          allowed_services?: number | null
+          badge_class_name?: string | null
+          class_name?: string | null
+          created_at?: string
+          free_trial?: boolean | null
+          free_trial_period?: number | null
+          free_trial_period_text?: string | null
+          id?: string
+          notes?: Json | null
+          price_monthly_title?: string | null
+          price_monthly_value?: number | null
+          price_yearly_title?: string | null
+          price_yearly_value?: number | null
+          stripe_monthly_price_id: string
+          stripe_product_id: string
+          stripe_yearly_price_id: string
+          tier?: number | null
+          title?: string | null
+          users?: number
+        }
+        Update: {
+          allowed_services?: number | null
+          badge_class_name?: string | null
+          class_name?: string | null
+          created_at?: string
+          free_trial?: boolean | null
+          free_trial_period?: number | null
+          free_trial_period_text?: string | null
+          id?: string
+          notes?: Json | null
+          price_monthly_title?: string | null
+          price_monthly_value?: number | null
+          price_yearly_title?: string | null
+          price_yearly_value?: number | null
+          stripe_monthly_price_id?: string
+          stripe_product_id?: string
+          stripe_yearly_price_id?: string
+          tier?: number | null
+          title?: string | null
+          users?: number
+        }
+        Relationships: []
+      }
       subscription_transactions: {
         Row: {
           amount: number | null
@@ -1317,6 +1472,109 @@ export type Database = {
             columns: ["subscription_id"]
             isOneToOne: false
             referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscription_transactions_dev: {
+        Row: {
+          amount: number | null
+          billing_period_end: string | null
+          billing_period_start: string | null
+          billing_reason: string | null
+          coupon_id: string | null
+          coupon_used: boolean | null
+          created_at: string
+          currency: string | null
+          email_sent: boolean | null
+          id: string
+          invoice_id: number | null
+          invoice_url: string | null
+          payment_date: string | null
+          payment_status: string | null
+          status: string
+          stripe_customer_id: string | null
+          stripe_invoice_id: string | null
+          stripe_price_id: string | null
+          stripe_product_id: string | null
+          stripe_subscription_id: string | null
+          stripe_subscription_item_id: string | null
+          subscription_id: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount?: number | null
+          billing_period_end?: string | null
+          billing_period_start?: string | null
+          billing_reason?: string | null
+          coupon_id?: string | null
+          coupon_used?: boolean | null
+          created_at?: string
+          currency?: string | null
+          email_sent?: boolean | null
+          id?: string
+          invoice_id?: number | null
+          invoice_url?: string | null
+          payment_date?: string | null
+          payment_status?: string | null
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_invoice_id?: string | null
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          stripe_subscription_id?: string | null
+          stripe_subscription_item_id?: string | null
+          subscription_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number | null
+          billing_period_end?: string | null
+          billing_period_start?: string | null
+          billing_reason?: string | null
+          coupon_id?: string | null
+          coupon_used?: boolean | null
+          created_at?: string
+          currency?: string | null
+          email_sent?: boolean | null
+          id?: string
+          invoice_id?: number | null
+          invoice_url?: string | null
+          payment_date?: string | null
+          payment_status?: string | null
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_invoice_id?: string | null
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          stripe_subscription_id?: string | null
+          stripe_subscription_item_id?: string | null
+          subscription_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_transactions_dev_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "coupons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_transactions_dev_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices_dev"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_transactions_dev_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions_dev"
             referencedColumns: ["id"]
           },
         ]
@@ -1427,6 +1685,119 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "subscriptions_tier_id_fkey"
+            columns: ["tier_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_tiers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscriptions_dev: {
+        Row: {
+          amount: number
+          auto_renew: boolean | null
+          billing_cycle: string
+          coupon_id: string | null
+          created_at: string
+          currency: string
+          expires_at: string
+          id: string
+          is_in_trial: boolean
+          is_payment_pastdue: boolean | null
+          last_payment_date: string | null
+          latest_stripe_invoice_id: string | null
+          next_payment_date: string | null
+          payment_method: string | null
+          services_allowed: number | null
+          services_used: number | null
+          started_at: string
+          status: string
+          stripe_coupon_id: string | null
+          stripe_customer_id: string | null
+          stripe_discount_id: string | null
+          stripe_price_id: string | null
+          stripe_product_id: string | null
+          stripe_promotion_id: string | null
+          stripe_subscription_id: string | null
+          stripe_subscription_item_id: string | null
+          subscription_ended_at: string | null
+          tier_id: string | null
+          trial_expires_at: string | null
+          updated_at: string
+          used_coupon_on_start: boolean | null
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          auto_renew?: boolean | null
+          billing_cycle?: string
+          coupon_id?: string | null
+          created_at?: string
+          currency?: string
+          expires_at?: string
+          id?: string
+          is_in_trial?: boolean
+          is_payment_pastdue?: boolean | null
+          last_payment_date?: string | null
+          latest_stripe_invoice_id?: string | null
+          next_payment_date?: string | null
+          payment_method?: string | null
+          services_allowed?: number | null
+          services_used?: number | null
+          started_at?: string
+          status?: string
+          stripe_coupon_id?: string | null
+          stripe_customer_id?: string | null
+          stripe_discount_id?: string | null
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          stripe_promotion_id?: string | null
+          stripe_subscription_id?: string | null
+          stripe_subscription_item_id?: string | null
+          subscription_ended_at?: string | null
+          tier_id?: string | null
+          trial_expires_at?: string | null
+          updated_at?: string
+          used_coupon_on_start?: boolean | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          auto_renew?: boolean | null
+          billing_cycle?: string
+          coupon_id?: string | null
+          created_at?: string
+          currency?: string
+          expires_at?: string
+          id?: string
+          is_in_trial?: boolean
+          is_payment_pastdue?: boolean | null
+          last_payment_date?: string | null
+          latest_stripe_invoice_id?: string | null
+          next_payment_date?: string | null
+          payment_method?: string | null
+          services_allowed?: number | null
+          services_used?: number | null
+          started_at?: string
+          status?: string
+          stripe_coupon_id?: string | null
+          stripe_customer_id?: string | null
+          stripe_discount_id?: string | null
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          stripe_promotion_id?: string | null
+          stripe_subscription_id?: string | null
+          stripe_subscription_item_id?: string | null
+          subscription_ended_at?: string | null
+          tier_id?: string | null
+          trial_expires_at?: string | null
+          updated_at?: string
+          used_coupon_on_start?: boolean | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_dev_tier_id_fkey"
             columns: ["tier_id"]
             isOneToOne: false
             referencedRelation: "subscription_tiers"

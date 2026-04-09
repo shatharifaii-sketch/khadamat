@@ -75,7 +75,7 @@ async function cancelSubscription({
   stripe_sub_id
 }: CancelSubscriptionInput) {
   const { data, error } = await supabase.functions.invoke(
-    'cancel-subscription', {
+    'cancel-subscription-dev', {
     body: JSON.stringify({
       sub_id,
       email,
