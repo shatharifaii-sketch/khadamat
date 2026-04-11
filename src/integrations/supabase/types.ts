@@ -1061,6 +1061,27 @@ export type Database = {
           },
         ]
       }
+      stipe_events: {
+        Row: {
+          event_id: string | null
+          id: number
+          processed_at: string
+          type: string | null
+        }
+        Insert: {
+          event_id?: string | null
+          id?: number
+          processed_at?: string
+          type?: string | null
+        }
+        Update: {
+          event_id?: string | null
+          id?: number
+          processed_at?: string
+          type?: string | null
+        }
+        Relationships: []
+      }
       stripe_checkout_sessions: {
         Row: {
           attrs: Json | null

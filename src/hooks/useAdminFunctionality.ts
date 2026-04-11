@@ -447,7 +447,7 @@ export const useAdminFunctionality = () => {
   const createCoupon = useMutation({
     mutationKey: ['create-coupon'],
     mutationFn: async (formData: Partial<Tables<'coupons'>>) => {
-      const { data: couponData, error: couponError } = await supabase.functions.invoke('create-coupons-with-stripe', {
+      const { data: couponData, error: couponError } = await supabase.functions.invoke('create-coupons-with-stripe-dev', {
         body: JSON.stringify({ formData })
       });
 

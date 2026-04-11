@@ -9,7 +9,7 @@ import Stripe from "npm:stripe";
 import { Resend } from "npm:resend@latest";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY")!);
-const stripe = new Stripe(Deno.env.get("STRIPE_LIVE_SEC_KEY")!);
+const stripe = new Stripe(Deno.env.get("VITE_STRIPE_LIVE_SEC_KEY")!);
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
@@ -28,21 +28,74 @@ function formatDate(date?: string | Date | null) {
 async function checkDiscount(subscriptionId: string) {
   try {
     const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
-      expand: ['discounts.data.coupon', 'discounts.data.promotion_code']
+      expand: ['discounts']
     });
 
-    const discount = subscription.discounts?.data?.[0];
+    console.log('subscription: ', subscription);
+
+    const discount = subscription.discounts[0];
+
+    console.log('discount: ', discount);
 
     if (!discount) return null;
 
+    const { data, error } = await supabase
+        .from('coupons')
+        .select('id')
+        .eq('stripe_coupon_id', discount.source.coupon)
+        .eq('stripe_promo_id', discount.promotion_code)
+        .maybeSingle();
+    
+    if (error) {
+      console.log('discount fetch error: ', error);
+      return null;
+    }
+
     return {
       discount_id: discount.id,
-      coupon_id: discount.coupon?.id ?? null,
-      promotion_code_id: discount.promotion_code?.id ?? null
+      coupon_id: discount.source.coupon ?? null,
+      promotion_code_id: discount.promotion_code ?? null,
+      db_id: data?.id ?? null,
     }
   } catch (error) {
     console.log('discount fetch error: ', error);
     return null;
+  }
+}
+
+async function deactivateSub(stripe_sub_id: string, endedAt: Date) {
+  try {
+    const { data: existingSub, error: subError } = await supabase.from('subscriptions').select('id, status').eq('stripe_subscription_id', stripe_sub_id).maybeSingle();
+
+    if (subError) {
+      console.log('subscription fetch SUB error: ', subError);
+      return false;
+    }
+
+    if (!existingSub) {
+      console.log('No subscription found with stripe_subscription_id: ', stripe_sub_id);
+      return true;
+    }
+
+    if (existingSub.status === 'inactive') {
+      console.log('Subscription already inactive for stripe_subscription_id: ', stripe_sub_id);
+      return true;
+    }
+
+    const { error: updateError } = await supabase.from('subscriptions').update({
+      status: 'inactive',
+      subscription_ended_at: endedAt.toISOString(),
+    }).eq('stripe_subscription_id', stripe_sub_id);
+
+    if (updateError) {
+      console.log('subscription creation SUB error: ', updateError);
+      return false;
+    };
+
+    return true;
+  } catch (error) {
+    console.log('Error deactivating subscription: ', error);
+    return false;
   }
 }
 
@@ -249,8 +302,8 @@ async function handleInvoicePaymentPaid(invoice: any) {
           subscription_date: formatDate(billingStart),
           invoice_url: invoice.hosted_invoice_url,
           due_date: formatDate(billingEnd),
-          action_link: Deno.env.get('APP_ACCOUNT_PAGE_LIVE'),//Deno.env.get('APP_ACCOUNT_PAGE'),
-          help_url: Deno.env.get('APP_HELP_URL_LIVE'),//Deno.env.get('APP_HELP_URL'),
+          action_link: Deno.env.get('APP_ACCOUNT_PAGE_LIVE'),
+          help_url: Deno.env.get('APP_HELP_URL_LIVE'),
         }
       }
     });
@@ -271,10 +324,10 @@ async function handleInvoicePaymentPaid(invoice: any) {
 
 async function handleSubscriptionCreated(subscription: any) {
   try {
-    const discount = subscription.discounts?.length
-      ? await checkDiscount(subscription.id)
-      : null;
-    
+    const discount = await checkDiscount(subscription.id);
+
+    console.log('handle function subscription created - discount: ', discount);
+
     const { data: subscriptionTier, error: tierError } = await supabase
       .from('subscription_tiers')
       .select('*')
@@ -307,6 +360,8 @@ async function handleSubscriptionCreated(subscription: any) {
         amount: subscription.items.data[0].plan.amount / 100,
         status: subscription.items.data[0].plan.active ? 'active' : 'inactive',
         trial_expires_at: nextPaymentDate,
+        used_coupon_on_start: !!discount,
+        coupon_id: discount?.db_id ?? null,
         stripe_subscription_id: subscription.id,
         stripe_subscription_item_id: subscription.items.data[0].id,
         stripe_customer_id: subscription.customer,
@@ -317,10 +372,10 @@ async function handleSubscriptionCreated(subscription: any) {
         stripe_coupon_id: discount?.coupon_id ?? null,
         stripe_promotion_id: discount?.promotion_code_id ?? null
       },
-      {
-        onConflict: 'stripe_subscription_id'
-      }
-    )
+        {
+          onConflict: 'stripe_subscription_id'
+        }
+      )
       .select('id, user_id, tier_id, billing_cycle')
       .maybeSingle();
 
@@ -348,7 +403,7 @@ async function handleSubscriptionCreated(subscription: any) {
       console.log('subscription creation USER error: ', userDataError);
     };
 
-    const { data: resendData, error: resendError } = await resend.emails.send({
+    const { error: resendError } = await resend.emails.send({
       from: "Khedemtak <support@mail.khedemtak.com>",
       to: subscription.metadata.email,
       template: {
@@ -362,8 +417,8 @@ async function handleSubscriptionCreated(subscription: any) {
           due_date: formatDate(nextPaymentDate),
           first_payment_date: formatDate(paymentsStart),
           total: (subscription.items.data[0].plan.amount / 100).toString(),
-          action_link: Deno.env.get('APP_ACCOUNT_PAGE_LIVE'),//Deno.env.get('APP_ACCOUNT_PAGE'),
-          help_url: Deno.env.get('APP_HELP_URL_LIVE'),//Deno.env.get('APP_HELP_URL'),
+          action_link: Deno.env.get('APP_ACCOUNT_PAGE_LIVE'),
+          help_url: Deno.env.get('APP_HELP_URL_LIVE'),
         }
       }
     });
@@ -421,7 +476,7 @@ async function handleInvoicePaymentFailed(invoice: any) {
         status: invoice.status,
         url: invoice.invoice_pdf,
       })
-      .select('*')
+      .select('id, user_id')
       .eq('stripe_invoice_id', invoice.id)
       .maybeSingle();
 
@@ -430,18 +485,101 @@ async function handleInvoicePaymentFailed(invoice: any) {
       return false;
     };
 
-    const { error: subError } = await supabase.from('subscriptions').update({
-      status: 'past_due'
-    }).eq('stripe_subscription_id', invoice.lines.data[0].parent.subscription_item_details.subscription)
+    const { data: userData, error: userDataError } = await supabase.from('profiles_with_email').select('full_name, email').eq('id', data.user_id).maybeSingle();
 
-    if (subError) {
-      console.log('subscription creation SUB error: ', subError);
+    if (userDataError) {
+      console.log('invoice payment failed USER error: ', userDataError);
       return false;
-    };
+    }
+
+    const { data: subscriptionData, error: subscriptionError } = 
+    await supabase.from('subscriptions')
+                  .select('started_at')
+                  .eq('user_id', data.user_id)
+                  .eq('status', 'active')
+                  .maybeSingle();
+
+    if (subscriptionError) {
+      console.log('invoice payment failed SUB error: ', subscriptionError);
+      return false;
+    }
+
+    const { error: resendError } = await resend.emails.send({
+        from: "Khedemtak <support@mail.khedemtak.com>",
+        to: userData.email,
+        template: {
+          id: "payment-failed",
+          variables: {
+            name: userData.full_name ?? 'مستخدم',
+            total: (invoice.amount_due / 100).toString(),
+            subscription_date: formatDate(subscriptionData.started_at),
+            invoice_url: invoice.hosted_invoice_url,
+            help_url: Deno.env.get('APP_HELP_URL_LIVE'),
+          }
+        }
+      });
+
+      if (resendError) {
+        console.log('subscription creation resend error: ', resendError);
+        return false;
+      };
 
     return true;
   } catch (error) {
     console.log(error);
+    return false;
+  }
+}
+
+async function handleSubscriptionUpdated(subscription: any) {
+  try {
+    const { data: userData, error: userDataError } = await supabase.from('profiles')
+      .select('full_name')
+      .eq('id', subscription.metadata.user_id)
+      .maybeSingle();
+
+    if (userDataError) {
+      console.log('subscription update USER error: ', userDataError);
+    };
+
+    const subscriptionStart = new Date(subscription.items.data[0].created * 1000);
+    const paymentsStart = new Date(subscription.items.data[0].current_period_start * 1000);
+    const endedAt = new Date(subscription.ended_at * 1000);
+
+    if (subscription.status === 'canceled' || subscription.status === 'past_due') {
+      const deactivateResponse = await deactivateSub(
+        subscription.id,
+        endedAt
+      );
+
+      if (!deactivateResponse) {
+        return false;
+      };
+    }
+
+    if (subscription.status === 'canceled') {
+      const { error: resendError } = await resend.emails.send({
+        from: "Khedemtak <support@mail.khedemtak.com>",
+        to: subscription.metadata.email,
+        template: {
+          id: "subscription-canceled",
+          variables: {
+            name: userData.full_name ?? 'مستخدم',
+            subscription_date: formatDate(subscriptionStart),
+            last_payment_date: formatDate(paymentsStart),
+            subscription_cancel_date: formatDate(endedAt),
+            help_url: Deno.env.get('APP_HELP_URL_LIVE'),
+          }
+        }
+      });
+
+      if (resendError) {
+        console.log('subscription creation resend error: ', resendError);
+        return false;
+      };
+    }
+  } catch (error) {
+    console.log('subscription update error: ', error);
     return false;
   }
 }
@@ -472,7 +610,7 @@ Deno.serve(async (req: Request) => {
   let data;
   let eventType;
 
-  const webhookSecret = Deno.env.get("VITE_STRIPE_LIVE_WEBHOOK_SIGNING_SEC");
+  const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET")!;
   console.log("wh sec: ", webhookSecret);
 
   if (webhookSecret) {
@@ -503,6 +641,18 @@ Deno.serve(async (req: Request) => {
 
   switch (eventType) {
     case 'checkout.session.completed':
+      const { data: checkoutCompletedEvent } = await supabase.from('stripe_events').select('id').eq('event_id', data.object.id).maybeSingle();
+
+      if (checkoutCompletedEvent) {
+        return new Response("Event already happened: ", {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        })
+      };
+
       // Payment is successful and the subscription is created.
       // You should provision the subscription and save the customer ID to your database.
       const checkoutResponse = await handleCheckoutSessionCompleted(
@@ -511,7 +661,7 @@ Deno.serve(async (req: Request) => {
 
       if (!checkoutResponse) {
         return new Response("Error in checkout.session.completed: ", {
-          status: 400,
+          status: 200,
           headers: {
             ...corsHeaders,
             "Content-Type": "application/json",
@@ -519,8 +669,25 @@ Deno.serve(async (req: Request) => {
         })
       }
 
+      await supabase.from('stripe_events').insert({
+        event_id: data.object.id,
+        event_type: 'checkout.session.completed',
+      });
+
       break;
     case 'invoice.created':
+      const { data: invoiceCreatedEvent } = await supabase.from('stripe_events').select('id').eq('event_id', data.object.id).maybeSingle();
+
+      if (invoiceCreatedEvent) {
+        return new Response("Event already happened: ", {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        })
+      };
+
       const { data: existingInv, error: invError } = await supabase
         .from('invoices')
         .select('*')
@@ -532,7 +699,7 @@ Deno.serve(async (req: Request) => {
       if (invError) {
         console.log('invoice creation error: ', invError);
         return new Response("Error in invoice.created: ", {
-          status: 400,
+          status: 200,
           headers: {
             ...corsHeaders,
             "Content-Type": "application/json",
@@ -556,7 +723,7 @@ Deno.serve(async (req: Request) => {
 
       if (!createInvoiceResponse) {
         return new Response("Error in invoice.created: ", {
-          status: 400,
+          status: 200,
           headers: {
             ...corsHeaders,
             "Content-Type": "application/json",
@@ -564,18 +731,32 @@ Deno.serve(async (req: Request) => {
         })
       }
 
+      await supabase.from('stripe_events').insert({
+        event_id: data.object.id,
+        event_type: 'invoice.created',
+      });
+
       break;
     case 'invoice.paid':
-      // Continue to provision the subscription as payments continue to be made.
-      // Store the status in your database and check when a user accesses your service.
-      // This approach helps you avoid hitting rate limits.
+      const { data: paidEvent } = await supabase.from('stripe_events').select('id').eq('event_id', data.object.id).maybeSingle();
+
+      if (paidEvent) {
+        return new Response("Event already happened: ", {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        })
+      };
+
       const invoicePaidResponse = await handleInvoicePaymentPaid(
         data.object
       )
 
       if (!invoicePaidResponse) {
         return new Response("Error in invoice_payment.paid: ", {
-          status: 400,
+          status: 200,
           headers: {
             ...corsHeaders,
             "Content-Type": "application/json",
@@ -583,8 +764,25 @@ Deno.serve(async (req: Request) => {
         })
       }
 
+      await supabase.from('stripe_events').insert({
+        event_id: data.object.id,
+        event_type: 'invoice.paid',
+      });
+
       break;
     case 'invoice.payment_failed':
+      console.log('Payment failed for invoice: ', data.object);
+      const { data: paymentFailedEvent } = await supabase.from('stripe_events').select('id').eq('event_id', data.object.id).maybeSingle();
+
+      if (paymentFailedEvent) {
+        return new Response("Event already happened: ", {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        })
+      };
       // The payment failed or the customer doesn't have a valid payment method.
       // The subscription becomes past_due. Notify your customer and send them to the
       // customer portal to update their payment information.
@@ -594,7 +792,7 @@ Deno.serve(async (req: Request) => {
 
       if (!invoicePaymentFailedResponse) {
         return new Response("Error in invoice.payment_failed: ", {
-          status: 400,
+          status: 200,
           headers: {
             ...corsHeaders,
             "Content-Type": "application/json",
@@ -602,8 +800,25 @@ Deno.serve(async (req: Request) => {
         })
       }
 
+      await supabase.from('stripe_events').insert({
+        event_id: data.object.id,
+        event_type: 'invoice.payment_failed',
+      });
+
       break;
     case 'customer.subscription.created':
+      const { data: subCreatedEvent } = await supabase.from('stripe_events').select('id').eq('event_id', data.object.id).maybeSingle();
+
+      if (subCreatedEvent) {
+        return new Response("Event already happened: ", {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        })
+      };
+
       const { data: existingSub, error: subError } = await supabase
         .from('subscriptions')
         .select('*')
@@ -616,7 +831,7 @@ Deno.serve(async (req: Request) => {
       if (subError) {
         console.log('subscription creation SUB error: ', subError);
         return new Response("Error in customer.subscription.created: ", {
-          status: 400,
+          status: 200,
           headers: {
             ...corsHeaders,
             "Content-Type": "application/json",
@@ -640,7 +855,7 @@ Deno.serve(async (req: Request) => {
 
       if (!createSubResponse) {
         return new Response("Error in customer.subscription.created: ", {
-          status: 400,
+          status: 200,
           headers: {
             ...corsHeaders,
             "Content-Type": "application/json",
@@ -648,15 +863,32 @@ Deno.serve(async (req: Request) => {
         })
       }
 
+      await supabase.from('stripe_events').insert({
+        event_id: data.object.id,
+        event_type: 'customer.subscription.created',
+      });
+
       break;
     case 'customer.created':
+      const { data: customerCreatedEvent } = await supabase.from('stripe_events').select('id').eq('event_id', data.object.id).maybeSingle();
+
+      if (customerCreatedEvent) {
+        return new Response("Event already happened: ", {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        })
+      };
+
       const createCustomerResponse = await handleCustomerCreated(
         data.object
       )
 
       if (!createCustomerResponse) {
         return new Response("Error in customer.created: ", {
-          status: 400,
+          status: 200,
           headers: {
             ...corsHeaders,
             "Content-Type": "application/json",
@@ -664,14 +896,97 @@ Deno.serve(async (req: Request) => {
         })
       }
 
+      await supabase.from('stripe_events').insert({
+        event_id: data.object.id,
+        event_type: 'customer.created',
+      });
+
       break;
     case 'customer.subscription.trial_will_end':
+      const { data: trialWillEndEvent } = await supabase.from('stripe_events').select('id').eq('event_id', data.object.id).maybeSingle();
+
+      if (trialWillEndEvent) {
+        return new Response("Event already happened: ", {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        })
+      };
+
+      await supabase.from('stripe_events').insert({
+        event_id: data.object.id,
+        event_type: 'customer.subscription.trial_will_end',
+      });
 
       break;
     case 'customer.subscription.updated':
+      const { data: subUpdatedEvent } = await supabase.from('stripe_events').select('id').eq('event_id', data.object.id).maybeSingle();
+
+      if (subUpdatedEvent) {
+        return new Response("Event already happened: ", {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        })
+      };
+
+      const updateSubResponse = await handleSubscriptionUpdated(
+        data.object
+      );
+
+      if (!updateSubResponse) {
+        return new Response("Error in customer.subscription.updated: ", {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        })
+      }
+
+
+      await supabase.from('stripe_events').insert({
+        event_id: data.object.id,
+        event_type: 'customer.subscription.updated',
+      });
 
       break;
     case 'customer.subscription.deleted':
+      const { data: subDeletedEvent } = await supabase.from('stripe_events').select('id').eq('event_id', data.object.id).maybeSingle();
+
+      if (subDeletedEvent) {
+        return new Response("Event already happened: ", {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        })
+      };
+
+      const deleteSubResponse = await deactivateSub(
+        data.object.items.data[0].subscription,
+        new Date(data.object.ended_at * 1000)
+      );
+
+      if (!deleteSubResponse) {
+        return new Response("Error in customer.subscription.deleted: ", {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        })
+      }
+
+      await supabase.from('stripe_events').insert({
+        event_id: data.object.id,
+        event_type: 'customer.subscription.deleted',
+      });
 
       break;
   }

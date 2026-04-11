@@ -8,7 +8,7 @@ import Stripe from "npm:stripe";
 import { Resend } from "npm:resend@latest";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY")!);
-const stripe = new Stripe(Deno.env.get("VITE_STRIPE_LIVE_SEC_KEY")!);
+const stripe = new Stripe(Deno.env.get("STRIPE_TEST_SEC_KEY")!);
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -33,20 +33,15 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { sessionId } = await req.json();
+    const { customerId } = await req.json();
 
-    const session = await stripe.checkout.sessions.retrieve(sessionId, {
-      expand: ["subscription", "customer"],
+    const portalSession = await stripe.billingPortal.sessions.create({
+      customer: customerId,
+      return_url: Deno.env.get("STRIPE_BILLING_PORTAL_RETURN_URL_DEV")!,
     });
-
+    
     return new Response(
-      JSON.stringify({
-        session,
-        status: session.status,
-        payment_status: session.payment_status,
-        customer: session.customer,
-        subscription: session.subscription,
-      }),
+      JSON.stringify({ url: portalSession.url }),
       {
         status: 200,
         headers: {
@@ -74,7 +69,7 @@ Deno.serve(async (req: Request) => {
   1. Run `supabase start` (see: https://supabase.com/docs/reference/cli/supabase-start)
   2. Make an HTTP request:
 
-  curl -i --location --request POST 'http://127.0.0.1:54321/functions/v1/verify-stripe-checkout-session-id' \
+  curl -i --location --request POST 'http://127.0.0.1:54321/functions/v1/stripe-billing-portal-dev' \
     --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0' \
     --header 'Content-Type: application/json' \
     --data '{"name":"Functions"}'

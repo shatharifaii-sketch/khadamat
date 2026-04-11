@@ -143,7 +143,7 @@ Deno.serve(async (req: Request) => {
           subscription_date: formatDate(res.data.started_at),
           last_payment_date: formatDate(res.data.last_payment_date),
           subscription_cancel_date: formatDate(res.data.ended_at),
-          help_url: Deno.env.get('APP_HELP_URL'),
+          help_url: Deno.env.get('APP_HELP_URL_LIVE'),
         }
       }
     })

@@ -12,6 +12,7 @@ import SubscriptionsModal from '../PostService/SubscriptionsModal';
 import { usePaymentLogic } from '@/hooks/usePaymentLogic';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
 import { User } from '../Admin/ui/UserForm';
+import useStripe from '@/hooks/use-stripe';
 
 interface UserSubscriptionsProps {
     user: User
@@ -19,6 +20,7 @@ interface UserSubscriptionsProps {
 
 const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
     const { getUserSubscriptions, deactivateSubscription, deactivatingSubscription, deactivateSubscriptionSuccess } = useSubscription();
+    const { billingPortalSession, isCreatingBillingPortalSession, isCreateBillingPortalSessionError, isCreateBillingPortalSessionSuccess } = useStripe();
     const { getPaymentUrl } = usePaymentLogic();
     const [isPaymentTime, setIsPaymentTime] = useState<boolean>(false);
     const [openSubscribeModal, setOpenSubscribeModal] = useState<boolean>(false);
@@ -151,7 +153,13 @@ const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
                                         </p>
                                     </div>
                                     <div className='flex flex-col'>
-                                        <p className='text-sm text-muted-foreground'>في حال لم يحن تاريخ الدفع المحدد فلا يصح بدء عملية الدفع!</p>
+                                        <Button
+                                            onClick={() => billingPortalSession(activeSubscription.stripe_customer_id)}
+                                            className='flex-1'
+                                            disabled={isCreatingBillingPortalSession}
+                                        >
+                                            إدارة الاشتراك و معلومات الدفع
+                                        </Button>
                                         <Button
                                             onClick={() => setOpenPaymentModal(true)} className='flex-1 mt-3'
                                             disabled={true}
