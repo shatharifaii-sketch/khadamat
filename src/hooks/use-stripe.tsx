@@ -27,7 +27,7 @@ const createStripeCheckoutSession = async ({ priceId, userId, email }: { priceId
     if (!userId) return;
 
     const { data, response, error } = await supabase.functions.invoke(
-        "create-checkout-session-dev",
+        "create-checkout-session",
         {
             body: JSON.stringify({
                 priceId,
@@ -47,7 +47,7 @@ const createStripeCheckoutSession = async ({ priceId, userId, email }: { priceId
 
 const verifyStripeSessionId = async (sessionId: string) => {
     const { data, error } = await supabase.functions.invoke(
-        "verify-stripe-checkout-session-id-dev",
+        "verify-stripe-checkout-session-id",
         {
             body: JSON.stringify({ sessionId }),
         }
@@ -88,7 +88,7 @@ const verifyStripeSessionId = async (sessionId: string) => {
 
 const getBillingPortalSession = async (customerId: string) => {
     const { data, error } = await supabase.functions.invoke(
-        "stripe-billing-portal-dev",
+        "stripe-billing-portal",
         {
             body: JSON.stringify({ customerId }),
         }
