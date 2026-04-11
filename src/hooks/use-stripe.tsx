@@ -59,9 +59,9 @@ const verifyStripeSessionId = async (sessionId: string) => {
     }
 
     const { data: userSub, error: userSubError } = await supabase
-        .from('subscriptions_dev')
+        .from('subscriptions')
         .select(`*, 
-          subscription_tier:subscriptions_dev_tier_id_fkey (
+          subscription_tier:subscriptions_tier_id_fkey (
             id,
             title,
             allowed_services,
