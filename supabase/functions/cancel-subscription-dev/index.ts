@@ -33,7 +33,7 @@ function formatDate(date?: string | Date | null) {
 
 async function deactivateSubInSupabase(id: string) {
   const { data, error } = await supabase
-    .from('subscriptions_dev')
+    .from('subscriptions')
     .update({
       status: 'inactive',
       subscription_ended_at: new Date().toISOString(),
