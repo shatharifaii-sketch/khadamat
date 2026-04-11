@@ -187,8 +187,8 @@ const Account = () => {
                     إدارة ومتابعة أداء خدماتك
                   </CardDescription>
                 </div>
-                <Link to="/post-service">
-                  <Button>
+                <Link to={subscription?.status === 'active' ? "/post-service" : "#"}>
+                  <Button disabled={subscription?.status !== 'active'}>
                     إضافة خدمة جديدة
                   </Button>
                 </Link>
@@ -202,7 +202,7 @@ const Account = () => {
               ) : services && services.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {services.map((service) => (
-                    <ServiceManagementCard key={service.id} service={service} />
+                    <ServiceManagementCard key={service.id} service={service} canPost={subscription?.status === 'active'} />
                   ))}
                 </div>
               ) : (

@@ -16,6 +16,10 @@ interface StripeActions {
     isVerifyingSessionPending: boolean;
     isVerifySessionError: boolean;
     isVerifySessionSuccess: boolean;
+    billingPortalSession: (customerId: string) => void;
+    isCreatingBillingPortalSession: boolean;
+    isCreateBillingPortalSessionError: boolean;
+    isCreateBillingPortalSessionSuccess: boolean;
 }
 
 const createStripeCheckoutSession = async ({ priceId, userId, email }: { priceId: string, userId: string, email: string }) => {
@@ -23,7 +27,7 @@ const createStripeCheckoutSession = async ({ priceId, userId, email }: { priceId
     if (!userId) return;
 
     const { data, response, error } = await supabase.functions.invoke(
-        "create-checkout-session",
+        "create-checkout-session-dev",
         {
             body: JSON.stringify({
                 priceId,
@@ -43,7 +47,7 @@ const createStripeCheckoutSession = async ({ priceId, userId, email }: { priceId
 
 const verifyStripeSessionId = async (sessionId: string) => {
     const { data, error } = await supabase.functions.invoke(
-        "verify-stripe-checkout-session-id",
+        "verify-stripe-checkout-session-id-dev",
         {
             body: JSON.stringify({ sessionId }),
         }
@@ -55,9 +59,9 @@ const verifyStripeSessionId = async (sessionId: string) => {
     }
 
     const { data: userSub, error: userSubError } = await supabase
-        .from('subscriptions')
+        .from('subscriptions_dev')
         .select(`*, 
-          subscription_tier:subscriptions_tier_id_fkey (
+          subscription_tier:subscriptions_dev_tier_id_fkey (
             id,
             title,
             allowed_services,
@@ -80,6 +84,22 @@ const verifyStripeSessionId = async (sessionId: string) => {
     }
 
     return userSub as Subscription;
+}
+
+const getBillingPortalSession = async (customerId: string) => {
+    const { data, error } = await supabase.functions.invoke(
+        "stripe-billing-portal-dev",
+        {
+            body: JSON.stringify({ customerId }),
+        }
+    );
+
+    if (error) {
+        console.log(error);
+        return error;
+    }
+
+    return data.url;
 }
 
 const useStripe = (): StripeActions => {
@@ -117,6 +137,23 @@ const useStripe = (): StripeActions => {
         }
     })
 
+    const {
+        mutateAsync: billingPortalSession,
+        isPending: isCreatingBillingPortalSession,
+        isError: isCreateBillingPortalSessionError,
+        isSuccess: isCreateBillingPortalSessionSuccess,
+    } = useMutation({
+        mutationKey: ['create-billing-portal-session'],
+        mutationFn: getBillingPortalSession,
+        onSuccess: (portalUrl) => {
+            console.log(portalUrl);
+            window.open(portalUrl, "_blank", "noopener,noreferrer");
+        },
+        onError: (error) => {
+            console.log(error);
+        }
+    })
+
 
     return {
         createCheckoutSession,
@@ -126,7 +163,11 @@ const useStripe = (): StripeActions => {
         verifySession,
         isVerifyingSessionPending,
         isVerifySessionError,
-        isVerifySessionSuccess
+        isVerifySessionSuccess,
+        billingPortalSession,
+        isCreatingBillingPortalSession,
+        isCreateBillingPortalSessionError,
+        isCreateBillingPortalSessionSuccess,
     }
 }
 

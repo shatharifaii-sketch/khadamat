@@ -14,7 +14,7 @@ const PostService = () => {
   const [searchParams] = useSearchParams();
   const editServiceId = searchParams.get('edit');
   const { user, loading } = useAuth();
-  const {service} = useServiceToEditData(editServiceId ?? '', user?.id ?? '');
+  const {service} = editServiceId ? useServiceToEditData(editServiceId ?? '') : { service: null };
 
   const isEditMode = !!editServiceId;
   

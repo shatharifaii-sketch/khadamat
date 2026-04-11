@@ -116,10 +116,10 @@ const { data } = useSuspenseQuery({
   return data;
 }
 
-export const useServiceToEditData = (id: string, userId: string) => {
-  if (!userId || !id) return { service: null };
+export const useServiceToEditData = (id: string) => {
+  if (!id) return { service: null };
   const { data } = useSuspenseQuery({
-    queryKey: ['service-edit-data', id, userId],
+    queryKey: ['service-edit-data', id],
     queryFn: async () => {
       const { data: serviceData, error: serviceError } = await 
         supabase
@@ -130,9 +130,8 @@ export const useServiceToEditData = (id: string, userId: string) => {
               full_name
             )
             `)
-          .eq('user_id', userId)
           .eq('id', id)
-          .single();
+          .maybeSingle();
 
       if (serviceError) {
         console.log('Error fetching service data:', serviceError);

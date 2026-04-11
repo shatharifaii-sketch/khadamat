@@ -32,6 +32,28 @@ const PaymentSuccess = () => {
     return <Navigate to="/" />;
   }
 
+  if (!subscriptiondata && isVerifySessionSuccess) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
+        <div className="text-center mb-8">
+          <Link to="/" className="inline-flex items-center space-x-2 space-x-reverse mb-6"> 
+            <div className="bg-primary text-primary-foreground p-2 rounded-lg">
+              <Home size={24} />
+            </div>
+            <span className="text-2xl font-bold text-primary">خدمتك</span>
+          </Link>
+        </div>
+        <div className="flex flex-col items-center gap-1 mb-3">
+          <p>حدث خطأ</p>
+          <p>واجهنا مشكلة في التحقق من الاشتراك!</p>
+          <Link to={'/'} className="underline text-blue-400">
+            الإنتقال إلى الصفحة الرئيسية
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
       <div className="text-center mb-8">

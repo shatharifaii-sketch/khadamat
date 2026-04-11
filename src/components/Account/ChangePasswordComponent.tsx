@@ -113,6 +113,7 @@ const ChangePasswordComponent = () => {
                         <div>
                             <Label>كلمة المرور الجديدة</Label>
                             <Input
+                                type='password'
                                 value={formData.newPassword}
                                 onChange={(e) => handleChange('newPassword', e.target.value)}
                             />
@@ -125,6 +126,7 @@ const ChangePasswordComponent = () => {
                         <div>
                             <Label>أعد كلمة المرور الجديدة</Label>
                             <Input
+                                type='password'
                                 value={formData.confirmPassword}
                                 onChange={(e) => handleChange('confirmPassword', e.target.value)}
                             />
@@ -134,7 +136,7 @@ const ChangePasswordComponent = () => {
                                 </p>
                             )}
                         </div>
-                        
+
                         {getError('server') && (
                             <p className="text-red-500 text-sm mt-1">
                                 {getError('server')}

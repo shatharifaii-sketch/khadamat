@@ -6,7 +6,7 @@ export const useSubscriptionTiers = () => {
         queryKey: ['subscription-tiers'],
         queryFn: async () => {
             const { data, error } = await supabase
-            .from('subscription_tiers')
+            .from('subscription_tiers_dev')
             .select('*');
 
             if (error) {
