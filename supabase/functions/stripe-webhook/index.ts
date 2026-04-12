@@ -40,12 +40,12 @@ async function checkDiscount(subscriptionId: string) {
     if (!discount) return null;
 
     const { data, error } = await supabase
-        .from('coupons')
-        .select('id')
-        .eq('stripe_coupon_id', discount.source.coupon)
-        .eq('stripe_promo_id', discount.promotion_code)
-        .maybeSingle();
-    
+      .from('coupons')
+      .select('id')
+      .eq('stripe_coupon_id', discount.source.coupon)
+      .eq('stripe_promo_id', discount.promotion_code)
+      .maybeSingle();
+
     if (error) {
       console.log('discount fetch error: ', error);
       return null;
@@ -492,12 +492,12 @@ async function handleInvoicePaymentFailed(invoice: any) {
       return false;
     }
 
-    const { data: subscriptionData, error: subscriptionError } = 
-    await supabase.from('subscriptions')
-                  .select('started_at')
-                  .eq('user_id', data.user_id)
-                  .eq('status', 'active')
-                  .maybeSingle();
+    const { data: subscriptionData, error: subscriptionError } =
+      await supabase.from('subscriptions')
+        .select('started_at')
+        .eq('user_id', data.user_id)
+        .eq('status', 'active')
+        .maybeSingle();
 
     if (subscriptionError) {
       console.log('invoice payment failed SUB error: ', subscriptionError);
@@ -505,24 +505,24 @@ async function handleInvoicePaymentFailed(invoice: any) {
     }
 
     const { error: resendError } = await resend.emails.send({
-        from: "Khedemtak <support@mail.khedemtak.com>",
-        to: userData.email,
-        template: {
-          id: "payment-failed",
-          variables: {
-            name: userData.full_name ?? 'مستخدم',
-            total: (invoice.amount_due / 100).toString(),
-            subscription_date: formatDate(subscriptionData.started_at),
-            invoice_url: invoice.hosted_invoice_url,
-            help_url: Deno.env.get('APP_HELP_URL_LIVE'),
-          }
+      from: "Khedemtak <support@mail.khedemtak.com>",
+      to: userData.email,
+      template: {
+        id: "payment-failed",
+        variables: {
+          name: userData.full_name ?? 'مستخدم',
+          total: (invoice.amount_due / 100).toString(),
+          subscription_date: formatDate(subscriptionData.started_at),
+          invoice_url: invoice.hosted_invoice_url,
+          help_url: Deno.env.get('APP_HELP_URL_LIVE'),
         }
-      });
+      }
+    });
 
-      if (resendError) {
-        console.log('subscription creation resend error: ', resendError);
-        return false;
-      };
+    if (resendError) {
+      console.log('subscription creation resend error: ', resendError);
+      return false;
+    };
 
     return true;
   } catch (error) {
@@ -580,6 +580,55 @@ async function handleSubscriptionUpdated(subscription: any) {
     }
   } catch (error) {
     console.log('subscription update error: ', error);
+    return false;
+  }
+}
+
+async function handleTrialEnding(subscription: any) {
+  try {
+    const { data: userData, error: userDataError } = await supabase.from('profiles_with_email')
+      .select('id, full_name, email')
+      .eq('id', subscription.metadata.user_id)
+      .maybeSingle();
+
+    if (userDataError) {
+      console.log('trial ending USER error: ', userDataError);
+      return false;
+    };
+
+    const { data: subscriptionData, error: subscriptionError } =
+      await supabase.from('subscriptions')
+        .select('trial_expires_at')
+        .eq('stripe_subscription_id', subscription.id)
+        .eq('status', 'active')
+        .maybeSingle();
+
+    if (subscriptionError) {
+      console.log('trial ending SUB error: ', subscriptionError);
+      return false;
+    }
+
+    const { error: resendError } = await resend.emails.send({
+      from: "Khedemtak <support@mail.khedemtak.com>",
+      to: userData.email,
+      template: {
+        id: "trial-will-end",
+        variables: {
+          name: userData.full_name ?? 'مستخدم',
+          trial_end_date: formatDate(subscriptionData.trial_expires_at),
+          cancel_subscription: Deno.env.get('APP_ACCOUNT_PAGE_LIVE'),
+        }
+      }
+    })
+
+    if (resendError) {
+      console.log('subscription creation resend error: ', resendError);
+      return false;
+    };
+
+    return true;
+  } catch (error) {
+    console.log('trial ending error: ', error);
     return false;
   }
 }
@@ -914,6 +963,20 @@ Deno.serve(async (req: Request) => {
           },
         })
       };
+
+      const trialWillEndResponse = await handleTrialEnding(
+        data.object
+      )
+
+      if (!trialWillEndResponse) {
+        return new Response("Error in customer.subscription.trial_will_end: ", {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        })
+      }
 
       await supabase.from('stripe_events').insert({
         event_id: data.object.id,
