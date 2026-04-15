@@ -1,9 +1,7 @@
 const AppLoading = () => {
   return (
     <div className='h-screen w-full flex justify-center items-center'>
-        <h1 className="text-4xl font-bold text-primary animate-pulse">
-            خدمتك
-        </h1>
+      <img src="/application_logo.png" className='h-20 animate-pulse' alt="cut logo" />
     </div>
   )
 }
