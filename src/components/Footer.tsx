@@ -7,10 +7,7 @@ const Footer = () => {
     <footer className="bg-card py-12 px-4 border-t border-border">
       <div className="max-w-6xl mx-auto text-center">
         <div className="flex items-center justify-center space-x-2 space-x-reverse mb-4">
-          <div className="bg-primary text-primary-foreground p-2 rounded-lg">
-            <Home size={24} />
-          </div>
-          <span className="text-2xl font-bold text-primary">خدمتك</span>
+          <img src="/application_logo_cut.png" className='h-12' alt="cut logo" />
         </div>
         <p className="text-muted-foreground text-large mb-6">
           منصتك للخدمات في فلسطين
