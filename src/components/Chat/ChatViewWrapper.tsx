@@ -36,7 +36,7 @@ const ChatViewWrapper = ({ conversationId, clientId, serviceId, providerId }: Co
         <ChatLayout setAttachment={setAttachment} service={conversation?.service}>
             <Card>
                 <CardHeader className='rounded-t-md border-b-2'>
-                    <ChatSimpleData provider={conversation.provider} />
+                    <ChatSimpleData user={user?.id === conversation.client.id ? conversation.provider : conversation.client} />
                 </CardHeader>
                 <CardContent className={cn(
                     attachment

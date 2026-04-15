@@ -44,6 +44,7 @@ export interface Subscription {
     free_trial_period_text: string;
     notes: string[];
   }
+  stripe_customer_id: string;
 }
 
 type CancelSubscriptionInput = {

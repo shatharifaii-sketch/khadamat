@@ -49,9 +49,8 @@ const PendingServicesManagement = ({ services }: Props) => {
         description: "تم حذف الخدمة بنجاح"
       });
     } catch (error: any) {
-      toast("خطأ", {
+      toast.error("خطأ", {
         description: error.message || "حدث خطأ أثناء حذف الخدمة",
-        type: "error"
       });
     }
   };

@@ -34,6 +34,7 @@ export interface Service {
   created_at: string;
   updated_at: string;
   user_id: string;
+  is_online?: boolean;
   publisher: {
     full_name: string;
   };
@@ -79,13 +80,11 @@ export const useIsAdmin = (): boolean => {
 export const useAdminData = () => {
   const admin = useIsAdmin();
 
-  if (!admin) return null;
-
   const { data: adminData } = useSuspenseQuery({
     queryKey: ['admin-data'],
     queryFn: async () => {
       const { data: profiles, error: usersError } = await supabase
-        .from('profiles')
+        .from('profiles_with_email')
         .select('*')
         .order('created_at', { ascending: false });
 

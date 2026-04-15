@@ -4,7 +4,8 @@ import {
   validatePhone, 
   validateRequired, 
   validateTitle, 
-  validateDescription 
+  validateDescription, 
+  validateLocation
 } from '@/utils/formValidation';
 import { ServiceFormData } from '@/types/service';
 
@@ -27,8 +28,12 @@ export const useServiceFormValidation = () => {
       case 'phone':
         validateField(field, validatePhone(formData.phone));
         break;
+      case 'is_online':
+        // No validation needed for boolean field, but we can mark it as touched
+        setFieldTouched(field);
+        break;
       case 'location':
-        validateField(field, validateRequired(formData.location, 'المنطقة'));
+        validateField(field, validateLocation(formData.location, 'المنطقة'));
         break;
       case 'price':
         validateField(field, validateRequired(formData.price, 'نطاق الأسعار'));
@@ -45,7 +50,7 @@ export const useServiceFormValidation = () => {
       { field: 'category', validation: validateRequired(formData.category, 'فئة الخدمة') },
       { field: 'description', validation: validateDescription(formData.description) },
       { field: 'price', validation: validateRequired(formData.price, 'نطاق الأسعار') },
-      { field: 'location', validation: validateRequired(formData.location, 'المنطقة') },
+      { field: 'location', validation: validateLocation(formData.location, 'المنطقة') },
       { field: 'phone', validation: validatePhone(formData.phone) },
       { field: 'email', validation: validateEmail(formData.email) }
     ];

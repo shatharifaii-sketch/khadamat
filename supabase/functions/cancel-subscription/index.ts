@@ -9,7 +9,7 @@ import Stripe from "npm:stripe";
 import { Resend } from "npm:resend@latest";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY")!);
-const stripe = new Stripe(Deno.env.get("STRIPE_TEST_SEC_KEY")!);
+const stripe = new Stripe(Deno.env.get("STRIPE_LIVE_SEC_KEY")!);
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
@@ -143,7 +143,7 @@ Deno.serve(async (req: Request) => {
           subscription_date: formatDate(res.data.started_at),
           last_payment_date: formatDate(res.data.last_payment_date),
           subscription_cancel_date: formatDate(res.data.ended_at),
-          help_url: Deno.env.get('APP_HELP_URL'),
+          help_url: Deno.env.get('APP_HELP_URL_LIVE'),
         }
       }
     })

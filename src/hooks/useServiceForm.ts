@@ -44,6 +44,8 @@ export const useServiceForm = (serviceToEdit?: Service | null) => {
     await submitForm(formData);
   };
 
+  console.log(isEditMode, canPostServiceAsync);
+
   return {
     formData,
     handleInputChange,

@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { useAnalyticsTracking } from '@/hooks/useAnalyticsTracking';
 import { cn } from '@/lib/utils';
 import { useConversations } from '@/hooks/useConversations';
-import { start } from 'repl';
+
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -109,13 +109,12 @@ const ContactOptions = ({
 
   const handleStartChat = () => {
     if (!userId) {
-      toast('يرجى تسجيل الدخول لبدء المحادثة', {
+      toast.error('يرجى تسجيل الدخول لبدء المحادثة', {
         icon: (
           <>
             <ArrowLeftToLine size={16} />
           </>
         ),
-        type: 'error',
         action: {
           label: 'تسجيل الدخول',
           onClick: () => {

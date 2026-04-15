@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { UserProfile } from '../UserManagement'
 import { useAdminFunctionality } from '@/hooks/useAdminFunctionality'
 import { Textarea } from '@/components/ui/textarea'
@@ -124,7 +124,7 @@ const UserForm = ({ editingUser, closeForm }: Props) => {
                   </div>
                 )}
                 <Button onClick={handleCreateUser} className="w-full">
-                  إنشاء الحساب
+                  {editingUser ? 'تحديث الحساب' : 'إنشاء الحساب'}
                 </Button>
               </div>
   )

@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -37,18 +37,6 @@ const Contact = () => {
     } catch (error) {
       console.error('Contact form error:', error);
       toast.error('حدث خطأ أثناء إرسال الرسالة. يرجى المحاولة مرة أخرى.');
-    } finally {
-      if (sendContactEmail.isSuccess) {
-        setOpenEmailDialog(true);
-        setFormData({
-          name: '',
-          email: '',
-          phone: '',
-          subject: '',
-          message: '',
-          inquiryType: ''
-        });
-      }
     }
   };
 
@@ -86,6 +74,22 @@ const Contact = () => {
     { value: 'partnership', label: 'شراكة أو تعاون' },
     { value: 'feedback', label: 'اقتراح أو ملاحظة' }
   ];
+
+  useEffect(() => {
+    if (sendContactEmail.isSuccess) {
+        setOpenEmailDialog(true);
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          subject: '',
+          message: '',
+          inquiryType: ''
+        });
+
+        toast.success('تم ارسال الرسالة بنجاح');
+      }
+  }, [sendContactEmail.isSuccess, sendContactEmail.mutateAsync]);
 
 
   return (

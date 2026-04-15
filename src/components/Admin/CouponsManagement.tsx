@@ -99,7 +99,7 @@ const CouponsManagement = ({ coupons }: Props) => {
                             <TableHead className='text-end'>النسبة المئوية</TableHead>
                             <TableHead className='text-end'>حد الاستخدام</TableHead>
                             <TableHead className='text-end'>الحالة</TableHead>
-                            <TableHead className='text-end'>الوصف</TableHead>
+                            {/* <TableHead className='text-end'>الوصف</TableHead> */}
                             <TableHead className='text-end'>مرات الاستخدام</TableHead>
                             <TableHead className='text-end'>إجراءات</TableHead>
                         </TableRow>
@@ -119,9 +119,9 @@ const CouponsManagement = ({ coupons }: Props) => {
                                 <TableCell>
                                     {coupon.active ? <Badge className='bg-green-100 text-green-800'>فعال</Badge> : <Badge className='bg-red-100 text-red-800'>متوقف</Badge>}
                                 </TableCell>
-                                <TableCell>
+                                {/* <TableCell>
                                     {coupon.description || 'لا يوجد'}
-                                </TableCell>
+                                </TableCell> */}
                                 <TableCell>
                                     {coupon.used_count || 0}
                                 </TableCell>

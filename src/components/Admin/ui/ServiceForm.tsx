@@ -6,8 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useEffect, useState } from "react";
 import { UserProfile } from "../ServiceManagement";
 import { useAdminFunctionality } from "@/hooks/useAdminFunctionality";
-import { serviceCategories } from "@/components/PostService/ServiceCategoryData";
-import { locations } from "@/components/FindService/ServiceCategories";
+import { categories, locations } from "@/components/FindService/ServiceCategories";
 import ServiceImages from "@/components/Service/ui/EditServiceImages";
 
 interface Props {
@@ -89,7 +88,7 @@ const ServiceForm = ({ isEdit, serviceProviders, service, closeForm }: Props) =>
                                 <SelectValue placeholder="اختر الفئة" />
                             </SelectTrigger>
                             <SelectContent>
-                                {serviceCategories.map((category) => {
+                                {categories.map((category) => {
                                     const Icon = category.icon;
                                     return (
                                         <SelectItem key={category.value} value={category.value}>

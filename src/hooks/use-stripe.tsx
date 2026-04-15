@@ -16,6 +16,10 @@ interface StripeActions {
     isVerifyingSessionPending: boolean;
     isVerifySessionError: boolean;
     isVerifySessionSuccess: boolean;
+    billingPortalSession: (customerId: string) => void;
+    isCreatingBillingPortalSession: boolean;
+    isCreateBillingPortalSessionError: boolean;
+    isCreateBillingPortalSessionSuccess: boolean;
 }
 
 const createStripeCheckoutSession = async ({ priceId, userId, email }: { priceId: string, userId: string, email: string }) => {
@@ -82,6 +86,22 @@ const verifyStripeSessionId = async (sessionId: string) => {
     return userSub as Subscription;
 }
 
+const getBillingPortalSession = async (customerId: string) => {
+    const { data, error } = await supabase.functions.invoke(
+        "stripe-billing-portal",
+        {
+            body: JSON.stringify({ customerId }),
+        }
+    );
+
+    if (error) {
+        console.log(error);
+        return error;
+    }
+
+    return data.url;
+}
+
 const useStripe = (): StripeActions => {
 
     const {
@@ -117,6 +137,23 @@ const useStripe = (): StripeActions => {
         }
     })
 
+    const {
+        mutateAsync: billingPortalSession,
+        isPending: isCreatingBillingPortalSession,
+        isError: isCreateBillingPortalSessionError,
+        isSuccess: isCreateBillingPortalSessionSuccess,
+    } = useMutation({
+        mutationKey: ['create-billing-portal-session'],
+        mutationFn: getBillingPortalSession,
+        onSuccess: (portalUrl) => {
+            console.log(portalUrl);
+            window.open(portalUrl, "_blank", "noopener,noreferrer");
+        },
+        onError: (error) => {
+            console.log(error);
+        }
+    })
+
 
     return {
         createCheckoutSession,
@@ -126,7 +163,11 @@ const useStripe = (): StripeActions => {
         verifySession,
         isVerifyingSessionPending,
         isVerifySessionError,
-        isVerifySessionSuccess
+        isVerifySessionSuccess,
+        billingPortalSession,
+        isCreatingBillingPortalSession,
+        isCreateBillingPortalSessionError,
+        isCreateBillingPortalSessionSuccess,
     }
 }
 
