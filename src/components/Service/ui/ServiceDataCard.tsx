@@ -42,7 +42,7 @@ const ServiceDataCard = ({
                     </div>
                     <div className='mt-3 flex flex-col gap-2'>
                         <p className='flex flex-col'>
-                            روابط ملحقة:
+                            {service?.links?.length > 0 ? 'روابط ملحقة:' : ''}
                         </p>
                         <div className='flex flex-row gap-3' dir="rtl">
                             {service.links?.map((link, index) => {
