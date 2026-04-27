@@ -2,6 +2,7 @@ import { useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-quer
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Service } from './useAdminFunctionality';
+import { ServiceLink } from '@/components/PostService/ServiceLinks';
 
 export interface PublicService {
   id: string;
@@ -17,6 +18,7 @@ export interface PublicService {
   created_at: string;
   user_id: string;
   is_online?: boolean;
+  links: [];
   updated_at: string;
   publisher: {
     id: string;
@@ -77,8 +79,7 @@ export const usePublicServices = () => {
         return [];
       }
 
-      console.log('Fetched services with publisher:', services);
-      return services as PublicService[];
+      return services;
     },
     retry: 1,
     staleTime: 30000, // 30 seconds
@@ -108,7 +109,7 @@ const { data } = useSuspenseQuery({
       if (serviceRes.error) throw serviceRes.error;
 
       return {
-        service: serviceRes.data as PublicService,
+        service: serviceRes.data,
       };
     },
   });
@@ -117,7 +118,6 @@ const { data } = useSuspenseQuery({
 }
 
 export const useServiceToEditData = (id: string) => {
-  if (!id) return { service: null };
   const { data } = useSuspenseQuery({
     queryKey: ['service-edit-data', id],
     queryFn: async () => {
@@ -162,7 +162,7 @@ export const useServiceToEditData = (id: string) => {
       return {
         service: serviceRes as Service,
       };
-    },
+    }
   });
 
   return data;

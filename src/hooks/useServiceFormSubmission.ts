@@ -18,7 +18,6 @@ export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
     // If we're editing, update the service
     if (isEditMode && serviceToEdit) {
       try {
-        console.log('Updating service:', serviceToEdit.id, formData);
         await updateService.mutateAsync({
           id: serviceToEdit.id,
           title: formData.title,
@@ -29,6 +28,8 @@ export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
           phone: formData.phone,
           email: formData.email,
           experience: formData.experience,
+          is_online: formData.is_online,
+          links: formData.links
         }).finally(() => {
           toast.success('تم تحديث الخدمة بنجاح! انتظر الموافقة من الإدارة.');
         });
@@ -69,6 +70,8 @@ export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
         phone: formData.phone,
         email: formData.email,
         experience: formData.experience,
+        is_online: formData.is_online,
+        links: formData.links
       });
 
       //TODO: Handle image uploads here if necessary

@@ -26,6 +26,7 @@ export interface ServiceFormData {
   experience: string;
   user_id?: string;
   is_online: boolean;
+  links: [];
   images: {
     id: string;
     image_name: string;

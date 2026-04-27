@@ -1,4 +1,5 @@
 import { locations } from "@/components/FindService/ServiceCategories";
+import { ServiceLink } from "@/components/PostService/ServiceLinks";
 
 export interface ValidationResult {
   isValid: boolean;
@@ -17,6 +18,64 @@ export const validateEmail = (email: string): ValidationResult => {
   
   return { isValid: true, message: '' };
 };
+
+export const validateLinks = (links: ServiceLink[]): ValidationResult => {
+  if (!links || links.length === 0) {
+    return { isValid: true, message: '' };
+  }
+
+  const domainMap: Record<string, string[]> = {
+    instagram: ["instagram.com"],
+    facebook: ["facebook.com"],
+    x: ["x.com", "twitter.com"],
+    youtube: ["youtube.com", "youtu.be"],
+    linkedin: ["linkedin.com"],
+    tiktok: ["tiktok.com"]
+  };
+
+  for (let i = 0; i < links.length; i++) {
+    const link = links[i];
+    const row = i + 1;
+
+    if (!link.type.trim()) {
+      return {
+        isValid: false,
+        message: `يرجى إدخال نوع رابط رقم ${row}`
+      }
+    }
+
+    if (!link.url.trim()) {
+      return {
+        isValid: false,
+        message: `يرجى إدخال رابط رقم ${row}`
+      }
+    }
+
+    try {
+      const parsedUrl = new URL(link.url);
+
+      const allowedDomains = domainMap[link.type];
+
+      if (allowedDomains) {
+        const matches = allowedDomains.some((domain) => parsedUrl.hostname.includes(domain));
+
+        if (!matches) {
+          return {
+            isValid: false,
+            message: `يرجى إدخال رابط صحيح من نوع ${link.type} رقم ${row}`
+          }
+        }
+      }
+    } catch (error) {
+      return {
+        isValid: false,
+        message: `يرجى إدخال رابط صحيح من نوع ${link.type} رقم ${row}`
+      }
+    }
+  }
+
+  return { isValid: true, message: '' };
+}
 
 const normalizeDigits = (value: string) => {
   return value

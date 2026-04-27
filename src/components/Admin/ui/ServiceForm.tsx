@@ -8,6 +8,7 @@ import { UserProfile } from "../ServiceManagement";
 import { useAdminFunctionality } from "@/hooks/useAdminFunctionality";
 import { categories, locations } from "@/components/FindService/ServiceCategories";
 import ServiceImages from "@/components/Service/ui/EditServiceImages";
+import ServiceLinks, { ServiceLink } from "@/components/PostService/ServiceLinks";
 
 interface Props {
     isEdit?: boolean;
@@ -27,6 +28,8 @@ interface Service {
     experience?: string;
     user_id: string;
     status: string;
+    is_online?: boolean;
+    links: ServiceLink[];
     service_images: {
         id: string;
         image_name: string;
@@ -49,6 +52,8 @@ const ServiceForm = ({ isEdit, serviceProviders, service, closeForm }: Props) =>
         user_id: '',
         status: 'published',
         service_images: [],
+        is_online: false,
+        links: [] as ServiceLink[],
     });
 
     useEffect(() => {
@@ -63,9 +68,7 @@ const ServiceForm = ({ isEdit, serviceProviders, service, closeForm }: Props) =>
     }, [service]);
 
     const handleSubmit = () => {
-        console.log(formData);
-
-        isEdit ? updateService.mutate(formData) : createService.mutate(formData);
+        if (isEdit) { updateService.mutate(formData) } else { createService.mutate(formData) };
     }
 
     return (
@@ -144,19 +147,19 @@ const ServiceForm = ({ isEdit, serviceProviders, service, closeForm }: Props) =>
                     <div>
                         <Label htmlFor="location">الموقع</Label>
                         <Select
-                                value={formData.location} onValueChange={(value) => setFormData({ ...formData, location: value })}
-                              >
-                                <SelectTrigger id="location">
-                                  <SelectValue placeholder="اختر المنطقة أو المحافظة" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {locations.map((loc) => (
+                            value={formData.location} onValueChange={(value) => setFormData({ ...formData, location: value })}
+                        >
+                            <SelectTrigger id="location">
+                                <SelectValue placeholder="اختر المنطقة أو المحافظة" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {locations.map((loc) => (
                                     <SelectItem key={loc} value={loc}>
-                                      {loc}
+                                        {loc}
                                     </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
 
                     <div>
@@ -200,6 +203,18 @@ const ServiceForm = ({ isEdit, serviceProviders, service, closeForm }: Props) =>
                                 <SelectItem value="disabled">معطل</SelectItem>
                             </SelectContent>
                         </Select>
+                    </div>
+
+                    <div className="col-span-2">
+                        <ServiceLinks
+                            socialLinks={formData.links}
+                            onChange={(links) => {
+                                setFormData((prev) => ({
+                                    ...prev,
+                                    links
+                                }));
+                            }}
+                        />
                     </div>
 
 
