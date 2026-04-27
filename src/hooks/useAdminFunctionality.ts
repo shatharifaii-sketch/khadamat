@@ -6,6 +6,7 @@ import { User } from "@/components/Admin/ui/UserForm";
 import { Tables } from "@/integrations/supabase/types";
 import { json } from "react-router-dom";
 import { toast } from "sonner";
+import { ServiceLink } from "@/components/PostService/ServiceLinks";
 
 interface UserProfile {
   id: string;
@@ -35,6 +36,7 @@ export interface Service {
   updated_at: string;
   user_id: string;
   is_online?: boolean;
+  links: [] | ServiceLink[]
   publisher: {
     full_name: string;
   };
@@ -345,6 +347,8 @@ export const useAdminFunctionality = () => {
           experience: formData.experience,
           status: formData.status,
           user_id: formData.user_id,
+          is_online: formData.is_online,
+          links: formData.links as []
         })
         .select('*')
         .single();
@@ -390,7 +394,9 @@ export const useAdminFunctionality = () => {
           phone: formData.phone,
           email: formData.email,
           experience: formData.experience,
-          status: formData.status
+          status: formData.status,
+          is_online: formData.is_online,
+          links: formData.links as []
         })
         .eq('id', formData.id)
         .select('*')
@@ -438,7 +444,7 @@ export const useAdminFunctionality = () => {
       queryClient.invalidateQueries({ queryKey: ['admin-data'] });
       toast.success('تم تحديث الخدمة بنجاح!');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       console.error('Error updating service:', error);
       toast.error(error.message || 'حدث خطأ في تحديث الخدمة');
     }

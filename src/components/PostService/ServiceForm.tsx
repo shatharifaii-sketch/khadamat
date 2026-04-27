@@ -13,6 +13,7 @@ import { useEffect } from 'react';
 import { PENDING_SERVICE_KEY, usePendingService } from '@/hooks/usePendingService';
 import ServiceImages from '../Service/ui/EditServiceImages';
 import { Service } from '@/hooks/useAdminFunctionality';
+import ServiceLinks from './ServiceLinks';
 
 interface ServiceFormProps {
   serviceToEdit?: Service | null;
@@ -87,6 +88,11 @@ const ServiceForm = ({ serviceToEdit }: ServiceFormProps) => {
             onEmailBlur={() => handleFieldBlur('email')}
             phoneError={getFieldError('phone')}
             emailError={getFieldError('email')}
+          />
+
+          <ServiceLinks
+            socialLinks={formData.links}
+            onChange={(value) => handleInputChange("links", value)}
           />
 
           <ServiceExperience

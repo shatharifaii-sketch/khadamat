@@ -13,6 +13,7 @@ import { NavLink } from 'react-router-dom';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { SelectLabel } from '@radix-ui/react-select';
 import { toast } from 'sonner';
+import { ServiceLink } from '../PostService/ServiceLinks';
 
 export interface Service {
   id: string;
@@ -29,6 +30,7 @@ export interface Service {
   created_at: string;
   updated_at: string;
   user_id: string;
+  links: ServiceLink[];
   publisher: {
     full_name: string;
   };

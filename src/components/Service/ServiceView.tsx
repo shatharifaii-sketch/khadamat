@@ -6,10 +6,35 @@ import { Link, NavLink } from 'react-router-dom';
 import { Button } from '../ui/button';
 import { MessageCircle } from 'lucide-react';
 import ReportDrawer from '../ReportDrawer';
+import { Conversation } from '@/hooks/useConversations';
+import { ServiceLink } from '../PostService/ServiceLinks';
+
+export interface ServiceViewProps {
+  id: string;
+  title: string;
+  category: string;
+  description: string;
+  price_range: string;
+  location: string;
+  phone: string;
+  email: string;
+  experience?: string;
+  views: number;
+  created_at: string;
+  user_id: string;
+  is_online?: boolean;
+  links: ServiceLink[];
+  updated_at: string;
+  publisher: {
+    id: string;
+    full_name: string;
+    profile_image_url: string;
+  };
+}
 
 interface Props {
-  service: PublicService;
-  conversation?: any;
+  service: ServiceViewProps;
+  conversation?: Conversation;
   isConvo: boolean;
   convoId: string | null;
   setConvoId: (id: string | null) => void;
