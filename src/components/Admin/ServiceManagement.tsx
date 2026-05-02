@@ -31,6 +31,7 @@ export interface Service {
   updated_at: string;
   user_id: string;
   links: ServiceLink[];
+  whatsapp_number?: string;
   publisher: {
     full_name: string;
   };

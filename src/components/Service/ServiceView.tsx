@@ -8,6 +8,7 @@ import { MessageCircle } from 'lucide-react';
 import ReportDrawer from '../ReportDrawer';
 import { Conversation } from '@/hooks/useConversations';
 import { ServiceLink } from '../PostService/ServiceLinks';
+import { Json } from '@/integrations/supabase/types';
 
 export interface ServiceViewProps {
   id: string;
@@ -23,7 +24,8 @@ export interface ServiceViewProps {
   created_at: string;
   user_id: string;
   is_online?: boolean;
-  links: ServiceLink[];
+  links: ServiceLink[] | [] | Json;
+  whatsapp_number?: string;
   updated_at: string;
   publisher: {
     id: string;
@@ -93,6 +95,7 @@ const ServiceView = ({
           setConvoId={setConvoId}
           userId={userId}
           publisherId={service?.publisher.id}
+          whatsappNumber={service?.whatsapp_number}
         />
         <ReportDrawer
           itemId={service?.id}

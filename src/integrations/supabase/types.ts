@@ -1010,6 +1010,7 @@ export type Database = {
           updated_at: string
           user_id: string
           views: number
+          whatsapp_number: string | null
         }
         Insert: {
           category: string
@@ -1028,6 +1029,7 @@ export type Database = {
           updated_at?: string
           user_id: string
           views?: number
+          whatsapp_number?: string | null
         }
         Update: {
           category?: string
@@ -1046,6 +1048,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
           views?: number
+          whatsapp_number?: string | null
         }
         Relationships: [
           {
@@ -1943,6 +1946,30 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      web_analytics: {
+        Row: {
+          created_at: string
+          id: number
+          path: string | null
+          visit_date: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          path?: string | null
+          visit_date?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          path?: string | null
+          visit_date?: string | null
+          visitor_id?: string | null
         }
         Relationships: []
       }

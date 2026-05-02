@@ -6,7 +6,8 @@ import {
   validateTitle, 
   validateDescription, 
   validateLocation,
-  validateLinks
+  validateLinks,
+  validateWhatsappNumber
 } from '@/utils/formValidation';
 import { ServiceFormData } from '@/types/service';
 
@@ -32,6 +33,9 @@ export const useServiceFormValidation = () => {
       case 'links':
         validateField(field, validateLinks(formData.links,));
         break;
+      case 'whatsapp_number':
+        validateField(field, validateWhatsappNumber(formData.whatsapp_number));
+        break;
       case 'is_online':
         // No validation needed for boolean field, but we can mark it as touched
         setFieldTouched(field);
@@ -54,6 +58,7 @@ export const useServiceFormValidation = () => {
       { field: 'category', validation: validateRequired(formData.category, 'فئة الخدمة') },
       { field: 'description', validation: validateDescription(formData.description) },
       { field: 'links', validation: validateLinks(formData.links) },
+      { field: 'whatsapp_number', validation: validateWhatsappNumber(formData.whatsapp_number) },
       { field: 'price', validation: validateRequired(formData.price, 'نطاق الأسعار') },
       { field: 'location', validation: validateLocation(formData.location, 'المنطقة') },
       { field: 'phone', validation: validatePhone(formData.phone) },

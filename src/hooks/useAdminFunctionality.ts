@@ -36,7 +36,11 @@ export interface Service {
   updated_at: string;
   user_id: string;
   is_online?: boolean;
-  links: [] | ServiceLink[]
+  links: [] | ServiceLink[];
+  whatsapp_number?: {
+    countryCode: string;
+    number: string;
+  } | string;
   publisher: {
     full_name: string;
   };
@@ -348,7 +352,8 @@ export const useAdminFunctionality = () => {
           status: formData.status,
           user_id: formData.user_id,
           is_online: formData.is_online,
-          links: formData.links as []
+          links: formData.links as [],
+          whatsapp_number: String(formData.whatsapp_number)
         })
         .select('*')
         .single();
@@ -396,7 +401,8 @@ export const useAdminFunctionality = () => {
           experience: formData.experience,
           status: formData.status,
           is_online: formData.is_online,
-          links: formData.links as []
+          links: formData.links as [],
+          whatsapp_number: String(formData.whatsapp_number)
         })
         .eq('id', formData.id)
         .select('*')

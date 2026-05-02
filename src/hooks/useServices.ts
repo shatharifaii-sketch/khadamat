@@ -23,6 +23,7 @@ export interface Service {
   user_id?: string;
   is_online?: boolean;
   links?: [];
+  whatsapp_number?: string;
 }
 
 export interface ServiceImageProps {

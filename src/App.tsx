@@ -35,6 +35,7 @@ import CodeVerification from "./pages/verify/CodeVerification";
 import ScrollToTop from "./components/ScrollToTop";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import { useWebsiteAnalytics } from "./hooks/useWebsiteAnalytics";
 
 const queryClient = new QueryClient();
 
