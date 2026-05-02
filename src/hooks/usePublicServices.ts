@@ -19,6 +19,7 @@ export interface PublicService {
   user_id: string;
   is_online?: boolean;
   links: [];
+  whatsapp_number?: string;
   updated_at: string;
   publisher: {
     id: string;

@@ -47,6 +47,12 @@ const PendingServiceData = ({
                     </span>
                 </p>
                 <p className='flex flex-col'>
+                    رقم الواتساب:
+                    <span className='px-4'>
+                        {service.whatsapp_number ? service.whatsapp_number : 'اونلاين'}
+                    </span>
+                </p>
+                <p className='flex flex-col'>
                     الموقع:
                     <span className='px-4'>
                         {service.location ? service.location : 'اونلاين'}

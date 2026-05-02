@@ -3,11 +3,12 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Mail, Phone, Copy, MessageCirclePlus, ArrowLeftToLine } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAnalyticsTracking } from '@/hooks/useAnalyticsTracking';
-import { cn } from '@/lib/utils';
+import { cn, isMobile } from '@/lib/utils';
 import { useConversations } from '@/hooks/useConversations';
 
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FaWhatsapp } from 'react-icons/fa6';
 
 interface ContactOptionsProps {
   serviceId?: string;
@@ -22,23 +23,25 @@ interface ContactOptionsProps {
   convoId?: string | null;
   setConvoId?: (id: string | null) => void;
   userId?: string;
-  publisherId?: string
+  publisherId?: string;
+  whatsappNumber?: string;
 }
 
-const ContactOptions = ({ 
-  serviceId, 
-  serviceName, 
-  providerName, 
-  email, 
-  phone, 
-  className, 
-  providerId, 
-  isConvo, 
+const ContactOptions = ({
+  serviceId,
+  serviceName,
+  providerName,
+  email,
+  phone,
+  className,
+  providerId,
+  isConvo,
   setIsConvo,
-  convoId, 
+  convoId,
   setConvoId,
   userId,
-  publisherId
+  publisherId,
+  whatsappNumber
 }: ContactOptionsProps) => {
   const { trackServiceAction } = useAnalyticsTracking();
   const { startConversation, startConversationSuccess } = useConversations();
@@ -48,7 +51,7 @@ const ContactOptions = ({
     if (startConversationSuccess) {
       setIsConvo(true);
     }
-  }, [startConversationSuccess])
+  }, [setIsConvo, startConversationSuccess])
 
   const handleEmailContact = () => {
     console.log('📧 Opening email client for service:', serviceName);
@@ -65,6 +68,23 @@ const ContactOptions = ({
       });
     }
   };
+
+  const handleWhatsappContact = () => {
+    if (!whatsappNumber) return;
+
+    console.log('📧 Opening whatsapp client for service:', serviceName, whatsappNumber);
+
+    const encodedMessage = encodeURIComponent(
+      "مرحباً، أود الاستفسار عن خدمتك"
+    );
+
+    const url = isMobile
+      ? `https://wa.me/${whatsappNumber}?text=${encodedMessage}`
+      : `https://web.whatsapp.com/send?phone=${whatsappNumber}&text=${encodedMessage}`;
+
+    window.open(url, '_blank');
+    toast.success('تم فتح برنامج الواتساب');
+  }
 
   const handleCopyEmail = () => {
     navigator.clipboard.writeText(email);
@@ -124,15 +144,15 @@ const ContactOptions = ({
       });
       return;
     }
-    startConversation.mutateAsync({ 
-      serviceId, providerId, providerName 
+    startConversation.mutateAsync({
+      serviceId, providerId, providerName
     },
-  ).then((data) => {
-    if (!data) return;
-    setIsConvo(true);
-    setConvoId(data.id);
-    navigate(`/chat/${data.id}/${userId}/${serviceId}/${publisherId}`);
-  });
+    ).then((data) => {
+      if (!data) return;
+      setIsConvo(true);
+      setConvoId(data.id);
+      navigate(`/chat/${data.id}/${userId}/${serviceId}/${publisherId}`);
+    });
 
     trackServiceAction.mutate({
       serviceId: serviceId!,
@@ -166,6 +186,18 @@ const ContactOptions = ({
                 </Button>
               </div>
             )}
+            <div className="flex gap-1">
+              <Button
+                variant="default"
+                className="flex-1 justify-start gap-2 bg-[#25D366] text-white"
+                disabled={!whatsappNumber}
+                onClick={handleWhatsappContact}
+              >
+                <FaWhatsapp size={30} />
+                تواصل معنا عبر واتساب
+              </Button>
+            </div>
+
             <div className="flex gap-1">
               <Button
                 variant="ghost"

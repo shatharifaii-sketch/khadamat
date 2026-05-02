@@ -83,6 +83,34 @@ const normalizeDigits = (value: string) => {
     .replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - 1776));
 };
 
+export const validateWhatsappNumber = ({countryCode, number}: {countryCode: string, number: string}): ValidationResult => {
+  if (!number.trim()) {
+    return { isValid: false, message: 'رقم الهاتف مطلوب' };
+  }
+
+  const cleanPhone = normalizeDigits(number)
+    .replace(/[^\d+]/g, '')     // remove spaces, symbols
+    .replace(/^\+?970/, '0');   // normalize country code
+
+  const phoneRegex = /^(059|056|057|058|052)\d{7}$/;
+
+  if (!phoneRegex.test(cleanPhone)) {
+    return {
+      isValid: false,
+      message: 'يرجى إدخال رقم هاتف صحيح (مثال: 0599123456)'
+    };
+  }
+
+  return {
+    isValid: true,
+    message: ''
+  };
+};
+
+export const formatWhatsappNumber = ({countryCode, number}: {countryCode: string, number: string}) => {
+  return `${countryCode}${number.replace(/^0+/, "")}`;
+}
+
 export const validatePhone = (phone: string): ValidationResult => {
   if (!phone.trim()) {
     return { isValid: false, message: 'رقم الهاتف مطلوب' };

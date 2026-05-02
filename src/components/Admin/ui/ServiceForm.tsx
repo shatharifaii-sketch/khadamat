@@ -9,6 +9,7 @@ import { useAdminFunctionality } from "@/hooks/useAdminFunctionality";
 import { categories, locations } from "@/components/FindService/ServiceCategories";
 import ServiceImages from "@/components/Service/ui/EditServiceImages";
 import ServiceLinks, { ServiceLink } from "@/components/PostService/ServiceLinks";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface Props {
     isEdit?: boolean;
@@ -30,6 +31,7 @@ interface Service {
     status: string;
     is_online?: boolean;
     links: ServiceLink[];
+    whatsapp_number?: string
     service_images: {
         id: string;
         image_name: string;
@@ -54,6 +56,7 @@ const ServiceForm = ({ isEdit, serviceProviders, service, closeForm }: Props) =>
         service_images: [],
         is_online: false,
         links: [] as ServiceLink[],
+        whatsapp_number: ''
     });
 
     useEffect(() => {
@@ -203,6 +206,35 @@ const ServiceForm = ({ isEdit, serviceProviders, service, closeForm }: Props) =>
                                 <SelectItem value="disabled">معطل</SelectItem>
                             </SelectContent>
                         </Select>
+                    </div>
+
+                    <div>
+                        <Label htmlFor="whatsapp_number">رقم الواتساب</Label>
+                        <Input
+                            id="whatsapp_number"
+                            value={formData.whatsapp_number}
+                            onChange={(e) => setFormData({ ...formData, whatsapp_number: e.target.value })}
+                        />
+                    </div>
+
+                    <div className='grid grid-cols-2 my-2'>
+                        <div className='flex items-center gap-2'>
+                            <Checkbox
+                                id="offline"
+                                checked={!formData.is_online}
+                                onCheckedChange={() => setFormData({ ...formData, is_online: false })}
+                            />
+                            <Label htmlFor="offline">خدمة في الموقع</Label>
+                        </div>
+
+                        <div className='flex items-center gap-2'>
+                            <Checkbox
+                                id="online"
+                                checked={formData.is_online}
+                                onCheckedChange={() => setFormData({ ...formData, is_online: true })}
+                            />
+                            <Label htmlFor="online">اونلاين</Label>
+                        </div>
                     </div>
 
                     <div className="col-span-2">

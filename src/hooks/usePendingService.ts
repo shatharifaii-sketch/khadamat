@@ -1,4 +1,5 @@
 
+import { ServiceLink } from '@/components/PostService/ServiceLinks';
 import { useState, useEffect } from 'react';
 
 export interface PendingServiceData {
@@ -11,7 +12,11 @@ export interface PendingServiceData {
   email: string;
   experience: string;
   is_online: boolean;
-  links: [];
+  links: [] | ServiceLink[];
+  whatsapp_number?: {
+    countryCode: string;
+    number: string;
+  };
   images: { id: string; image_name: string; image_url: string }[];
 }
 

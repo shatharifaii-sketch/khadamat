@@ -66,3 +66,5 @@ export const platforms = [
     icon: FaTiktok
   }
 ];
+
+export const isMobile = /Android|iphone/i.test(navigator.userAgent);
