@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { useEffect, useState } from "react";
 import { UserProfile } from "../ServiceManagement";
-import { useAdminFunctionality } from "@/hooks/useAdminFunctionality";
+import { Service, useAdminFunctionality } from "@/hooks/useAdminFunctionality";
 import { categories, locations } from "@/components/FindService/ServiceCategories";
 import ServiceImages from "@/components/Service/ui/EditServiceImages";
 import ServiceLinks, { ServiceLink } from "@/components/PostService/ServiceLinks";
@@ -16,27 +16,6 @@ interface Props {
     serviceProviders: UserProfile[];
     service?: Service;
     closeForm: () => void
-}
-
-interface Service {
-    title: string;
-    category: string;
-    description: string;
-    price_range: string;
-    location: string;
-    phone: string;
-    email: string;
-    experience?: string;
-    user_id: string;
-    status: string;
-    is_online?: boolean;
-    links: ServiceLink[];
-    whatsapp_number?: string
-    service_images: {
-        id: string;
-        image_name: string;
-        image_url: string;
-    }[];
 }
 
 const ServiceForm = ({ isEdit, serviceProviders, service, closeForm }: Props) => {
@@ -212,7 +191,7 @@ const ServiceForm = ({ isEdit, serviceProviders, service, closeForm }: Props) =>
                         <Label htmlFor="whatsapp_number">رقم الواتساب</Label>
                         <Input
                             id="whatsapp_number"
-                            value={formData.whatsapp_number}
+                            value={String(formData.whatsapp_number)}
                             onChange={(e) => setFormData({ ...formData, whatsapp_number: e.target.value })}
                         />
                     </div>
@@ -239,7 +218,7 @@ const ServiceForm = ({ isEdit, serviceProviders, service, closeForm }: Props) =>
 
                     <div className="col-span-2">
                         <ServiceLinks
-                            socialLinks={formData.links}
+                            socialLinks={formData.links as ServiceLink[]}
                             onChange={(links) => {
                                 setFormData((prev) => ({
                                     ...prev,

@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tansta
 import { useAuth } from "@/contexts/AuthContext";
 import { supabaseAdmin } from "@/integrations/supabase/adminClient";
 import { User } from "@/components/Admin/ui/UserForm";
-import { Tables } from "@/integrations/supabase/types";
+import { Json, Tables } from "@/integrations/supabase/types";
 import { json } from "react-router-dom";
 import { toast } from "sonner";
 import { ServiceLink } from "@/components/PostService/ServiceLinks";
@@ -36,7 +36,7 @@ export interface Service {
   updated_at: string;
   user_id: string;
   is_online?: boolean;
-  links: [] | ServiceLink[];
+  links: [] | ServiceLink[] | Json;
   whatsapp_number?: {
     countryCode: string;
     number: string;

@@ -1953,6 +1953,8 @@ export type Database = {
         Row: {
           created_at: string
           id: number
+          is_mobile: boolean | null
+          is_new_visit: boolean | null
           path: string | null
           visit_date: string | null
           visitor_id: string | null
@@ -1960,6 +1962,8 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: number
+          is_mobile?: boolean | null
+          is_new_visit?: boolean | null
           path?: string | null
           visit_date?: string | null
           visitor_id?: string | null
@@ -1967,6 +1971,38 @@ export type Database = {
         Update: {
           created_at?: string
           id?: number
+          is_mobile?: boolean | null
+          is_new_visit?: boolean | null
+          path?: string | null
+          visit_date?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: []
+      }
+      web_analytics_dev: {
+        Row: {
+          created_at: string
+          id: number
+          is_mobile: boolean | null
+          is_new_visit: boolean | null
+          path: string | null
+          visit_date: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          is_mobile?: boolean | null
+          is_new_visit?: boolean | null
+          path?: string | null
+          visit_date?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          is_mobile?: boolean | null
+          is_new_visit?: boolean | null
           path?: string | null
           visit_date?: string | null
           visitor_id?: string | null

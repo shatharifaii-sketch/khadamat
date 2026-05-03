@@ -7,40 +7,16 @@ import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Edit, Trash2, Eye } from 'lucide-react';
-import { useAdminFunctionality } from '@/hooks/useAdminFunctionality';
+import { Service, useAdminFunctionality } from '@/hooks/useAdminFunctionality';
 import ServiceForm from './ui/ServiceForm';
 import { NavLink } from 'react-router-dom';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { SelectLabel } from '@radix-ui/react-select';
 import { toast } from 'sonner';
 import { ServiceLink } from '../PostService/ServiceLinks';
+import { Json } from '@/integrations/supabase/types';
 
-export interface Service {
-  id: string;
-  title: string;
-  category: string;
-  description: string;
-  status: string;
-  price_range: string;
-  location: string;
-  phone: string;
-  email: string;
-  experience?: string;
-  views: number;
-  created_at: string;
-  updated_at: string;
-  user_id: string;
-  links: ServiceLink[];
-  whatsapp_number?: string;
-  publisher: {
-    full_name: string;
-  };
-  service_images: {
-    id: string;
-    image_name: string;
-    image_url: string;
-  }[]
-}
+
 
 export interface UserProfile {
   id: string;
