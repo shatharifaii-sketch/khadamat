@@ -183,7 +183,7 @@ export const useWebsiteAnalytics = () => {
     } = useQuery({
         queryKey: ["analytics"],
         queryFn: async () => {
-            const { data, error } = await supabase.from("web_analytics_dev").select("*").not("path", "like", "/admin%").order("created_at", { ascending: false });
+            const { data, error } = await supabase.from("web_analytics").select("*").not("path", "like", "/admin%").order("created_at", { ascending: false });
 
             if (error) throw error;
             return data;
@@ -196,7 +196,7 @@ export const useWebsiteAnalytics = () => {
         async function track() {
             const result = checkVisitData();
 
-            const { error } = await supabase.from("web_analytics_dev").insert({
+            const { error } = await supabase.from("web_analytics").insert({
                 visitor_id: result.id,
                 path: location.pathname,
                 is_new_visit: result.isNewVisit,
