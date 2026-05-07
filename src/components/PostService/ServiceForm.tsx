@@ -7,12 +7,13 @@ import ServicePricing from './ServicePricing';
 import ServiceLocation from './ServiceLocation';
 import ServiceContact from './ServiceContact';
 import ServiceExperience from './ServiceExperience';
-import ServicePortfolio from './ServicePortfolio';
 import ServiceFormSubmit from './ServiceFormSubmit';
 import { useEffect } from 'react';
 import { PENDING_SERVICE_KEY, usePendingService } from '@/hooks/usePendingService';
 import ServiceImages from '../Service/ui/EditServiceImages';
 import { Service } from '@/hooks/useAdminFunctionality';
+import ServiceLinks from './ServiceLinks';
+import WhatsappNumberInput from './WhatsappNumberInput';
 
 interface ServiceFormProps {
   serviceToEdit?: Service | null;
@@ -70,6 +71,8 @@ const ServiceForm = ({ serviceToEdit }: ServiceFormProps) => {
           />
 
           <ServiceLocation
+            is_online={formData.is_online}
+            onOnlineChange={(value) => handleInputChange('is_online', value)}
             location={formData.location}
             onLocationChange={(value) => handleInputChange('location', value)}
             onLocationBlur={() => handleFieldBlur('location')}
@@ -85,6 +88,16 @@ const ServiceForm = ({ serviceToEdit }: ServiceFormProps) => {
             onEmailBlur={() => handleFieldBlur('email')}
             phoneError={getFieldError('phone')}
             emailError={getFieldError('email')}
+          />
+
+          <ServiceLinks
+            socialLinks={formData.links}
+            onChange={(value) => handleInputChange("links", value)}
+          />
+
+          <WhatsappNumberInput
+            whatsappNumber={formData.whatsapp_number}
+            onChange={(value) => handleInputChange('whatsapp_number', value)}
           />
 
           <ServiceExperience

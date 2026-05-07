@@ -1,5 +1,13 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import {
+  FaInstagram,
+  FaFacebook,
+  FaXTwitter,
+  FaYoutube,
+  FaLinkedin,
+  FaTiktok
+} from "react-icons/fa6";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -25,3 +33,38 @@ export function handleFileName(fileName: string) {
 
     return { newFileName, filePath };
 }
+
+export const platforms = [
+  {
+    value: "instagram",
+    label: "Instagram",
+    icon: FaInstagram
+  },
+  {
+    value: "facebook",
+    label: "Facebook",
+    icon: FaFacebook
+  },
+  {
+    value: "x",
+    label: "X",
+    icon: FaXTwitter
+  },
+  {
+    value: "youtube",
+    label: "YouTube",
+    icon: FaYoutube
+  },
+  {
+    value: "linkedin",
+    label: "LinkedIn",
+    icon: FaLinkedin
+  },
+  {
+    value: "tiktok",
+    label: "TikTok",
+    icon: FaTiktok
+  }
+];
+
+export const isMobile = /Android|iphone/i.test(navigator.userAgent);

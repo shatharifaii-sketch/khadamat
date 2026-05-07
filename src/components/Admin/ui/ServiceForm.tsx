@@ -5,34 +5,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { useEffect, useState } from "react";
 import { UserProfile } from "../ServiceManagement";
-import { useAdminFunctionality } from "@/hooks/useAdminFunctionality";
-import { serviceCategories } from "@/components/PostService/ServiceCategoryData";
-import { locations } from "@/components/FindService/ServiceCategories";
+import { Service, useAdminFunctionality } from "@/hooks/useAdminFunctionality";
+import { categories, locations } from "@/components/FindService/ServiceCategories";
 import ServiceImages from "@/components/Service/ui/EditServiceImages";
+import ServiceLinks, { ServiceLink } from "@/components/PostService/ServiceLinks";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface Props {
     isEdit?: boolean;
     serviceProviders: UserProfile[];
     service?: Service;
     closeForm: () => void
-}
-
-interface Service {
-    title: string;
-    category: string;
-    description: string;
-    price_range: string;
-    location: string;
-    phone: string;
-    email: string;
-    experience?: string;
-    user_id: string;
-    status: string;
-    service_images: {
-        id: string;
-        image_name: string;
-        image_url: string;
-    }[];
 }
 
 const ServiceForm = ({ isEdit, serviceProviders, service, closeForm }: Props) => {
@@ -50,6 +33,9 @@ const ServiceForm = ({ isEdit, serviceProviders, service, closeForm }: Props) =>
         user_id: '',
         status: 'published',
         service_images: [],
+        is_online: false,
+        links: [] as ServiceLink[],
+        whatsapp_number: ''
     });
 
     useEffect(() => {
@@ -64,9 +50,7 @@ const ServiceForm = ({ isEdit, serviceProviders, service, closeForm }: Props) =>
     }, [service]);
 
     const handleSubmit = () => {
-        console.log(formData);
-
-        isEdit ? updateService.mutate(formData) : createService.mutate(formData);
+        if (isEdit) { updateService.mutate(formData) } else { createService.mutate(formData) };
     }
 
     return (
@@ -89,7 +73,7 @@ const ServiceForm = ({ isEdit, serviceProviders, service, closeForm }: Props) =>
                                 <SelectValue placeholder="اختر الفئة" />
                             </SelectTrigger>
                             <SelectContent>
-                                {serviceCategories.map((category) => {
+                                {categories.map((category) => {
                                     const Icon = category.icon;
                                     return (
                                         <SelectItem key={category.value} value={category.value}>
@@ -145,19 +129,19 @@ const ServiceForm = ({ isEdit, serviceProviders, service, closeForm }: Props) =>
                     <div>
                         <Label htmlFor="location">الموقع</Label>
                         <Select
-                                value={formData.location} onValueChange={(value) => setFormData({ ...formData, location: value })}
-                              >
-                                <SelectTrigger id="location">
-                                  <SelectValue placeholder="اختر المنطقة أو المحافظة" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {locations.map((loc) => (
+                            value={formData.location} onValueChange={(value) => setFormData({ ...formData, location: value })}
+                        >
+                            <SelectTrigger id="location">
+                                <SelectValue placeholder="اختر المنطقة أو المحافظة" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {locations.map((loc) => (
                                     <SelectItem key={loc} value={loc}>
-                                      {loc}
+                                        {loc}
                                     </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
 
                     <div>
@@ -201,6 +185,47 @@ const ServiceForm = ({ isEdit, serviceProviders, service, closeForm }: Props) =>
                                 <SelectItem value="disabled">معطل</SelectItem>
                             </SelectContent>
                         </Select>
+                    </div>
+
+                    <div>
+                        <Label htmlFor="whatsapp_number">رقم الواتساب</Label>
+                        <Input
+                            id="whatsapp_number"
+                            value={String(formData.whatsapp_number)}
+                            onChange={(e) => setFormData({ ...formData, whatsapp_number: e.target.value })}
+                        />
+                    </div>
+
+                    <div className='grid grid-cols-2 my-2'>
+                        <div className='flex items-center gap-2'>
+                            <Checkbox
+                                id="offline"
+                                checked={!formData.is_online}
+                                onCheckedChange={() => setFormData({ ...formData, is_online: false })}
+                            />
+                            <Label htmlFor="offline">خدمة في الموقع</Label>
+                        </div>
+
+                        <div className='flex items-center gap-2'>
+                            <Checkbox
+                                id="online"
+                                checked={formData.is_online}
+                                onCheckedChange={() => setFormData({ ...formData, is_online: true })}
+                            />
+                            <Label htmlFor="online">اونلاين</Label>
+                        </div>
+                    </div>
+
+                    <div className="col-span-2">
+                        <ServiceLinks
+                            socialLinks={formData.links as ServiceLink[]}
+                            onChange={(links) => {
+                                setFormData((prev) => ({
+                                    ...prev,
+                                    links
+                                }));
+                            }}
+                        />
                     </div>
 
 

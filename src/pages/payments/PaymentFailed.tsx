@@ -12,7 +12,7 @@ const PaymentFailed = () => {
             <div className="bg-primary text-primary-foreground p-2 rounded-lg">
               <Home size={24} />
             </div>
-            <span className="text-2xl font-bold text-primary">خدمتك</span>
+            <img src="/application_logo_cut.png" className='h-12' alt="cut logo" />
           </Link>
         </div>
 

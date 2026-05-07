@@ -33,6 +33,9 @@ import PaymentSuccess from "./pages/payments/PaymentSuccess";
 import PaymentFailed from "./pages/payments/PaymentFailed";
 import CodeVerification from "./pages/verify/CodeVerification";
 import ScrollToTop from "./components/ScrollToTop";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+import { useWebsiteAnalytics } from "./hooks/useWebsiteAnalytics";
 
 const queryClient = new QueryClient();
 
@@ -70,6 +73,8 @@ function App() {
                   </Route>
 
                   <Route path="auth" element={<Auth />} />
+                  <Route path="forgot-password" element={<ForgotPassword />} />
+                  <Route path="reset-password" element={<ResetPassword />} />
 
 
                   <Route path="admin" element={<AdminDashboard />}>

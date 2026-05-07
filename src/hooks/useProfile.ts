@@ -23,7 +23,7 @@ export const useProfile = () => {
     queryKey: ['profile', user?.id],
     queryFn: async () => {
       if (!user) return null;
-      
+
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -39,7 +39,7 @@ export const useProfile = () => {
   const updateProfile = useMutation({
     mutationFn: async (profileData: Partial<UserProfile>) => {
       if (!user) throw new Error('User must be authenticated');
-      
+
       const { data, error } = await supabase
         .from('profiles')
         .update(profileData)
@@ -60,11 +60,68 @@ export const useProfile = () => {
     }
   });
 
+  const confirmEmail = useMutation({
+    mutationFn: async ({ otp, email, user_id }: { otp: string; email: string; user_id: string; }) => {
+      if (!user) throw new Error('User must be authenticated');
+
+      const { error } = await supabase.auth.verifyOtp({
+        email,
+        token: otp,
+        type: 'email_change'
+      });
+
+      if (error) {
+        toast.error(error.code === "otp_expired" ? ' انتهت صلاحية الرمز' : 'حدث خطاء في التحقق من البريد الألكتروني');
+        console.error('Error verifying OTP:', error);
+        return { error };
+      }
+
+      toast.success('تم التحقق من البريد الألكتروني');
+
+      const response = await supabase.functions.invoke('confirm-new-email', { body: JSON.stringify({ email, user_id }) });
+
+      if (!response.data.success) {
+        toast.error('حدث خطاء في التحقق من البريد الألكتروني');
+        console.error('Error verifying OTP:', response.data.error);
+        return { error: response.data.error };
+      }
+
+      return 'OTP verified successfully';
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+      window.location.reload();
+    },
+    onError: (error: any) => {
+      console.error('Error updating profile:', error);
+      toast.error('حدث خطأ في تحديث الملف الشخصي');
+    }
+  });
+
+  const changePassword = useMutation({
+    mutationFn: async (password: string) => {
+      if (!user) throw new Error('User must be authenticated');
+
+      const { data, error } = await supabase.auth.updateUser({
+        password
+      });
+
+      if (error) {
+        console.error('Error changing password:', error);
+        throw error;
+      }
+
+      return data;
+    }
+  });
+
   return {
     profile: getProfile.data,
     updateProfile,
     isLoading: getProfile.isLoading,
-    isUpdating: updateProfile.isPending
+    isUpdating: updateProfile.isPending,
+    confirmEmail,
+    changePassword
   };
 };
 
@@ -77,8 +134,6 @@ export const usePublisherProfile = (userId: string) => {
         .select('*')
         .eq('id', userId)
         .maybeSingle();
-      
-        console.log('Publisher profile:', profile);
 
       if (error) throw error;
       return profile;
@@ -94,7 +149,7 @@ export const usePublisherProfile = (userId: string) => {
         .from('services')
         .select('*')
         .eq('user_id', getProfile.id);
-      
+
       if (error) throw error;
       return services;
     }
@@ -103,7 +158,7 @@ export const usePublisherProfile = (userId: string) => {
   const sendReport = useMutation({
     mutationKey: ['send-report'],
     mutationFn: async (reportData: { reported_user_id: string; description: string; }) => {
-      
+
     }
   })
 

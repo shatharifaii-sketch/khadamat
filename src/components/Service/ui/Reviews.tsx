@@ -31,13 +31,13 @@ const Reviews = ({
                 </DialogContent>
             </Dialog>
         </div>
-        <div className='flex gap-4 items-center justify-start overflow-x-auto pb-3'>
+        <div className='flex flex-col gap-1 md:gap-4 items-start md:items-center justify-start md:overflow-x-auto overflow-y-auto pb-3 max-h-[400px]'>
             {reviews.length === 0 && (
                 <p className='text-muted-foreground/70 text-center mx-auto'>لا توجد تقييمات بعد. كن أول من يضيف تقييمًا!</p>
             )}
             {reviews.map((review) => (
             <Dialog key={review.id}>
-                <DialogTrigger>
+                <DialogTrigger className='w-full'>
                     <ReviewCard review={review} />
                 </DialogTrigger>
                 <DialogContent>

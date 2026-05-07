@@ -20,9 +20,10 @@ interface Service {
 
 interface ServiceManagementCardProps {
   service: Service;
+  canPost: boolean;
 }
 
-const ServiceManagementCard = ({ service }: ServiceManagementCardProps) => {
+const ServiceManagementCard = ({ service, canPost }: ServiceManagementCardProps) => {
   const navigate = useNavigate();
 
   // Fetch accurate analytics data for this service
@@ -101,6 +102,7 @@ const ServiceManagementCard = ({ service }: ServiceManagementCardProps) => {
             variant="outline" 
             size="sm" 
             className="w-full"
+            disabled={!canPost}
           >
             <Edit size={16} className="mr-2" />
             تعديل الخدمة

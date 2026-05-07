@@ -7,18 +7,21 @@ import { Badge } from '../ui/badge'
 import { AnalyticsSummary } from '@/types/analytics'
 import ErrorBoundary from '../ErrorBoundary'
 import { ServiceManagement } from './ServiceManagement'
-import { UserManagement } from './UserManagement'
+import { UserManagement, UserProfile } from './UserManagement'
 import { Json, Tables } from '@/integrations/supabase/types'
 import { Service } from '@/hooks/useAdminFunctionality'
 import { ServiceEditModal } from './ServiceEditModal'
 import CouponsManagement from './CouponsManagement'
 import PendingServicesManagement from './PendingServicesManagement'
+import WebAnalytics from './WebAnalytics'
+import WebLineChart from './WebLineChart'
+import { useWebsiteAnalytics } from '@/hooks/useWebsiteAnalytics'
 
 interface Props {
     analyticsSummary: AnalyticsSummary;
     adminData: {
         services: Service[];
-        profiles: Tables<'profiles'>[];
+        profiles: UserProfile[];
         coupons: Tables<'coupons'>[];
         pendingServices: Service[];
     };
@@ -47,6 +50,16 @@ interface Props {
 const AdminView = ({ analyticsSummary, adminData, stats, dailyStats, monthlyStats, yearlyStats }: Props) => {
     const [selectedService, setSelectedService] = useState<Service | null>(null);
     const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
+    const { 
+    analyticsData, 
+    analyticsLoading, 
+    topPaths, 
+    visitsPerDay,
+    dailyStats: analyticsDailyStats,
+    monthlyStats: analyticsMonthlyStats,
+    yearlyStats: analyticsYearlyStats,
+    deviceStats
+  } = useWebsiteAnalytics();
 
     return (
         <div>
@@ -71,12 +84,34 @@ const AdminView = ({ analyticsSummary, adminData, stats, dailyStats, monthlyStat
                 </Card>
             </div>
 
-            {/* ACTIVITY CHARTS */}
-            <ActivityChart
-                dailyStats={dailyStats}
-                monthlyStats={monthlyStats}
-                yearlyStats={yearlyStats}
-            />
+            <Tabs defaultValue="web_analytics" className="space-y-6">
+                <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="web_analytics" className="flex items-center justify-center gap-2">
+                        <BarChart3 className="h-4 w-4" />
+                        نشاط استخدام الموقع
+                    </TabsTrigger>
+                    <TabsTrigger value="activity" className="flex items-center justify-center gap-2">
+                        <TrendingUp className="h-4 w-4" />
+                        تحليل نشاط المستخدمين
+                    </TabsTrigger>
+                </TabsList>
+
+                {/* ACTIVITY CHARTS */}
+                <TabsContent value='web_analytics'>
+                    <WebLineChart
+                        dailyStats={analyticsDailyStats}
+                        monthlyStats={analyticsMonthlyStats}
+                        yearlyStats={analyticsYearlyStats}
+                    />
+                </TabsContent>
+                <TabsContent value='activity'>
+                    <ActivityChart
+                        dailyStats={dailyStats}
+                        monthlyStats={monthlyStats}
+                        yearlyStats={yearlyStats}
+                    />
+                </TabsContent>
+            </Tabs>
 
             {/* Main Admin Tabs */}
             <Tabs defaultValue="analytics" className="space-y-6">
@@ -142,7 +177,7 @@ const AdminView = ({ analyticsSummary, adminData, stats, dailyStats, monthlyStat
                         </Card>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <Card>
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
@@ -191,6 +226,12 @@ const AdminView = ({ analyticsSummary, adminData, stats, dailyStats, monthlyStat
                             </CardContent>
                         </Card>
                     </div>
+
+                    <WebAnalytics
+                        topPaths={topPaths}
+                        visitsPerDay={visitsPerDay}
+                        deviceStats={deviceStats}
+                    />
                 </TabsContent>
 
                 <TabsContent value="users">

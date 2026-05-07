@@ -28,6 +28,9 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import SubscriptionsLoading from '@/components/Account/SubscriptionsLoading';
 import UserSubscriptions from '@/components/Account/UserSubscriptions';
 import UserTransactions from '@/components/Account/UserTransactions';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import ChangeEmailComponent from '@/components/Account/ChangeEmailComponent';
+import ChangePasswordComponent from '@/components/Account/ChangePasswordComponent';
 
 const Account = () => {
   const { user, loading } = useAuth();
@@ -184,8 +187,8 @@ const Account = () => {
                     إدارة ومتابعة أداء خدماتك
                   </CardDescription>
                 </div>
-                <Link to="/post-service">
-                  <Button>
+                <Link to={subscription?.status === 'active' ? "/post-service" : "#"}>
+                  <Button disabled={subscription?.status !== 'active'}>
                     إضافة خدمة جديدة
                   </Button>
                 </Link>
@@ -199,7 +202,7 @@ const Account = () => {
               ) : services && services.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {services.map((service) => (
-                    <ServiceManagementCard key={service.id} service={service} />
+                    <ServiceManagementCard key={service.id} service={service} canPost={subscription?.status === 'active'} />
                   ))}
                 </div>
               ) : (
@@ -223,13 +226,13 @@ const Account = () => {
         {/* Subscription History Section */}
         {getUserSubscriptions.data && (
           <div>
-          <Suspense fallback={<>
-            <p>تحميل الاشتراكات</p></>}>
-            <ErrorBoundary fallback={<div>فشل في تحميل  الاشتراكات</div>}>
-              <UserSubscriptions user={user} />
-            </ErrorBoundary>
-          </Suspense>
-        </div>
+            <Suspense fallback={<>
+              <p>تحميل الاشتراكات</p></>}>
+              <ErrorBoundary fallback={<div>فشل في تحميل  الاشتراكات</div>}>
+                <UserSubscriptions user={user} />
+              </ErrorBoundary>
+            </Suspense>
+          </div>
         )}
 
         <div id="subscription-history">
@@ -255,27 +258,11 @@ const Account = () => {
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>البريد الإلكتروني</Label>
-                <div className="p-3 bg-muted rounded-md">
-                  <span className="text-sm">{user?.email}</span>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  لا يمكن تغيير البريد الإلكتروني حالياً
-                </p>
+                <ChangeEmailComponent user={user} />
               </div>
 
               <div className="space-y-2">
-                <Label>كلمة المرور</Label>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    // This would typically open a password change modal or navigate to a password change page
-                    alert('سيتم إضافة وظيفة تغيير كلمة المرور قريباً');
-                  }}
-                  className="w-full"
-                >
-                  تغيير كلمة المرور
-                </Button>
+                <ChangePasswordComponent />
               </div>
             </div>
           </CardContent>

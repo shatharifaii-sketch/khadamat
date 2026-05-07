@@ -50,8 +50,6 @@ const ServiceDetailsModal = ({ service, isOpen, onClose, onViewProvider }: Servi
     enabled: !!service?.id && isOpen,
   });
 
-  if (!service) return null;
-
   const CategoryIcon = categories.find(cat => cat.value === service.category)?.icon || Star;
   const { data: profile } = useQuery({
     queryKey: ['service-provider-profile', service?.user_id],

@@ -5,6 +5,7 @@ import { usePendingService } from '@/hooks/usePendingService';
 import { ServiceFormData } from '@/types/service';
 import { toast } from 'sonner';
 import { Service } from './useAdminFunctionality';
+import { formatWhatsappNumber } from '@/utils/formValidation';
 
 export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
   const navigate = useNavigate();
@@ -18,7 +19,6 @@ export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
     // If we're editing, update the service
     if (isEditMode && serviceToEdit) {
       try {
-        console.log('Updating service:', serviceToEdit.id, formData);
         await updateService.mutateAsync({
           id: serviceToEdit.id,
           title: formData.title,
@@ -29,8 +29,14 @@ export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
           phone: formData.phone,
           email: formData.email,
           experience: formData.experience,
+          is_online: formData.is_online,
+          links: formData.links,
+          whatsapp_number: formatWhatsappNumber({
+            countryCode: formData.whatsapp_number.countryCode,
+            number: formData.whatsapp_number.number
+          })
         }).finally(() => {
-          toast('تم تحديث الخدمة بنجاح! انتظر الموافقة من الإدارة.', { type: 'success' });
+          toast.success('تم تحديث الخدمة بنجاح! انتظر الموافقة من الإدارة.');
         });
 
         if (formData.images && formData.images.length > 0) {
@@ -69,6 +75,12 @@ export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
         phone: formData.phone,
         email: formData.email,
         experience: formData.experience,
+        is_online: formData.is_online,
+        links: formData.links,
+        whatsapp_number: formatWhatsappNumber({
+          countryCode: formData.whatsapp_number.countryCode,
+          number: formData.whatsapp_number.number
+        })
       });
 
       //TODO: Handle image uploads here if necessary

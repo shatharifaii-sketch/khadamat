@@ -25,51 +25,72 @@ const PendingServiceData = ({
 
     if (!service) return null;
 
-  return (
-    <div className='relative'>
-        <div className='flex flex-col gap-6 overflow-y-auto max-h-[60vh] pr-2'>
-            <h1 className='flex flex-col'>
-            اسم الخدمة:
-            <span className='px-4 text-2xl'>
-                {service.title}
-            </span>
-        </h1>
-        <p className='flex flex-col'>
-            وصف الخدمة: 
-            <span className='px-4'>
-                {service.description}
-            </span>
-        </p>
-        <p className='flex flex-col'>
-            تكلفة الخدمة: 
-            <span className='px-4'>
-                {service.price_range}
-            </span>
-        </p>
-        <p className='flex flex-col'>
-            الموقع: 
-            <span className='px-4'>
-                {service.location}
-            </span>
-        </p>
-        <div>
-            <h3 className='text-lg font-semibold'>الملحقات</h3>
-            <div className='mt-3 border border-dashed border-muted-foreground rounded-lg'>
-                <ServiceImages serviceId={service.id} />
+    return (
+        <div className='relative'>
+            <div className='flex flex-col gap-6 overflow-y-auto max-h-[60vh] pr-2'>
+                <h1 className='flex flex-col'>
+                    اسم الخدمة:
+                    <span className='px-4 text-2xl'>
+                        {service.title}
+                    </span>
+                </h1>
+                <p className='flex flex-col'>
+                    وصف الخدمة:
+                    <span className='px-4'>
+                        {service.description}
+                    </span>
+                </p>
+                <p className='flex flex-col'>
+                    تكلفة الخدمة:
+                    <span className='px-4'>
+                        {service.price_range}
+                    </span>
+                </p>
+                <p className='flex flex-col'>
+                    رقم الواتساب:
+                    <span className='px-4'>
+                        {service.whatsapp_number ? service.whatsapp_number : 'اونلاين'}
+                    </span>
+                </p>
+                <p className='flex flex-col'>
+                    الموقع:
+                    <span className='px-4'>
+                        {service.location ? service.location : 'اونلاين'}
+                    </span>
+                </p>
+                <p className='flex flex-col'>
+                    روابط التواصل:
+                    {service.links?.map((link, index) => (
+                        <a
+                            key={index}
+                            href={link.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className='flex flex-col items-end'
+                        >
+                            <span>{link.type}</span>
+                            <span className='text-xs text-muted-foreground' dir='ltr'>{link.url}</span>
+                        </a>
+                    ))}
+                </p>
+                <div>
+                    <h3 className='text-lg font-semibold'>الملحقات</h3>
+                    <div className='mt-3 border border-dashed border-muted-foreground rounded-lg'>
+                        <ServiceImages serviceId={service.id} />
+                    </div>
+                </div>
+            </div>
+            <Separator className="mt-4" />
+            <div className='w-full'>
+                <h3 className='text-lg font-semibold'>إقبل نشر الخدمة</h3>
+                <div className='mt-3 flex items-center'>
+                    <Button onClick={handleAccept} className='flex-1'>
+                        نشر الخدمة
+                    </Button>
+                </div>
             </div>
         </div>
-        </div>
-        <Separator className="mt-4" />
-        <div className='w-full'>
-            <h3 className='text-lg font-semibold'>إقبل نشر الخدمة</h3>
-            <div className='mt-3 flex items-center'>
-                <Button onClick={handleAccept} className='flex-1'>
-                    نشر الخدمة
-                </Button>
-            </div>
-        </div>
-    </div>
-  )
+    )
 }
 
 export default PendingServiceData

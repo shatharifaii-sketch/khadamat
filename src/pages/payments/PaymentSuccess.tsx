@@ -32,6 +32,28 @@ const PaymentSuccess = () => {
     return <Navigate to="/" />;
   }
 
+  if (!subscriptiondata && isVerifySessionSuccess) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
+        <div className="text-center mb-8">
+          <Link to="/" className="inline-flex items-center space-x-2 space-x-reverse mb-6">
+            <div className="bg-primary text-primary-foreground p-2 rounded-lg">
+              <Home size={24} />
+            </div>
+            <img src="/application_logo_cut.png" className='h-12' alt="cut logo" />
+          </Link>
+        </div>
+        <div className="flex flex-col items-center gap-1 mb-3">
+          <p>حدث خطأ</p>
+          <p>واجهنا مشكلة في التحقق من الاشتراك!</p>
+          <Link to={'/'} className="underline text-blue-400">
+            الإنتقال إلى الصفحة الرئيسية
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
       <div className="text-center mb-8">
@@ -53,33 +75,33 @@ const PaymentSuccess = () => {
               </Link>
             </div>
             <Card className={cn('col-span-1 flex flex-col justify-between', subscriptiondata.subscription_tier.class_name)}>
-            <CardHeader className='text-2xl text-center font-bold'>
-              {subscriptiondata?.subscription_tier.title}
-              <span className='block mt-3'>
-                <Badge className={cn('flex items-center gap-2 w-fit mx-auto', subscriptiondata.subscription_tier.badge_class_name)}>
-                  <Star className='text-yellow-400' />{subscriptiondata.subscription_tier.free_trial_period_text}
-                </Badge>
-              </span>
-              <span className='text-sm'>عدد الخدمات المتاحة: {subscriptiondata.subscription_tier.allowed_services}</span>
-            </CardHeader>
-            <CardContent>
-              <div className='flex flex-col gap-4'>
-                <div>
-                  <div className={cn('border-2 border-dashed rounded-lg p-2', subscriptiondata.subscription_tier.class_name)}>
-                    <span className={cn('flex items-center gap-2', subscriptiondata.subscription_tier.class_name)}>
-                      نقاط مهمة للاشتراك:
-                    </span>
-                    <ul className='list-disc list-inside'>
-                      {(subscriptiondata.subscription_tier.notes ?? []).map((note: string) => (
-                        <li className='text-start' key={note}>{note}</li>
-                      ))}
-                    </ul>
+              <CardHeader className='text-2xl text-center font-bold'>
+                {subscriptiondata?.subscription_tier.title}
+                <span className='block mt-3'>
+                  <Badge className={cn('flex items-center gap-2 w-fit mx-auto', subscriptiondata.subscription_tier.badge_class_name)}>
+                    <Star className='text-yellow-400' />{subscriptiondata.subscription_tier.free_trial_period_text}
+                  </Badge>
+                </span>
+                <span className='text-sm'>عدد الخدمات المتاحة: {subscriptiondata.subscription_tier.allowed_services}</span>
+              </CardHeader>
+              <CardContent>
+                <div className='flex flex-col gap-4'>
+                  <div>
+                    <div className={cn('border-2 border-dashed rounded-lg p-2', subscriptiondata.subscription_tier.class_name)}>
+                      <span className={cn('flex items-center gap-2', subscriptiondata.subscription_tier.class_name)}>
+                        نقاط مهمة للاشتراك:
+                      </span>
+                      <ul className='list-disc list-inside'>
+                        {(subscriptiondata.subscription_tier.notes ?? []).map((note: string) => (
+                          <li className='text-start' key={note}>{note}</li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
+              </CardContent>
 
-          </Card>
+            </Card>
           </>
         ) : (
           <>

@@ -1,4 +1,4 @@
-import { useServiceData } from "@/hooks/usePublicServices";
+import { PublicService, useServiceData } from "@/hooks/usePublicServices";
 import ServiceView from "./ServiceView";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";

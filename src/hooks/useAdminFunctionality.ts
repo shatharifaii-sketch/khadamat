@@ -3,9 +3,10 @@ import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tansta
 import { useAuth } from "@/contexts/AuthContext";
 import { supabaseAdmin } from "@/integrations/supabase/adminClient";
 import { User } from "@/components/Admin/ui/UserForm";
-import { Tables } from "@/integrations/supabase/types";
+import { Json, Tables } from "@/integrations/supabase/types";
 import { json } from "react-router-dom";
 import { toast } from "sonner";
+import { ServiceLink } from "@/components/PostService/ServiceLinks";
 
 interface UserProfile {
   id: string;
@@ -34,6 +35,12 @@ export interface Service {
   created_at: string;
   updated_at: string;
   user_id: string;
+  is_online?: boolean;
+  links: [] | ServiceLink[] | Json;
+  whatsapp_number?: {
+    countryCode: string;
+    number: string;
+  } | string;
   publisher: {
     full_name: string;
   };
@@ -79,13 +86,11 @@ export const useIsAdmin = (): boolean => {
 export const useAdminData = () => {
   const admin = useIsAdmin();
 
-  if (!admin) return null;
-
   const { data: adminData } = useSuspenseQuery({
     queryKey: ['admin-data'],
     queryFn: async () => {
       const { data: profiles, error: usersError } = await supabase
-        .from('profiles')
+        .from('profiles_with_email')
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -346,6 +351,9 @@ export const useAdminFunctionality = () => {
           experience: formData.experience,
           status: formData.status,
           user_id: formData.user_id,
+          is_online: formData.is_online,
+          links: formData.links as [],
+          whatsapp_number: String(formData.whatsapp_number)
         })
         .select('*')
         .single();
@@ -391,7 +399,10 @@ export const useAdminFunctionality = () => {
           phone: formData.phone,
           email: formData.email,
           experience: formData.experience,
-          status: formData.status
+          status: formData.status,
+          is_online: formData.is_online,
+          links: formData.links as [],
+          whatsapp_number: String(formData.whatsapp_number)
         })
         .eq('id', formData.id)
         .select('*')
@@ -439,7 +450,7 @@ export const useAdminFunctionality = () => {
       queryClient.invalidateQueries({ queryKey: ['admin-data'] });
       toast.success('تم تحديث الخدمة بنجاح!');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       console.error('Error updating service:', error);
       toast.error(error.message || 'حدث خطأ في تحديث الخدمة');
     }
