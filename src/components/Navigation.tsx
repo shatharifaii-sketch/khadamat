@@ -14,8 +14,10 @@ import { GeneratedAvatar } from './GeneratedAvatar';
 import { useIsAdmin } from '@/hooks/useAdminFunctionality';
 import { useChat } from '@/contexts/ChatContext';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 const Navigation = () => {
+  const { t } = useTranslation("navbar");
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -72,7 +74,7 @@ const Navigation = () => {
             />
           )
         }
-        <span>حسابي</span>
+        <span>{t("account")}</span>
       </div>
     </NavLink>
   );
@@ -84,7 +86,7 @@ const Navigation = () => {
         {unreadCount > 0 && (
           <p className="absolute -top-2 -right-2 text-muted bg-red-500 rounded-full text-xs flex items-center justify-center size-5">{unreadCount}</p>
         )}
-        {mobile && <span>المحادثات</span>}
+        {mobile && <span>{t("conversations")}</span>}
       </div>
     </NavLink>
   );
@@ -103,26 +105,26 @@ const Navigation = () => {
             <NavLink to="/find-service">
               <div className="flex items-center gap-2">
                 <Search size={16} />
-                البحث عن خدمة
+                {t("find_service")}
               </div>
             </NavLink>
             <NavLink to="/post-service">
               <div className="flex items-center gap-2">
                 <PlusCircle size={16} />
-                أضف خدمة
+                {t("add_service")}
               </div>
             </NavLink>
             <NavLink to="/about">
               <div className="flex items-center gap-2">
                 <Info size={16} />
-                من نحن
+                {t("about")}
               </div>
             </NavLink>
             {admin && (
               <NavLink to="/admin">
                 <div className="flex items-center gap-2">
                   <Shield size={16} />
-                  لوحة الإدارة
+                  {t("admin_panel")}
                 </div>
               </NavLink>
             )}
@@ -141,13 +143,13 @@ const Navigation = () => {
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>تسجيل الخروج</p>
+                    <p>{t("logout")}</p>
                   </TooltipContent>
                 </Tooltip>
               </div>
             ) : (
               <Link to="/auth">
-                <Button>تسجيل الدخول</Button>
+                <Button>{t("login")}</Button>
               </Link>
             )}
 
@@ -167,26 +169,26 @@ const Navigation = () => {
                   <NavLink to="/find-service" onClick={() => setIsOpen(false)}>
                     <div className="flex items-center gap-2 text-lg">
                       <Search size={20} />
-                      البحث عن خدمة
+                      {t("find_service")}
                     </div>
                   </NavLink>
                   <NavLink to="/post-service" onClick={() => setIsOpen(false)}>
                     <div className="flex items-center gap-2 text-lg">
                       <PlusCircle size={20} />
-                      أضف خدمة
+                      {t("add_service")}
                     </div>
                   </NavLink>
                   <NavLink to="/about" onClick={() => setIsOpen(false)}>
                     <div className="flex items-center gap-2 text-lg">
                       <Info size={20} />
-                      من نحن
+                      {t("about")}
                     </div>
                   </NavLink>
                   {admin && (
                     <NavLink to="/admin" onClick={() => setIsOpen(false)}>
                       <div className="flex items-center gap-2 text-lg">
                         <Shield size={20} />
-                        لوحة الإدارة
+                        {t("admin_panel")}
                       </div>
                     </NavLink>
                   )}
@@ -199,12 +201,12 @@ const Navigation = () => {
                         <ConvosButton mobile />
                         <Button variant="ghost" size="sm" onClick={handleSignOut} className="w-full justify-start">
                           <LogOut size={20} className="ml-2" />
-                          تسجيل الخروج
+                          {t("logout")}
                         </Button>
                       </div>
                     ) : (
                       <Link to="/auth" onClick={() => setIsOpen(false)}>
-                        <Button className="w-full">تسجيل الدخول</Button>
+                        <Button className="w-full">{t("login")}</Button>
                       </Link>
                     )}
                   </div>

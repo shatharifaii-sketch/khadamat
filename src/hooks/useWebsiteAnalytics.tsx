@@ -1,8 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { useIsMobile } from "./use-mobile";
 import { isMobile } from "@/lib/utils";
 
 type visitData = {
