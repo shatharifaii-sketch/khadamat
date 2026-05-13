@@ -2,6 +2,7 @@ import { categories } from '@/components/FindService/ServiceCategories';
 import { GeneratedAvatar } from '@/components/GeneratedAvatar';
 import { Avatar, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router-dom';
 
 interface Props {
@@ -21,6 +22,7 @@ const ServiceHeader = ({
   updatedAt,
   publisherId
 }: Props) => {
+  const { t } = useTranslation("services");
 
   const categoryLabel = categories.find(cat => cat.value === category)?.label || category;
 
@@ -49,7 +51,7 @@ const ServiceHeader = ({
       <div className=''>
         <div className='flex justify-start gap-2'>
           <Badge variant="secondary" className="text-sm font-medium text-center p-1">
-            {categoryLabel}
+            {t(categoryLabel)}
           </Badge>
           <h1 className='md:text-4xl text-wrap text-2xl'>{title}</h1>
         </div>

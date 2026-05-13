@@ -1,1 +1,10 @@
-{}
+{
+    "about": "about",
+    "add_service": "Add Service",
+    "find_service": "Find Service",
+    "login": "Login",
+    "logout": "Logout",
+    "account": "Account",
+    "conversations": "Conversations",
+    "admin_panel": "Admin Panel"
+}

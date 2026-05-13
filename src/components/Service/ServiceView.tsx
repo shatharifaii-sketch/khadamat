@@ -9,6 +9,7 @@ import ReportDrawer from '../ReportDrawer';
 import { Conversation } from '@/hooks/useConversations';
 import { ServiceLink } from '../PostService/ServiceLinks';
 import { Json } from '@/integrations/supabase/types';
+import { useTranslation } from 'react-i18next';
 
 export interface ServiceViewProps {
   id: string;
@@ -51,7 +52,8 @@ const ServiceView = ({
   setConvoId,
   setIsConvo,
   userId
-}: Props) => {  
+}: Props) => {
+  const { t } = useTranslation("services");
   return (
     <div className='flex flex-col gap-10'>
       <ServiceHeader
@@ -77,7 +79,7 @@ const ServiceView = ({
           >
             <Button variant='ghost' className='shadow border'>
               <MessageCircle />
-              المحادثة
+              {t("find_service.service.conversation")}
             </Button>
           </NavLink>
         )}

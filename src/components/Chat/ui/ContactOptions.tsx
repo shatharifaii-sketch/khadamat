@@ -9,6 +9,7 @@ import { useConversations } from '@/hooks/useConversations';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaWhatsapp } from 'react-icons/fa6';
+import { useTranslation } from 'react-i18next';
 
 interface ContactOptionsProps {
   serviceId?: string;
@@ -43,6 +44,7 @@ const ContactOptions = ({
   publisherId,
   whatsappNumber
 }: ContactOptionsProps) => {
+  const { t } = useTranslation("services");
   const { trackServiceAction } = useAnalyticsTracking();
   const { startConversation, startConversationSuccess } = useConversations();
   const navigate = useNavigate();
@@ -55,10 +57,10 @@ const ContactOptions = ({
 
   const handleEmailContact = () => {
     console.log('📧 Opening email client for service:', serviceName);
-    const subject = encodeURIComponent(`استفسار حول: ${serviceName}`);
-    const body = encodeURIComponent(`مرحباً،\n\nأود الاستفسار حول خدمة "${serviceName}".\n\nشكراً لك.`);
+    const subject = encodeURIComponent(`${t("find_service.card.inquiry")}: ${serviceName}`);
+    const body = encodeURIComponent(t("find_service.card.inquiry_body", { serviceName }));
     window.open(`mailto:${email}?subject=${subject}&body=${body}`);
-    toast.success('تم فتح برنامج البريد الإلكتروني');
+    toast.success(t("find_service.card.inquiry_success_toast"));
 
     if (serviceId && serviceName) {
       // Track email contact action
@@ -75,7 +77,7 @@ const ContactOptions = ({
     console.log('📧 Opening whatsapp client for service:', serviceName, whatsappNumber);
 
     const encodedMessage = encodeURIComponent(
-      "مرحباً، أود الاستفسار عن خدمتك"
+      t("find_service.card.whatsapp_contact_message", { serviceName })
     );
 
     const url = isMobile
@@ -83,12 +85,12 @@ const ContactOptions = ({
       : `https://web.whatsapp.com/send?phone=${whatsappNumber}&text=${encodedMessage}`;
 
     window.open(url, '_blank');
-    toast.success('تم فتح برنامج الواتساب');
+    toast.success(t("find_service.card.whatsapp_contact_success_toast"));
   }
 
   const handleCopyEmail = () => {
     navigator.clipboard.writeText(email);
-    toast.success('تم نسخ عنوان البريد الإلكتروني');
+    toast.success(t("find_service.card.email_copy_toast"));
 
     if (serviceId && serviceName) {
       // Track email contact action
@@ -102,7 +104,7 @@ const ContactOptions = ({
   const handlePhoneCall = () => {
     if (phone) {
       window.open(`tel:${phone}`);
-      toast.success('تم فتح تطبيق الهاتف');
+      toast.success(t("find_service.card.phone_success_toast"));
 
       // Track phone contact action
       trackServiceAction.mutate({
@@ -115,7 +117,7 @@ const ContactOptions = ({
   const handleCopyPhone = () => {
     if (phone) {
       navigator.clipboard.writeText(phone);
-      toast.success('تم نسخ رقم الهاتف');
+      toast.success(t("find_service.card.phone_copy_toast"));
 
       if (serviceId && serviceName) {
         // Track phone contact action
@@ -129,14 +131,14 @@ const ContactOptions = ({
 
   const handleStartChat = () => {
     if (!userId) {
-      toast.error('يرجى تسجيل الدخول لبدء المحادثة', {
+      toast.error(t("find_service.card.login_to_chat"), {
         icon: (
           <>
             <ArrowLeftToLine size={16} />
           </>
         ),
         action: {
-          label: 'تسجيل الدخول',
+          label: t("find_service.card.login"),
           onClick: () => {
             navigate('/auth');
           }
@@ -164,13 +166,13 @@ const ContactOptions = ({
     <Popover>
       <PopoverTrigger asChild>
         <Button className={className}>
-          تواصل معنا
+          {t("find_service.card.contact_us")}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-64 p-2">
         <div className="space-y-2">
           <div className="text-sm font-medium text-center mb-3">
-            تواصل مع: {providerName}
+            {t("find_service.card.contact_provider", { providerName })}
           </div>
 
           <div className="space-y-2">
@@ -182,7 +184,7 @@ const ContactOptions = ({
                   onClick={handleStartChat}
                 >
                   <MessageCirclePlus size={16} />
-                  إرسال رسالة خاصة
+                  {t("find_service.card.dm_contact")}
                 </Button>
               </div>
             )}
@@ -194,7 +196,7 @@ const ContactOptions = ({
                 onClick={handleWhatsappContact}
               >
                 <FaWhatsapp size={30} />
-                تواصل معنا عبر واتساب
+                {t("find_service.card.whatsapp_contact")}
               </Button>
             </div>
 
@@ -205,7 +207,7 @@ const ContactOptions = ({
                 onClick={handleEmailContact}
               >
                 <Mail size={16} />
-                إرسال إيميل
+                {t("find_service.card.email_contact")}
               </Button>
               <Button
                 variant="ghost"
@@ -225,7 +227,7 @@ const ContactOptions = ({
                   onClick={handlePhoneCall}
                 >
                   <Phone size={16} />
-                  اتصال هاتفي
+                  {t("find_service.card.phone_contact")}
                 </Button>
                 <Button
                   variant="ghost"
