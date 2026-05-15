@@ -15,6 +15,7 @@ type FormError = {
 const ResetPassword = () => {
   const navigate = useNavigate();
   const [errors, setErrors] = useState<{ message: string, field: string }[]>([]);
+  const [showPassword, setShowPassword] = useState(false);
 
   const { changePassword } = useProfile();
   const [formData, setFormData] = useState({
@@ -112,6 +113,7 @@ const ResetPassword = () => {
               <div>
                 <Label>كلمة المرور الجديدة</Label>
                 <Input
+                  type={showPassword ? 'text' : 'password'}
                   value={formData.newPassword}
                   onChange={(e) => handleChange('newPassword', e.target.value)}
                 />
@@ -124,6 +126,7 @@ const ResetPassword = () => {
               <div>
                 <Label>أعد كلمة المرور الجديدة</Label>
                 <Input
+                  type={showPassword ? 'text' : 'password'}
                   value={formData.confirmPassword}
                   onChange={(e) => handleChange('confirmPassword', e.target.value)}
                 />
@@ -139,15 +142,23 @@ const ResetPassword = () => {
                   {getError('server')}
                 </p>
               )}
+
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? 'أخف كلمة المرور' : 'أظهر كلمة المرور'}
+              </Button>
             </div>
 
             <Button
-                onClick={handleSubmit}
-                className='flex-1'
-                disabled={changePassword.isPending}
-              >
-                تغيير كلمة المرور
-              </Button>
+              onClick={handleSubmit}
+              className='flex-1 mt-6'
+              disabled={changePassword.isPending}
+            >
+              تغيير كلمة المرور
+            </Button>
 
           </CardContent>
         </Card>

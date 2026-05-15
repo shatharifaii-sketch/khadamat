@@ -153,7 +153,7 @@ const Navigation = () => {
               </Link>
             )}
 
-            <LanguageSwitcher />
+            {/* <LanguageSwitcher /> */}
           </div>
 
           {/* Mobile menu button */}
