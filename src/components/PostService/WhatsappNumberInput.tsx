@@ -49,9 +49,9 @@ const WhatsappNumberInput = ({
         </p>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-1 md:gap-4">
         <div className="bg-[#25D366] py-2 px-4 rounded-lg">
-          <FaWhatsapp className="text-white" size={30} />
+          <FaWhatsapp className="text-white" size={28} />
         </div>
 
         <Select
@@ -59,7 +59,7 @@ const WhatsappNumberInput = ({
           onValueChange={(e) => handleCountryChange(e)}
           dir="rtl"
         >
-          <SelectTrigger className="">
+          <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="رقم البلد" />
           </SelectTrigger>
           <SelectContent>

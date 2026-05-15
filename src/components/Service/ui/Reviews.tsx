@@ -3,10 +3,11 @@ import ReviewCard from './ReviewCard'
 import { useServiceReviews } from '@/hooks/UseServiceReviews';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import ReviewDialog from './ReviewDialog';
-import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import CreateReviewForm from './CreateReviewForm';
 import { useTranslation } from 'react-i18next';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
 
 interface Props {
     serviceId: string;
@@ -16,6 +17,7 @@ const Reviews = ({
     serviceId
 }: Props) => {
     const { t } = useTranslation("services");
+    const isMobile = useIsMobile();
     const { reviews, userAllowed } = useServiceReviews(serviceId);
     const [creatingReview, setCreatingReview] = useState<boolean>(false);
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
@@ -30,7 +32,11 @@ const Reviews = ({
                 <DialogTrigger disabled={!userAllowed}  className='text-primary flex items-center gap-2'>
                     {t("service.reviews.add_review")}<Plus />
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className={cn(
+                    isMobile
+                        ? "top-1/3"
+                        : ""
+                )}>
                     <CreateReviewForm closeForm={() => setCreatingReview(false)} serviceId={serviceId} />
                 </DialogContent>
             </Dialog>
@@ -44,7 +50,11 @@ const Reviews = ({
                 <DialogTrigger className='w-full'>
                     <ReviewCard review={review} />
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className={cn(
+                    isMobile
+                        ? "top-1/3"
+                        : ""
+                )}>
                     <ReviewDialog closeDialog={() => setDialogOpen(false)} review={review} />
                 </DialogContent>
             </Dialog>

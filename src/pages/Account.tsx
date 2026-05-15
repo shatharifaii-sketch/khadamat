@@ -7,8 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { User, Settings, CreditCard, MessageCircle, TrendingUp, Eye, Calendar, Loader2, Search, Pen } from 'lucide-react';
-import Navigation from '@/components/Navigation';
+import { User, TrendingUp, Calendar, Loader2, Pen, Plus } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { locations } from '@/components/FindService/ServiceCategories';
 
@@ -20,7 +19,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 import ServiceManagementCard from '@/components/Account/ServiceManagementCard';
-import SubscriptionHistoryTable from '@/components/Account/SubscriptionHistoryTable';
 import PaymentSuccessCard from '@/components/Account/PaymentSuccessCard';
 import MainUserDetails from '@/components/Account/MainUserDetails';
 import UploadProfileImage from '@/components/Account/UploadProfileImage';
@@ -28,11 +26,14 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import SubscriptionsLoading from '@/components/Account/SubscriptionsLoading';
 import UserSubscriptions from '@/components/Account/UserSubscriptions';
 import UserTransactions from '@/components/Account/UserTransactions';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import ChangeEmailComponent from '@/components/Account/ChangeEmailComponent';
 import ChangePasswordComponent from '@/components/Account/ChangePasswordComponent';
+import { useTranslation } from 'react-i18next';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Account = () => {
+  const { t } = useTranslation("account");
+  const isMobile = useIsMobile();
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const { profile, updateProfile, isLoading: profileLoading } = useProfile();
@@ -128,11 +129,11 @@ const Account = () => {
           variant='ghost'
           className="text-muted-foreground justify-center flex items-center gap-2 hover:text-primary mx-auto">
           <Pen className='size-4' />
-          <p>إدارة ملفك الشخصي</p>
+          <p>{t('edit_profile_button')}</p>
         </Button>
       </div>
 
-      <div className="grid gap-8">
+      <div className="md:grid md:gap-8 flex flex-col gap-2">
         {/* Payment Success Notification */}
         <PaymentSuccessCard />
 
@@ -143,7 +144,7 @@ const Account = () => {
             onClick={() => scrollToSection('my-services')}
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">الخدمات المنشورة</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('my_services')}</CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -159,7 +160,7 @@ const Account = () => {
             onClick={() => scrollToSection('subscription-history')}
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">الاشتراك</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('subscription')}</CardTitle>
               <Calendar className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -167,7 +168,7 @@ const Account = () => {
                 {subscription?.services_allowed || 0}
               </div>
               <p className="text-xs text-muted-foreground">
-                خدمة متاحة
+                {t("available_services")}
               </p>
             </CardContent>
           </Card>
@@ -179,17 +180,17 @@ const Account = () => {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-sm text-wrap md:text-xl">
                     <TrendingUp className="h-5 w-5" />
-                    خدماتي المنشورة
+                    {t("my_published_services")}
                   </CardTitle>
                   <CardDescription className='mt-2'>
-                    إدارة ومتابعة أداء خدماتك
+                    {t("manage_your_services")}
                   </CardDescription>
                 </div>
                 <Link to={subscription?.status === 'active' ? "/post-service" : "#"}>
                   <Button disabled={subscription?.status !== 'active'}>
-                    إضافة خدمة جديدة
+                    {isMobile ? <Plus className="h-4 w-4" /> : t("post_new_service")}
                   </Button>
                 </Link>
               </div>
@@ -208,13 +209,13 @@ const Account = () => {
               ) : (
                 <div className="text-center py-8">
                   <TrendingUp className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium mb-2">لا توجد خدمات منشورة</h3>
+                  <h3 className="text-lg font-medium mb-2">{t("no_published_services")}</h3>
                   <p className="text-muted-foreground mb-4">
-                    ابدأ بنشر خدمتك الأولى للوصول إلى العملاء
+                    {t("start_publishing_services")}
                   </p>
                   <Link to="/post-service">
                     <Button>
-                      نشر خدمة جديدة
+                      {t("post_new_service")}
                     </Button>
                   </Link>
                 </div>
@@ -227,8 +228,8 @@ const Account = () => {
         {getUserSubscriptions.data && (
           <div>
             <Suspense fallback={<>
-              <p>تحميل الاشتراكات</p></>}>
-              <ErrorBoundary fallback={<div>فشل في تحميل  الاشتراكات</div>}>
+              <p>{t("loading_subscriptions")}</p></>}>
+              <ErrorBoundary fallback={<div>{t("error_loading_subscriptions")}</div>}>
                 <UserSubscriptions user={user} />
               </ErrorBoundary>
             </Suspense>
@@ -237,7 +238,7 @@ const Account = () => {
 
         <div id="subscription-history">
           <Suspense fallback={<SubscriptionsLoading />}>
-            <ErrorBoundary fallback={<div>فشل في تحميل تاريخ الاشتراكات</div>}>
+            <ErrorBoundary fallback={<div>{t("error_loading_past_subscriptions")}</div>}>
               {/*<SubscriptionHistoryTable /> */}
               <UserTransactions />
             </ErrorBoundary>
@@ -249,10 +250,10 @@ const Account = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="h-5 w-5" />
-              إعدادات الحساب
+              {t("account_settings")}
             </CardTitle>
             <CardDescription>
-              إدارة معلومات حسابك وكلمة المرور
+              {t("manage_account_info")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -273,10 +274,10 @@ const Account = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="h-5 w-5" />
-              الملف الشخصي
+              {t("profile_settings")}
             </CardTitle>
             <CardDescription>
-              تحديث معلوماتك الشخصية
+              {t("update_profile_info")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -284,39 +285,39 @@ const Account = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="full_name">الاسم الكامل</Label>
+                  <Label htmlFor="full_name">{t("full_name")}</Label>
                   <Input
                     id="full_name"
                     value={formData.full_name}
                     onChange={(e) => handleInputChange('full_name', e.target.value)}
-                    placeholder="الاسم الكامل"
+                    placeholder={t("full_name")}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="phone">رقم الهاتف</Label>
+                  <Label htmlFor="phone">{t("phone")}</Label>
                   <Input
                     id="phone"
                     value={formData.phone}
                     onChange={(e) => handleInputChange('phone', e.target.value)}
-                    placeholder="رقم الهاتف"
+                    placeholder={t("phone")}
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="location">المنطقة/المحافظة</Label>
+                <Label htmlFor="location">{t("location")}</Label>
                 <Select
                   value={formData.location}
                   onValueChange={(value) => handleInputChange('location', value)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="اختر المنطقة أو المحافظة" />
+                    <SelectValue placeholder={t("select_location")} />
                   </SelectTrigger>
                   <SelectContent>
                     {locations.map((location) => (
                       <SelectItem key={location} value={location}>
-                        {location}
+                        {t(location)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -324,12 +325,12 @@ const Account = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="bio">نبذة عنك</Label>
+                <Label htmlFor="bio">{t("bio")}</Label>
                 <Textarea
                   id="bio"
                   value={formData.bio}
                   onChange={(e) => handleInputChange('bio', e.target.value)}
-                  placeholder="اكتب نبذة مختصرة عنك وخبراتك"
+                  placeholder={t("bio_placeholder")}
                   rows={3}
                 />
               </div>
@@ -340,19 +341,19 @@ const Account = () => {
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 mb-2">
-                        <Badge variant="secondary">مقدم خدمة</Badge>
+                        <Badge variant="secondary">{t("service_provider")}</Badge>
                         <span className="text-sm text-muted-foreground">
-                          تم تفعيل هذا تلقائياً لأن لديك خدمات منشورة
+                          {t("service_provider_description")}
                         </span>
                       </div>
-                      <Label htmlFor="experience_years">سنوات الخبرة</Label>
+                      <Label htmlFor="experience_years">{t("experience_years")}</Label>
                       <Input
                         id="experience_years"
                         type="number"
                         min="0"
                         value={formData.experience_years}
                         onChange={(e) => handleInputChange('experience_years', parseInt(e.target.value) || 0)}
-                        placeholder="عدد سنوات الخبرة"
+                        placeholder={t("experience_years_placeholder")}
                       />
                     </div>
                   </div>

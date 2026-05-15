@@ -47,7 +47,7 @@ const ServiceBasicInfo = ({
 
       {/* Category */}
       <div className="space-y-2">
-        <label className="text-large font-semibold text-foreground">
+        <label className="text-md font-semibold text-foreground">
           فئة الخدمة *
         </label>
         <Select onValueChange={onCategoryChange} value={category} required>

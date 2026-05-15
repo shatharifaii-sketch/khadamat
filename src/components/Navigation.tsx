@@ -193,7 +193,7 @@ const Navigation = () => {
                     </NavLink>
                   )}
 
-                  <div className="border-t pt-4">
+                  <div className="border-t pt-4 flex flex-col gap-4 items-start">
                     {user ? (
                       <div className="space-y-4">
 
@@ -209,6 +209,7 @@ const Navigation = () => {
                         <Button className="w-full">{t("login")}</Button>
                       </Link>
                     )}
+                    <LanguageSwitcher />
                   </div>
                 </div>
               </SheetContent>

@@ -10,6 +10,7 @@ import { Conversation } from '@/hooks/useConversations';
 import { ServiceLink } from '../PostService/ServiceLinks';
 import { Json } from '@/integrations/supabase/types';
 import { useTranslation } from 'react-i18next';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export interface ServiceViewProps {
   id: string;
@@ -53,9 +54,10 @@ const ServiceView = ({
   setIsConvo,
   userId
 }: Props) => {
+  const isMobile = useIsMobile();
   const { t } = useTranslation("services");
   return (
-    <div className='flex flex-col gap-10'>
+    <div className='flex flex-col gap-5 md:gap-10'>
       <ServiceHeader
         title={service?.title}
         category={service?.category}

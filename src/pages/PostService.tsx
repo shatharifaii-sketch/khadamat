@@ -8,8 +8,10 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { LogIn, Loader2 } from 'lucide-react';
 import { useServiceToEditData } from '@/hooks/usePublicServices';
+import { useTranslation } from 'react-i18next';
 
 const PostService = () => {
+  const { t } = useTranslation("services");
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const editServiceId = searchParams.get('edit');
@@ -106,9 +108,9 @@ const PostService = () => {
           
           {isEditMode && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h3 className="text-lg font-semibold text-blue-900 mb-1">تعديل الخدمة</h3>
+              <h3 className="text-lg font-semibold text-blue-900 mb-1">{t("post_service.edit_service_title")}</h3>
               <p className="text-blue-700">
-                تقوم بتعديل خدمة: <span className="font-medium">{service?.title}</span>
+                {t("post_service.editing_service")} <span className="font-medium">{service?.title}</span>
               </p>
             </div>
           )}

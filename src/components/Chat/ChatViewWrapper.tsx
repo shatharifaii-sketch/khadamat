@@ -47,7 +47,7 @@ const ChatViewWrapper = ({ conversationId, clientId, serviceId, providerId }: Co
                     //setReplyToMessage={setReplyToMessage}
                     />
                 </CardContent>
-                <CardFooter className='border-t-2 py-4'>
+                <CardFooter className='border-t-2 py-2 md:py-4'>
                     <ChatMessageInput
                         attachment={attachment}
                         setAttachment={setAttachment}

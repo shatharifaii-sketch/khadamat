@@ -21,7 +21,7 @@ const ServiceDataCard = ({
     return (
         <Card>
             <CardHeader>
-                <CardContent>
+                <CardContent className='px-2 md:px-5'>
                     <div className='space-y-2'>
                         <div className='flex items-center justify-between'>
                             <h3 className='text-xl font-semibold'>{t("service.description")}</h3>

@@ -47,7 +47,7 @@ const ServiceFormSubmit = ({ isCreating, canPostService: editMode, isEditMode = 
         onClick={() => {
           if (!editMode && !allowed) {
             savePendingService();
-            setOpenSubscribeModal(true);
+            // setOpenSubscribeModal(true);
             return;
           }
         }}
@@ -64,7 +64,7 @@ const ServiceFormSubmit = ({ isCreating, canPostService: editMode, isEditMode = 
         </p>
       )}
 
-      <Drawer
+      {/* <Drawer
         direction='right'
         open={openSubscribeModal}
       >
@@ -77,7 +77,7 @@ const ServiceFormSubmit = ({ isCreating, canPostService: editMode, isEditMode = 
             </ErrorBoundary>
           </Suspense>
         </DrawerContent>
-      </Drawer>
+      </Drawer> */}
     </div>
   );
 };

@@ -72,7 +72,7 @@ const ReportDrawer = ({
         <>
             <Drawer open={openDrawer} onOpenChange={setOpenDrawer}>
                 <DrawerTrigger asChild>
-                    <Button variant="outline" className="">
+                    <Button variant="outline" className="max-w-full">
                         {t("service.report.report_button")}
                     </Button>
                 </DrawerTrigger>
@@ -84,7 +84,7 @@ const ReportDrawer = ({
                     <DrawerDescription className="mb-5">
                         {t("service.report.report_drawer_placeholder")}
                     </DrawerDescription>
-                    <div className="w-1/2">
+                    <div className="w-full md:w-1/2">
                         <div>
                             <Label>{t("service.report.report_drawer_name")}</Label>
                             <Input
@@ -111,7 +111,7 @@ const ReportDrawer = ({
                                 onChange={(e) => handleInputChange('report_message', e.target.value)} placeholder={t("service.report.report_drawer_input_placeholder")} rows={5} />
                         </div>
                     </div>
-                    <DrawerFooter className="w-2/5">
+                    <DrawerFooter className="w-full md:w-2/5">
                         <Button
                             onClick={handleSubmit}
                             disabled={sendReportEmail.isPending}

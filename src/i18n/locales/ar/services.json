@@ -22,6 +22,17 @@
     "تدريس خصوصي": "تدريس خصوصي",
     "ترجمة": "ترجمة",
     "غير ذلك": "غير ذلك",
+    "post_service": {
+        "edit_service_title": "تعديل الخدمة",
+        "editing_service": "تقوم بتعديل خدمة:",
+        "post_service_title": "انشر خدمتك",
+        "post_service_description": "انشر خدمتك وابدأ في جذب العملاء اليوم!",
+        "service_details": "تفاصيل الخدمة",
+        "service_details_edit": "تعديل تفاصيل الخدمة",
+        "edit_service_description": "قم بتعديل معلومات خدمتك",
+        "post_service_inner_description": "املأ المعلومات التالية لنشر خدمتك",
+        "pending_service_notice": "تم استرداد بياناتك المحفوظة. يمكنك تعديلها وإكمال نشر خدمتك."
+    },
     "find_service": {
         "find_the_right_service": "ابحث عن الخدمة المناسبة",
         "discover_top_services": "اكتشف أفضل الخدمات المهنية في منطقتك واحصل على أفضل العروض",

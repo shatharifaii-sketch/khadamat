@@ -1,4 +1,3 @@
-import { useState } from "react"
 import { Label } from "../ui/label";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "../ui/select";
 import { Input } from "../ui/input";
@@ -89,7 +88,7 @@ const ServiceLinks = ({
                     <Button
                         type="button"
                         variant="destructive"
-                        className="col-span-1"
+                        className="col-span-2 md:col-span-1"
                         onClick={() => removeLink(index)}
                     >
                         <X className="size-4" />

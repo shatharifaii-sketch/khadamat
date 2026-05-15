@@ -3,9 +3,13 @@ import { initReactI18next } from "react-i18next";
 
 import enNavbar from "./locales/en/navbar.json";
 import enServices from "./locales/en/services.json";
+import enChat from "./locales/en/chat.json";
+import enAccount from "./locales/en/account.json";
 
 import arNavbar from "./locales/ar/navbar.json";
 import arServices from "./locales/ar/services.json";
+import arChat from "./locales/ar/chat.json";
+import arAccount from "./locales/ar/account.json";
 
 const savedLanguage = localStorage.getItem("language") || "ar";
 
@@ -15,11 +19,15 @@ i18n
         resources: {
             en: {
                 navbar: enNavbar,
-                services: enServices
+                services: enServices,
+                chat: enChat,
+                account: enAccount
             },
             ar: {
                 navbar: arNavbar,
-                services: arServices
+                services: arServices,
+                chat: arChat,
+                account: arAccount
             },
         },
 
@@ -28,7 +36,9 @@ i18n
 
         ns: [
             "navbar",
-            "services"
+            "services",
+            "chat",
+            "account"
         ],
 
         interpolation: {

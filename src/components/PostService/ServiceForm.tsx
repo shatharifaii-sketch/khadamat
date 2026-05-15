@@ -47,8 +47,8 @@ const ServiceForm = ({ serviceToEdit }: ServiceFormProps) => {
         isEditMode={isEditMode} 
         hasPendingService={!!pendingService && !isEditMode} 
       />
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
+      <CardContent className='px-2 py-1'>
+        <form onSubmit={handleSubmit} className="space-y-3 md:space-y-6">
           <ServiceBasicInfo
             title={formData.title}
             category={formData.category}
