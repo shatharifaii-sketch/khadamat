@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import { UserProfile } from '../UserManagement'
 import { useAdminFunctionality } from '@/hooks/useAdminFunctionality'
 import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 export interface User {
   id: string;
@@ -17,6 +18,7 @@ export interface User {
   bio?: string;
   experience_years?: number;
   password?: string;
+  is_admin?: boolean;
 }
 
 interface Props {
@@ -24,8 +26,20 @@ interface Props {
   closeForm: () => void
 }
 
+const countries = [
+  { code: "970", label: "PS +970" },
+  { code: "966", label: "SA +966" },
+  { code: "20", label: "EG +20" },
+  { code: "971", label: "AE +971" },
+  { code: "963", label: "SY +963" },
+  { code: "962", label: "JO +962" },
+  { code: "1", label: "US +1" },
+];
+
 const UserForm = ({ editingUser, closeForm }: Props) => {
   const { updateUser, updateUserSuccess, createUser, createUserSuccess } = useAdminFunctionality();
+  const [countryCode, setCountryCode] = useState<string>(editingUser?.phone ? editingUser.phone.replace(/\D/g, '').slice(0, -9) : countries[0].code);
+  const [phone, setPhone] = useState<string>(editingUser?.phone ? editingUser.phone.replace(/\D/g, '').slice(-9) : '');
 
   useEffect(() => {
     if (updateUserSuccess || createUserSuccess) {
@@ -34,99 +48,150 @@ const UserForm = ({ editingUser, closeForm }: Props) => {
   }, [updateUserSuccess, createUserSuccess, closeForm])
 
   const [formData, setFormData] = useState(editingUser ?? {
-      id: editingUser?.id || '',
-      email: '',
-      password: '',
-      full_name: '',
-      phone: '',
-      location: '',
-      bio: '',
-      is_service_provider: false,
-      experience_years: 0
-    });
+    id: editingUser?.id || '',
+    email: '',
+    password: '',
+    full_name: '',
+    phone: '',
+    location: '',
+    bio: '',
+    is_service_provider: false,
+    experience_years: 0,
+    is_admin: false,
+  });
 
   const handleCreateUser = () => {
     // Implement user creation logic here
-    console.log('Creating user with data:', formData);
-    editingUser ? updateUser.mutate(formData) : createUser.mutate(formData);
+    const formattedPhone =
+      phone.length > 0
+        ? `+${countryCode}${phone}`
+        : "";
+
+    const payload = {
+      ...formData,
+      phone: formattedPhone,
+    };
+
+    editingUser ? updateUser.mutate(payload) : createUser.mutate(payload);
   }
   return (
     <div className="space-y-4">
-                <div>
-                  <Label htmlFor="email">البريد الإلكتروني</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="password">كلمة المرور</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="full_name">الاسم الكامل</Label>
-                  <Input
-                    id="full_name"
-                    value={formData.full_name}
-                    onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="phone">رقم الهاتف</Label>
-                  <Input
-                    id="phone"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="location">الموقع</Label>
-                  <Input
-                    id="location"
-                    value={formData.location}
-                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="bio">الوصف</Label>
-                  <Textarea
-                    id="bio"
-                    value={formData.bio}
-                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                  />
-                </div>
-                <div className="flex items-center space-x-2" dir='ltr'>
-                  
-                  <Label htmlFor="is_service_provider">مقدم خدمة</Label>
-                  <Switch
-                    id="is_service_provider"
-                    checked={formData.is_service_provider}
-                    onCheckedChange={(checked) => setFormData({ ...formData, is_service_provider: checked })}
-                    className='relative'
-                  />
-                </div>
-                {formData.is_service_provider && (
-                  <div>
-                    <Label htmlFor="experience_years">سنوات الخبرة</Label>
-                    <Input
-                      id="experience_years"
-                      type="number"
-                      value={formData.experience_years}
-                      onChange={(e) => setFormData({ ...formData, experience_years: parseInt(e.target.value) || 0 })}
-                    />
-                  </div>
+      <div>
+        <Label htmlFor="email">البريد الإلكتروني</Label>
+        <Input
+          id="email"
+          type="email"
+          value={formData.email}
+          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+        />
+      </div>
+      <div>
+        <Label htmlFor="password">كلمة المرور</Label>
+        <Input
+          id="password"
+          type="password"
+          value={formData.password}
+          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+        />
+      </div>
+      <div>
+        <Label htmlFor="full_name">الاسم الكامل</Label>
+        <Input
+          id="full_name"
+          value={formData.full_name}
+          onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+        />
+      </div>
+      <div>
+        <Label htmlFor="phone">رقم الهاتف</Label>
+        <div className='grid grid-cols-5 items-center gap-2'>
+          <Select
+            value={countryCode}
+            onValueChange={(e) => setCountryCode(e)}
+            dir="rtl"
+          >
+            <SelectTrigger className="col-span-2">
+              <SelectValue placeholder="رقم البلد" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {countries.map((c) => (
+                  <SelectItem
+                    key={c.code} value={c.code}
+                  >
+                    <div className="flex items-center gap-2">
+                      {c.label}
+                    </div>
+                  </SelectItem>
+                )
                 )}
-                <Button onClick={handleCreateUser} className="w-full">
-                  {editingUser ? 'تحديث الحساب' : 'إنشاء الحساب'}
-                </Button>
-              </div>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+
+          <Input
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="599123456"
+            dir="ltr"
+            className='col-span-3'
+          />
+        </div>
+      </div>
+      <div>
+        <Label htmlFor="location">الموقع</Label>
+        <Input
+          id="location"
+          value={formData.location}
+          onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+        />
+      </div>
+      <div>
+        <Label htmlFor="bio">الوصف</Label>
+        <Textarea
+          id="bio"
+          value={formData.bio}
+          onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+        />
+      </div>
+      <div className='flex justify-between'>
+        <div className="flex items-center space-x-2" dir='ltr'>
+
+          <Label htmlFor="is_service_provider">مقدم خدمة</Label>
+          <Switch
+            id="is_service_provider"
+            checked={formData.is_service_provider}
+            onCheckedChange={(checked) => setFormData({ ...formData, is_service_provider: checked })}
+            className='relative'
+          />
+        </div>
+        <div className="flex items-center space-x-2" dir='ltr'>
+
+          <Label htmlFor="is_admin">اّدمن</Label>
+          <Switch
+            id="is_admin"
+            checked={formData.is_admin}
+            onCheckedChange={(checked) => setFormData({ ...formData, is_admin: checked })}
+            className='relative'
+          />
+        </div>
+      </div>
+      {formData.is_service_provider && (
+        <div>
+          <Label htmlFor="experience_years">سنوات الخبرة</Label>
+          <Input
+            id="experience_years"
+            type="number"
+            value={formData.experience_years}
+            onChange={(e) => setFormData({ ...formData, experience_years: parseInt(e.target.value) || 0 })}
+          />
+        </div>
+      )}
+      <Button onClick={handleCreateUser} className="w-full">
+        {editingUser ? 'تحديث الحساب' : 'إنشاء الحساب'}
+      </Button>
+    </div>
   )
 }
 

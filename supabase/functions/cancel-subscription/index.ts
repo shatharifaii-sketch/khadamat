@@ -9,7 +9,7 @@ import Stripe from "npm:stripe";
 import { Resend } from "npm:resend@latest";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY")!);
-const stripe = new Stripe(Deno.env.get("STRIPE_LIVE_SEC_KEY")!);
+const stripe = new Stripe(Deno.env.get("VITE_STRIPE_LIVE_SEC_KEY")!);
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!

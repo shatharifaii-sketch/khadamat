@@ -7,6 +7,7 @@ import { Json, Tables } from "@/integrations/supabase/types";
 import { json } from "react-router-dom";
 import { toast } from "sonner";
 import { ServiceLink } from "@/components/PostService/ServiceLinks";
+import { useEmail } from "./useEmail";
 
 interface UserProfile {
   id: string;
@@ -169,7 +170,7 @@ export const useAdminData = () => {
 
 export const useAdminFunctionality = () => {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const { sendPasswordUpdateEmail } = useEmail();
 
   // Admin check - in a real app, you'd check this from the database
   const admin = useIsAdmin();
@@ -189,7 +190,12 @@ export const useAdminFunctionality = () => {
         phone: formData.phone,
       })
 
-      if (userError) throw userError;
+      if (userError) {
+        toast.error(userError.code === "email_exists" ? "البريد الإلكتروني مستخدم بالفعل" : "خطأ في إنشاء المستخدم");
+        throw userError
+      };
+
+      await sendPasswordUpdateEmail.mutateAsync({ email: formData.email! });
 
       const { data: profile, error: profileError } = await supabase.from('profiles')
         .update({
@@ -204,6 +210,12 @@ export const useAdminFunctionality = () => {
         .eq('id', user.user?.id);
 
       if (profileError) throw profileError;
+
+      if (formData.is_admin) {
+        const { error: adminError } = await supabaseAdmin.from('user_roles').insert({ user_id: user.user?.id, role: 'admin' });
+
+        if (adminError) throw adminError;
+      }
 
       return;
     },
@@ -291,7 +303,7 @@ export const useAdminFunctionality = () => {
         }
       }
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
         .update({
           full_name: formData.full_name,
@@ -301,9 +313,15 @@ export const useAdminFunctionality = () => {
           is_service_provider: formData.is_service_provider,
           experience_years: formData.experience_years
         })
-        .eq('id', formData.id);
+        .eq('id', formData.id).select('id').maybeSingle();
 
       if (error) throw error;
+
+      if (formData.is_admin) {
+        const { error: adminError } = await supabaseAdmin.from('user_roles').insert({ user_id: data.id, role: 'admin' });
+
+        if (adminError) throw adminError;
+      }
 
       return;
     },

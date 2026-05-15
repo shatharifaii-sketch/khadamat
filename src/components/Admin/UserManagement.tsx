@@ -24,6 +24,7 @@ export interface UserProfile {
   created_at: string;
   profile_image_url?: string;
   experience_years?: number;
+  is_admin?: boolean;
 }
 
 interface UserManagementProps {
