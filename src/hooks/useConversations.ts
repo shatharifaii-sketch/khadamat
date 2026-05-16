@@ -76,7 +76,7 @@ export interface EnrichedConversation {
 
 const removeEmptyConvo = async (conversationId: string) => {
     try {
-        const {error} = await supabase.from('conversations').delete().eq('id', conversationId);
+        const { error } = await supabase.from('conversations').delete().eq('id', conversationId);
 
         if (error) {
             console.error(error);
@@ -182,16 +182,26 @@ export const useConversations = () => {
         mutationFn: async ({ serviceId, providerId, providerName }: { serviceId: string; providerId: string; providerName: string }) => {
             if (!user) throw new Error('User not authenticated');
 
-            const { data: existingConvo, error: existingConvoError } = await supabase.from('conversations')
+            const query = supabase
+                .from('conversations')
                 .select('id')
-                .eq('service_id', serviceId)
                 .eq('client_id', user.id)
-                .eq('provider_id', providerId)
-                .single();
-            
+                .eq('provider_id', providerId);
+
+            if (serviceId) {
+                query.eq('service_id', serviceId);
+            } else {
+                query.is('service_id', null);
+            }
+
+            const { data: existingConvo, error: existingConvoError } =
+                await query.maybeSingle();
+
             if (existingConvoError && existingConvoError.code !== 'PGRST116') {
                 toast.error('حدث خطأ أثناء بدء المحادثة');
                 console.error(existingConvoError);
+
+                throw existingConvoError;
             }
 
             if (existingConvo) {
@@ -202,7 +212,7 @@ export const useConversations = () => {
 
             const { data, error } = await supabase.from('conversations')
                 .insert([{
-                    service_id: serviceId,
+                    service_id: serviceId || null,
                     client_id: user.id,
                     provider_id: providerId,
                 }])
@@ -211,6 +221,25 @@ export const useConversations = () => {
 
             if (error) {
                 console.error(error);
+
+                if (error?.code === "23505") {
+                    let query = supabase
+                        .from("conversations")
+                        .select("id")
+                        .eq("client_id", user.id)
+                        .eq("provider_id", providerId);
+
+                    if (serviceId) {
+                        query = query.eq("service_id", serviceId);
+                    } else {
+                        query = query.is("service_id", null);
+                    }
+
+                    const { data: existing } = await query.single();
+
+                    return existing;
+                }
+
                 throw error;
             }
 

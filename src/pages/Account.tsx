@@ -33,6 +33,8 @@ import { useIsMobile } from '@/hooks/use-mobile';
 
 const Account = () => {
   const { t } = useTranslation("account");
+  const lang = localStorage.getItem("language") || "en";
+
   const isMobile = useIsMobile();
   const { user, loading } = useAuth();
   const navigate = useNavigate();
@@ -238,7 +240,7 @@ const Account = () => {
 
         <div id="subscription-history">
           <Suspense fallback={<SubscriptionsLoading />}>
-            <ErrorBoundary fallback={<div>{t("error_loading_past_subscriptions")}</div>}>
+            <ErrorBoundary fallback={<div>{t("error_loading_transactions")}</div>}>
               {/*<SubscriptionHistoryTable /> */}
               <UserTransactions />
             </ErrorBoundary>
@@ -270,13 +272,13 @@ const Account = () => {
         </Card>
 
         {/* Profile Settings */}
-        <Card ref={cardRef}>
+        <Card ref={cardRef} dir={lang === "ar" ? "rtl" : "ltr"}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="h-5 w-5" />
               {t("profile_settings")}
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-start">
               {t("update_profile_info")}
             </CardDescription>
           </CardHeader>
@@ -284,7 +286,7 @@ const Account = () => {
             <UploadProfileImage userId={profile?.id} userName={profile?.full_name} userImage={profile?.profile_image_url} />
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
+                <div className="space-y-2 text-start">
                   <Label htmlFor="full_name">{t("full_name")}</Label>
                   <Input
                     id="full_name"
@@ -294,7 +296,7 @@ const Account = () => {
                   />
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 text-start">
                   <Label htmlFor="phone">{t("phone")}</Label>
                   <Input
                     id="phone"
@@ -305,7 +307,7 @@ const Account = () => {
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2 text-start">
                 <Label htmlFor="location">{t("location")}</Label>
                 <Select
                   value={formData.location}
@@ -324,7 +326,7 @@ const Account = () => {
                 </Select>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2 text-start">
                 <Label htmlFor="bio">{t("bio")}</Label>
                 <Textarea
                   id="bio"
@@ -338,7 +340,7 @@ const Account = () => {
               {isServiceProvider && (
                 <>
                   <Separator />
-                  <div className="space-y-4">
+                  <div className="space-y-4 text-start">
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 mb-2">
                         <Badge variant="secondary">{t("service_provider")}</Badge>
@@ -364,10 +366,10 @@ const Account = () => {
                 {isUpdating ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    جاري التحديث...
+                    {t("saving_changes")}
                   </>
                 ) : (
-                  'حفظ التغييرات'
+                  t("save_changes")
                 )}
               </Button>
             </form>

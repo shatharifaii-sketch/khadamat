@@ -5,25 +5,26 @@ import ProfileView from '@/components/Profile/ProfileView';
 import ProfileViewWrapper from '@/components/Profile/ProfileViewWrapper';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { useAuth } from '@/contexts/AuthContext';
 import { usePublisherProfile } from '@/hooks/useProfile';
 import { EllipsisVertical } from 'lucide-react';
 import { Suspense } from 'react';
-import { useParams } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 
 const UserProfilePage = () => {
+  const { user } = useAuth();
   const { id: userId } = useParams<{id: string}>();
 
   if (!userId) {
     throw new Error('User ID not found');
   };
 
+  if (user?.id === userId) {
+    return <Navigate to='/account' />;
+  }
+
   return (
     <div className='max-w-4xl mx-auto py-12 px-4 space-y-10'>
-            <div className="flex items-center justify-center gap-2">
-                <h1 className="text-4xl font-bold">
-                  حساب المستخدم
-                </h1>
-            </div>
             <Suspense fallback={<ProfileLoading />}>
             <ErrorBoundary fallback={<UserProfileQueryError />}>
                 <ProfileViewWrapper userId={userId} />

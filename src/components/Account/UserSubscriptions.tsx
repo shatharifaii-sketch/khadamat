@@ -266,9 +266,9 @@ const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
 
             <CardFooter className='pt-5 px-10 flex flex-col items-start gap-3'>
                 <Separator />
-                <Label className='text-lg'>الاشتراكات السابقة</Label>
+                <Label className='text-lg'>{t("subscriptions.past_subscriptions")}</Label>
                 {
-                    inactiveSubscriptions ? (
+                    inactiveSubscriptions && inactiveSubscriptions.length > 0 ? (
                         <div className='grid grid-cols-2 w-full gap-3 overflow-y-auto max-h-[300px] border p-2 rounded-md'>
                             {
                                 inactiveSubscriptions.map((subscription: Subscription) => (
@@ -294,8 +294,8 @@ const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
                             }
                         </div>
                     ) : (
-                        <div>
-                            لا يوجد اشتراكات سابقة
+                        <div className='text-muted-foreground'>
+                            {t("subscriptions.no_past_subscriptions")}
                         </div>
                     )
                 }

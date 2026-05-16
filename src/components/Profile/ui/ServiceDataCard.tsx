@@ -5,6 +5,7 @@ import { Tables } from '@/integrations/supabase/types'
 import { truncateString } from '@/lib/utils'
 import { Eye, TrendingUp } from 'lucide-react'
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { NavLink } from 'react-router-dom'
 
 interface Props {
@@ -16,6 +17,8 @@ const ServiceDataCard = ({
 }: Props) => {
 
     const { data: analyticsData, isLoading: analyticsLoading } = useServiceAnalytics(service.id);
+    const { t } = useTranslation("profile");
+    const lang = localStorage.getItem("language") || "en";
 
     const isNewlyPublished = () => {
         const now = new Date();
@@ -38,22 +41,22 @@ const ServiceDataCard = ({
                         <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
                             {truncateString(service.description, 50)}
                         </p>
-                        <div className='flex gap-2 items-center justify-start'>
+                        <div className='flex gap-2 items-center justify-start' dir={lang === "ar" ? "rtl" : "ltr"}>
                             {isNewlyPublished && (
-                            <Badge className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground animate-pulse">
-                                جديد!
-                            </Badge>
-                        )}
+                                <Badge className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground animate-pulse">
+                                    {t("services.newly_published")}!
+                                </Badge>
+                            )}
 
-                        {/* Enhanced analytics display */}
-                        <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                                <Eye size={14} />
-                                <span>
-                                    {analyticsLoading ? '...' : (analyticsData?.totalViews || service.views)} مشاهدة
-                                </span>
+                            {/* Enhanced analytics display */}
+                            <div className="flex items-center gap-4 text-sm text-muted-foreground" dir={lang === "ar" ? "rtl" : "ltr"}>
+                                <div className="flex items-center gap-1">
+                                    <Eye size={14} />
+                                    <span>
+                                        {analyticsLoading ? '...' : (analyticsData?.totalViews || service.views)} {t("services.views")}
+                                    </span>
+                                </div>
                             </div>
-                        </div>
                         </div>
                     </div>
                 </div>

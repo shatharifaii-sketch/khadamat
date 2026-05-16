@@ -12,10 +12,17 @@
     "طوباس": "Tubas",
     "غزة": "Gaza",
     "رفح": "Rafah",
-    "خان يونس": "Khan Yunis",
+    "خان يونس": "Khan Younis",
     "دير البلح": "Deir al-Balah",
-    "add_attachment": "Add to Message",
-    "send_message_error": "Error sending message. Please try again.",
-    "send_button": "Send",
-    "message_placeholder": "Aa"
+    "description": "description",
+    "location": "location",
+    "not_specified": "not specified",
+    "experience_years": "experience",
+    "joined_at": "joined at",
+    "services": {
+        "title": "services",
+        "num": "number of services",
+        "newly_published": "new",
+        "views": "views"
+    }
 }

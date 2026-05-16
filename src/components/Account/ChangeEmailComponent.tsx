@@ -7,6 +7,7 @@ import { Input } from '../ui/input'
 import { useEmail } from '@/hooks/useEmail'
 import { DialogTitle } from '@radix-ui/react-dialog'
 import { useProfile } from '@/hooks/useProfile'
+import { useTranslation } from 'react-i18next'
 
 interface ChangeEmailComponentProps {
     user: User
@@ -15,6 +16,7 @@ interface ChangeEmailComponentProps {
 const ChangeEmailComponent = ({
     user
 }: ChangeEmailComponentProps) => {
+    const { t } = useTranslation("account");
     const { sendEmailUpdateEmail } = useEmail();
     const { confirmEmail } = useProfile();
     const [changeEmail, setChangeEmail] = useState(false);
@@ -67,14 +69,14 @@ const ChangeEmailComponent = ({
 
     return (
         <>
-            <Label>البريد الإلكتروني</Label>
+            <Label>{t("email")}</Label>
             <Input
                 readOnly={!changeEmail}
                 value={email}
                 disabled={!changeEmail}
                 onChange={(e) => setEmail(e.target.value)}
             />
-            {!user.user_metadata.email_verified && <p className="text-destructive">البريد الإلكتروني غير مفعل</p>}
+            {!user.user_metadata.email_verified && <p className="text-destructive">{t("email_not_verified")}</p>}
             {error && <p className="text-destructive">{error}</p>}
             <div className='flex gap-2'>
                 <Button
@@ -87,16 +89,16 @@ const ChangeEmailComponent = ({
                         }
                     }}
                     disabled={sendEmailUpdateEmail.isPending}>
-                    {changeEmail ? "تأكيد" : "تغيير البريد الإلكتروني"}
+                    {changeEmail ? t("confirm") : t("change_email")}
                 </Button>
-                {changeEmail && <Button variant="outline" onClick={() => setChangeEmail(false)}>الغاء</Button>}
+                {changeEmail && <Button variant="outline" onClick={() => setChangeEmail(false)}>{t("cancel")}</Button>}
             </div>
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle className='text-xl'>قم بتأكيد البريد الإلكتروني الجديد</DialogTitle>
+                        <DialogTitle className='text-xl'>{t("confirm_new_email")}</DialogTitle>
                         <DialogDescription>
-                            قم بتأكيد البريد الإلكتروني عن طريق الرمز أو الرابط المرسل لك إلى البريد الإلكتروني الجديد
+                            {t("confirm_email_description")}
                         </DialogDescription>
                     </DialogHeader>
                     <div>
@@ -105,14 +107,15 @@ const ChangeEmailComponent = ({
                             value={confCode}
                             onChange={(e) => setConfCode(e.target.value)}
                         />
-                        {confCode.length > 6 && <p className='text-destructive mt-1 text-xs'>الرمز لا يتجاوز 6 ارقام</p>}
+                        {confCode.length > 6 && <p className='text-destructive mt-1 text-xs'>
+                            {t("confirm_code_too_long")}</p>}
                     </div>
                     <DialogFooter>
                         <Button
                             disabled={(confCode.length > 6) || confirmEmail.isPending}
                             onClick={handleConfirmEmail}
                             className='flex-1'>
-                            تأكيد
+                            {t("confirm")}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

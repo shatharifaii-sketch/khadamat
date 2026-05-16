@@ -1,8 +1,10 @@
 
 import { Link } from 'react-router-dom';
 import { Home, Facebook, Instagram } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const Footer = () => {
+  const { t } = useTranslation("footer");
   return (
     <footer className="bg-card py-12 px-4 border-t border-border">
       <div className="max-w-6xl mx-auto text-center">
@@ -10,12 +12,12 @@ const Footer = () => {
           <img src="/application_logo_cut.png" className='h-12' alt="cut logo" />
         </div>
         <p className="text-muted-foreground text-large mb-6">
-          منصتك للخدمات في فلسطين
+          {t("description")}
         </p>
         <div className="flex flex-wrap justify-center gap-6 text-large mb-6">
-          <Link to="/about" className="text-muted-foreground hover:text-primary">من نحن</Link>
-          <Link to="/contact" className="text-muted-foreground hover:text-primary">تواصل معنا</Link>
-          <Link to="/faq" className="text-muted-foreground hover:text-primary">الأسئلة الشائعة</Link>
+          <Link to="/about" className="text-muted-foreground hover:text-primary">{t("about")}</Link>
+          <Link to="/contact" className="text-muted-foreground hover:text-primary">{t("contact")}</Link>
+          <Link to="/faq" className="text-muted-foreground hover:text-primary">{t("faqs")}</Link>
         </div>
         <div className="flex justify-center gap-4 mb-6">
           <a 
@@ -38,7 +40,7 @@ const Footer = () => {
           </a>
         </div>
         <div className="pt-6 border-t border-border text-muted-foreground">
-          © 2024 خدمتك. جميع الحقوق محفوظة.
+          {t("rights")}
         </div>
       </div>
     </footer>

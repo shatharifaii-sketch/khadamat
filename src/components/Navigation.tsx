@@ -18,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 
 const Navigation = () => {
   const { t } = useTranslation("navbar");
+  const lang = localStorage.getItem("language") || "en";
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -58,7 +59,7 @@ const Navigation = () => {
 
   const AccountButton = ({ mobile = false }: { mobile?: boolean }) => (
     <NavLink to="/account" onClick={mobile ? () => setIsOpen(false) : undefined} className='flex items-center gap-4 justify-start'>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2" dir={lang === "ar" ? "rtl" : "ltr"}>
         {
           profile?.profile_image_url ? (
             <Avatar className='size-7'>
@@ -101,7 +102,7 @@ const Navigation = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8 space-x-reverse">
+          <div className="hidden md:flex items-center gap-5" dir={lang === "ar" ? "rtl" : "ltr"}>
             <NavLink to="/find-service">
               <div className="flex items-center gap-2">
                 <Search size={16} />
@@ -153,7 +154,7 @@ const Navigation = () => {
               </Link>
             )}
 
-            {/* <LanguageSwitcher /> */}
+            <LanguageSwitcher />
           </div>
 
           {/* Mobile menu button */}

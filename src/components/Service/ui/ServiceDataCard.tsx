@@ -7,6 +7,7 @@ import { cn, platforms, truncateString } from '@/lib/utils';
 import { ServiceViewProps } from '../ServiceView';
 import { FaGlobe } from 'react-icons/fa6';
 import { useTranslation } from 'react-i18next';
+import { ServiceLink } from '@/components/PostService/ServiceLinks';
 
 interface Props {
     service: ServiceViewProps
@@ -16,7 +17,10 @@ const ServiceDataCard = ({
     service
 }: Props) => {
     const { t } = useTranslation("services");
+    const lang = localStorage.getItem("language") || "en";
     const getPlatform = (type: string) => platforms.find((p) => p.value === type);
+
+    const links = (service?.links ?? []) as ServiceLink[];
 
     return (
         <Card>
@@ -34,7 +38,7 @@ const ServiceDataCard = ({
                                 </div>
                             </div>
                         </div>
-                        <p className='text-muted-foreground border border-gray-100 rounded-lg p-2 text-lg'>{service?.description}</p>
+                        <p className='text-muted-foreground border border-gray-100 rounded-lg p-2 text-lg text-start font-normal'>{service?.description}</p>
                     </div>
                     <div className='mt-5'>
                         <h3 className='text-xl font-semibold'>{t("service.attachments")}</h3>
@@ -44,10 +48,10 @@ const ServiceDataCard = ({
                     </div>
                     <div className='mt-3 flex flex-col gap-2'>
                         <p className='flex flex-col'>
-                            {service?.links?.length > 0 ? t("service.links") : ''}
+                            {links.length > 0 ? t("service.links") : ''}
                         </p>
                         <div className='flex flex-row gap-3' dir="rtl">
-                            {service.links?.map((link, index) => {
+                            {links.map((link, index) => {
                                 const platform = getPlatform(link.type);
                                 const Icon = platform?.icon;
 
@@ -74,7 +78,7 @@ const ServiceDataCard = ({
                     </div>
                     <div className={cn('flex my-5', service?.experience.length > 15 || service?.location.length > 15 || service?.price_range.length > 15 ? 'flex-col' : 'flex-col md:flex-row md:items-center md:gap-8')}>
                         <div className='flex flex-col sm:flex-row items-start sm:items-center gap-4'>
-                            <h3 className='text-lg font-semibold mt-4 text-nowrap'>{t("service.price")}</h3>
+                            <h3 className='text-lg font-semibold text-nowrap'>{t("service.price")}</h3>
                             <h2 className='text-xl font-semibold text-primary text-nowrap'>{service?.price_range}</h2>
                         </div>
                         <Separator orientation='vertical' className='h-5 mt-3 hidden md:block' />
@@ -94,14 +98,14 @@ const ServiceDataCard = ({
                         </div>
                         <Separator orientation='vertical' className='h-5 mt-3 hidden md:block' />
                         <div className='flex flex-col sm:flex-row items-start sm:items-center gap-4'>
-                            <h3 className='text-lg font-semibold mt-4 text-nowrap'>{t("service.experience")}</h3>
+                            <h3 className='text-lg font-semibold text-nowrap'>{t("service.experience")}</h3>
                             <h2 className='text-xl font-semibold text-primary text-nowrap'>{service?.experience}</h2>
                         </div>
                     </div>
                     <Separator />
-                    <div className='space-y-3'>
-                        <h3 className='text-xl font-semibold mt-4'>{t("service.provider_info")}</h3>
-                        <div className='space-y-2 text-muted-foreground'>
+                    <div className='space-y-3' dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+                        <h3 className='text-xl font-semibold mt-4 text-start'>{t("service.provider_info")}</h3>
+                        <div className='space-y-2 text-muted-foreground text-start'>
                             <p>{t("service.provider_name")} {service?.publisher.full_name}</p>
                             <p>{t("service.email")}: {service?.email}</p>
                             <p>{t("service.phone")}: {service?.phone}</p>

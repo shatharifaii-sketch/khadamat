@@ -7,6 +7,7 @@ import { useServiceForm } from '@/hooks/useServiceForm';
 import PaymentModal from './PaymentModal';
 import { DialogTitle } from '@radix-ui/react-dialog';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 interface ServiceFormSubmitProps {
   isCreating: boolean;
@@ -16,6 +17,7 @@ interface ServiceFormSubmitProps {
 }
 
 const ServiceFormSubmit = ({ isCreating, canPostService: editMode, isEditMode = false, savePendingService }: ServiceFormSubmitProps) => {
+  const { t } = useTranslation("services");
   const { user } = useAuth();
   const [openSubscribeModal, setOpenSubscribeModal] = useState<boolean>(false);
   const { canPostServiceAsync } = useServiceForm();
@@ -53,14 +55,14 @@ const ServiceFormSubmit = ({ isCreating, canPostService: editMode, isEditMode = 
         }}
       >
         {isCreating ?
-          (isEditMode ? 'جاري التحديث...' : 'جاري النشر...')
+          (isEditMode ? t("post_service.updating") : t("post_service.publishing"))
           :
-          (isEditMode ? 'حفظ التعديلات' : allowed && sub ? 'انشر الخدمة' : 'اشترك أو إدفع الان و انشر الخدمة')
+          (isEditMode ? t("post_service.save_changes") : allowed && sub ? t("post_service.publish_service") : t("post_service.subscribe_or_pay"))
         }
       </Button>
       {!isEditMode && !sub && !allowed && (
         <p className="text-center text-muted-foreground mt-4 text-large">
-          سيتم توجيهك لصفحة الدفع أولاً
+          {t("post_service.redirect_to_payment_on_click")}
         </p>
       )}
 

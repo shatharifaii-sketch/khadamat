@@ -4,7 +4,7 @@ import { ServiceImageProps } from '@/hooks/useServices';
 import { Paperclip } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { cn, truncateString } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 
 interface Props {
@@ -17,8 +17,8 @@ const ChatServiceData = ({ service, images, setAttachment }: Props) => {
     const [imageHovered, setImageHovered] = useState<string | null>(null);
 
     return (
-        <div className='flex justify-between w-full items-start lg:items-start lg:flex-col lg:gap-10 gap-20' dir='ltr'>
-            <div className='flex gap-3 lg:flex-col'>
+        <div className='flex justify-center md:justify-start w-full items-start lg:items-start lg:flex-col lg:gap-10 gap-20' dir='ltr'>
+            <div className='flex gap-3 items-center justify-center'>
                     {images.length > 0 ? (
                         <div className='overflow-auto flex lg:flex-col gap-2 w-[200px] h-[130px] lg:w-[350px] lg:max-h-[500px] lg:min-h-[210px]'>
                             {images.map(image => (
@@ -37,8 +37,8 @@ const ChatServiceData = ({ service, images, setAttachment }: Props) => {
                     ) : (
                         <></>
                     )}
-                <div className='text-start'>
-                    <Link to={`/find-service/${service.id}`} className='text-2xl font-bold  hover:underline-offset-1'>{service.title}</Link>
+                <div className='text-center md:text-start'>
+                    <Link to={`/find-service/${service.id}`} className='text-xl font-bold  hover:underline-offset-1'>{service.title}</Link>
                     <p className='text-muted-foreground'>{service.price_range}</p>
                     <p className='text-muted-foreground text-sm'>{t(service.location)}</p>
                     <p className='text-muted-foreground text-sm'>{new Date(service.created_at).toLocaleDateString()}</p>

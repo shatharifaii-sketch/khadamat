@@ -33,7 +33,7 @@ const ChatViewWrapper = ({ conversationId, clientId, serviceId, providerId }: Co
     //const [ replyToMessage, setReplyToMessage ] = useState<Message | null>(null);
 
     return (
-        <ChatLayout setAttachment={setAttachment} service={conversation?.service}>
+        <ChatLayout setAttachment={setAttachment} service={conversation?.service ? conversation.service : null}>
             <Card>
                 <CardHeader className='rounded-t-md border-b-2'>
                     <ChatSimpleData user={user?.id === conversation.client.id ? conversation.provider : conversation.client} />

@@ -2,6 +2,7 @@ import { FaWhatsapp } from "react-icons/fa6"
 import { Label } from "../ui/label"
 import { Input } from "../ui/input"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "../ui/select";
+import { useTranslation } from "react-i18next";
 
 const countries = [
   { code: "970", label: "PS +970" },
@@ -19,12 +20,15 @@ interface Props {
     number: string;
   };
   onChange: (event: { countryCode: string; number: string; }) => void;
+  error: string;
 }
 
 const WhatsappNumberInput = ({
   whatsappNumber,
-  onChange
+  onChange,
+  error
 }: Props) => {
+  const { t } = useTranslation("services");
   const hanldePhoneChange = (val: string) => {
     const digits = val.replace(/\D/g, "");
 
@@ -43,9 +47,9 @@ const WhatsappNumberInput = ({
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <Label className="text-md">رقم الواتساب</Label>
+        <Label className="text-md">{t("post_service.whatsapp_number")}</Label>
         <p className="text-xs text-muted-foreground">
-          رقم الواتساب يسهل عليك التواصل مع الزبائن!
+          {t("post_service.whatsapp_number_helper")}
         </p>
       </div>
 
@@ -60,7 +64,7 @@ const WhatsappNumberInput = ({
           dir="rtl"
         >
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="رقم البلد" />
+            <SelectValue placeholder={t("post_service.country_code_placeholder")} />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>

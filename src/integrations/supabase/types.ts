@@ -178,7 +178,7 @@ export type Database = {
           id: string
           last_message_at: string | null
           provider_id: string
-          service_id: string
+          service_id: string | null
           status: string
           updated_at: string
         }
@@ -188,7 +188,7 @@ export type Database = {
           id?: string
           last_message_at?: string | null
           provider_id: string
-          service_id: string
+          service_id?: string | null
           status?: string
           updated_at?: string
         }
@@ -198,7 +198,7 @@ export type Database = {
           id?: string
           last_message_at?: string | null
           provider_id?: string
-          service_id?: string
+          service_id?: string | null
           status?: string
           updated_at?: string
         }

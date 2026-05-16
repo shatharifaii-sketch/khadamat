@@ -4,6 +4,7 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { X } from "lucide-react";
 import { platforms } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 export interface ServiceLink {
     type: string;
@@ -19,6 +20,7 @@ const ServiceLinks = ({
     socialLinks = [],
     onChange
 }: Props) => {
+    const { t } = useTranslation("services");
     const addLink = () => {
         console.log(socialLinks);
         onChange([...socialLinks, { type: "", url: "" }]);
@@ -40,7 +42,7 @@ const ServiceLinks = ({
 
     return (
         <div className="flex flex-col gap-4">
-            <Label>مواقع التواصل</Label>
+            <Label>{t("post_service.social_links")}</Label>
 
             {socialLinks.map((link, index) => (
                 <div
@@ -53,11 +55,11 @@ const ServiceLinks = ({
                         dir="rtl"
                     >
                         <SelectTrigger className="col-span-4">
-                            <SelectValue placeholder="نوع الرابط" />
+                            <SelectValue placeholder={t("post_service.link_type_placeholder")} />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectGroup>
-                                <SelectLabel className="opacity-70">موقع التواصل</SelectLabel>
+                                <SelectLabel className="opacity-70">{t("post_service.social_platform")}</SelectLabel>
                                 {platforms.map((platform) => {
                                     const Icon = platform.icon;
 
@@ -97,7 +99,7 @@ const ServiceLinks = ({
             ))}
 
             <Button type="button" onClick={addLink} variant="outline">
-                إضافة رابط
+                {t("post_service.add_link")}
             </Button>
         </div>
     )

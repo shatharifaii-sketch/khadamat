@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '../ui/input';
 import { useProfile } from '@/hooks/useProfile';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 type FormError = {
     message: string,
@@ -12,6 +13,7 @@ type FormError = {
 }
 
 const ChangePasswordComponent = () => {
+    const { t } = useTranslation("account");
     const { changePassword } = useProfile();
     const [open, setOpen] = useState(false);
     const [formData, setFormData] = useState({
@@ -26,28 +28,28 @@ const ChangePasswordComponent = () => {
         if (!formData.newPassword) {
             newErrors.push({
                 field: 'newPassword',
-                message: 'كلمة المرور الجديدة مطلوبة'
+                message: t("new_password_required")
             })
         }
 
         if (formData.newPassword.length < 6) {
             newErrors.push({
                 field: 'newPassword',
-                message: 'كلمة المرور الجديدة يجب ان تكون على الاقل 6 حروف'
+                message: t("password_min_length")
             })
         }
 
         if (!formData.confirmPassword) {
             newErrors.push({
                 field: 'confirmPassword',
-                message: 'تاكيد كلمة المرور مطلوب'
+                message: t("confirm_password_required")
             })
         }
 
         if (formData.newPassword !== formData.confirmPassword) {
             newErrors.push({
                 field: 'confirmPassword',
-                message: 'كلمة المرور غير متطابقة'
+                message: t("passwords_do_not_match")
             })
         }
 
@@ -85,33 +87,35 @@ const ChangePasswordComponent = () => {
         }
 
         if (changePassword.isError) {
-            setErrors([{ field: 'server', message: changePassword.error?.message || 'حدث خطأ ما' }]);
-            toast.error('فشل في تغيير كلمة المرور');
+            setErrors([{ field: 'server', message: changePassword.error?.message || t('failed_to_change_password') }]);
+            toast.error(t('failed_to_change_password'));
         }
     }, [changePassword.isSuccess, changePassword.isError, changePassword.mutateAsync]);
 
     return (
         <>
-            <Label>كلمة المرور</Label>
+            <Label>{t("new_password")}</Label>
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
                     <Button
                         variant="outline"
                         className="w-full"
                     >
-                        تغيير كلمة المرور
+                        {t("change_password")}
                     </Button>
                 </DialogTrigger>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle className='text-xl'>تغيير كلمة المرور</DialogTitle>
+                        <DialogTitle className='text-xl'>
+                            {t("change_password_title")}
+                        </DialogTitle>
                         <DialogDescription>
-                            سيتم تغيير كلمة المرور الخاصة بك
+                            {t("change_password_description")}
                         </DialogDescription>
                     </DialogHeader>
                     <div className='flex flex-col gap-2'>
                         <div>
-                            <Label>كلمة المرور الجديدة</Label>
+                            <Label>{t("new_password")}</Label>
                             <Input
                                 type='password'
                                 value={formData.newPassword}
@@ -124,7 +128,7 @@ const ChangePasswordComponent = () => {
                             )}
                         </div>
                         <div>
-                            <Label>أعد كلمة المرور الجديدة</Label>
+                            <Label></Label>
                             <Input
                                 type='password'
                                 value={formData.confirmPassword}
@@ -149,7 +153,7 @@ const ChangePasswordComponent = () => {
                             className='flex-1'
                             disabled={changePassword.isPending}
                         >
-                            تغيير كلمة المرور
+                            {t("update_password")}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

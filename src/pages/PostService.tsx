@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 
 const PostService = () => {
   const { t } = useTranslation("services");
+  const lang = localStorage.getItem("language") || "en";
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const editServiceId = searchParams.get('edit');
@@ -103,7 +104,7 @@ const PostService = () => {
   }
 
   return (
-      <div className="max-w-4xl mx-auto py-12 px-4">
+      <div className="max-w-4xl mx-auto py-12 px-4" dir={lang === "ar" ? "rtl" : "ltr"}>
         <PostServiceHeader isEditMode={isEditMode}>
           
           {isEditMode && (

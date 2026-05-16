@@ -27,6 +27,29 @@ type AnalyticsRow = {
 
 const VISIT_THRESHOLD_MS = 30 * 60 * 1000;
 
+const dynamicRoutes = [
+    {
+        pattern: /^\/chat\/[^/]+\/[^/]+\/[^/]+\/[^/]+$/,
+        normalized: "/chat/:id/:client_id/:service_id/:provider_id"
+    },
+    {
+        pattern: /^\/find-service\/[^/]+$/,
+        normalized: "/find-service/:id"
+    },
+    {
+        pattern: /^\/profile\/[^/]+$/,
+        normalized: "/profile/:id"
+    }
+];
+
+function normalizePath(path: string) {
+    const route = dynamicRoutes.find((r) =>
+        r.pattern.test(path)
+    );
+
+    return route?.normalized || path;
+}
+
 function getVisitData(): visitData {
     let id = localStorage.getItem('visitorId');
     let visitingDate = localStorage.getItem('visitingDate');
@@ -194,10 +217,11 @@ export const useWebsiteAnalytics = () => {
 
         async function track() {
             const result = checkVisitData();
+            const normalizedPath = normalizePath(location.pathname);
 
             const { error } = await supabase.from("web_analytics_dev").insert({
                 visitor_id: result.id,
-                path: location.pathname,
+                path: normalizedPath,
                 is_new_visit: result.isNewVisit,
                 is_mobile: isMobile
             });
@@ -207,7 +231,7 @@ export const useWebsiteAnalytics = () => {
             }
 
             // update last visited path
-            localStorage.setItem("visitedPath", location.pathname);
+            localStorage.setItem("visitedPath", normalizedPath);
         }
 
         track();

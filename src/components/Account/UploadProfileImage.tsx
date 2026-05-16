@@ -5,6 +5,9 @@ import { Label } from "../ui/label";
 import { useProfileImageUpload, useSaveProfileImage } from "@/hooks/useProfileImageUpload";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import { GeneratedAvatar } from "../GeneratedAvatar";
+import { useTranslation } from "react-i18next";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 interface Props {
     userImage?: string | null;
@@ -13,6 +16,8 @@ interface Props {
 }
 
 const UploadProfileImage = ({ userImage, userName, userId }: Props) => {
+    const { t } = useTranslation("account");
+    const isMobile = useIsMobile();
     const [changeProfileImage, setChangeProfileImage] = useState(false);
     const [userPhoto, setUserPhoto] = useState<string | null>(userImage);
     const { mutate: saveProfileImage, data, isPending, isError, isSuccess } = useSaveProfileImage();
@@ -30,7 +35,7 @@ const UploadProfileImage = ({ userImage, userName, userId }: Props) => {
         if (!changeProfileImage || !image) {
             setUserPhoto(userImage);
         }
-        
+
         if (isSuccess) {
             setChangeProfileImage(false);
             setImage(null);
@@ -66,14 +71,13 @@ const UploadProfileImage = ({ userImage, userName, userId }: Props) => {
 
     return (
         <div className="space-y-4 mb-4">
-            <Label className="text-large font-semibold">صور من أعمالك السابقة (اختيارية)</Label>
 
-            <div className="flex items-center gap-5">
+            <div className={cn("flex items-center gap-5", isMobile && "flex-col")}>
                 <div className="relative rounded-lg">
                     {isPending && (
                         <div className="absolute inset-0 flex items-center justify-center z-10 backdrop-blur-sm rounded-lg bg-muted-foreground/30">
-                        <Loader className="animate-spin text-primary" />
-                    </div>
+                            <Loader className="animate-spin text-primary" />
+                        </div>
                     )}
                     {userPhoto ? (
                         <Avatar className="size-48 aspect-square">
@@ -91,10 +95,10 @@ const UploadProfileImage = ({ userImage, userName, userId }: Props) => {
                     )}
 
                     {image && userPhoto === image.url && (
-                        <Button 
-                        className="w-full mt-2" 
-                        onClick={() => removeImage(image.id)}>
-                            حذف
+                        <Button
+                            className="w-full mt-2"
+                            onClick={() => removeImage(image.id)}>
+                            {t("remove_image")}
                         </Button>
                     )}
 
@@ -104,13 +108,13 @@ const UploadProfileImage = ({ userImage, userName, userId }: Props) => {
                         type="button"
                         onClick={() => setChangeProfileImage(!changeProfileImage)}
                     >
-                        تغيير الصورة
+                        {t(changeProfileImage ? "cancel" : "change_profile_image")}
                     </Button>
                 </div>
 
-                <div className="flex-1" style={{ minHeight: "300px" }}>
-                    {/* Upload Area */}
-                    {changeProfileImage && (
+                {/* Upload Area */}
+                {changeProfileImage && (
+                    <div className="flex-1" style={{ minHeight: "300px" }}>
                         <div className="flex flex-col gap-2">
                             <div
                                 className="border-2 border-dashed border-border rounded-lg p-8 text-center cursor-pointer hover:border-primary/50 transition-colors"
@@ -120,11 +124,15 @@ const UploadProfileImage = ({ userImage, userName, userId }: Props) => {
                             >
                                 <Upload size={48} className="mx-auto text-muted-foreground mb-4" />
                                 <p className="text-large text-muted-foreground mb-2">
-                                    {uploading ? 'جاري رفع الصورة...' : 'اسحب الصورة هنا أو اضغط للرفع'}
+                                    {uploading
+                                        ? t("uploading_image")
+                                        : t("drag_and_drop_or_click")
+                                    }
                                 </p>
                                 <p className="text-muted-foreground">PNG, JPG 10MB</p>
                                 <Button variant="outline" className="mt-4" type="button" disabled={uploading}>
-                                    {uploading ? 'جاري الرفع...' : 'اختر صورة'}
+                                    {uploading ? t("uploading_image_button")
+                                        : t("drag_and_drop_or_click_button")}
                                 </Button>
                                 <input
                                     ref={fileInputRef}
@@ -136,11 +144,12 @@ const UploadProfileImage = ({ userImage, userName, userId }: Props) => {
                                 />
                             </div>
                             <Button onClick={handleImageSave}>
-                                Save Image
+                                {t("save_image")}
                             </Button>
                         </div>
-                    )}
-                </div>
+
+                    </div>
+                )}
             </div>
         </div>
     );

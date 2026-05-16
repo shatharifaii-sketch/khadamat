@@ -310,6 +310,12 @@ export const useServiceImages = (serviceId: string) => {
   const { data: images } = useSuspenseQuery({
     queryKey: ['service-images'],
     queryFn: async () => {
+      if (!serviceId) {
+        console.error('No service id found when trying to fetch service images');
+
+        return []
+      }
+
       const { data: images, error } = await supabase
       .from('service_images')
       .select('*')
@@ -321,7 +327,7 @@ export const useServiceImages = (serviceId: string) => {
       }
 
       return images as ServiceImageProps[];
-    }
+    },
   })
 
   return images;
