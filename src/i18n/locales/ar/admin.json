@@ -1,0 +1,222 @@
+{
+    "title": "لوحة التحكم الإدارية",
+    "description": "إدارة شاملة للمنصة ومراقبة الأداء",
+    "chart": {
+        "site_activity": "تحليل نشاط الموقع",
+        "site_activity_description": "نشاط استخدام الموقع من زيارات جديدة خلال فترة معينة",
+        "user_activity": "تحليل نشاط المستخدمين",
+        "user_activity_description": "نشاط استخدام المستخدمين من تسجيلات جديدة خلال فترة معينة",
+        "daily": "يومي",
+        "monthly": "شهري",
+        "yearly": "سنوي"
+    },
+    "stats": {
+        "total_users": "إجمالي المستخدمين",
+        "total_services": "إجمالي الخدمات",
+        "activity_analytics": "نشاط استخدام الموقع",
+        "user_activity_analytics": "نشاط المستخدمين"
+    },
+    "table": {
+        "header": {
+            "analytics": "التحليلات",
+            "users": "المستخدمين",
+            "services": "الخدمات",
+            "pending_services": "الخدمات المنتظرة",
+            "coupons": "الكوبونات"
+        },
+        "analytics": {
+            "user_analytics": "إحصائيات المستخدمين",
+            "total_users": "إجمالي المستخدمين",
+            "service_providers": "مقدمي الخدمات",
+            "today_signups": "المنضمين اليوم",
+            "service_analytics": "إحصائيات الخدمات",
+            "total_services": "إجمالي الخدمات",
+            "published_services": "الخدمات المنشورة",
+            "top_search_terms": "أكثر الكلمات بحثاً",
+            "no_search_terms": "لا توجد عمليات بحث بعد",
+            "top_viewed_services": "الخدمات الأكثر مشاهدة",
+            "no_viewed_services": "لا توجد مشاهدات بعد",
+            "web_analytics": {
+                "title": "إحصائيات الموقع",
+                "top_paths": "الصفحات الأكثر مشاهدة",
+                "no_data": "لا توجد بيانات بعد"
+            },
+            "platforms_used": {
+                "title": "المنصات المستخدمة"
+            }
+        },
+        "service_management": {
+            "title": "إدارة الخدمات",
+            "create_service": "إنشاء خدمة جديدة",
+            "create_service_title": "إنشاء خدمة جديدة",
+            "sort_placeholder": "ترتيب حسب التاريخ",
+            "sort": {
+                "label": "ترتيب حسب",
+                "newest": "الأحدث",
+                "oldest": "الأقدم",
+                "name_ar": "الاسم عربي",
+                "name_en": "الاسم الانجليزي"
+            },
+            "table": {
+                "title": "العنوان",
+                "category": "الفئة",
+                "provider": "مقدم الخدمة",
+                "views": "المشاهدات",
+                "status": "الحالة",
+                "actions": "إجراءات"
+            },
+            "status": {
+                "published": "منشور",
+                "draft": "مسودة",
+                "disabled": "معطل"
+            },
+            "empty_provider": "غير محدد",
+            "actions": {
+                "view": "عرض",
+                "edit": "تعديل",
+                "delete": "حذف"
+            },
+            "edit_service": "تحرير الخدمة",
+            "delete_dialog": {
+                "title": "تأكيد الحذف",
+                "description": "هل أنت متأكد من حذف الخدمة \"{{title}}\"؟ هذا الإجراء لا يمكن التراجع عنه.",
+                "cancel": "إلغاء",
+                "confirm": "حذف"
+            },
+            "toasts": {
+                "deleted_title": "تم الحذف",
+                "deleted_description": "تم حذف الخدمة بنجاح",
+                "error_title": "خطأ",
+                "error_description": "حدث خطأ أثناء حذف الخدمة"
+            }
+        },
+        "pending_services_management": {
+            "title": "إدارة الخدمات ت المنتظرة",
+            "sort_placeholder": "ترتيب حسب التاريخ",
+            "sort": {
+                "label": "ترتيب حسب",
+                "newest": "الأحدث",
+                "oldest": "الأقدم",
+                "name_ar": "الاسم عربي",
+                "name_en": "الاسم الانجليزي"
+            },
+            "table": {
+                "title": "العنوان",
+                "category": "الفئة",
+                "provider": "مقدم الخدمة",
+                "views": "المشاهدات",
+                "status": "الحالة",
+                "actions": "إجراءات"
+            },
+            "status": {
+                "pending": "قيد المراجعة",
+                "approved": "موافق"
+            },
+            "empty_state": "لا يوجد خدمات قيد المراجعة",
+            "actions": {
+                "edit": "تعديل",
+                "delete": "حذف"
+            },
+            "dialogs": {
+                "edit_title": "تحرير الخدمة",
+                "delete_title": "تأكيد الحذف",
+                "delete_description": "هل أنت متأكد من حذف الخدمة \"{{title}}\"؟ هذا الإجراء لا يمكن التراجع عنه.",
+                "cancel": "إلغاء",
+                "confirm_delete": "حذف"
+            },
+            "toasts": {
+                "deleted_title": "تم الحذف",
+                "deleted_description": "تم حذف الخدمة بنجاح",
+                "error_title": "خطأ",
+                "error_description": "حدث خطأ أثناء حذف الخدمة"
+            }
+        },
+        "user_management": {
+            "title": "إدارة المستخدمين",
+            "create_user": "إنشاء حساب جديد",
+            "create_user_title": "إنشاء حساب مستخدم جديد",
+            "sort_placeholder": "ترتيب حسب التاريخ",
+            "sort": {
+                "label": "ترتيب حسب",
+                "newest": "الأحدث",
+                "oldest": "الأقدم",
+                "name_ar": "الاسم عربي",
+                "name_en": "الاسم الانجليزي"
+            },
+            "table": {
+                "name": "الاسم",
+                "phone": "الهاتف",
+                "location": "الموقع",
+                "type": "النوع",
+                "created_at": "تاريخ التسجيل",
+                "actions": "إجراءات"
+            },
+            "type": {
+                "provider": "مقدم خدمة",
+                "client": "عميل"
+            },
+            "empty": {
+                "phone": "-",
+                "location": "-",
+                "name": "غير محدد"
+            },
+            "actions": {
+                "view": "عرض",
+                "edit": "تعديل",
+                "delete": "حذف"
+            },
+            "dialogs": {
+                "edit_title": "تحرير بيانات المستخدم",
+                "delete_title": "تأكيد الحذف",
+                "delete_description": "هل أنت متأكد من حذف المستخدم \"{{name}}\"؟ هذا الإجراء لا يمكن التراجع عنه.",
+                "cancel": "إلغاء",
+                "confirm_delete": "حذف"
+            },
+            "toasts": {
+                "error_title": "خطأ",
+                "error_description": "حدث خطأ أثناء حذف الخدمة"
+            }
+        },
+        "coupons_management": {
+            "title": "إدارة الكوبونات",
+            "create_coupon": "إنشاء كوبون جديد",
+            "create_coupon_title": "إنشاء كوبون جديد",
+            "sort": {
+                "label": "ترتيب حسب",
+                "newest": "الأحدث",
+                "oldest": "الأقدم",
+                "code": "نص الكوبون"
+            },
+            "table": {
+                "code": "الكود",
+                "type": "النوع",
+                "fixed_value": "القيمة المحددة",
+                "percentage": "النسبة المئوية",
+                "usage_limit": "حد الاستخدام",
+                "status": "الحالة",
+                "used_count": "مرات الاستخدام",
+                "actions": "إجراءات"
+            },
+            "status": {
+                "active": "فعال",
+                "inactive": "متوقف"
+            },
+            "empty": {
+                "value": "غير محدد",
+                "none": "لا يوجد"
+            },
+            "dialogs": {
+                "delete_title": "تأكيد الحذف",
+                "delete_description": "هل أنت متأكد من حذف الكوبون \"{{code}}\"؟ هذا الإجراء لا يمكن التراجع عنه.",
+                "cancel": "إلغاء",
+                "confirm_delete": "حذف"
+            },
+            "toasts": {
+                "deleted_title": "تم الحذف",
+                "deleted_description": "تم حذف الكوبون بنجاح",
+                "error_title": "خطأ",
+                "error_description": "حدث خطأ أثناء حذف الكوبون"
+            }
+        }
+    }
+}

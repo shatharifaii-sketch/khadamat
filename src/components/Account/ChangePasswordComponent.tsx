@@ -90,7 +90,7 @@ const ChangePasswordComponent = () => {
             setErrors([{ field: 'server', message: changePassword.error?.message || t('failed_to_change_password') }]);
             toast.error(t('failed_to_change_password'));
         }
-    }, [changePassword.isSuccess, changePassword.isError, changePassword.mutateAsync]);
+    }, [changePassword.isSuccess, changePassword.isError, changePassword.mutateAsync, changePassword.error?.message, t]);
 
     return (
         <>

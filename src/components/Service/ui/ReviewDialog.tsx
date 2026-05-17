@@ -24,6 +24,7 @@ const ReviewDialog = ({
     closeDialog
 }: Props) => {
     const { t } = useTranslation("services");
+    const lang = localStorage.getItem("language") || "en";
     const { toast } = useToast();
     const { user } = useAuth();
     const [editing, setEditing] = useState<boolean>(false);
@@ -189,7 +190,7 @@ const ReviewDialog = ({
                     )}
                     <span className='text-sm text-muted-foreground ml-2'>
                         {
-                            new Date(localReview.created_at).toLocaleDateString('ar-EG', {
+                            new Date(localReview.created_at).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-EG', {
                                 year: 'numeric',
                                 month: 'long',
                                 day: 'numeric',

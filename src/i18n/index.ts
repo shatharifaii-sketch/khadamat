@@ -8,6 +8,10 @@ import enAccount from "./locales/en/account.json";
 import enFooter from "./locales/en/footer.json";
 import enHome from "./locales/en/home.json";
 import enProfile from "./locales/en/profile.json";
+import enContact from "./locales/en/contact.json";
+import enAbout from "./locales/en/about.json";
+import enFaqs from "./locales/en/faqs.json";
+import enAdmin from "./locales/en/admin.json";
 
 import arNavbar from "./locales/ar/navbar.json";
 import arServices from "./locales/ar/services.json";
@@ -16,6 +20,10 @@ import arAccount from "./locales/ar/account.json";
 import arFooter from "./locales/ar/footer.json";
 import arHome from "./locales/ar/home.json";
 import arProfile from "./locales/ar/profile.json";
+import arContact from "./locales/ar/contact.json";
+import arAbout from "./locales/ar/about.json";
+import arFaqs from "./locales/ar/faqs.json";
+import arAdmin from "./locales/ar/admin.json";
 
 const savedLanguage = localStorage.getItem("language") || "ar";
 
@@ -30,7 +38,11 @@ i18n
                 account: enAccount,
                 footer: enFooter,
                 home: enHome,
-                profile: enProfile
+                profile: enProfile,
+                contact: enContact,
+                about: enAbout,
+                faqs: enFaqs,
+                admin: enAdmin
             },
             ar: {
                 navbar: arNavbar,
@@ -39,7 +51,11 @@ i18n
                 account: arAccount,
                 footer: arFooter,
                 home: arHome,
-                profile: arProfile
+                profile: arProfile,
+                contact: arContact,
+                about: arAbout,
+                faqs: arFaqs,
+                admin: arAdmin
             },
         },
 
@@ -53,7 +69,11 @@ i18n
             "account",
             "footer",
             "home",
-            "profile"
+            "profile",
+            "contact",
+            "about",
+            "faqs",
+            "admin"
         ],
 
         interpolation: {

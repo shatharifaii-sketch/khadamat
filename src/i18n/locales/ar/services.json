@@ -149,7 +149,11 @@
                 "edit_review": "تعديل التقييم",
                 "save_button": "حفظ التغييرات",
                 "edit_review_label": "نص التقييم",
-                "rating_label": "التقييم"
+                "rating_label": "التقييم",
+                "create_dialog_title": "انشر تقييمك للخدمة",
+                "create_dialog_rating": "التقييم",
+                "create_dialog_review": "نص التقييم",
+                "create_dialog_submit": "أضف التقييم"
             }
         }
     }

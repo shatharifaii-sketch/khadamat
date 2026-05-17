@@ -53,6 +53,71 @@ export type Database = {
         }
         Relationships: []
       }
+      analytics_page_views: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_mobile: boolean | null
+          normalized_path: string
+          path: string
+          session_id: string | null
+          visitor_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_mobile?: boolean | null
+          normalized_path: string
+          path: string
+          session_id?: string | null
+          visitor_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_mobile?: boolean | null
+          normalized_path?: string
+          path?: string
+          session_id?: string | null
+          visitor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_page_views_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "analytics_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      analytics_sessions: {
+        Row: {
+          id: string
+          is_mobile: boolean | null
+          last_seen_at: string | null
+          started_at: string | null
+          user_agent: string | null
+          visitor_id: string
+        }
+        Insert: {
+          id?: string
+          is_mobile?: boolean | null
+          last_seen_at?: string | null
+          started_at?: string | null
+          user_agent?: string | null
+          visitor_id: string
+        }
+        Update: {
+          id?: string
+          is_mobile?: boolean | null
+          last_seen_at?: string | null
+          started_at?: string | null
+          user_agent?: string | null
+          visitor_id?: string
+        }
+        Relationships: []
+      }
       contact_rate_limits: {
         Row: {
           created_at: string | null

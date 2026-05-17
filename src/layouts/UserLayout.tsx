@@ -1,10 +1,11 @@
 import AiChat from "@/components/AiChat";
 import Navigation from "@/components/Navigation";
-import { useWebsiteAnalytics } from "@/hooks/useWebsiteAnalytics";
+import useWebAnalytics from "@/hooks/useWebAnalytics";
 import { Outlet } from "react-router-dom";
 
 const UserLayout = () => {
-  useWebsiteAnalytics();
+  //useWebsiteAnalytics();
+  useWebAnalytics();
   return (
     <div className="min-h-screen bg-background arabic">
       <Navigation />

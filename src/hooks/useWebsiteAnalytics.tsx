@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { isMobile } from "@/lib/utils";
 
@@ -198,6 +198,7 @@ function getDeviceStats(data: AnalyticsRow[]) {
 export const useWebsiteAnalytics = () => {
     const queryClient = useQueryClient();
     const location = useLocation();
+    const lastTrackedPathRef = useRef<string | null>(null);
 
     const {
         data: analyticsData,
@@ -235,7 +236,7 @@ export const useWebsiteAnalytics = () => {
         }
 
         track();
-    }, [location]);
+    }, [location.pathname]);
 
     useEffect(() => {
         const channel = supabase

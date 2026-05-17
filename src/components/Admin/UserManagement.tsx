@@ -11,6 +11,7 @@ import { useAdminFunctionality } from '@/hooks/useAdminFunctionality';
 import { NavLink } from 'react-router-dom';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select';
 import UserForm from './ui/UserForm';
+import { useTranslation } from 'react-i18next';
 
 export interface UserProfile {
   id: string;
@@ -34,6 +35,9 @@ interface UserManagementProps {
 type SortOption = "name-ar" | "name-en" | "date-asc" | "date-desc";
 
 export const UserManagement = ({ users }: UserManagementProps) => {
+  const { t } = useTranslation("admin");
+  const lang = localStorage.getItem("language") || "en";
+  
   const { toast } = useToast();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
@@ -70,8 +74,8 @@ export const UserManagement = ({ users }: UserManagementProps) => {
       deleteUser.mutate(userId);
     } catch (error: any) {
       toast({
-        title: "خطأ",
-        description: error.message || "حدث خطأ أثناء حذف المستخدم",
+        title: t("table.user_management.toasts.error_title"),
+        description: error.message || t("table.user_management.toasts.error_description"),
         variant: "destructive",
       });
     }
@@ -97,18 +101,18 @@ export const UserManagement = ({ users }: UserManagementProps) => {
       <CardHeader className='flex flex-col gap-3'>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
-            إدارة المستخدمين
+            {t("table.user_management.title")}
           </CardTitle>
           <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
             <DialogTrigger asChild>
               <Button className="flex items-center gap-2">
                 <UserPlus className="h-4 w-4" />
-                إنشاء حساب جديد
+                {t("table.user_management.create_user")}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-md">
               <DialogHeader>
-                <DialogTitle>إنشاء حساب مستخدم جديد</DialogTitle>
+                <DialogTitle>{t("table.user_management.create_user_title")}</DialogTitle>
               </DialogHeader>
               <UserForm closeForm={() => setIsCreateModalOpen(false)} />
             </DialogContent>
@@ -116,14 +120,14 @@ export const UserManagement = ({ users }: UserManagementProps) => {
         </div>
         <Select value={sortOption} onValueChange={(value) => setSortOption(value as SortOption)}>
           <SelectTrigger>
-            <SelectValue placeholder="ترتيب حسب التاريخ" />
+            <SelectValue placeholder={t("table.user_management.sort_placeholder")} />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              <SelectLabel className='text-right px-3 text-muted-foreground'>ترتيب حسب</SelectLabel>
-              <SelectItem value="date-desc">الأحدث</SelectItem>
-              <SelectItem value="date-asc">الأقدم</SelectItem>
-              <SelectItem value="name-ar">الاسم عربي</SelectItem> <SelectItem value="name-en">الاسم الانجليزي</SelectItem>
+              <SelectLabel className='text-right px-3 text-muted-foreground'>{t("table.user_management.sort.label")}</SelectLabel>
+              <SelectItem value="date-desc">{t("table.user_management.sort.newest")}</SelectItem>
+              <SelectItem value="date-asc">{t("table.user_management.sort.oldest")}</SelectItem>
+              <SelectItem value="name-ar">{t("table.user_management.sort.name_ar")}</SelectItem> <SelectItem value="name-en">{t("table.user_management.sort.name_en")}</SelectItem>
             </SelectGroup>
           </SelectContent>
         </Select>
@@ -132,12 +136,12 @@ export const UserManagement = ({ users }: UserManagementProps) => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className='text-end'>الاسم</TableHead>
-              <TableHead className='text-end'>الهاتف</TableHead>
-              <TableHead className='text-end'>الموقع</TableHead>
-              <TableHead className='text-end'>النوع</TableHead>
-              <TableHead className='text-end'>تاريخ التسجيل</TableHead>
-              <TableHead className='text-end'>إجراءات</TableHead>
+              <TableHead className='text-end'>{t("table.user_management.table.name")}</TableHead>
+              <TableHead className='text-end'>{t("table.user_management.table.phone")}</TableHead>
+              <TableHead className='text-end'>{t("table.user_management.table.location")}</TableHead>
+              <TableHead className='text-end'>{t("table.user_management.table.type")}</TableHead>
+              <TableHead className='text-end'>{t("table.user_management.table.created_at")}</TableHead>
+              <TableHead className='text-end'>{t("table.user_management.table.actions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -145,18 +149,18 @@ export const UserManagement = ({ users }: UserManagementProps) => {
               <TableRow key={user.id}>
                 <TableCell className="font-medium">
                   <NavLink to={user.id ? `/profile/${user.id}` : '#'}>
-                    {user.full_name || 'غير محدد'}
+                    {user.full_name || t("table.user_management.empty.name")}
                   </NavLink>
                 </TableCell>
                 <TableCell>{user.phone || '-'}</TableCell>
                 <TableCell>{user.location || '-'}</TableCell>
                 <TableCell>
                   <Badge variant={user.is_service_provider ? 'default' : 'secondary'}>
-                    {user.is_service_provider ? 'مقدم خدمة' : 'عميل'}
+                    {user.is_service_provider ? t("table.user_management.type.provider") : t("table.user_management.type.client")}
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  {new Date(user.created_at).toLocaleDateString('ar-SA')}
+                  {new Date(user.created_at).toLocaleDateString(lang === 'en' ? 'en-US' : 'ar-SA')}
                 </TableCell>
                 <TableCell className='flex items-center justify-center'>
                   <div className="flex gap-2">
@@ -174,7 +178,7 @@ export const UserManagement = ({ users }: UserManagementProps) => {
                       </DialogTrigger>
                       <DialogContent className="max-w-md">
                         <DialogHeader>
-                          <DialogTitle>تحرير بيانات المستخدم</DialogTitle>
+                          <DialogTitle>{t("table.user_management.dialogs.edit_title")}</DialogTitle>
                         </DialogHeader>
                         <UserForm 
                           editingUser={editingUser}
@@ -191,15 +195,15 @@ export const UserManagement = ({ users }: UserManagementProps) => {
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>تأكيد الحذف</AlertDialogTitle>
+                          <AlertDialogTitle>{t("table.user_management.dialogs.delete_title")}</AlertDialogTitle>
                           <AlertDialogDescription>
-                            هل أنت متأكد من حذف المستخدم "{user.full_name}"؟ هذا الإجراء لا يمكن التراجع عنه.
+                            {t("table.user_management.dialogs.delete_description", { name: user.full_name })}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                          <AlertDialogCancel>{t("table.user_management.dialogs.cancel")}</AlertDialogCancel>
                           <AlertDialogAction onClick={() => handleDeleteUser(user.id)} className="bg-destructive text-destructive-foreground">
-                            حذف
+                            {t("table.user_management.dialogs.confirm_delete")}
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>

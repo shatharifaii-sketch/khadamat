@@ -1,7 +1,7 @@
-import React, { Suspense, useState } from 'react'
+import React, { Suspense, useEffect, useState } from 'react'
 import ActivityChart, { ActivityChartProps } from './ActivityChart'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
-import { BadgePercent, BarChart3, Search, Settings, TrendingUp, Users } from 'lucide-react'
+import { BadgePercent, BarChart3, Eye, Search, Settings, TrendingUp, Users } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
 import { Badge } from '../ui/badge'
 import { AnalyticsSummary } from '@/types/analytics'
@@ -15,7 +15,8 @@ import CouponsManagement from './CouponsManagement'
 import PendingServicesManagement from './PendingServicesManagement'
 import WebAnalytics from './WebAnalytics'
 import WebLineChart from './WebLineChart'
-import { useWebsiteAnalytics } from '@/hooks/useWebsiteAnalytics'
+import { useTranslation } from 'react-i18next'
+import useWebAnalytics from '@/hooks/useWebAnalytics'
 
 interface Props {
     analyticsSummary: AnalyticsSummary;
@@ -48,67 +49,88 @@ interface Props {
 }
 
 const AdminView = ({ analyticsSummary, adminData, stats, dailyStats, monthlyStats, yearlyStats }: Props) => {
+    const { t } = useTranslation("admin");
+    const lang = localStorage.getItem("language") || "en";
     const [selectedService, setSelectedService] = useState<Service | null>(null);
     const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
-    const { 
-    analyticsData, 
-    analyticsLoading, 
-    topPaths, 
-    visitsPerDay,
-    dailyStats: analyticsDailyStats,
-    monthlyStats: analyticsMonthlyStats,
-    yearlyStats: analyticsYearlyStats,
-    deviceStats
-  } = useWebsiteAnalytics();
+//     const { 
+//     analyticsData, 
+//     analyticsLoading, 
+//     topPaths, 
+//     visitsPerDay,
+//     dailyStats: analyticsDailyStats,
+//     monthlyStats: analyticsMonthlyStats,
+//     yearlyStats: analyticsYearlyStats,
+//     deviceStats
+//   } = useWebsiteAnalytics();
 
+    const {
+        analyticsData,
+        refreshAnalytics,
+        topPaths,
+        visitsPerDay,
+        yearlyStats: analyticsYearlyStats,
+        monthlyStats: analyticsMonthlyStats,
+        dailyStats: analyticsDailyStats,
+        deviceStats
+    } = useWebAnalytics();
+
+    useEffect(() => {
+        refreshAnalytics();
+    }, [refreshAnalytics])
+    
     return (
         <div>
             {/* Simple Statistics */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8" dir={lang === "ar" ? "rtl" : "ltr"}>
                 <Card>
                     <CardHeader className="pb-3">
-                        <CardTitle className="text-sm font-medium">إجمالي المستخدمين</CardTitle>
+                        <CardTitle className="text-sm font-medium text-start">
+                            {t("stats.total_users")}
+                        </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{stats.totalUsers}</div>
+                        <div className="text-2xl font-bold text-start">{stats.totalUsers}</div>
                     </CardContent>
                 </Card>
 
                 <Card>
                     <CardHeader className="pb-3">
-                        <CardTitle className="text-sm font-medium">إجمالي الخدمات</CardTitle>
+                        <CardTitle className="text-sm font-medium text-start">
+                            {t("stats.total_services")}
+                        </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{stats.totalServices}</div>
+                        <div className="text-2xl font-bold text-start">{stats.totalServices}</div>
                     </CardContent>
                 </Card>
             </div>
 
-            <Tabs defaultValue="web_analytics" className="space-y-6">
+            <Tabs defaultValue="activity" className="space-y-6">
                 <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="web_analytics" className="flex items-center justify-center gap-2">
-                        <BarChart3 className="h-4 w-4" />
-                        نشاط استخدام الموقع
-                    </TabsTrigger>
                     <TabsTrigger value="activity" className="flex items-center justify-center gap-2">
                         <TrendingUp className="h-4 w-4" />
-                        تحليل نشاط المستخدمين
+                        {t("stats.user_activity_analytics")}
+                    </TabsTrigger>
+                    <TabsTrigger value="web_analytics" className="flex items-center justify-center gap-2">
+                        <BarChart3 className="h-4 w-4" />
+                        {t("stats.activity_analytics")}
                     </TabsTrigger>
                 </TabsList>
 
                 {/* ACTIVITY CHARTS */}
-                <TabsContent value='web_analytics'>
-                    <WebLineChart
-                        dailyStats={analyticsDailyStats}
-                        monthlyStats={analyticsMonthlyStats}
-                        yearlyStats={analyticsYearlyStats}
-                    />
-                </TabsContent>
                 <TabsContent value='activity'>
                     <ActivityChart
                         dailyStats={dailyStats}
                         monthlyStats={monthlyStats}
                         yearlyStats={yearlyStats}
+                    />
+                </TabsContent>
+                <TabsContent value='web_analytics'>
+                    <WebLineChart
+                        dailyStats={analyticsDailyStats}
+                        monthlyStats={analyticsMonthlyStats}
+                        yearlyStats={analyticsYearlyStats}
                     />
                 </TabsContent>
             </Tabs>
@@ -118,23 +140,23 @@ const AdminView = ({ analyticsSummary, adminData, stats, dailyStats, monthlyStat
                 <TabsList className="grid w-full grid-cols-5">
                     <TabsTrigger value="analytics" className="flex items-center gap-2">
                         <BarChart3 className="h-4 w-4" />
-                        التحليلات
+                        {t("table.header.analytics")}
                     </TabsTrigger>
                     <TabsTrigger value="users" className="flex items-center gap-2">
                         <Users className="h-4 w-4" />
-                        المستخدمين
+                        {t("table.header.users")}
                     </TabsTrigger>
                     <TabsTrigger value="services" className="flex items-center gap-2">
                         <Settings className="h-4 w-4" />
-                        الخدمات
+                        {t("table.header.services")}
                     </TabsTrigger>
                     <TabsTrigger value="pending-services" className="flex items-center gap-2">
                         <Settings className="h-4 w-4" />
-                        الخدمات المنتظرة
+                        {t("table.header.pending_services")}
                     </TabsTrigger>
                     <TabsTrigger value="coupons" className="flex items-center gap-2">
                         <BadgePercent className="h-4 w-4" />
-                        الكوبونات
+                        {t("table.header.coupons")}
                     </TabsTrigger>
                 </TabsList>
 
@@ -142,19 +164,21 @@ const AdminView = ({ analyticsSummary, adminData, stats, dailyStats, monthlyStat
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                         <Card>
                             <CardHeader>
-                                <CardTitle>إحصائيات المستخدمين</CardTitle>
+                                <CardTitle>
+                                    {t("table.analytics.user_analytics")}
+                                </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="flex justify-between">
-                                    <span>إجمالي المستخدمين:</span>
+                                    <span>{t("table.analytics.total_users")}:</span>
                                     <span className="font-bold">{stats.totalUsers}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                    <span>مقدمي الخدمات:</span>
+                                    <span>{t("table.analytics.service_providers")}:</span>
                                     <span className="font-bold">{stats.serviceProviders}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                    <span>المنضمين اليوم:</span>
+                                    <span>{t("table.analytics.today_signups")}:</span>
                                     <span className="font-bold">{stats.todaySignups}</span>
                                 </div>
                             </CardContent>
@@ -162,15 +186,15 @@ const AdminView = ({ analyticsSummary, adminData, stats, dailyStats, monthlyStat
 
                         <Card>
                             <CardHeader>
-                                <CardTitle>إحصائيات الخدمات</CardTitle>
+                                <CardTitle>{t("table.analytics.service_analytics")}</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="flex justify-between">
-                                    <span>إجمالي الخدمات:</span>
+                                    <span>{t("table.analytics.total_services")}:</span>
                                     <span className="font-bold">{stats.totalServices}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                    <span>الخدمات المنشورة:</span>
+                                    <span>{t("table.analytics.published_services")}:</span>
                                     <span className="font-bold">{stats.publishedServices}</span>
                                 </div>
                             </CardContent>
@@ -182,7 +206,7 @@ const AdminView = ({ analyticsSummary, adminData, stats, dailyStats, monthlyStat
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
                                     <Search className="h-5 w-5 text-primary" />
-                                    أكثر الكلمات بحثاً
+                                    {t("table.analytics.top_search_terms")}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
@@ -192,13 +216,13 @@ const AdminView = ({ analyticsSummary, adminData, stats, dailyStats, monthlyStat
                                             <div key={term.query} className="flex justify-between items-center">
                                                 <span className="font-medium">#{index + 1} {term.query}</span>
                                                 <Badge variant="secondary">
-                                                    <span> {term.count > 1 && term.count < 10 ? 'مرات' : 'مرة'} </span> {term.count}
+                                                    x {term.count}
                                                 </Badge>
                                             </div>
                                         ))}
                                     </div>
                                 ) : (
-                                    <p className="text-muted-foreground text-center py-4">لا توجد عمليات بحث بعد</p>
+                                    <p className="text-muted-foreground text-center py-4">{t("table.analytics.no_search_terms")}</p>
                                 )}
                             </CardContent>
                         </Card>
@@ -207,7 +231,7 @@ const AdminView = ({ analyticsSummary, adminData, stats, dailyStats, monthlyStat
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
                                     <TrendingUp className="h-5 w-5 text-primary" />
-                                    أكثر الخدمات نقراً
+                                    {t("table.analytics.top_viewed_services")}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
@@ -216,12 +240,14 @@ const AdminView = ({ analyticsSummary, adminData, stats, dailyStats, monthlyStat
                                         {analyticsSummary.topViewedServices.slice(0, 5).map((service, index) => (
                                             <div key={service.service_id} className="flex justify-between items-center">
                                                 <span className="font-medium truncate">#{index + 1} {service.title}</span>
-                                                <Badge variant="secondary">{service.views} مشاهدة</Badge>
+                                                <Badge variant="secondary">{service.views} <Eye size={14} className='ml-2'/></Badge>
                                             </div>
                                         ))}
                                     </div>
                                 ) : (
-                                    <p className="text-muted-foreground text-center py-4">لا توجد مشاهدات بعد</p>
+                                    <p className="text-muted-foreground text-center py-4">
+                                        {t("table.analytics.no_viewed_services")}
+                                    </p>
                                 )}
                             </CardContent>
                         </Card>

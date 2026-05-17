@@ -152,7 +152,11 @@
                 "edit_review": "Edit Review",
                 "save_button": "Save Changes",
                 "edit_review_label": "Review Text",
-                "rating_label": "Rating"
+                "rating_label": "Rating",
+                "create_dialog_title": "Post a Review",
+                "create_dialog_rating": "Rating",
+                "create_dialog_review": "Review Text",
+                "create_dialog_submit": "Add Review"
             }
         }
     }

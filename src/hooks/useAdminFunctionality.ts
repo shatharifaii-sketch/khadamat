@@ -108,7 +108,6 @@ export const useAdminData = () => {
       image_name,
       image_url
         )`)
-        .neq('status', 'pending-approval')
         .order('created_at', { ascending: false });
 
       if (servicesError) throw servicesError;
