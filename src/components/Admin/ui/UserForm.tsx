@@ -135,10 +135,16 @@ const UserForm = ({ editingUser, closeForm }: Props) => {
           <Input
             type="tel"
             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            onChange={(e) => {
+              const numericValue = e.target.value.replace(/\D/g, "");
+
+              // limit digits
+              setPhone(numericValue.slice(0, 9));
+            }}
             placeholder="599123456"
             dir="ltr"
             className='col-span-3'
+            maxLength={9}
           />
         </div>
       </div>
@@ -201,9 +207,9 @@ const UserForm = ({ editingUser, closeForm }: Props) => {
         </div>
       )}
       <Button onClick={handleCreateUser} disabled={createUser.isPending} className={`w-full ${createUser.isPending ? 'opacity-50' : ''}`}>
-        {editingUser 
-        ? 'تحديث الحساب' 
-        : 'إنشاء الحساب'
+        {editingUser
+          ? 'تحديث الحساب'
+          : 'إنشاء الحساب'
         }
       </Button>
     </div>

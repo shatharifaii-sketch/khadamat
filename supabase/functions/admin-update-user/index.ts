@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { id, email, password, phone } = await req.json();
+    const { id, email, password, phone, is_admin } = await req.json();
 
     if (!id) {
       return new Response(
@@ -81,6 +81,27 @@ Deno.serve(async (req) => {
           },
         }
       );
+    }
+
+    if (is_admin) {
+      const { error: adminError } = await supabase.from('user_roles').insert({ user_id: id, role: 'admin' });
+
+      if (adminError) {
+        console.error("Error creating admin user: ", adminError);
+        return new Response(
+          JSON.stringify({
+            success: false,
+            user: null,
+            error: adminError,
+          }),
+          {
+            headers: {
+              ...corsHeaders,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+      };
     }
 
     return new Response(

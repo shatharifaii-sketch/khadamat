@@ -188,7 +188,8 @@ export const useAdminFunctionality = () => {
         body: {
           email: formData.email,
           password: formData.password,
-          phone: formData.phone
+          phone: formData.phone,
+          is_admin: formData.is_admin
         }
       });
 
@@ -212,12 +213,6 @@ export const useAdminFunctionality = () => {
         .eq('id', user.user?.id);
 
       if (profileError) throw profileError;
-
-      if (formData.is_admin) {
-        const { error: adminError } = await supabaseAdmin.from('user_roles').insert({ user_id: user.user?.id, role: 'admin' });
-
-        if (adminError) throw adminError;
-      }
 
       return;
     },
@@ -297,7 +292,8 @@ export const useAdminFunctionality = () => {
             id: formData.id,
             email: formData.email,
             password: formData.password,
-            phone: formData.phone
+            phone: formData.phone,
+            is_admin: formData.is_admin
           }
         });
 
@@ -329,12 +325,6 @@ export const useAdminFunctionality = () => {
         .eq('id', formData.id).select('id').maybeSingle();
 
       if (error) throw error;
-
-      if (formData.is_admin) {
-        const { error: adminError } = await supabaseAdmin.from('user_roles').upsert({ user_id: data.id, role: 'admin' }, { onConflict: 'user_id' });
-
-        if (adminError) throw adminError;
-      }
 
       return;
     },
