@@ -232,16 +232,13 @@ export const useAdminFunctionality = () => {
         throw new Error("Only admins can delete users");
       }
 
-      const { error } = await supabase
-        .from('profiles')
-        .delete()
-        .eq('id', id);
+      const { error } = await supabase.functions.invoke("admin-delete-user", {
+        body: {
+          id
+        }
+      });
 
       if (error) throw error;
-
-      const { error: deleteUserError } = await supabaseAdmin.auth.admin.deleteUser(id);
-
-      if (deleteUserError) throw deleteUserError;
 
       return;
     },
