@@ -7,6 +7,7 @@ import { UserProfile } from '../UserManagement'
 import { useAdminFunctionality } from '@/hooks/useAdminFunctionality'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { locations } from '@/components/FindService/ServiceCategories'
 
 export interface User {
   id: string;
@@ -39,7 +40,8 @@ const countries = [
 const UserForm = ({ editingUser, closeForm }: Props) => {
   const { updateUser, updateUserSuccess, createUser, createUserSuccess } = useAdminFunctionality();
   const [countryCode, setCountryCode] = useState<string>(editingUser?.phone ? editingUser.phone.replace(/\D/g, '').slice(0, -9) : countries[0].code);
-  const [phone, setPhone] = useState<string>(editingUser?.phone ? editingUser.phone.replace(/\D/g, '').slice(-9) : '');
+  const [phone, setPhone] = useState<string>(editingUser?.phone ? (editingUser.phone.replace(/\D/g, '').slice(-9) || editingUser.phone) : '');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (updateUserSuccess || createUserSuccess) {
@@ -73,6 +75,7 @@ const UserForm = ({ editingUser, closeForm }: Props) => {
     };
 
     editingUser ? updateUser.mutate(payload) : createUser.mutate(payload);
+
   }
   return (
     <div className="space-y-4">
@@ -132,20 +135,35 @@ const UserForm = ({ editingUser, closeForm }: Props) => {
           <Input
             type="tel"
             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            onChange={(e) => {
+              const numericValue = e.target.value.replace(/\D/g, "");
+
+              // limit digits
+              setPhone(numericValue.slice(0, 9));
+            }}
             placeholder="599123456"
             dir="ltr"
             className='col-span-3'
+            maxLength={9}
           />
         </div>
       </div>
       <div>
         <Label htmlFor="location">الموقع</Label>
-        <Input
-          id="location"
-          value={formData.location}
-          onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-        />
+        <Select
+          value={formData.location} onValueChange={(value) => setFormData({ ...formData, location: value })}
+        >
+          <SelectTrigger id="location">
+            <SelectValue placeholder="اختر المنطقة أو المحافظة" />
+          </SelectTrigger>
+          <SelectContent>
+            {locations.map((loc) => (
+              <SelectItem key={loc} value={loc}>
+                {loc}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       <div>
         <Label htmlFor="bio">الوصف</Label>
@@ -188,8 +206,11 @@ const UserForm = ({ editingUser, closeForm }: Props) => {
           />
         </div>
       )}
-      <Button onClick={handleCreateUser} className="w-full">
-        {editingUser ? 'تحديث الحساب' : 'إنشاء الحساب'}
+      <Button onClick={handleCreateUser} disabled={createUser.isPending} className={`w-full ${createUser.isPending ? 'opacity-50' : ''}`}>
+        {editingUser
+          ? 'تحديث الحساب'
+          : 'إنشاء الحساب'
+        }
       </Button>
     </div>
   )

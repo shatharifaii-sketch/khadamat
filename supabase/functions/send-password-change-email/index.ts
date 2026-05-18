@@ -19,6 +19,9 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+const WINDOW_MINUTES = 15;
+const MAX_REQUESTS = 3;
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", {
@@ -46,6 +49,26 @@ Deno.serve(async (req: Request) => {
         status: 400,
       });
     }
+
+    // 1. check recent requests
+    const { count } = await supabase
+      .from("password_reset_logs")
+      .select("*", { count: "exact", head: true })
+      .eq("email", email)
+      .gte(
+        "created_at",
+        new Date(Date.now() - WINDOW_MINUTES * 60 * 1000).toISOString()
+      );
+
+    if (count && count >= MAX_REQUESTS) {
+      return new Response("Too many requests", { status: 429 });
+    }
+
+    // 2. log request
+    await supabase.from("password_reset_logs").insert({
+      email,
+      ip: req.headers.get("x-forwarded-for"),
+    });
 
     const { data, error } = await supabase.auth.admin.generateLink({
       type: "recovery",
