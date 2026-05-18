@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { useTranslation } from 'react-i18next';
 
 export interface ActivityChartProps {
     year?: number;
@@ -28,6 +29,9 @@ export interface StatProps {
     }[];
 }
 const ActivityChart = ({ dailyStats, monthlyStats, yearlyStats }: StatProps) => {
+    const { t } = useTranslation("admin");
+    const lang = localStorage.getItem("language") || "en";
+
     const formattedDailyStats = dailyStats?.map(d => ({
         ...d,
         day: new Date(d.day).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
@@ -52,11 +56,11 @@ const ActivityChart = ({ dailyStats, monthlyStats, yearlyStats }: StatProps) => 
     }
 
     return (
-        <Card className='mb-5'>
+        <Card className='mb-5' dir={lang === "ar" ? "rtl" : "ltr"}>
             <CardHeader>
-                <CardTitle>تحليل نشاط المستخدم</CardTitle>
-                <CardDescription>
-                    نشاط المستخدمين المسجلين من تسجيل خلال فترة معينة
+                <CardTitle className='text-start'>{t("chart.user_activity")}</CardTitle>
+                <CardDescription className='text-muted-foreground text-start'>
+                    {t("chart.user_activity_description")}
                 </CardDescription>
             </CardHeader>
             <CardContent className='w-full px-2 h-[400px] flex flex-col md:flex-row gap-5'>
@@ -64,17 +68,17 @@ const ActivityChart = ({ dailyStats, monthlyStats, yearlyStats }: StatProps) => 
                 <ul className='grid grid-cols-3 md:flex md:flex-col gap-2 w-full justify-around md:justify-start'>
                     <li>
                         <Button variant={dataKey === 'day' ? 'default' : 'outline'} className='w-full' onClick={() => handleChartStatsChange(formattedDailyStats, 'day')}>
-                            Daily
+                            {t("chart.daily")}
                         </Button>
                     </li>
                     <li>
                         <Button variant={dataKey === 'month' ? 'default' : 'outline'} className='w-full' onClick={() => handleChartStatsChange(formattedMonthlyStats, 'month')}>
-                            Monthly
+                            {t("chart.monthly")}
                         </Button>
                     </li>
                     <li>
                         <Button variant={dataKey === 'year' ? 'default' : 'outline'} className='w-full' onClick={() => handleChartStatsChange(formattedYearlyStats, 'year')}>
-                            Yearly
+                            {t("chart.yearly")}
                         </Button>
                     </li>
                 </ul>

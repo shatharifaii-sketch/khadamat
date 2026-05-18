@@ -20,6 +20,7 @@ interface ServiceFormProps {
 }
 
 const ServiceForm = ({ serviceToEdit }: ServiceFormProps) => {
+  const lang = localStorage.getItem("language") || "en";
   const {
     formData,
     handleInputChange,
@@ -42,13 +43,13 @@ const ServiceForm = ({ serviceToEdit }: ServiceFormProps) => {
   }, [isEditMode, pendingService, clearPendingService]);
 
   return (
-    <Card>
+    <Card dir={lang === "ar" ? "rtl" : "ltr"}>
       <ServiceFormHeader 
         isEditMode={isEditMode} 
         hasPendingService={!!pendingService && !isEditMode} 
       />
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
+      <CardContent className='px-2 py-1'>
+        <form onSubmit={handleSubmit} className="space-y-3 md:space-y-6">
           <ServiceBasicInfo
             title={formData.title}
             category={formData.category}
@@ -98,6 +99,7 @@ const ServiceForm = ({ serviceToEdit }: ServiceFormProps) => {
           <WhatsappNumberInput
             whatsappNumber={formData.whatsapp_number}
             onChange={(value) => handleInputChange('whatsapp_number', value)}
+            error={getFieldError('whatsapp_number')}
           />
 
           <ServiceExperience

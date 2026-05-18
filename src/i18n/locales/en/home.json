@@ -1,0 +1,60 @@
+{
+    "hero": {
+        "title": "Search for the right service",
+        "subtitle": "In one place",
+        "description": "A platform that connects professional service providers with people looking for services in an easy and secure way",
+        "find_service": "Find a Service",
+        "post_service": "Post Your Service"
+    },
+    "stats": {
+        "service_providers": "Service Providers",
+        "published_services": "Published Services",
+        "encouraging_message": {
+            "title": "A new platform in continuous growth",
+            "description": "Join us at the beginning of our journey and be part of a community of professional services"
+        }
+    },
+    "تنظيف": "Cleaning",
+    "صيانة ( كهرباء/ سباكة )": "Maintenance (Electrical / Plumbing)",
+    "تصميم جرافيكي": "Graphic Design",
+    "تصوير": "Photography",
+    "مجالسة أطفال": "Babysitting",
+    "تدريس خصوصي": "Private Tutoring",
+    "ترجمة": "Translation",
+    "غير ذلك": "Other",
+    "services": {
+        "title": "Available Services",
+        "description": "Discover the currently available professional services",
+        "service_count": "{{count}} Services",
+        "service_count_single": "{{count}} Service",
+        "available_services": "Available Services",
+        "no_services_starting": "We are at the beginning of our journey and looking for professional service providers to join us",
+        "no_services_description": "Be among the first service providers on our platform and get a greater chance to reach customers",
+        "loading_services": "Loading services..."
+    },
+    "how_it_works": {
+        "title": "How Does the Platform Work?",
+        "description": "Simple steps to get the service you need",
+        "for_seekers": "For Service Seekers",
+        "for_providers": "For Service Providers",
+        "step_1": "Create a New Account",
+        "step_1_desc": "Create a free account using email or Gmail",
+        "step_2": "Search for a Service",
+        "step_2_desc": "Browse available services and choose the right one",
+        "step_3": "Contact the Service Provider",
+        "step_3_desc": "Get in touch with the provider and agree on the details",
+        "provider_step_1": "Register and Subscribe",
+        "provider_step_1_desc": "Create an account and subscribe monthly (10 ILS)",
+        "provider_step_2": "Publish Your Service",
+        "provider_step_2_desc": "Add your service details and previous work",
+        "provider_step_3": "Start Working",
+        "provider_step_3_desc": "Receive requests and earn money"
+    },
+    "cta": {
+        "title": "Are You Ready to Get Started?",
+        "subtitle_1": "Join {{count}}+ professional service providers",
+        "subtitle_2": "Be among the first service providers on our platform",
+        "post_service": "Start Offering Services",
+        "find_service": "Find a Service Now"
+    }
+}

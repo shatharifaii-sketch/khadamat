@@ -6,6 +6,8 @@ import { PublicService } from '@/hooks/usePublicServices';
 import { cn, platforms, truncateString } from '@/lib/utils';
 import { ServiceViewProps } from '../ServiceView';
 import { FaGlobe } from 'react-icons/fa6';
+import { useTranslation } from 'react-i18next';
+import { ServiceLink } from '@/components/PostService/ServiceLinks';
 
 interface Props {
     service: ServiceViewProps
@@ -14,15 +16,19 @@ interface Props {
 const ServiceDataCard = ({
     service
 }: Props) => {
+    const { t } = useTranslation("services");
+    const lang = localStorage.getItem("language") || "en";
     const getPlatform = (type: string) => platforms.find((p) => p.value === type);
+
+    const links = (service?.links ?? []) as ServiceLink[];
 
     return (
         <Card>
             <CardHeader>
-                <CardContent>
+                <CardContent className='px-2 md:px-5'>
                     <div className='space-y-2'>
                         <div className='flex items-center justify-between'>
-                            <h3 className='text-xl font-semibold'>وصف الخدمة</h3>
+                            <h3 className='text-xl font-semibold'>{t("service.description")}</h3>
                             <div className="flex items-center justify-between text-muted-foreground opacity-70">
                                 <div className="flex items-center gap-4">
                                     <div className="flex items-center gap-1">
@@ -32,20 +38,20 @@ const ServiceDataCard = ({
                                 </div>
                             </div>
                         </div>
-                        <p className='text-muted-foreground border border-gray-100 rounded-lg p-2 text-lg'>{service?.description}</p>
+                        <p className='text-muted-foreground border border-gray-100 rounded-lg p-2 text-lg text-start font-normal'>{service?.description}</p>
                     </div>
                     <div className='mt-5'>
-                        <h3 className='text-xl font-semibold'>الملحقات</h3>
+                        <h3 className='text-xl font-semibold'>{t("service.attachments")}</h3>
                         <div className='mt-3'>
                             <ServiceImages serviceId={service?.id} />
                         </div>
                     </div>
                     <div className='mt-3 flex flex-col gap-2'>
                         <p className='flex flex-col'>
-                            {service?.links?.length > 0 ? 'روابط ملحقة:' : ''}
+                            {links.length > 0 ? t("service.links") : ''}
                         </p>
                         <div className='flex flex-row gap-3' dir="rtl">
-                            {service.links?.map((link, index) => {
+                            {links.map((link, index) => {
                                 const platform = getPlatform(link.type);
                                 const Icon = platform?.icon;
 
@@ -72,7 +78,7 @@ const ServiceDataCard = ({
                     </div>
                     <div className={cn('flex my-5', service?.experience.length > 15 || service?.location.length > 15 || service?.price_range.length > 15 ? 'flex-col' : 'flex-col md:flex-row md:items-center md:gap-8')}>
                         <div className='flex flex-col sm:flex-row items-start sm:items-center gap-4'>
-                            <h3 className='text-lg font-semibold mt-4 text-nowrap'>تكلفة الخدمة</h3>
+                            <h3 className='text-lg font-semibold text-nowrap'>{t("service.price")}</h3>
                             <h2 className='text-xl font-semibold text-primary text-nowrap'>{service?.price_range}</h2>
                         </div>
                         <Separator orientation='vertical' className='h-5 mt-3 hidden md:block' />
@@ -80,29 +86,29 @@ const ServiceDataCard = ({
                             {service?.is_online ? (
                                 <>
                                     <h2 className='text-xl font-semibold text-primary text-nowrap'>
-                                        خدمة رقمية اونلاين
+                                        {t("service.online")}
                                     </h2>
                                 </>
                             ) : (
                                 <>
-                                    <h3 className='text-lg font-semibold mt-4 text-nowrap'>مكان الخدمة</h3>
+                                    <h3 className='text-lg font-semibold mt-4 text-nowrap'>{t("service.location")}</h3>
                                     <h2 className='text-xl font-semibold text-primary text-nowrap'>{service?.location}</h2>
                                 </>
                             )}
                         </div>
                         <Separator orientation='vertical' className='h-5 mt-3 hidden md:block' />
                         <div className='flex flex-col sm:flex-row items-start sm:items-center gap-4'>
-                            <h3 className='text-lg font-semibold mt-4 text-nowrap'>الخبرة</h3>
+                            <h3 className='text-lg font-semibold text-nowrap'>{t("service.experience")}</h3>
                             <h2 className='text-xl font-semibold text-primary text-nowrap'>{service?.experience}</h2>
                         </div>
                     </div>
                     <Separator />
-                    <div className='space-y-3'>
-                        <h3 className='text-xl font-semibold mt-4'>معلومات موفر الخدمة</h3>
-                        <div className='space-y-2 text-muted-foreground'>
-                            <p>الاسم الشخصي: {service?.publisher.full_name}</p>
-                            <p>البريد الالكتروني: {service?.email}</p>
-                            <p>رقم الهاتف: {service?.phone}</p>
+                    <div className='space-y-3' dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+                        <h3 className='text-xl font-semibold mt-4 text-start'>{t("service.provider_info")}</h3>
+                        <div className='space-y-2 text-muted-foreground text-start'>
+                            <p>{t("service.provider_name")} {service?.publisher.full_name}</p>
+                            <p>{t("service.email")}: {service?.email}</p>
+                            <p>{t("service.phone")}: {service?.phone}</p>
                         </div>
                     </div>
                 </CardContent>

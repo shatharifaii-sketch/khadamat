@@ -24,7 +24,7 @@ const ChatSimpleData = ({ user }: Props) => {
           <PopoverTrigger className='hover:bg-muted p-2 rounded-full'>
             <EllipsisVertical className='size-6 text-muted-foreground' />
           </PopoverTrigger>
-          <PopoverContent className='p-1'>
+          <PopoverContent className='p-1 w-fit'>
             <ReportDrawer
               itemId={user.id}
               itemType='user'
@@ -34,7 +34,7 @@ const ChatSimpleData = ({ user }: Props) => {
         </Popover>
       </div>
       <div className='flex items-center gap-2 justify-end'>
-        <h1>{user.full_name}</h1>
+        <h1 className='text-xl md:text-2xl'>{user.full_name}</h1>
         {user.profile_image_url ? (
           <Avatar className='size-10'>
             <AvatarImage

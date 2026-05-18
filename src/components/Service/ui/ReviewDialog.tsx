@@ -12,6 +12,7 @@ import { PublicReview, useServiceReviews } from '@/hooks/UseServiceReviews'
 import { DialogDescription } from '@radix-ui/react-dialog';
 import { Edit, Loader2, StarIcon, Trash } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     review: PublicReview;
@@ -22,6 +23,8 @@ const ReviewDialog = ({
     review,
     closeDialog
 }: Props) => {
+    const { t } = useTranslation("services");
+    const lang = localStorage.getItem("language") || "en";
     const { toast } = useToast();
     const { user } = useAuth();
     const [editing, setEditing] = useState<boolean>(false);
@@ -54,8 +57,8 @@ const ReviewDialog = ({
                 setLocalReview(newReview);
                 setEditing(false);
                 toast({
-                    title: 'تم التحديث',
-                    description: 'تم تحديث التقييم بنجاح',
+                    title: t("service.reviews.dialog.update_toast_title"),
+                    description: t("service.reviews.dialog.update_toast_message"),
                 });
             },
         });
@@ -68,8 +71,8 @@ const ReviewDialog = ({
             onSuccess: () => {
                 closeDialog();
                 toast({
-                    title: 'تم الحذف',
-                    description: 'تم حذف التقييم بنجاح',
+                    title: t("service.reviews.dialog.delete_toast_title"),
+                    description: t("service.reviews.dialog.delete_toast_message"),
                 });
             },
         });
@@ -78,7 +81,7 @@ const ReviewDialog = ({
     return (
         <>
             <DialogTitle className='text-lg font-bold text-start pr-10 flex items-center gap-2'>
-                <span>مراجعة للخدمة</span>
+                <span>{t("service.reviews.dialog.title")}</span>
                 <span>{localReview.service.title}</span>
             </DialogTitle>
             <Separator />
@@ -104,7 +107,7 @@ const ReviewDialog = ({
                 <div className='flex items-center justify-start gap-2' dir='ltr'>
                     {editing ? (
                         <div className='flex gap-5 items-center justify-between' dir='rtl'>
-                            <Label htmlFor="review_body">التقييم</Label>
+                            <Label htmlFor="review_body">{t("service.reviews.dialog.rating_label")}</Label>
                             <div className='flex items-center gap-2'>
                                 <div className='flex items-center'>
                                     {[...Array(5)].map((_, index) => (
@@ -148,7 +151,9 @@ const ReviewDialog = ({
             <DialogDescription className='mt-4 text-md text-start'>
                 {editing ? (
                     <div className='flex flex-col gap-2'>
-                        <Label htmlFor="review_body">نص التقييم</Label>
+                        <Label htmlFor="review_body">
+                            {t("service.reviews.dialog.edit_review_label")}
+                        </Label>
                             <Textarea
                             id="review_body"
                             value={formData.review_body}
@@ -168,13 +173,13 @@ const ReviewDialog = ({
                         <span className='text-xs text-muted-foreground mr-2'>
                             {editing ? (
                                 <Button onClick={handleSubmitUpdatedData}>
-                                    حفظ التغييرات
+                                    {t("service.reviews.dialog.save_button")}
                                 </Button>
                             ) : (
                                 <div className='flex gap-1'>
                                     <Button onClick={() => setEditing(true)} className='outline outline-1' size='sm' variant='ghost'>
                                         <Edit className='size-4' />
-                                        تعديل التقييم
+                                        {t("service.reviews.dialog.edit_review")}
                                     </Button>
                                     <Button onClick={handleDeleteReview} className='outline outline-1' size='sm' variant='destructive' disabled={deleteReviewLoading}>
                                         <Trash className='size-4' />
@@ -185,7 +190,7 @@ const ReviewDialog = ({
                     )}
                     <span className='text-sm text-muted-foreground ml-2'>
                         {
-                            new Date(localReview.created_at).toLocaleDateString('ar-EG', {
+                            new Date(localReview.created_at).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-EG', {
                                 year: 'numeric',
                                 month: 'long',
                                 day: 'numeric',

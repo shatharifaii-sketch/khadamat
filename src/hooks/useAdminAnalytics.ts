@@ -1,4 +1,4 @@
-import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
+import { QueryClient, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type {
   SearchAnalytic,
@@ -6,8 +6,14 @@ import type {
   ConversationAnalytic,
   AnalyticsSummary
 } from '@/types/analytics';
+import { useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 
 export const useAdminAnalytics = () => {
+  const location = useLocation();
+
+  const queryClient = useQueryClient();
+
   // Get search analytics
   const getSearchAnalytics = useQuery({
     queryKey: ['admin-search-analytics'],
@@ -218,7 +224,20 @@ export const useAdminAnalytics = () => {
 
       return data;
     }
-  })
+  });
+
+  useEffect(() => {
+    if (location.pathname.startsWith('/admin')) {
+      queryClient.invalidateQueries({ queryKey: ['admin-search-analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-service-analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-conversation-analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-analytics-summary'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-login-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-daily-logins'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-monthly-logins'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-yearly-logins'] });
+    }
+  }, [location.pathname, queryClient]);
 
   return {
     searchAnalytics: getSearchAnalytics.data || [],

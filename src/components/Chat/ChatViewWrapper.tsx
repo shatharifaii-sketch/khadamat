@@ -33,7 +33,7 @@ const ChatViewWrapper = ({ conversationId, clientId, serviceId, providerId }: Co
     //const [ replyToMessage, setReplyToMessage ] = useState<Message | null>(null);
 
     return (
-        <ChatLayout setAttachment={setAttachment} service={conversation?.service}>
+        <ChatLayout setAttachment={setAttachment} service={conversation?.service ? conversation.service : null}>
             <Card>
                 <CardHeader className='rounded-t-md border-b-2'>
                     <ChatSimpleData user={user?.id === conversation.client.id ? conversation.provider : conversation.client} />
@@ -47,7 +47,7 @@ const ChatViewWrapper = ({ conversationId, clientId, serviceId, providerId }: Co
                     //setReplyToMessage={setReplyToMessage}
                     />
                 </CardContent>
-                <CardFooter className='border-t-2 py-4'>
+                <CardFooter className='border-t-2 py-2 md:py-4'>
                     <ChatMessageInput
                         attachment={attachment}
                         setAttachment={setAttachment}

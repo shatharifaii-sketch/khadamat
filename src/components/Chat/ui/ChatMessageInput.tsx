@@ -3,6 +3,7 @@ import { Input } from '@/components/ui/input'
 import { useChat } from '@/contexts/ChatContext';
 import { Paperclip, SendHorizonal, X } from 'lucide-react'
 import { FormEvent, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 interface Props {
@@ -14,6 +15,7 @@ interface Props {
 }
 
 const ChatMessageInput = ({ attachment, setAttachment, /*replyToMessage, setReplyToMessage*/ }: Props) => {
+    const { t } = useTranslation("chat");
     const [file, setFile] = useState<File | null>(null);
     const [previewURL, setPreviewURL] = useState<string | null>(attachment || null);
     const [message, setMessage] = useState<string>('')
@@ -54,12 +56,12 @@ const ChatMessageInput = ({ attachment, setAttachment, /*replyToMessage, setRepl
             setPreviewURL(null);
         } catch (error) {
             console.error('Error sending message:', error);
-            toast.error('حدث خطاء في ارسال الرسالة');
+            toast.error(t("send_message_error"));
         }
     }
 
     return (
-        <div className='flex flex-col items-center justify-center w-full gap-5 '>
+        <div className='flex flex-col items-center justify-center w-full gap-5'>
             {/**TODO: add reply to message
             {
             replyToMessage && (
@@ -87,13 +89,13 @@ const ChatMessageInput = ({ attachment, setAttachment, /*replyToMessage, setRepl
                     <img src={previewURL} alt="image file" className='border rounded-md' />
                 </div>
             )}
-            <form className='flex md:flex-row flex-col w-full items-center gap-4' dir='ltr' onSubmit={handleSendMessage}>
+            <form className='flex md:flex-row flex-col w-full gap-1 md:gap-4' dir='ltr' onSubmit={handleSendMessage}>
                 <div className='flex-1 mb-1'>
                     <Input
                         type='text'
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
-                        placeholder="Type a message" className='w-full' />
+                        placeholder={t("message_placeholder")} className='w-full' />
                 </div>
                 <div className='flex items-center gap-2'>
                     <div className='w-1/2'>
@@ -116,7 +118,7 @@ const ChatMessageInput = ({ attachment, setAttachment, /*replyToMessage, setRepl
                     </div>
                     <Button type='submit' variant='default' className='w-1/2'>
                         <SendHorizonal className='w-20 h-20' />
-                        ارسال
+                        {t("send_button")}
                     </Button>
                 </div>
             </form>

@@ -1,8 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
-import { useIsMobile } from "./use-mobile";
 import { isMobile } from "@/lib/utils";
 
 type visitData = {
@@ -27,6 +26,29 @@ type AnalyticsRow = {
 }
 
 const VISIT_THRESHOLD_MS = 30 * 60 * 1000;
+
+const dynamicRoutes = [
+    {
+        pattern: /^\/chat\/[^/]+\/[^/]+\/[^/]+\/[^/]+$/,
+        normalized: "/chat/:id/:client_id/:service_id/:provider_id"
+    },
+    {
+        pattern: /^\/find-service\/[^/]+$/,
+        normalized: "/find-service/:id"
+    },
+    {
+        pattern: /^\/profile\/[^/]+$/,
+        normalized: "/profile/:id"
+    }
+];
+
+function normalizePath(path: string) {
+    const route = dynamicRoutes.find((r) =>
+        r.pattern.test(path)
+    );
+
+    return route?.normalized || path;
+}
 
 function getVisitData(): visitData {
     let id = localStorage.getItem('visitorId');
@@ -176,6 +198,7 @@ function getDeviceStats(data: AnalyticsRow[]) {
 export const useWebsiteAnalytics = () => {
     const queryClient = useQueryClient();
     const location = useLocation();
+    const lastTrackedPathRef = useRef<string | null>(null);
 
     const {
         data: analyticsData,
@@ -183,7 +206,7 @@ export const useWebsiteAnalytics = () => {
     } = useQuery({
         queryKey: ["analytics"],
         queryFn: async () => {
-            const { data, error } = await supabase.from("web_analytics").select("*").not("path", "like", "/admin%").order("created_at", { ascending: false });
+            const { data, error } = await supabase.from("web_analytics_dev").select("*").not("path", "like", "/admin%").order("created_at", { ascending: false });
 
             if (error) throw error;
             return data;
@@ -195,10 +218,11 @@ export const useWebsiteAnalytics = () => {
 
         async function track() {
             const result = checkVisitData();
+            const normalizedPath = normalizePath(location.pathname);
 
-            const { error } = await supabase.from("web_analytics").insert({
+            const { error } = await supabase.from("web_analytics_dev").insert({
                 visitor_id: result.id,
-                path: location.pathname,
+                path: normalizedPath,
                 is_new_visit: result.isNewVisit,
                 is_mobile: isMobile
             });
@@ -208,11 +232,11 @@ export const useWebsiteAnalytics = () => {
             }
 
             // update last visited path
-            localStorage.setItem("visitedPath", location.pathname);
+            localStorage.setItem("visitedPath", normalizedPath);
         }
 
         track();
-    }, [location]);
+    }, [location.pathname]);
 
     useEffect(() => {
         const channel = supabase

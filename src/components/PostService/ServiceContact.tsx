@@ -1,5 +1,6 @@
 
 import FormField from '@/components/ui/form-field';
+import { useTranslation } from 'react-i18next';
 
 interface ServiceContactProps {
   phone: string;
@@ -22,10 +23,11 @@ const ServiceContact = ({
   phoneError,
   emailError
 }: ServiceContactProps) => {
+  const { t } = useTranslation("services");
   return (
     <div className="grid md:grid-cols-2 gap-6">
       <FormField
-        label="رقم الهاتف"
+        label={t("post_service.phone")}
         id="phone"
         type="tel"
         placeholder="0599123456"
@@ -37,7 +39,7 @@ const ServiceContact = ({
       />
       
       <FormField
-        label="البريد الإلكتروني"
+        label={t("post_service.email")}
         id="email"
         type="email"
         placeholder="info@khedemtak.com"

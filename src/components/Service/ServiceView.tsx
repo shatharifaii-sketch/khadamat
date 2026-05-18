@@ -9,6 +9,8 @@ import ReportDrawer from '../ReportDrawer';
 import { Conversation } from '@/hooks/useConversations';
 import { ServiceLink } from '../PostService/ServiceLinks';
 import { Json } from '@/integrations/supabase/types';
+import { useTranslation } from 'react-i18next';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export interface ServiceViewProps {
   id: string;
@@ -51,9 +53,12 @@ const ServiceView = ({
   setConvoId,
   setIsConvo,
   userId
-}: Props) => {  
+}: Props) => {
+  const isMobile = useIsMobile();
+  const { t } = useTranslation("services");
+  const lang = localStorage.getItem("language") || "en";
   return (
-    <div className='flex flex-col gap-10'>
+    <div className='flex flex-col gap-5 md:gap-10' dir={lang === "ar" ? "rtl" : "ltr"}>
       <ServiceHeader
         title={service?.title}
         category={service?.category}
@@ -77,7 +82,7 @@ const ServiceView = ({
           >
             <Button variant='ghost' className='shadow border'>
               <MessageCircle />
-              المحادثة
+              {t("find_service.service.conversation")}
             </Button>
           </NavLink>
         )}

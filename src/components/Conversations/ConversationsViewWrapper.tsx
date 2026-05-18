@@ -20,7 +20,7 @@ const ConversationsViewWrapper = () => {
         <ConvoLayout>
             {conversations && conversations.length > 0 ? (conversations.map((convo) => (
                 <div key={convo.id}>
-                    <Link to={`/chat/${convo.id}/${convo.client_id}/${convo.service_id}/${convo.provider_id}`} key={convo.id} className='py-2 flex justify-between items-center hover:bg-muted px-2'>
+                    <Link to={`/chat/${convo.id}/${convo.client_id}${convo.service_id ? `/${convo.service_id}` : ''}/${convo.provider_id}`} key={convo.id} className='py-2 flex justify-between items-center hover:bg-muted px-2'>
                         <ConvoLink convo={convo} />
                     </Link>
                     <Separator />

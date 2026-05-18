@@ -88,19 +88,6 @@ export const validateWhatsappNumber = ({countryCode, number}: {countryCode: stri
     return { isValid: false, message: 'رقم الهاتف مطلوب' };
   }
 
-  const cleanPhone = normalizeDigits(number)
-    .replace(/[^\d+]/g, '')     // remove spaces, symbols
-    .replace(/^\+?970/, '0');   // normalize country code
-
-  const phoneRegex = /^(059|056|057|058|052)\d{7}$/;
-
-  if (!phoneRegex.test(cleanPhone)) {
-    return {
-      isValid: false,
-      message: 'يرجى إدخال رقم هاتف صحيح (مثال: 0599123456)'
-    };
-  }
-
   return {
     isValid: true,
     message: ''

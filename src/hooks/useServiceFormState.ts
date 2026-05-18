@@ -37,6 +37,8 @@ export const useServiceFormState = (serviceToEdit?: Service | null) => {
   // Load service data for editing or pending service data
   useEffect(() => {
     if (serviceToEdit) {
+      const digits = serviceToEdit.whatsapp_number.toString().replace(/\D/g, "");
+
       setFormData({
         title: serviceToEdit.title,
         category: serviceToEdit.category,
@@ -47,10 +49,14 @@ export const useServiceFormState = (serviceToEdit?: Service | null) => {
         email: serviceToEdit.email,
         experience: serviceToEdit.experience || '',
         is_online: serviceToEdit.is_online || false,
-        links: serviceToEdit.links,
-        whatsapp_number: serviceToEdit.whatsapp_number,
+        links: serviceToEdit.links as [],
+        whatsapp_number: {
+          countryCode: digits.slice(0, digits.length - 9),
+          number: digits.slice(digits.length - 9),
+        },
         images: serviceToEdit.service_images,
       });
+
     } else if (pendingService && !isEditMode) {
       console.log('Loading pending service data into form');
       setFormData(pendingService);

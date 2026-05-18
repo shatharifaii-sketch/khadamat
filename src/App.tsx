@@ -62,7 +62,7 @@ function App() {
                     <Route path="about" element={<About />} />
                     <Route path="contact" element={<Contact />} />
                     <Route path="profile/:id" element={<UserProfilePage />} />
-                    <Route path="chat/:id/:client_id/:service_id/:provider_id" element={<ChatPage />} />
+                    <Route path="chat/:id/:client_id/:service_id?/:provider_id" element={<ChatPage />} />
                     <Route path="convos" element={<ConversationsPage />} />
                     <Route path="payment" element={<Payment />} />
                     <Route path="subscription-payment" element={<SubscriptionPayment />} />

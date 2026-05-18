@@ -1,0 +1,222 @@
+{
+    "title": "Admin Panel",
+    "description": "A comprehensive admin panel for the Khedemtak platform",
+    "chart": {
+        "site_activity": "Site Activity",
+        "site_activity_description": "View and analyze site activity and visits over time",
+        "user_activity": "User Activity",
+        "user_activity_description": "View and analyze user activity and sign-ins over time",
+        "daily": "Daily",
+        "monthly": "Monthly",
+        "yearly": "Yearly"
+    },
+    "stats": {
+        "total_users": "Total Users",
+        "total_services": "Total Services",
+        "activity_analytics": "Site Activity Analytics",
+        "user_activity_analytics": "User Activity Analytics"
+    },
+    "table": {
+        "header": {
+            "analytics": "Analytics",
+            "users": "Users",
+            "services": "Services",
+            "pending_services": "Pending Services",
+            "coupons": "Coupons"
+        },
+        "analytics": {
+            "user_analytics": "User Analytics",
+            "total_users": "Total Users",
+            "service_providers": "Service Providers",
+            "today_signups": "Joined Today",
+            "service_analytics": "Service Analytics",
+            "total_services": "Total Services",
+            "published_services": "Published Services",
+            "top_search_terms": "Top Search Terms",
+            "no_search_terms": "No search stats yet",
+            "top_viewed_services": "Most Viewed Services",
+            "no_viewed_services": "No viewed services yet",
+            "web_analytics": {
+                "title": "Web Analytics",
+                "top_paths": "Top Paths Visited",
+                "no_data": "No web analytics yet"
+            },
+            "platforms_used": {
+                "title": "Platforms Used"
+            }
+        },
+        "service_management": {
+            "title": "Service Management",
+            "create_service": "Create New Service",
+            "create_service_title": "Create New Service",
+            "sort_placeholder": "Sort by date",
+            "sort": {
+                "label": "Sort by",
+                "newest": "Newest",
+                "oldest": "Oldest",
+                "name_ar": "Name (Arabic)",
+                "name_en": "Name (English)"
+            },
+            "table": {
+                "title": "Title",
+                "category": "Category",
+                "provider": "Service Provider",
+                "views": "Views",
+                "status": "Status",
+                "actions": "Actions"
+            },
+            "status": {
+                "published": "Published",
+                "draft": "Draft",
+                "disabled": "Disabled"
+            },
+            "empty_provider": "Not specified",
+            "actions": {
+                "view": "View",
+                "edit": "Edit",
+                "delete": "Delete"
+            },
+            "edit_service": "Edit Service",
+            "delete_dialog": {
+                "title": "Confirm Deletion",
+                "description": "Are you sure you want to delete the service \"{{title}}\"? This action cannot be undone.",
+                "cancel": "Cancel",
+                "confirm": "Delete"
+            },
+            "toasts": {
+                "deleted_title": "Deleted",
+                "deleted_description": "Service deleted successfully",
+                "error_title": "Error",
+                "error_description": "An error occurred while deleting the service"
+            }
+        },
+        "pending_services_management": {
+            "title": "Pending Services Management",
+            "sort_placeholder": "Sort by date",
+            "sort": {
+                "label": "Sort by",
+                "newest": "Newest",
+                "oldest": "Oldest",
+                "name_ar": "Name (Arabic)",
+                "name_en": "Name (English)"
+            },
+            "table": {
+                "title": "Title",
+                "category": "Category",
+                "provider": "Service Provider",
+                "views": "Views",
+                "status": "Status",
+                "actions": "Actions"
+            },
+            "status": {
+                "pending": "Under Review",
+                "approved": "Approved"
+            },
+            "empty_state": "No pending services found",
+            "actions": {
+                "edit": "Edit",
+                "delete": "Delete"
+            },
+            "dialogs": {
+                "edit_title": "Edit Service",
+                "delete_title": "Confirm Deletion",
+                "delete_description": "Are you sure you want to delete the service \"{{title}}\"? This action cannot be undone.",
+                "cancel": "Cancel",
+                "confirm_delete": "Delete"
+            },
+            "toasts": {
+                "deleted_title": "Deleted",
+                "deleted_description": "Service deleted successfully",
+                "error_title": "Error",
+                "error_description": "An error occurred while deleting the service"
+            }
+        },
+        "user_management": {
+            "title": "User Management",
+            "create_user": "Create New User",
+            "create_user_title": "Create New User Account",
+            "sort_placeholder": "Sort by date",
+            "sort": {
+                "label": "Sort by",
+                "newest": "Newest",
+                "oldest": "Oldest",
+                "name_ar": "Name (Arabic)",
+                "name_en": "Name (English)"
+            },
+            "table": {
+                "name": "Name",
+                "phone": "Phone",
+                "location": "Location",
+                "type": "Type",
+                "created_at": "Registration Date",
+                "actions": "Actions"
+            },
+            "type": {
+                "provider": "Service Provider",
+                "client": "Client"
+            },
+            "empty": {
+                "phone": "-",
+                "location": "-",
+                "name": "Not specified"
+            },
+            "actions": {
+                "view": "View",
+                "edit": "Edit",
+                "delete": "Delete"
+            },
+            "dialogs": {
+                "edit_title": "Edit User Details",
+                "delete_title": "Confirm Deletion",
+                "delete_description": "Are you sure you want to delete user \"{{name}}\"? This action cannot be undone.",
+                "cancel": "Cancel",
+                "confirm_delete": "Delete"
+            },
+            "toasts": {
+                "error_title": "Error",
+                "error_description": "An error occurred while deleting the service"
+            }
+        },
+        "coupons_management": {
+            "title": "Coupons Management",
+            "create_coupon": "Create New Coupon",
+            "create_coupon_title": "Create New Coupon",
+            "sort": {
+                "label": "Sort by",
+                "newest": "Newest",
+                "oldest": "Oldest",
+                "code": "Coupon Code"
+            },
+            "table": {
+                "code": "Code",
+                "type": "Type",
+                "fixed_value": "Fixed Value",
+                "percentage": "Percentage",
+                "usage_limit": "Usage Limit",
+                "status": "Status",
+                "used_count": "Times Used",
+                "actions": "Actions"
+            },
+            "status": {
+                "active": "Active",
+                "inactive": "Inactive"
+            },
+            "empty": {
+                "value": "Not specified",
+                "none": "None"
+            },
+            "dialogs": {
+                "delete_title": "Confirm Deletion",
+                "delete_description": "Are you sure you want to delete coupon \"{{code}}\"? This action cannot be undone.",
+                "cancel": "Cancel",
+                "confirm_delete": "Delete"
+            },
+            "toasts": {
+                "deleted_title": "Deleted",
+                "deleted_description": "Coupon deleted successfully",
+                "error_title": "Error",
+                "error_description": "An error occurred while deleting the coupon"
+            }
+        }
+    }
+}

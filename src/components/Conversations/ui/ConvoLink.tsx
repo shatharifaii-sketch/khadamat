@@ -18,7 +18,8 @@ const ConvoLink = ({ convo }: Props) => {
                 <div className='flex flex-col flex-start'>
                     <h2
                         className={cn('text-lg font-semibold', convo.unread_messages_count > 0 ? 'font-bold' : 'text-muted-foreground')}>
-                        {convo.service.title}
+                        {convo.service.title 
+                        || convo.client_id === user?.id ? convo.provider.full_name : convo.client.full_name}
                     </h2>
                     <p className='text-muted-foreground/70'>
                         {convo.last_message_sender_id === user?.id ? 'أنت' : convo.last_message_sender_name }: {convo.last_message || 'الرسائل غير موجودة'}

@@ -11,8 +11,12 @@ import { Mail, Phone, MapPin, Clock, Send, MailCheck } from 'lucide-react';
 import { useEmail } from '@/hooks/useEmail';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 const Contact = () => {
+  const { t } = useTranslation("contact");
+  const lang = localStorage.getItem("language") || "en";
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -87,30 +91,30 @@ const Contact = () => {
           inquiryType: ''
         });
 
-        toast.success('تم ارسال الرسالة بنجاح');
+        toast.success(t("email_sent_successfully_toast"));
       }
-  }, [sendContactEmail.isSuccess, sendContactEmail.mutateAsync]);
+  }, [sendContactEmail.isSuccess, sendContactEmail.mutateAsync, t]);
 
 
   return (
     <div className="max-w-6xl mx-auto py-12 px-4">
       <div className="text-center mb-12">
         <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-          تواصل معنا
+          {t("title")}
         </h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          نحن هنا لمساعدتك! تواصل معنا للاستفسارات أو الدعم أو أي اقتراحات
+          {t("description")}
         </p>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-8">
+      <div className="grid lg:grid-cols-3 gap-8" dir={lang === "ar" ? "rtl" : "ltr"}>
         {/* Contact Information */}
         <div className="lg:col-span-1">
           <Card className="h-fit">
             <CardHeader>
-              <CardTitle className="text-2xl">معلومات التواصل</CardTitle>
-              <CardDescription className="text-large">
-                طرق متعددة للتواصل معنا
+              <CardTitle className="text-2xl text-start">{t("contact_info")}</CardTitle>
+              <CardDescription className="text-large text-start">
+                {t("contact_info_description")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -122,9 +126,9 @@ const Contact = () => {
                       <Icon size={24} className="text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-large mb-1">{info.title}</h3>
-                      <p className="text-foreground font-medium mb-1">{info.content}</p>
-                      <p className="text-muted-foreground">{info.description}</p>
+                      <h3 className="font-semibold text-large mb-1 text-start">{t(info.title)}</h3>
+                      <p className="text-foreground font-medium mb-1 text-start">{t(info.content)}</p>
+                      <p className="text-muted-foreground text-start">{t(info.description)}</p>
                     </div>
                   </div>
                 );
@@ -136,22 +140,22 @@ const Contact = () => {
 
         {/* Contact Form */}
         <div className="lg:col-span-2">
-          <Card>
+          <Card dir={lang === "ar" ? "rtl" : "ltr"}>
             <CardHeader>
-              <CardTitle className="text-2xl">أرسل لنا رسالة</CardTitle>
+              <CardTitle className="text-2xl">{t("send_us_a_message")}</CardTitle>
               <CardDescription className="text-large">
-                املأ النموذج وسنتواصل معك في أقرب وقت ممكن
+                {t("send_a_message_description")}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6 text-start">
                 {/* Personal Info */}
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="name" className="text-large font-semibold">الاسم الكامل *</Label>
+                    <Label htmlFor="name" className="text-large font-semibold">{t("full_name")} *</Label>
                     <Input
                       id="name"
-                      placeholder="اسمك الكامل"
+                      placeholder={t("your_full_name")}
                       value={formData.name}
                       onChange={(e) => handleInputChange('name', e.target.value)}
                       className="text-large"
@@ -159,7 +163,7 @@ const Contact = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="text-large font-semibold">البريد الإلكتروني *</Label>
+                    <Label htmlFor="email" className="text-large font-semibold">{t("email")} *</Label>
                     <Input
                       id="email"
                       type="email"
@@ -172,9 +176,9 @@ const Contact = () => {
                   </div>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-6">
+                <div className="grid md:grid-cols-2 gap-6 text-start">
                   <div className="space-y-2">
-                    <Label htmlFor="phone" className="text-large font-semibold">رقم الهاتف</Label>
+                    <Label htmlFor="phone" className="text-large font-semibold">{t("phone")}</Label>
                     <Input
                       id="phone"
                       type="tel"
@@ -185,15 +189,15 @@ const Contact = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="inquiry-type" className="text-large font-semibold">نوع الاستفسار *</Label>
+                    <Label htmlFor="inquiry-type" className="text-large font-semibold">{t("message_type")} *</Label>
                     <Select onValueChange={(value) => handleInputChange('inquiryType', value)} required>
                       <SelectTrigger className="text-large">
-                        <SelectValue placeholder="اختر نوع الاستفسار" />
+                        <SelectValue placeholder={t("choose")} />
                       </SelectTrigger>
                       <SelectContent>
                         {inquiryTypes.map((type) => (
                           <SelectItem key={type.value} value={type.value}>
-                            {type.label}
+                            {t(type.label)}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -202,10 +206,10 @@ const Contact = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="subject" className="text-large font-semibold">موضوع الرسالة *</Label>
+                  <Label htmlFor="subject" className="text-large font-semibold">{t("subject")} *</Label>
                   <Input
                     id="subject"
-                    placeholder="موضوع رسالتك"
+                    placeholder={t("message_subject")}
                     value={formData.subject}
                     onChange={(e) => handleInputChange('subject', e.target.value)}
                     className="text-large"
@@ -214,10 +218,10 @@ const Contact = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="message" className="text-large font-semibold">الرسالة *</Label>
+                  <Label htmlFor="message" className="text-large font-semibold">{t("message")} *</Label>
                   <Textarea
                     id="message"
-                    placeholder="اكتب رسالتك هنا..."
+                    placeholder={t("write_message")}
                     value={formData.message}
                     onChange={(e) => handleInputChange('message', e.target.value)}
                     className="text-large min-h-32"
@@ -227,7 +231,7 @@ const Contact = () => {
 
                 <Button type="submit" size="lg" className="w-full text-xl py-6" disabled={sendContactEmail.isPending}>
                   <Send size={20} className="ml-2" />
-                  {sendContactEmail.isPending ? 'جاري الإرسال...' : 'إرسال الرسالة'}
+                  {sendContactEmail.isPending ? t("sending") : t("send")}
                 </Button>
               </form>
             </CardContent>
@@ -239,23 +243,35 @@ const Contact = () => {
       <Card className="mt-12 bg-primary/5 border-primary/20">
         <CardContent className="p-8 text-center">
           <h3 className="text-2xl font-bold text-primary mb-4">
-            نعدك بالرد السريع
+            {t("quick_response_promise")}
           </h3>
           <p className="text-xl-large text-muted-foreground mb-6">
-            فريق الدعم لدينا يعمل على مدار الساعة لضمان حصولك على الإجابة في أسرع وقت ممكن
+            {t("quick_response_promise_description")}
           </p>
           <div className="grid md:grid-cols-3 gap-6">
             <div className="text-center">
-              <div className="text-3xl font-bold text-primary mb-2">أقل من ساعة</div>
-              <div className="text-large text-muted-foreground">المشاكل التقنية العاجلة</div>
+              <div className="text-3xl font-bold text-primary mb-2">
+                {t("urgent_response_time")}
+              </div>
+              <div className="text-large text-muted-foreground">
+                {t("urgent_response")}
+              </div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-primary mb-2">أقل من 4 ساعات</div>
-              <div className="text-large text-muted-foreground">الاستفسارات العامة</div>
+              <div className="text-3xl font-bold text-primary mb-2">
+                {t("general_inquiry_time")}
+              </div>
+              <div className="text-large text-muted-foreground">
+                {t("general_inquiry")}
+              </div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-primary mb-2">أقل من 24 ساعة</div>
-              <div className="text-large text-muted-foreground">طلبات الشراكة</div>
+              <div className="text-3xl font-bold text-primary mb-2">
+                {t("collaboration_requests")}
+              </div>
+              <div className="text-large text-muted-foreground">
+                {t("collaboration_requests")}
+              </div>
             </div>
           </div>
         </CardContent>
@@ -263,17 +279,17 @@ const Contact = () => {
       <Dialog open={openEmailDialog} onOpenChange={setOpenEmailDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>تم ارسال الرسالة بنجاح</DialogTitle>
+            <DialogTitle>{t("dialog.title")}</DialogTitle>
             <DialogDescription>
-              سيتم التواصل معك قريبا
+              {t("dialog.description")}
             </DialogDescription>
           </DialogHeader>
           <p className='flex gap-2 items-center'>
-            شكرا لتواصلك معنا!
+            {t("dialog.message")}!
             <MailCheck size={16} />
           </p>
           <DialogFooter>
-            <Button onClick={() => setOpenEmailDialog(false)}>حسنا</Button>
+            <Button onClick={() => setOpenEmailDialog(false)}>{t("dialog.close")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
