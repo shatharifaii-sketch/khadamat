@@ -97,6 +97,30 @@ export const useAdminData = () => {
 
       if (usersError) throw usersError;
 
+      const { 
+        data: { 
+          success, 
+          data: roles, 
+          error 
+        }, 
+        error: rolesError 
+      } = await supabase.functions.invoke("get-user-roles");
+
+      if (rolesError) throw rolesError;
+
+      const adminSet = new Set(
+        roles
+          .filter(r => r.role === "admin")
+          .map(r => r.user_id)
+      );
+
+      const profilesWithAdminFlag = profiles.map(profile => ({
+        ...profile,
+        is_admin: adminSet.has(profile.id),
+      }));
+
+      console.log(profilesWithAdminFlag);
+
       const { data: services, error: servicesError } = await supabase.from('services')
         .select(`
         *,
@@ -154,7 +178,7 @@ export const useAdminData = () => {
 
 
       return {
-        profiles,
+        profiles: profilesWithAdminFlag,
         services,
         stats,
         coupons,
