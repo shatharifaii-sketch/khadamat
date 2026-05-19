@@ -12,6 +12,7 @@ import useStripe from '@/hooks/use-stripe';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { User } from '../Admin/ui/UserForm';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 interface SubscriptionsModalProps {
     cardClassName?: string;
@@ -33,7 +34,11 @@ interface SubscriptionCardProps {
 }
 
 const SubscriptionCard = ({ subscription, yearly, selectedSubscription, cardClassName, onSelect, onNavigate, isCreatingCheckoutSessionPending, setDrawerOpen }: SubscriptionCardProps) => {
+    const { t } = useTranslation("subscriptions");
+    const lang = localStorage.getItem("language") || "en";
     const [open, setOpen] = useState(false);
+
+    console.log("subscription: ", subscription, lang);
 
     return (
         <Card className={cn('col-span-1 flex flex-col justify-between', subscription.class_name, cardClassName)}>
@@ -41,20 +46,23 @@ const SubscriptionCard = ({ subscription, yearly, selectedSubscription, cardClas
                 {subscription?.title}
                 <span className='block mt-3'>
                     <Badge className={cn('flex items-center gap-2 w-fit mx-auto', subscription.badge_class_name)}>
-                        <Star className='text-yellow-400' />{subscription.free_trial_period_text}
+                        <Star className='text-yellow-400' />{t(subscription.free_trial_period_text)}
                     </Badge>
                 </span>
-                <span className='text-sm'>عدد الخدمات المتاحة: {subscription.allowed_services}</span>
+                <span className='text-sm'>{t("available_services")} {subscription.allowed_services}</span>
             </CardHeader>
             <CardContent>
                 <div className='flex flex-col gap-4'>
                     <div>
                         <div className={cn('border-2 border-dashed rounded-lg p-2', subscription.class_name)}>
                             <span className={cn('flex items-center gap-2', subscription.class_name)}>
-                                نقاط مهمة للاشتراك:
+                                {t("important_points")}
                             </span>
                             <ul className='list-disc list-inside'>
-                                {(subscription.notes ?? []).map((note: string) => (
+                                {lang === "ar" && (subscription.notes ?? []).map((note: string) => (
+                                    <li className='text-start' key={note}>{note}</li>
+                                ))}
+                                {lang === "en" && (subscription.notes_english ?? []).map((note: string) => (
                                     <li className='text-start' key={note}>{note}</li>
                                 ))}
                             </ul>
@@ -62,9 +70,9 @@ const SubscriptionCard = ({ subscription, yearly, selectedSubscription, cardClas
                         <div className='mt-4'>
                             <Badge className={cn('text-lg rounded-md', subscription.badge_class_name)}>
                                 {yearly ?
-                                    `${subscription.price_yearly_value} شيكل/سنة`
+                                    `${subscription.price_yearly_value} ${t("yearly_ils")}`
                                     :
-                                    `${subscription.price_monthly_value} شيكل/شهر`
+                                    `${subscription.price_monthly_value} ${t("monthly_ils")}`
                                 }
                             </Badge>
                         </div>
@@ -80,16 +88,16 @@ const SubscriptionCard = ({ subscription, yearly, selectedSubscription, cardClas
                             className='bg-white text-muted-foreground flex-1 shadow-md border hover:text-white'
                             disabled={isCreatingCheckoutSessionPending}
                         >
-                            اشتراك
+                            {t("subscribe")}
                         </Button>
                     </DialogTrigger>
                     <DialogContent>
                         <DialogHeader>
                             <DialogTitle>
-                                أنت الآن على وشك الإنتقال إلى بوابة الدفع!
+                                {t("payment_gateway_title")}
                             </DialogTitle>
                             <DialogDescription>
-                                هل أنت متأكد من انك تريد الانتقال لبوابة الدفع؟
+                                {t("payment_gateway_description")}
                             </DialogDescription>
                         </DialogHeader>
                         {selectedSubscription && (
@@ -98,20 +106,23 @@ const SubscriptionCard = ({ subscription, yearly, selectedSubscription, cardClas
                                     {selectedSubscription?.title}
                                     <span className='block mt-3'>
                                         <Badge className={cn('flex items-center gap-2 w-fit mx-auto', selectedSubscription.badge_class_name)}>
-                                            <Star className='text-yellow-400' />{selectedSubscription.free_trial_period_text}
+                                            <Star className='text-yellow-400' />{t(selectedSubscription.free_trial_period_text)}
                                         </Badge>
                                     </span>
-                                    <span className='text-sm'>عدد الخدمات المتاحة: {selectedSubscription.allowed_services}</span>
+                                    <span className='text-sm'>{t("available_services")} {selectedSubscription.allowed_services}</span>
                                 </CardHeader>
                                 <CardContent>
                                     <div className='flex flex-col gap-4'>
                                         <div>
                                             <div className={cn('border-2 border-dashed rounded-lg p-2', selectedSubscription.class_name)}>
                                                 <span className={cn('flex items-center gap-2', selectedSubscription.class_name)}>
-                                                    نقاط مهمة للاشتراك:
+                                                    {t("important_points")}
                                                 </span>
                                                 <ul className='list-disc list-inside'>
-                                                    {(selectedSubscription.notes ?? []).map((note: string) => (
+                                                    {lang === "ar" && (selectedSubscription.notes ?? []).map((note: string) => (
+                                                        <li className='text-start' key={note}>{note}</li>
+                                                    ))}
+                                                    {lang === "en" && (selectedSubscription.notes_english ?? []).map((note: string) => (
                                                         <li className='text-start' key={note}>{note}</li>
                                                     ))}
                                                 </ul>
@@ -119,9 +130,9 @@ const SubscriptionCard = ({ subscription, yearly, selectedSubscription, cardClas
                                             <div className='mt-4'>
                                                 <Badge className={cn('text-lg rounded-md', selectedSubscription.badge_class_name)}>
                                                     {yearly ?
-                                                        `${selectedSubscription.price_yearly_value} شيكل/سنة`
+                                                        `${selectedSubscription.price_yearly_value} ${t("yearly_ils")}`
                                                         :
-                                                        `${selectedSubscription.price_monthly_value} شيكل/شهر`
+                                                        `${selectedSubscription.price_monthly_value} ${t("monthly_ils")}`
                                                     }
                                                 </Badge>
                                             </div>
@@ -138,7 +149,7 @@ const SubscriptionCard = ({ subscription, yearly, selectedSubscription, cardClas
                                 className='bg-white text-muted-foreground flex-1 shadow-md border hover:text-white'
                                 disabled={isCreatingCheckoutSessionPending}
                             >
-                                الإنتقال إلى بوابة الدفع
+                                {t("go_to_payment_gateway")}
                             </Button>
                         </DialogFooter>
                     </DialogContent>
@@ -149,6 +160,9 @@ const SubscriptionCard = ({ subscription, yearly, selectedSubscription, cardClas
 };
 
 const SubscriptionsModal = ({ cardClassName, switchClassName, user, setDrawerOpen, asDrawer = true }: SubscriptionsModalProps) => {
+    const { t } = useTranslation("subscriptions");
+    const lang = localStorage.getItem("language") || "en";
+
     const [yearly, setYearly] = useState<boolean>(false);
     const [selectedSubscription, setSelectedSubscription] = useState(null);
     const navigate = useNavigate()
@@ -162,7 +176,7 @@ const SubscriptionsModal = ({ cardClassName, switchClassName, user, setDrawerOpe
 
     const handleNavigationToPaymentWindow = (price_id: string) => {
         if (!user) {
-            toast.error('يرجى تسجيل الدخول');
+            toast.error(t("login_required"));
             return navigate('/auth');
         };
         createCheckoutSession({ priceId: price_id, userId: user.id, email: user.email });
@@ -178,23 +192,23 @@ const SubscriptionsModal = ({ cardClassName, switchClassName, user, setDrawerOpe
         <>
             <HeaderWrapper className='flex items-center justify-between'>
                 <TitleWrapper className={cn('text-2xl w-full', asDrawer ? 'text-start' : 'text-center')}>
-                    أنواع الاشتراك
+                    {t("title")}
                 </TitleWrapper>
             </HeaderWrapper>
             <DescWrapper className='flex flex-col gap-4 px-5 overflow-y-auto'>
                 <div>
-                    <p>اختار نوع الاشتراك المناسب لك لتتمكن من نشر خدمتك.</p>
+                    <p>{t("description")}</p>
                 </div>
                 <div className='flex flex-col gap-5'>
                     <div className='border-2 border-dashed rounded-lg p-2 lg:px-4'>
-                        <p className='text-lg mb-2'>اختر نوع الاشتراك المناسب:</p>
+                        <p className='text-lg mb-2'>{t("choose_plan")}</p>
                         <div dir='ltr' className="flex flex-col items-center justify-center gap-2 mb-4">
                             <div className={cn('flex items-center gap-2', switchClassName)}>
-                                <span className={cn(!yearly && "text-primary", 'transition-all text-lg')}>شهري</span>
+                                <span className={cn(!yearly && "text-primary", 'transition-all text-lg')}>{t("monthly")}</span>
                                 <Switch checked={yearly} onCheckedChange={setYearly} />
-                                <span className={cn(yearly && "text-primary", 'transition-all text-lg')}>سنوي</span>
+                                <span className={cn(yearly && "text-primary", 'transition-all text-lg')}>{t("yearly")}</span>
                             </div>
-                            <p className='text-muted-foreground/50'>حدد خطة الدفع</p>
+                            <p className='text-muted-foreground/50'>{t("select_payment_plan")}</p>
                         </div>
                         <div className='grid grid-cols-1 md:grid-cols-2 w-full gap-4'>
                             {(subscriptionTiersData ?? []).map((subscription) => (
@@ -212,8 +226,8 @@ const SubscriptionsModal = ({ cardClassName, switchClassName, user, setDrawerOpe
                             ))}
                         </div>
                         <div className='px-5 mt-5 mb-2'>
-                            <p>- الاشتراك يتجدد تلقائيا في حال عدم الالغاء</p>
-                            <p>- سيتم اعلامك من خلال البريد الالكتروني والمنصة للتاكد من الدفع الشهري</p>
+                            <p>{t("auto_renew_notice")}</p>
+                            <p>{t("payment_notification_notice")}</p>
                         </div>
                     </div>
                 </div>

@@ -17,5 +17,9 @@
     "add_attachment": "Add to Message",
     "send_message_error": "Error sending message. Please try again.",
     "send_button": "Send",
-    "message_placeholder": "Aa"
+    "message_placeholder": "Aa",
+    "convos_title": "Conversations",
+    "convos_your_message": "You",
+    "convos_no_messages": "No messages",
+    "no_conversations": "No conversations"
 }

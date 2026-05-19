@@ -1,0 +1,36 @@
+{
+    "title": "أنواع الاشتراك",
+    "description": "اختار نوع الاشتراك المناسب لك لتتمكن من نشر خدمتك.",
+    "choose_plan": "اختر نوع الاشتراك المناسب:",
+    "monthly": "شهري",
+    "yearly": "سنوي",
+    "select_payment_plan": "حدد خطة الدفع",
+    "available_services": "عدد الخدمات المتاحة:",
+    "important_points": "نقاط مهمة للاشتراك:",
+    "subscribe": "اشتراك",
+    "payment_gateway_title": "أنت الآن على وشك الإنتقال إلى بوابة الدفع!",
+    "payment_gateway_description": "هل أنت متأكد من انك تريد الانتقال لبوابة الدفع؟",
+    "go_to_payment_gateway": "الإنتقال إلى بوابة الدفع",
+    "login_required": "يرجى تسجيل الدخول",
+    "auto_renew_notice": "- الاشتراك يتجدد تلقائيا في حال عدم الالغاء",
+    "payment_notification_notice": "- سيتم اعلامك من خلال البريد الالكتروني والمنصة للتاكد من الدفع الشهري",
+    "أربعة أشهر مجانا": "أربعة شهور مجانا",
+    "yeatly_ils": "ILS/سنة",
+    "monthly_ils": "ILS/شهر",
+    "payment_failed": {
+        "title": "حدث خطأ في عملية الدفع",
+        "description": "لم نتمكن من إكمال عملية الدفع، الرجاء إعادة المحاولة",
+        "back_home": "العودة إلى الصفحة الرئيسية"
+    },
+    "payment_success": {
+        "loading": "جاري التحقق من الاشتراك...",
+        "success_title": "اشتراكك نجح",
+        "success_description": "جهّز حسابك وتأكد من معلوماتك وابدأ نشر خدماتك!",
+        "error_title": "حدث خطأ",
+        "error_description": "واجهنا مشكلة في التحقق من الاشتراك!",
+        "subscription_details_title": "نقاط مهمة للاشتراك",
+        "allowed_services": "عدد الخدمات المتاحة",
+        "go_home": "الانتقال إلى الصفحة الرئيسية",
+        "invalid_session_redirect": "سيتم تحويلك إلى الصفحة الرئيسية"
+    }
+}

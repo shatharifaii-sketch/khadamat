@@ -3,6 +3,7 @@ import { Service } from '../ServiceManagement'
 import ServiceImages from '@/components/Service/ui/ServiceImages';
 import { useAdminFunctionality } from '@/hooks/useAdminFunctionality';
 import { Separator } from '@/components/ui/separator';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     service: Service | null;
@@ -13,6 +14,9 @@ const PendingServiceData = ({
     service,
     setServiceToAccept
 }: Props) => {
+    const { t } = useTranslation("admin");
+    const lang = localStorage.getItem("language") || "en";
+
     const { acceptServicePost } = useAdminFunctionality();
 
     const handleAccept = () => {
@@ -26,40 +30,40 @@ const PendingServiceData = ({
     if (!service) return null;
 
     return (
-        <div className='relative'>
-            <div className='flex flex-col gap-6 overflow-y-auto max-h-[60vh] pr-2'>
+        <div className='relative' dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+            <div className='flex flex-col gap-6 overflow-y-auto max-h-[60vh] pr-2 text-start'>
                 <h1 className='flex flex-col'>
-                    اسم الخدمة:
+                    {t("table.pending_services_management.data.title_name")}:
                     <span className='px-4 text-2xl'>
                         {service.title}
                     </span>
                 </h1>
                 <p className='flex flex-col'>
-                    وصف الخدمة:
+                    {t("table.pending_services_management.data.title_description")}:
                     <span className='px-4'>
                         {service.description}
                     </span>
                 </p>
                 <p className='flex flex-col'>
-                    تكلفة الخدمة:
+                    {t("table.pending_services_management.data.title_price")}:
                     <span className='px-4'>
                         {service.price_range}
                     </span>
                 </p>
                 <p className='flex flex-col'>
-                    رقم الواتساب:
+                    {t("table.pending_services_management.data.title_whatsapp")}:
                     <span className='px-4'>
                         {service.whatsapp_number ? service.whatsapp_number : 'اونلاين'}
                     </span>
                 </p>
                 <p className='flex flex-col'>
-                    الموقع:
+                    {t("table.pending_services_management.data.title_location")}:
                     <span className='px-4'>
-                        {service.location ? service.location : 'اونلاين'}
+                        {service.location ? t(service.location) : t("table.pending_services_management.data.offline_fallback")}
                     </span>
                 </p>
                 <p className='flex flex-col'>
-                    روابط التواصل:
+                    {t("table.pending_services_management.data.links_title")}:
                     {service.links?.map((link, index) => (
                         <a
                             key={index}
@@ -74,7 +78,7 @@ const PendingServiceData = ({
                     ))}
                 </p>
                 <div>
-                    <h3 className='text-lg font-semibold'>الملحقات</h3>
+                    <h3 className='text-lg font-semibold'>{t("table.pending_services_management.data.attachments")}</h3>
                     <div className='mt-3 border border-dashed border-muted-foreground rounded-lg'>
                         <ServiceImages serviceId={service.id} />
                     </div>
@@ -82,10 +86,10 @@ const PendingServiceData = ({
             </div>
             <Separator className="mt-4" />
             <div className='w-full'>
-                <h3 className='text-lg font-semibold'>إقبل نشر الخدمة</h3>
+                <h3 className='text-lg font-semibold'>{t("table.pending_services_management.data.accept_title")}</h3>
                 <div className='mt-3 flex items-center'>
                     <Button onClick={handleAccept} className='flex-1'>
-                        نشر الخدمة
+                        {t("table.pending_services_management.data.accept_button")}
                     </Button>
                 </div>
             </div>

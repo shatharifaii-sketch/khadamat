@@ -1,10 +1,8 @@
 import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabaseAdmin } from "@/integrations/supabase/adminClient";
 import { User } from "@/components/Admin/ui/UserForm";
 import { Json, Tables } from "@/integrations/supabase/types";
-import { json } from "react-router-dom";
 import { toast } from "sonner";
 import { ServiceLink } from "@/components/PostService/ServiceLinks";
 import { useEmail } from "./useEmail";
@@ -553,7 +551,7 @@ export const useAdminFunctionality = () => {
         throw error;
       }
 
-      return json({ success: true });
+      return { success: true };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-data'] });

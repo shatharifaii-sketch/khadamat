@@ -10,6 +10,7 @@ import { categories, locations } from "@/components/FindService/ServiceCategorie
 import ServiceImages from "@/components/Service/ui/EditServiceImages";
 import ServiceLinks, { ServiceLink } from "@/components/PostService/ServiceLinks";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useTranslation } from "react-i18next";
 
 interface Props {
     isEdit?: boolean;
@@ -19,6 +20,9 @@ interface Props {
 }
 
 const ServiceForm = ({ isEdit, serviceProviders, service, closeForm }: Props) => {
+    const { t } = useTranslation("admin");
+    const lang = localStorage.getItem("language") || "en";
+
     const { createService, updateService, createServiceSuccess, updateServiceSuccess } = useAdminFunctionality();
 
     const [formData, setFormData] = useState(service ?? {
@@ -54,11 +58,11 @@ const ServiceForm = ({ isEdit, serviceProviders, service, closeForm }: Props) =>
     }
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4" dir={lang === "ar" ? "rtl" : "ltr"}>
 
-            <div className="flex flex-col overflow-y-scroll h-[510px] space-x-2 pr-3">
+            <div className="flex flex-col overflow-y-scroll h-[510px] space-x-2 pr-3 text-start">
                 <div className="ml-2">
-                    <Label htmlFor="title">عنوان الخدمة</Label>
+                    <Label htmlFor="title">{t("table.service_management.form.title")}</Label>
                     <Input
                         id="title"
                         value={formData.title}
@@ -67,7 +71,7 @@ const ServiceForm = ({ isEdit, serviceProviders, service, closeForm }: Props) =>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <Label htmlFor="category">الفئة</Label>
+                        <Label htmlFor="category">{t("table.service_management.form.category")}</Label>
                         <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
                             <SelectTrigger>
                                 <SelectValue placeholder="اختر الفئة" />
@@ -90,10 +94,10 @@ const ServiceForm = ({ isEdit, serviceProviders, service, closeForm }: Props) =>
 
                     {!isEdit && (
                         <div>
-                            <Label htmlFor="user_id">مقدم الخدمة</Label>
+                            <Label htmlFor="user_id">{t("table.service_management.form.provider")}</Label>
                             <Select value={formData.user_id} onValueChange={(value) => setFormData({ ...formData, user_id: value })}>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="اختر مقدم الخدمة" />
+                                    <SelectValue placeholder={t("table.service_management.form.provider_placeholder")} />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {serviceProviders.map((provider) => (
@@ -107,7 +111,7 @@ const ServiceForm = ({ isEdit, serviceProviders, service, closeForm }: Props) =>
                     )}
 
                     <div>
-                        <Label htmlFor="description">الوصف</Label>
+                        <Label htmlFor="description">{t("table.service_management.form.description")}</Label>
                         <Textarea
                             id="description"
                             value={formData.description}
@@ -117,27 +121,27 @@ const ServiceForm = ({ isEdit, serviceProviders, service, closeForm }: Props) =>
                     </div>
 
                     <div>
-                        <Label htmlFor="price_range">النطاق السعري</Label>
+                        <Label htmlFor="price_range">{t("table.service_management.form.price_range")}</Label>
                         <Input
                             id="price_range"
                             value={formData.price_range}
                             onChange={(e) => setFormData({ ...formData, price_range: e.target.value })}
-                            placeholder="مثال: 100-500 ريال"
+                            placeholder={t("table.service_management.form.price_range_placeholder")}
                         />
                     </div>
 
                     <div>
-                        <Label htmlFor="location">الموقع</Label>
+                        <Label htmlFor="location">{t("table.service_management.form.location")}</Label>
                         <Select
                             value={formData.location} onValueChange={(value) => setFormData({ ...formData, location: value })}
                         >
                             <SelectTrigger id="location">
-                                <SelectValue placeholder="اختر المنطقة أو المحافظة" />
+                                <SelectValue placeholder={t("table.service_management.form.location_placeholder")} />
                             </SelectTrigger>
                             <SelectContent>
                                 {locations.map((loc) => (
                                     <SelectItem key={loc} value={loc}>
-                                        {loc}
+                                        {t(loc)}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
@@ -145,7 +149,7 @@ const ServiceForm = ({ isEdit, serviceProviders, service, closeForm }: Props) =>
                     </div>
 
                     <div>
-                        <Label htmlFor="phone">رقم الهاتف</Label>
+                        <Label htmlFor="phone">{t("table.service_management.form.phone")}</Label>
                         <Input
                             id="phone"
                             value={formData.phone}
@@ -154,7 +158,7 @@ const ServiceForm = ({ isEdit, serviceProviders, service, closeForm }: Props) =>
                     </div>
 
                     <div>
-                        <Label htmlFor="email">البريد الإلكتروني</Label>
+                        <Label htmlFor="email">{t("table.service_management.form.email")}</Label>
                         <Input
                             id="email"
                             type="email"
@@ -164,7 +168,7 @@ const ServiceForm = ({ isEdit, serviceProviders, service, closeForm }: Props) =>
                     </div>
 
                     <div>
-                        <Label htmlFor="experience">الخبرة</Label>
+                        <Label htmlFor="experience">{t("table.service_management.form.experience")}</Label>
                         <Textarea
                             id="experience"
                             value={formData.experience}
@@ -174,21 +178,21 @@ const ServiceForm = ({ isEdit, serviceProviders, service, closeForm }: Props) =>
                     </div>
 
                     <div>
-                        <Label htmlFor="status">الحالة</Label>
+                        <Label htmlFor="status">{t("table.service_management.form.status")}</Label>
                         <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
                             <SelectTrigger>
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="published">منشور</SelectItem>
-                                <SelectItem value="draft">مسودة</SelectItem>
-                                <SelectItem value="disabled">معطل</SelectItem>
+                                <SelectItem value="published">{t("table.service_management.form.status_published")}</SelectItem>
+                                <SelectItem value="draft">{t("table.service_management.form.status_draft")}</SelectItem>
+                                <SelectItem value="disabled">{t("table.service_management.form.status_disabled")}</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
 
                     <div>
-                        <Label htmlFor="whatsapp_number">رقم الواتساب</Label>
+                        <Label htmlFor="whatsapp_number">{t("table.service_management.form.whatsapp_number")}</Label>
                         <Input
                             id="whatsapp_number"
                             value={String(formData.whatsapp_number)}
@@ -203,7 +207,7 @@ const ServiceForm = ({ isEdit, serviceProviders, service, closeForm }: Props) =>
                                 checked={!formData.is_online}
                                 onCheckedChange={() => setFormData({ ...formData, is_online: false })}
                             />
-                            <Label htmlFor="offline">خدمة في الموقع</Label>
+                            <Label htmlFor="offline">{t("table.service_management.form.offline_service")}</Label>
                         </div>
 
                         <div className='flex items-center gap-2'>
@@ -212,7 +216,7 @@ const ServiceForm = ({ isEdit, serviceProviders, service, closeForm }: Props) =>
                                 checked={formData.is_online}
                                 onCheckedChange={() => setFormData({ ...formData, is_online: true })}
                             />
-                            <Label htmlFor="online">اونلاين</Label>
+                            <Label htmlFor="online">{t("table.service_management.form.online_service")}</Label>
                         </div>
                     </div>
 
@@ -241,7 +245,7 @@ const ServiceForm = ({ isEdit, serviceProviders, service, closeForm }: Props) =>
                 onClick={() => handleSubmit()}
                 className="w-full"
             >
-                {isEdit ? 'حفظ التغييرات' : 'إنشاء الخدمة'}
+                {isEdit ? t("table.service_management.form.save_edit") : t("table.service_management.form.create")}
             </Button>
         </div>
     )

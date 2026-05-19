@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { useProfile } from "@/hooks/useProfile";
 import { Home } from "lucide-react"
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom"
 
 type FormError = {
@@ -13,6 +14,9 @@ type FormError = {
 }
 
 const ResetPassword = () => {
+  const { t } = useTranslation("auth");
+  const lang = localStorage.getItem("language") || "en";
+
   const navigate = useNavigate();
   const [errors, setErrors] = useState<{ message: string, field: string }[]>([]);
   const [showPassword, setShowPassword] = useState(false);
@@ -29,28 +33,28 @@ const ResetPassword = () => {
     if (!formData.newPassword) {
       newErrors.push({
         field: 'newPassword',
-        message: 'كلمة المرور الجديدة مطلوبة'
+        message: t("reset_password_page.errors.new_password_required")
       })
     }
 
     if (formData.newPassword.length < 6) {
       newErrors.push({
         field: 'newPassword',
-        message: 'كلمة المرور الجديدة يجب ان تكون على الاقل 6 حروف'
+        message: t("reset_password_page.errors.new_password_min")
       })
     }
 
     if (!formData.confirmPassword) {
       newErrors.push({
         field: 'confirmPassword',
-        message: 'تاكيد كلمة المرور مطلوب'
+        message: t("reset_password_page.errors.confirm_password_required")
       })
     }
 
     if (formData.newPassword !== formData.confirmPassword) {
       newErrors.push({
         field: 'confirmPassword',
-        message: 'كلمة المرور غير متطابقة'
+        message: t("reset_password_page.errors.passwords_mismatch")
       })
     }
 
@@ -94,24 +98,26 @@ const ResetPassword = () => {
             <div className="bg-primary text-primary-foreground p-2 rounded-lg">
               <Home size={24} />
             </div>
-            <span className="text-2xl font-bold text-primary">خدمتك</span>
+            <img src="/application_logo_cut.png" className='h-10' alt="cut logo" />
           </Link>
         </div>
 
-        <Card>
+        <Card dir={lang === "ar" ? "rtl" : "ltr"}>
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">
-              تغيير كلمة المرور
+              {t("reset_password_page.title")}
             </CardTitle>
             <CardDescription>
-              سيتم تغيير كلمة المرور الخاصة بك
+              {t("reset_password_page.description")}
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground text-center mb-3">سنرسل لك رابطا لتجديد كلمة المرور</p>
+          <CardContent className="text-start">
+            <p className="text-sm text-muted-foreground text-center mb-3">
+              {t("reset_password_page.helper_text")}
+            </p>
             <div className='flex flex-col gap-2'>
               <div>
-                <Label>كلمة المرور الجديدة</Label>
+                <Label>{t("reset_password_page.new_password")}</Label>
                 <Input
                   type={showPassword ? 'text' : 'password'}
                   value={formData.newPassword}
@@ -124,7 +130,7 @@ const ResetPassword = () => {
                 )}
               </div>
               <div>
-                <Label>أعد كلمة المرور الجديدة</Label>
+                <Label>{t("reset_password_page.confirm_password")}</Label>
                 <Input
                   type={showPassword ? 'text' : 'password'}
                   value={formData.confirmPassword}
@@ -148,7 +154,7 @@ const ResetPassword = () => {
                 variant="outline"
                 onClick={() => setShowPassword(!showPassword)}
               >
-                {showPassword ? 'أخف كلمة المرور' : 'أظهر كلمة المرور'}
+                {showPassword ? t("reset_password_page.hide_password") : t("reset_password_page.show_password")}
               </Button>
             </div>
 
@@ -157,7 +163,7 @@ const ResetPassword = () => {
               className='flex-1 mt-6'
               disabled={changePassword.isPending}
             >
-              تغيير كلمة المرور
+              {t("reset_password_page.change_password")}
             </Button>
 
           </CardContent>

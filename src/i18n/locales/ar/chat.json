@@ -17,5 +17,9 @@
     "add_attachment": "أضف الى الرسالة",
     "send_message_error": "حدث خطأ في ارسال الرسالة. يرجى المحاولة مرة أخرى.",
     "send_button": "إرسال",
-    "message_placeholder": "اكتب رسالة"
+    "message_placeholder": "اكتب رسالة",
+    "convos_title": "المحادثات",
+    "convos_your_message": "أنت",
+    "convos_no_messages": "الرسائل غير موجودة",
+    "no_conversations": "لا توجد محادثات"
 }

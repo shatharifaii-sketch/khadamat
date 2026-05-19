@@ -7,6 +7,7 @@ import { useEmail } from "@/hooks/useEmail";
 import { useProfile } from "@/hooks/useProfile";
 import { Home } from "lucide-react"
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom"
 import { toast } from "sonner";
 
@@ -16,6 +17,9 @@ type FormError = {
 }
 
 const ForgotPassword = () => {
+  const { t } = useTranslation("auth");
+  const lang = localStorage.getItem("language") || "en";
+
   const [email, setEmail] = useState('');
   const [errors, setErrors] = useState<{ message: string, field: string }[]>([]);
 
@@ -31,7 +35,7 @@ const ForgotPassword = () => {
     } catch (e) {
       // optionally log internally
     } finally {
-      toast.success("إذا كان البريد الإلكتروني موجوداً، سيتم إرسال رابط إعادة التعيين.");
+      toast.success(t("forgot_password_page.success_message"));
     }
   };
 
@@ -44,23 +48,25 @@ const ForgotPassword = () => {
             <div className="bg-primary text-primary-foreground p-2 rounded-lg">
               <Home size={24} />
             </div>
-            <span className="text-2xl font-bold text-primary">خدمتك</span>
+            <img src="/application_logo_cut.png" className='h-10' alt="cut logo" />
           </Link>
         </div>
 
         <Card>
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">
-              إستعادة كلمة المرور
+              {t("forgot_password_page.title")}
             </CardTitle>
             <CardDescription>
-              أدخل بريدك الإلكتروني لتجدد كلمة المرور
+              {t("forgot_password_page.description")}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground text-center mb-3">سنرسل لك رابطا لتجديد كلمة المرور</p>
+            <p className="text-sm text-muted-foreground text-center mb-3">
+              {t("forgot_password_page.helper_text")}
+            </p>
             <div className="space-y-2 mb-3">
-              <Label htmlFor="email">البريد الإلكتروني</Label>
+              <Label htmlFor="email">{t("forgot_password_page.email")}</Label>
               <Input
                 id="email"
                 type="email"
@@ -78,7 +84,7 @@ const ForgotPassword = () => {
               onClick={handleResetPassword}
               disabled={sendPasswordUpdateEmail.isPending}
             >
-              أرسل الرابط
+              {t("forgot_password_page.submit_button")}
             </Button>
 
           </CardContent>

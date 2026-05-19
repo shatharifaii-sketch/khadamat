@@ -2,12 +2,15 @@ import { useAuth } from '@/contexts/AuthContext'
 import { EnrichedConversation } from '@/hooks/useConversations'
 import { cn } from '@/lib/utils'
 import { ChevronLeft, SendHorizonal } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 interface Props {
     convo: EnrichedConversation
 }
 
 const ConvoLink = ({ convo }: Props) => {
+    const { t } = useTranslation("chat");
+    const lang = localStorage.getItem("language") || "en";
     const { user } = useAuth();
     return (
         <>
@@ -22,7 +25,7 @@ const ConvoLink = ({ convo }: Props) => {
                         || convo.client_id === user?.id ? convo.provider.full_name : convo.client.full_name}
                     </h2>
                     <p className='text-muted-foreground/70'>
-                        {convo.last_message_sender_id === user?.id ? 'أنت' : convo.last_message_sender_name }: {convo.last_message || 'الرسائل غير موجودة'}
+                        {convo.last_message_sender_id === user?.id ? t("convos_your_message") : convo.last_message_sender_name }: {convo.last_message || t("convos_no_messages")}
                     </p>
                 </div>
             </div>

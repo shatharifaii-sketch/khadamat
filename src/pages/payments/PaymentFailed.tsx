@@ -1,8 +1,12 @@
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Home } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
 
 const PaymentFailed = () => {
+  const { t } = useTranslation("subscriptions");
+  const lang = localStorage.getItem("language") || "en";
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4 arabic">
       <div className="w-full max-w-md">
@@ -19,15 +23,15 @@ const PaymentFailed = () => {
         <Card>
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">
-              حدث خطأ في عملية الدفع
+              {t("payment_failed.title")}
             </CardTitle>
             <CardDescription>
-              لم نتمكن من إكمال عملية الدفع, الرجاء إعادة المحاولة
+              {t("payment_failed.description")}
             </CardDescription>
           </CardHeader>
           <CardFooter>
             <Link to={'/'} className="flex-1">
-              العودة الى الصفحة الرئيسية
+              {t("payment_failed.back_home")}
             </Link>
           </CardFooter>
         </Card>

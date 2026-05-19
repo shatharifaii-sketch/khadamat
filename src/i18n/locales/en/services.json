@@ -67,7 +67,14 @@
         "publishing": "Publishing...",
         "images_uploaded": "Images uploaded",
         "save_changes": "Save Changes",
-        "existing_images": "Existing Images"
+        "existing_images": "Existing Images",
+        "service_not_found": "Service Not Found",
+        "service_not_found_message": "Couldn't find the service to edit",
+        "back_to_home": "Go back home",
+        "service_loading": "Loading service details...",
+        "no_user_title": "Login Required",
+        "no_user_message": "Login is required to post a service",
+        "sign_in": "Login"
     },
 
     "find_service": {

@@ -1,6 +1,21 @@
 {
     "title": "Admin Panel",
     "description": "A comprehensive admin panel for the Khedemtak platform",
+    "رام الله": "Ramallah",
+    "القدس": "Jerusalem",
+    "بيت لحم": "Bethlehem",
+    "الخليل": "Hebron",
+    "نابلس": "Nablus",
+    "جنين": "Jenin",
+    "طولكرم": "Tulkarm",
+    "قلقيلية": "Qalqilya",
+    "سلفيت": "Salfit",
+    "أريحا": "Jericho",
+    "طوباس": "Tubas",
+    "غزة": "Gaza",
+    "رفح": "Rafah",
+    "خان يونس": "Khan Younis",
+    "دير البلح": "Deir al-Balah",
     "chart": {
         "site_activity": "Site Activity",
         "site_activity_description": "View and analyze site activity and visits over time",
@@ -88,6 +103,31 @@
                 "deleted_description": "Service deleted successfully",
                 "error_title": "Error",
                 "error_description": "An error occurred while deleting the service"
+            },
+            "form": {
+                "title": "Service title",
+                "category": "Category",
+                "provider": "Service provider",
+                "provider_placeholder": "Choose a service provider",
+                "description": "Description",
+                "price_range": "Price range",
+                "price_range_placeholder": "Example: 100-500 USD",
+                "location": "Location",
+                "location_placeholder": "Choose area or city",
+                "phone": "Phone number",
+                "email": "Email address",
+                "experience": "Experience",
+                "status": "Status",
+                "status_published": "Published",
+                "status_draft": "Draft",
+                "status_disabled": "Disabled",
+                "whatsapp_number": "WhatsApp number",
+                "offline_service": "On-site service",
+                "online_service": "Online",
+                "social_links": "Social links",
+                "images": "Service images",
+                "save_edit": "Save changes",
+                "create": "Create service"
             }
         },
         "pending_services_management": {
@@ -129,6 +169,18 @@
                 "deleted_description": "Service deleted successfully",
                 "error_title": "Error",
                 "error_description": "An error occurred while deleting the service"
+            },
+            "data": {
+                "title_name": "Service name:",
+                "title_description": "Service description:",
+                "title_price": "Service price:",
+                "title_whatsapp": "WhatsApp number:",
+                "title_location": "Location:",
+                "links_title": "Social links:",
+                "attachments": "Attachments",
+                "accept_title": "Approve service publishing",
+                "accept_button": "Publish service",
+                "offline_fallback": "Online"
             }
         },
         "user_management": {
@@ -175,6 +227,30 @@
             "toasts": {
                 "error_title": "Error",
                 "error_description": "An error occurred while deleting the service"
+            },
+            "form": {
+                "fields": {
+                    "email": "Email",
+                    "password": "Password",
+                    "full_name": "Full name",
+                    "phone": "Phone number",
+                    "location": "Location",
+                    "bio": "Bio",
+                    "experience_years": "Years of experience"
+                },
+                "placeholders": {
+                    "country_code": "Country code",
+                    "select_location": "Select region or governorate",
+                    "phone_placeholder": "599123456"
+                },
+                "toggles": {
+                    "service_provider": "Service provider",
+                    "admin": "Admin"
+                },
+                "buttons": {
+                    "create": "Create account",
+                    "update": "Update account"
+                }
             }
         },
         "coupons_management": {
@@ -216,6 +292,20 @@
                 "deleted_description": "Coupon deleted successfully",
                 "error_title": "Error",
                 "error_description": "An error occurred while deleting the coupon"
+            },
+            "form": {
+                "code": "Coupon code",
+                "type": "Type",
+                "type_placeholder": "Select type",
+                "fixed_amount": "Fixed amount",
+                "percentage": "Percentage",
+                "description": "Description",
+                "usage_limit": "Usage limit",
+                "expires_at": "Expiration date",
+                "create": "Create coupon",
+                "creating": "Creating...",
+                "نسبة مئوية": "Percentage",
+                "قيمة ثابتة": "Fixed amount"
             }
         }
     }
