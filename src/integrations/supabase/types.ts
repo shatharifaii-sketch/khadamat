@@ -665,24 +665,24 @@ export type Database = {
         }
         Relationships: []
       }
-      password_reset_tokens: {
+      password_reset_logs: {
         Row: {
-          created_at: string
-          email: string | null
-          id: number
-          token: string | null
+          created_at: string | null
+          email: string
+          id: string
+          ip: string | null
         }
         Insert: {
-          created_at?: string
-          email?: string | null
-          id?: number
-          token?: string | null
+          created_at?: string | null
+          email: string
+          id?: string
+          ip?: string | null
         }
         Update: {
-          created_at?: string
-          email?: string | null
-          id?: number
-          token?: string | null
+          created_at?: string | null
+          email?: string
+          id?: string
+          ip?: string | null
         }
         Relationships: []
       }
@@ -1344,6 +1344,7 @@ export type Database = {
           free_trial_period_text: string | null
           id: string
           notes: Json | null
+          notes_english: Json | null
           price_monthly_title: string | null
           price_monthly_value: number | null
           price_yearly_title: string | null
@@ -1365,6 +1366,7 @@ export type Database = {
           free_trial_period_text?: string | null
           id?: string
           notes?: Json | null
+          notes_english?: Json | null
           price_monthly_title?: string | null
           price_monthly_value?: number | null
           price_yearly_title?: string | null
@@ -1386,6 +1388,7 @@ export type Database = {
           free_trial_period_text?: string | null
           id?: string
           notes?: Json | null
+          notes_english?: Json | null
           price_monthly_title?: string | null
           price_monthly_value?: number | null
           price_yearly_title?: string | null

@@ -10,7 +10,7 @@ const UserLayout = () => {
     <div className="min-h-screen bg-background arabic">
       <Navigation />
       <Outlet />
-      <AiChat />
+      {/* <AiChat /> */}
     </div>
   )
 }

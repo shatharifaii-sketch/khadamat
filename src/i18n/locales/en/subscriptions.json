@@ -1,0 +1,36 @@
+{
+    "title": "Subscription Plans",
+    "description": "Choose the subscription plan that suits you so you can publish your service.",
+    "choose_plan": "Choose the subscription plan that suits you:",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "select_payment_plan": "Select a payment plan",
+    "available_services": "Available services count:",
+    "important_points": "Important subscription notes:",
+    "subscribe": "Subscribe",
+    "payment_gateway_title": "You are about to proceed to the payment gateway!",
+    "payment_gateway_description": "Are you sure you want to continue to the payment gateway?",
+    "go_to_payment_gateway": "Proceed to Payment Gateway",
+    "login_required": "Please log in",
+    "auto_renew_notice": "- The subscription renews automatically unless canceled",
+    "payment_notification_notice": "- You will be notified via email and the platform to confirm the monthly payment",
+    "أربعة أشهر مجانا": "Four months free trial",
+    "yearly_ils": "ILS/year",
+    "monthly_ils": "ILS/month",
+    "payment_failed": {
+        "title": "Payment failed",
+        "description": "We couldn't complete the payment. Please try again",
+        "back_home": "Back to homepage"
+    },
+    "payment_success": {
+        "loading": "Verifying subscription...",
+        "success_title": "Subscription successful",
+        "success_description": "Prepare your account, review your details, and start publishing your services!",
+        "error_title": "Something went wrong",
+        "error_description": "We encountered an issue verifying your subscription!",
+        "subscription_details_title": "Subscription details",
+        "allowed_services": "Allowed services",
+        "go_home": "Go to homepage",
+        "invalid_session_redirect": "Redirecting to homepage"
+    }
+}

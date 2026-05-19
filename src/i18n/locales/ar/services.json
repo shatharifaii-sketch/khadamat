@@ -66,7 +66,14 @@
         "publishing": "جارٍ النشر...",
         "images_uploaded": "تم رفع الصور بنجاح",
         "save_changes": "حفظ التغييرات",
-        "existing_images": "الصور المحملة مسبقاً"
+        "existing_images": "الصور المحملة مسبقاً",
+        "service_not_found": "الخدمة غير موجودة",
+        "service_not_found_message": "لم يتم العثور على الخدمة المطلوبة",
+        "back_to_home": "العودة لحسابي",
+        "service_loading": "جاري تحميل بيانات الخدمة...",
+        "no_user_title": "تسجيل الدخول مطلوب",
+        "no_user_message": "يجب تسجيل الدخول أولاً لتتمكن من نشر خدماتك",
+        "sign_in": "تسجيل الدخول"
     },
     "find_service": {
         "find_the_right_service": "ابحث عن الخدمة المناسبة",

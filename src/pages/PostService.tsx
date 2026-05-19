@@ -44,20 +44,20 @@ const PostService = () => {
             <CardContent className="space-y-6">
               <LogIn size={64} className="mx-auto text-muted-foreground" />
               <div>
-                <h2 className="text-2xl font-bold mb-2">تسجيل الدخول مطلوب</h2>
+                <h2 className="text-2xl font-bold mb-2">{t("post_service.no_user_title")}</h2>
                 <p className="text-muted-foreground text-large mb-6">
-                  يجب تسجيل الدخول أولاً لتتمكن من نشر خدماتك
+                  {t("post_service.no_user_message")}
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link to="/auth" state={{ from: location }}>
                   <Button size="lg" className="w-full sm:w-auto">
-                    تسجيل الدخول
+                    {t("post_service.sign_in")}
                   </Button>
                 </Link>
                 <Link to="/">
                   <Button variant="outline" size="lg" className="w-full sm:w-auto">
-                    العودة للرئيسية
+                    {t("post_service.back_to_home")}
                   </Button>
                 </Link>
               </div>
@@ -73,7 +73,7 @@ const PostService = () => {
         <div className="max-w-4xl mx-auto py-12 px-4">
           <div className="text-center">
             <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4" />
-            <p className="text-muted-foreground">جاري تحميل بيانات الخدمة...</p>
+            <p className="text-muted-foreground">{t("post_service.service_loading")}</p>
           </div>
         </div>
     );
@@ -87,14 +87,14 @@ const PostService = () => {
           <Card className="text-center p-8">
             <CardContent className="space-y-6">
               <div>
-                <h2 className="text-2xl font-bold mb-2">الخدمة غير موجودة</h2>
+                <h2 className="text-2xl font-bold mb-2">{t("post_service.service_not_found")}</h2>
                 <p className="text-muted-foreground text-large mb-6">
-                  لم يتم العثور على الخدمة المطلوبة
+                  {t("post_service.service_not_found_message")}
                 </p>
               </div>
               <Link to="/account">
                 <Button size="lg">
-                  العودة لحسابي
+                  {t("post_service.back_to_home")}
                 </Button>
               </Link>
             </CardContent>

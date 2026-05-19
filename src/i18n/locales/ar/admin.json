@@ -1,6 +1,21 @@
 {
     "title": "لوحة التحكم الإدارية",
     "description": "إدارة شاملة للمنصة ومراقبة الأداء",
+    "رام الله": "رام الله",
+    "القدس": "القدس",
+    "بيت لحم": "بيت لحم",
+    "الخليل": "الخليل",
+    "نابلس": "نابلس",
+    "جنين": "جنين",
+    "طولكرم": "طولكرم",
+    "قلقيلية": "قلقيلية",
+    "سلفيت": "سلفيت",
+    "أريحا": "أريحا",
+    "طوباس": "طوباس",
+    "غزة": "غزة",
+    "رفح": "رفح",
+    "خان يونس": "خان يونس",
+    "دير البلح": "دير البلح",
     "chart": {
         "site_activity": "تحليل نشاط الموقع",
         "site_activity_description": "نشاط استخدام الموقع من زيارات جديدة خلال فترة معينة",
@@ -88,6 +103,31 @@
                 "deleted_description": "تم حذف الخدمة بنجاح",
                 "error_title": "خطأ",
                 "error_description": "حدث خطأ أثناء حذف الخدمة"
+            },
+            "form": {
+                "title": "عنوان الخدمة",
+                "category": "الفئة",
+                "provider": "مقدم الخدمة",
+                "provider_placeholder": "اختر مقدم الخدمة",
+                "description": "الوصف",
+                "price_range": "النطاق السعري",
+                "price_range_placeholder": "مثال: 100-500 ريال",
+                "location": "الموقع",
+                "location_placeholder": "اختر المنطقة أو المحافظة",
+                "phone": "رقم الهاتف",
+                "email": "البريد الإلكتروني",
+                "experience": "الخبرة",
+                "status": "الحالة",
+                "status_published": "منشور",
+                "status_draft": "مسودة",
+                "status_disabled": "معطل",
+                "whatsapp_number": "رقم الواتساب",
+                "offline_service": "خدمة في الموقع",
+                "online_service": "أونلاين",
+                "social_links": "روابط التواصل",
+                "images": "صور الخدمة",
+                "save_edit": "حفظ التغييرات",
+                "create": "إنشاء الخدمة"
             }
         },
         "pending_services_management": {
@@ -129,6 +169,18 @@
                 "deleted_description": "تم حذف الخدمة بنجاح",
                 "error_title": "خطأ",
                 "error_description": "حدث خطأ أثناء حذف الخدمة"
+            },
+            "data": {
+                "title_name": "اسم الخدمة:",
+                "title_description": "وصف الخدمة:",
+                "title_price": "تكلفة الخدمة:",
+                "title_whatsapp": "رقم الواتساب:",
+                "title_location": "الموقع:",
+                "links_title": "روابط التواصل:",
+                "attachments": "الملحقات",
+                "accept_title": "إقبل نشر الخدمة",
+                "accept_button": "نشر الخدمة",
+                "offline_fallback": "اونلاين"
             }
         },
         "user_management": {
@@ -175,6 +227,30 @@
             "toasts": {
                 "error_title": "خطأ",
                 "error_description": "حدث خطأ أثناء حذف الخدمة"
+            },
+            "form": {
+                "fields": {
+                    "email": "البريد الإلكتروني",
+                    "password": "كلمة المرور",
+                    "full_name": "الاسم الكامل",
+                    "phone": "رقم الهاتف",
+                    "location": "الموقع",
+                    "bio": "الوصف",
+                    "experience_years": "سنوات الخبرة"
+                },
+                "placeholders": {
+                    "country_code": "رقم البلد",
+                    "select_location": "اختر المنطقة أو المحافظة",
+                    "phone_placeholder": "599123456"
+                },
+                "toggles": {
+                    "service_provider": "مقدم خدمة",
+                    "admin": "أدمن"
+                },
+                "buttons": {
+                    "create": "إنشاء الحساب",
+                    "update": "تحديث الحساب"
+                }
             }
         },
         "coupons_management": {
@@ -216,6 +292,20 @@
                 "deleted_description": "تم حذف الكوبون بنجاح",
                 "error_title": "خطأ",
                 "error_description": "حدث خطأ أثناء حذف الكوبون"
+            },
+            "form": {
+                "code": "نص الكوبون",
+                "type": "الفئة",
+                "type_placeholder": "اختر الفئة",
+                "fixed_amount": "القيمة الثابتة",
+                "percentage": "النسبة المئوية",
+                "description": "الوصف",
+                "usage_limit": "مرات الاستخدام المسموحة",
+                "expires_at": "تاريخ الانتهاء",
+                "create": "إنشاء الكوبون",
+                "creating": "جاري الانشاء...",
+                "نسبة مئوية": "نسبة مئوية",
+                "قيمة ثابتة": "قيمة ثابتة"
             }
         }
     }
