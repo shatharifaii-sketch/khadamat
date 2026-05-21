@@ -984,6 +984,44 @@ Deno.serve(async (req: Request) => {
       });
 
       break;
+    case 'charge.updated':
+      const { data: subUpdatedEvent } = await supabase.from('stripe_events').select('id').eq('event_id', data.object.id).maybeSingle();
+
+      if (subUpdatedEvent) {
+        return new Response("Event already happened: ", {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        })
+      };
+
+      await supabase.from('stripe_events').insert({
+        event_id: data.object.id,
+        event_type: 'charge.updated',
+      });
+
+      break;
+    case 'payment_intent.succeeded':
+      const { data: subUpdatedEvent } = await supabase.from('stripe_events').select('id').eq('event_id', data.object.id).maybeSingle();
+
+      if (subUpdatedEvent) {
+        return new Response("Event already happened: ", {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        })
+      };
+
+      await supabase.from('stripe_events').insert({
+        event_id: data.object.id,
+        event_type: 'payment_intent.succeeded',
+      });
+      
+      break;
     case 'customer.subscription.updated':
       const { data: subUpdatedEvent } = await supabase.from('stripe_events').select('id').eq('event_id', data.object.id).maybeSingle();
 

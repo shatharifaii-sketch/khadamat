@@ -75,6 +75,8 @@
         "no_user_message": "يجب تسجيل الدخول أولاً لتتمكن من نشر خدماتك",
         "sign_in": "تسجيل الدخول",
         "subscribe_or_pay": "الاشتراك لنشر الخدمة"
+        "get_extra_service": "احصل على خدمة إضافية",
+        "not_allowed_to_post": "غير مسموح لك بنشر خدمة جديدة"
     },
     "find_service": {
         "find_the_right_service": "ابحث عن الخدمة المناسبة",

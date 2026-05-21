@@ -1,5 +1,5 @@
 import { Subscription, useSubscription } from '@/hooks/useSubscription';
-import { Suspense, useEffect, useState } from 'react'
+import { act, Suspense, useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Clock, Star, TrendingUp } from 'lucide-react';
 import { Badge } from '../ui/badge';
@@ -16,13 +16,15 @@ import useStripe from '@/hooks/use-stripe';
 import { useTranslation } from 'react-i18next';
 
 interface UserSubscriptionsProps {
-    user: User
+    user: User, 
 }
 
 const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
     const { t } = useTranslation("account");
+    const lang = localStorage.getItem("language") || "en";
+
     const { getUserSubscriptions, deactivateSubscription, deactivatingSubscription, deactivateSubscriptionSuccess } = useSubscription();
-    const { billingPortalSession, isCreatingBillingPortalSession, isCreateBillingPortalSessionError, isCreateBillingPortalSessionSuccess } = useStripe();
+    const { billingPortalSession, isCreatingBillingPortalSession, isCreateBillingPortalSessionError, isCreateBillingPortalSessionSuccess, createExtraCheckoutSession, isCreatingExtraCheckoutSessionPending, isCreateExtraCheckoutSessionError, isCreateExtraCheckoutSessionSuccess } = useStripe();
     const { getPaymentUrl } = usePaymentLogic();
     const [isPaymentTime, setIsPaymentTime] = useState<boolean>(false);
     const [openSubscribeModal, setOpenSubscribeModal] = useState<boolean>(false);
@@ -77,8 +79,8 @@ const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
 
 
     return (
-        <Card>
-            <CardHeader>
+        <Card dir={lang === "ar" ? "rtl" : "ltr"}>
+            <CardHeader className='text-start'>
                 <div className="flex items-center justify-between">
                     <div className='flex flex-col gap-2'>
                         <CardTitle className="flex items-center gap-2">
@@ -95,7 +97,7 @@ const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
                 {
                     activeSubscription ? (
 
-                        <div className='flex flex-col md:flex-row md:items-center gap-3'>
+                        <div className='flex flex-col md:flex-row md:items-center gap-3 text-start'>
                             <Card className='md:w-1/2 shadow-none'>
                                 <CardHeader className='flex flex-row items-start justify-between'>
                                     <div className='text-lg font-bold'>
@@ -118,8 +120,8 @@ const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
                                                             {t("subscriptions.trial_period")}
                                                         </Badge>
                                                         <p className='text-xs text-muted-foreground'>
-                                                            {t("subscriptions.trial_ends")}
-                                                             <span>{new Date(activeSubscription.trial_expires_at).toLocaleDateString('ar')}</span></p>
+                                                            {t("subscriptions.trial_ends")} 
+                                                             <span> {new Date(activeSubscription.trial_expires_at).toLocaleDateString(lang === "ar" ? "ar" : 'en')}</span></p>
                                                     </div>
                                                 )
                                             }
@@ -127,7 +129,7 @@ const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
                                         </div>
                                         <Separator />
                                         <div className='flex flex-col text-sm'>
-                                            <p>{t("subscriptions.created_at")} <span>{new Date(activeSubscription.created_at).toLocaleDateString('ar')}</span></p>
+                                            <p>{t("subscriptions.created_at")} <span>{new Date(activeSubscription.created_at).toLocaleDateString(lang === "ar" ? "ar" : 'en')}</span></p>
                                         </div>
                                     </div>
                                 </CardContent>
@@ -148,10 +150,10 @@ const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
                                 <CardContent className='flex flex-col gap-5'>
                                     <div className='flex flex-col gap-2'>
                                         <p>
-                                            {t("subscriptions.next_payment_date")}: <Badge variant='secondary' className='text-sm'>{new Date(activeSubscription.next_payment_date).toLocaleDateString('ar')}</Badge>
+                                            {t("subscriptions.next_payment_date")} <Badge variant='secondary' className='text-sm'>{new Date(activeSubscription.next_payment_date).toLocaleDateString(lang === "ar" ? "ar" : 'en')}</Badge>
                                         </p>
                                         <p className='text-sm text-muted-foreground'>
-                                            {t("subscriptions.last_payment_date")}: <Badge variant='secondary' className='text-sm'>{activeSubscription.is_in_trial ? '--' : new Date(activeSubscription.last_payment_date).toLocaleDateString('ar')}</Badge>
+                                            {t("subscriptions.last_payment_date")} <Badge variant='secondary' className='text-sm'>{activeSubscription.is_in_trial ? '--' : new Date(activeSubscription.last_payment_date).toLocaleDateString(lang === "ar" ? "ar" : 'en')}</Badge>
                                         </p>
                                     </div>
                                     <div className='flex flex-col'>
@@ -161,6 +163,19 @@ const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
                                             disabled={isCreatingBillingPortalSession}
                                         >
                                             {t("subscriptions.billing_portal")}
+                                        </Button>
+                                        <Button
+                                            onClick={() => {
+                                                createExtraCheckoutSession({
+                                                    userId: user.id,
+                                                    email: user.email,
+                                                    name: "Extra Service"
+                                                })
+                                            }}
+                                            className='flex-1 mt-1'
+                                            disabled={isCreatingExtraCheckoutSessionPending || activeSubscription.services_used < activeSubscription.services_allowed}
+                                        >
+                                            {t("subscriptions.get_extra_service")}
                                         </Button>
                                         <Button
                                             onClick={() => setOpenPaymentModal(true)} className='flex-1 mt-3'

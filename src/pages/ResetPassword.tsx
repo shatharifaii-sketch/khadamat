@@ -87,7 +87,7 @@ const ResetPassword = () => {
       setFormData({ newPassword: '', confirmPassword: '' });
       navigate('/', { replace: true });
     }
-  }, [changePassword.isSuccess, changePassword.isError, changePassword.mutateAsync]);
+  }, [changePassword.isSuccess, navigate]);
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4 arabic">

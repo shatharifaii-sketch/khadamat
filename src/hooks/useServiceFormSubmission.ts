@@ -6,6 +6,7 @@ import { ServiceFormData } from '@/types/service';
 import { toast } from 'sonner';
 import { Service } from './useAdminFunctionality';
 import { formatWhatsappNumber } from '@/utils/formValidation';
+import { useTranslation } from 'react-i18next';
 
 export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
   const navigate = useNavigate();
@@ -35,8 +36,6 @@ export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
             countryCode: formData.whatsapp_number.countryCode,
             number: formData.whatsapp_number.number
           })
-        }).finally(() => {
-          toast.success('تم تحديث الخدمة بنجاح! انتظر الموافقة من الإدارة.');
         });
 
         if (formData.images && formData.images.length > 0) {
@@ -55,7 +54,7 @@ export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
 
     // Check if user can post more services (for new services only)
     const canPost = canPostService;
-    if (!canPost) {
+    if (!canPost.canPost) {
       clearPendingService();
       // Save the service data before redirecting to payment
       savePendingService(formData);

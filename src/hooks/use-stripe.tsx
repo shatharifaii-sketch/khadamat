@@ -12,14 +12,21 @@ interface StripeActions {
     isCreatingCheckoutSessionPending: boolean;
     isCreateCheckoutSessionError: boolean;
     isCreateCheckoutSessionSuccess: boolean;
-    verifySession: (sessionId: string) => any;
+
+    verifySession: (sessionId: string) => void;
     isVerifyingSessionPending: boolean;
     isVerifySessionError: boolean;
     isVerifySessionSuccess: boolean;
+
     billingPortalSession: (customerId: string) => void;
     isCreatingBillingPortalSession: boolean;
     isCreateBillingPortalSessionError: boolean;
     isCreateBillingPortalSessionSuccess: boolean;
+
+    createExtraCheckoutSession: ({ userId, email, name }: { userId: string, email: string, name: string }) => void;
+    isCreatingExtraCheckoutSessionPending: boolean;
+    isCreateExtraCheckoutSessionError: boolean;
+    isCreateExtraCheckoutSessionSuccess: boolean;
 }
 
 const createStripeCheckoutSession = async ({ priceId, userId, email }: { priceId: string, userId: string, email: string }) => {
@@ -27,7 +34,7 @@ const createStripeCheckoutSession = async ({ priceId, userId, email }: { priceId
     if (!userId) return;
 
     const { data, response, error } = await supabase.functions.invoke(
-        "create-checkout-session",
+        "create-checkout-session-dev",
         {
             body: JSON.stringify({
                 priceId,
@@ -47,7 +54,7 @@ const createStripeCheckoutSession = async ({ priceId, userId, email }: { priceId
 
 const verifyStripeSessionId = async (sessionId: string) => {
     const { data, error } = await supabase.functions.invoke(
-        "verify-stripe-checkout-session-id",
+        "verify-stripe-checkout-session-id-dev",
         {
             body: JSON.stringify({ sessionId }),
         }
@@ -77,7 +84,7 @@ const verifyStripeSessionId = async (sessionId: string) => {
         .eq('user_id', data.subscription.metadata.user_id)
         .eq('status', 'active')
         .single();
-    
+
     if (userSubError) {
         console.log(error);
         return error;
@@ -88,7 +95,7 @@ const verifyStripeSessionId = async (sessionId: string) => {
 
 const getBillingPortalSession = async (customerId: string) => {
     const { data, error } = await supabase.functions.invoke(
-        "stripe-billing-portal",
+        "stripe-billing-portal-dev",
         {
             body: JSON.stringify({ customerId }),
         }
@@ -100,6 +107,29 @@ const getBillingPortalSession = async (customerId: string) => {
     }
 
     return data.url;
+}
+
+const createExtraStripeCheckoutSession = async ({ userId, email, name }: { userId: string, email: string, name: string }) => {
+
+    console.log('Creating extra checkout session for user:', userId, email, name);
+
+    const { data, response, error } = await supabase.functions.invoke(
+        "create-extra-product-checkout-session-dev",
+        {
+            body: {
+                userId: userId,
+                email: email,
+                name: name
+            },
+        }
+    )
+
+    if (error && !response.ok && !data.success) {
+        console.log(error);
+        return error;
+    }
+
+    return data.sessionUrl;
 }
 
 const useStripe = (): StripeActions => {
@@ -152,6 +182,23 @@ const useStripe = (): StripeActions => {
         onError: (error) => {
             console.log(error);
         }
+    });
+
+    const {
+        mutateAsync: createExtraCheckoutSession,
+        isPending: isCreatingExtraCheckoutSessionPending,
+        isError: isCreateExtraCheckoutSessionError,
+        isSuccess: isCreateExtraCheckoutSessionSuccess,
+    } = useMutation({
+        mutationKey: ['create-extra-checkout-session'],
+        mutationFn: createExtraStripeCheckoutSession,
+        onSuccess: (sessionUrl) => {
+            console.log(sessionUrl);
+            window.open(sessionUrl, "_blank", "noopener,noreferrer");
+        },
+        onError: (error) => {
+            console.log(error);
+        }
     })
 
 
@@ -160,14 +207,21 @@ const useStripe = (): StripeActions => {
         isCreatingCheckoutSessionPending,
         isCreateCheckoutSessionError,
         isCreateCheckoutSessionSuccess,
+
         verifySession,
         isVerifyingSessionPending,
         isVerifySessionError,
         isVerifySessionSuccess,
+
         billingPortalSession,
         isCreatingBillingPortalSession,
         isCreateBillingPortalSessionError,
         isCreateBillingPortalSessionSuccess,
+
+        createExtraCheckoutSession,
+        isCreatingExtraCheckoutSessionPending,
+        isCreateExtraCheckoutSessionError,
+        isCreateExtraCheckoutSessionSuccess
     }
 }
 
