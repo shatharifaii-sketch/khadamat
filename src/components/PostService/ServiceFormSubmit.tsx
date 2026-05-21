@@ -61,7 +61,7 @@ const ServiceFormSubmit = ({ isCreating, canPostService: editMode, isEditMode = 
               ? t("post_service.publish_service") 
               : !allowed && sub 
                 ? t("post_service.get_extra_service")
-                : t("post_service.not_allowed_to_post"))
+                : !sub ? t("post_service.get_subscription") : t("post_service.not_allowed_to_post"))
         }
       </Button>
 

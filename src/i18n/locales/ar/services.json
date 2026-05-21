@@ -76,7 +76,8 @@
         "sign_in": "تسجيل الدخول",
         "subscribe_or_pay": "الاشتراك لنشر الخدمة",
         "get_extra_service": "احصل على خدمة إضافية",
-        "not_allowed_to_post": "غير مسموح لك بنشر خدمة جديدة"
+        "not_allowed_to_post": "غير مسموح لك بنشر خدمة جديدة",
+        "get_subscription": "اشترك الان"
     },
     "find_service": {
         "find_the_right_service": "ابحث عن الخدمة المناسبة",
