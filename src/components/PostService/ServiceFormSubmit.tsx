@@ -36,18 +36,6 @@ const ServiceFormSubmit = ({ isCreating, canPostService: editMode, isEditMode = 
     }
   }, [canPostServiceAsync, isEditMode]);
 
-  useEffect(() => {
-    if (isReady && !sub) {
-      setOpenSubscribeModal(true);
-    }
-  }, [isReady, sub]);
-
-  useEffect(() => {
-    if (!allowed && sub) {
-      toast.warning(t("post_service.get_extra_service"));
-    }
-  }, [allowed, sub, t]);
-
   return (
     <div className="pt-6">
       <Button
@@ -56,6 +44,9 @@ const ServiceFormSubmit = ({ isCreating, canPostService: editMode, isEditMode = 
         className="w-full text-xl py-6"
         disabled={isCreating}
         onClick={() => {
+          if (isReady && !sub) {
+            setOpenSubscribeModal(true);
+          }
           if (!allowed && sub) {
             navigate('/account');
           }
@@ -73,26 +64,21 @@ const ServiceFormSubmit = ({ isCreating, canPostService: editMode, isEditMode = 
                 : t("post_service.not_allowed_to_post"))
         }
       </Button>
-      {!isEditMode && !sub && !allowed && (
-        <p className="text-center text-muted-foreground mt-4 text-large">
-          {t("post_service.redirect_to_payment_on_click")}
-        </p>
-      )}
 
-      {/* <Drawer
-        direction='right'
+      <Drawer
+        direction='bottom'
         open={openSubscribeModal}
+        onOpenChange={setOpenSubscribeModal}
       >
-        <DrawerContent className='h-screen w-full sm:w-4/5 lg:w-2/5 transition-all rounded-none'>
+        <DrawerContent className=' transition-all rounded-none'>
           <DialogTitle></DialogTitle>
           <Suspense fallback={<div>Loading...</div>}>
             <ErrorBoundary fallback={<div>Something went wrong</div>}>
-              {((!allowed && !sub) || (allowed && !sub)) && <SubscriptionsModal user={user} />}
-              {!allowed && sub && <PaymentModal />}
+              <SubscriptionsModal user={user} />
             </ErrorBoundary>
           </Suspense>
         </DrawerContent>
-      </Drawer> */}
+      </Drawer>
     </div>
   );
 };
