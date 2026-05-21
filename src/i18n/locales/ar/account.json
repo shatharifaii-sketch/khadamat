@@ -77,7 +77,8 @@
         "deactivating": "جاري المعالجة...",
         "deactivate_button": "تأكيد الغاء الاشتراك",
         "past_subscriptions": "الاشتراكات السابقة",
-        "no_past_subscriptions": "لا توجد اشتراكات سابقة"
+        "no_past_subscriptions": "لا توجد اشتراكات سابقة",
+        "get_extra_service": "احصل على خدمة إضافية"
     },
     "transactions": {
             "title": "الدفعات السابقة",

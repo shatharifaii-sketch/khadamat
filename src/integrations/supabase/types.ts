@@ -405,6 +405,36 @@ export type Database = {
         }
         Relationships: []
       }
+      extra_products: {
+        Row: {
+          active: boolean | null
+          created_at: string
+          id: string
+          name: string | null
+          price: string | null
+          stripe_price_id: string | null
+          stripe_product_id: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string
+          id?: string
+          name?: string | null
+          price?: string | null
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string
+          id?: string
+          name?: string | null
+          price?: string | null
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+        }
+        Relationships: []
+      }
       invoices: {
         Row: {
           amount: number | null
@@ -1132,27 +1162,6 @@ export type Database = {
           },
         ]
       }
-      stipe_events: {
-        Row: {
-          event_id: string | null
-          id: number
-          processed_at: string
-          type: string | null
-        }
-        Insert: {
-          event_id?: string | null
-          id?: number
-          processed_at?: string
-          type?: string | null
-        }
-        Update: {
-          event_id?: string | null
-          id?: number
-          processed_at?: string
-          type?: string | null
-        }
-        Relationships: []
-      }
       stripe_checkout_sessions: {
         Row: {
           attrs: Json | null
@@ -1201,6 +1210,27 @@ export type Database = {
           email?: string | null
           id?: string | null
           name?: string | null
+        }
+        Relationships: []
+      }
+      stripe_events: {
+        Row: {
+          event_id: string | null
+          id: number
+          processed_at: string
+          type: string | null
+        }
+        Insert: {
+          event_id?: string | null
+          id?: number
+          processed_at?: string
+          type?: string | null
+        }
+        Update: {
+          event_id?: string | null
+          id?: number
+          processed_at?: string
+          type?: string | null
         }
         Relationships: []
       }
@@ -2016,6 +2046,58 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      users_with_extra_products: {
+        Row: {
+          created_at: string
+          id: string
+          product_id: string | null
+          stripe_customer_id: string | null
+          stripe_price_id: string | null
+          stripe_product_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_id?: string | null
+          stripe_customer_id?: string | null
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_id?: string | null
+          stripe_customer_id?: string | null
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "users_with_extra_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "extra_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "users_with_extra_products_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "users_with_extra_products_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_with_email"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       web_analytics: {
         Row: {

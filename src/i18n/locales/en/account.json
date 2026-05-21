@@ -58,7 +58,8 @@
         "deactivating": "Deactivating...",
         "deactivate_button": "Deactivate",
         "past_subscriptions": "Past Subscriptions",
-        "no_past_subscriptions": "No past subscriptions"
+        "no_past_subscriptions": "No past subscriptions",
+        "get_extra_service": "Get an extra service"
     },
     "transactions": {
         "title": "Previous Transactions",

@@ -77,7 +77,7 @@ export const useServices = () => {
       }
       
       const { data: subscription, error: subError } = await supabase
-        .from('subscriptions')
+        .from('subscriptions_dev')
         .select('services_allowed, services_used')
         .eq('user_id', user?.id)
         .eq('status', 'active')
@@ -165,12 +165,13 @@ export const useServices = () => {
       // Update services_used count to reflect actual service count
       console.log('Updating services_used count...');
       const { error: updateError } = await supabase
-        .from('subscriptions')
+        .from('subscriptions_dev')
         .update({ 
           services_used: currentServiceCount + 1,
           updated_at: new Date().toISOString()
         })
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .eq('status', 'active');
 
       if (updateError) {
         console.error('Error updating services_used:', updateError);

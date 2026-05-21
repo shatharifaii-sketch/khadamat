@@ -37,6 +37,7 @@ const Account = () => {
 
   const isMobile = useIsMobile();
   const { user, loading } = useAuth();
+  
   const navigate = useNavigate();
   const { profile, updateProfile, isLoading: profileLoading } = useProfile();
   const { getUserServices } = useServices();

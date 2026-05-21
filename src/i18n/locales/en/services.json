@@ -74,7 +74,10 @@
         "service_loading": "Loading service details...",
         "no_user_title": "Login Required",
         "no_user_message": "Login is required to post a service",
-        "sign_in": "Login"
+        "sign_in": "Login",
+        "subscribe_or_pay": "Renew your subscription or get an extra service",
+        "get_extra_service": "Get an extra service",
+        "not_allowed_to_post": "You are not allowed to post a new service"
     },
 
     "find_service": {

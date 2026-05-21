@@ -8,6 +8,8 @@ import PaymentModal from './PaymentModal';
 import { DialogTitle } from '@radix-ui/react-dialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
+import { Navigate, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 interface ServiceFormSubmitProps {
   isCreating: boolean;
@@ -18,6 +20,7 @@ interface ServiceFormSubmitProps {
 
 const ServiceFormSubmit = ({ isCreating, canPostService: editMode, isEditMode = false, savePendingService }: ServiceFormSubmitProps) => {
   const { t } = useTranslation("services");
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [openSubscribeModal, setOpenSubscribeModal] = useState<boolean>(false);
   const { canPostServiceAsync } = useServiceForm();
@@ -31,13 +34,19 @@ const ServiceFormSubmit = ({ isCreating, canPostService: editMode, isEditMode = 
       setAllowed(!!canPostServiceAsync.canPost);
       setIsReady(true);
     }
-  }, [canPostServiceAsync]);
+  }, [canPostServiceAsync, isEditMode]);
 
   useEffect(() => {
     if (isReady && !sub) {
       setOpenSubscribeModal(true);
     }
-  }, [isReady]);
+  }, [isReady, sub]);
+
+  useEffect(() => {
+    if (!allowed && sub) {
+      toast.warning(t("post_service.get_extra_service"));
+    }
+  }, [allowed, sub, t]);
 
   return (
     <div className="pt-6">
@@ -47,17 +56,21 @@ const ServiceFormSubmit = ({ isCreating, canPostService: editMode, isEditMode = 
         className="w-full text-xl py-6"
         disabled={isCreating}
         onClick={() => {
-          if (!editMode && !allowed) {
-            savePendingService();
-            // setOpenSubscribeModal(true);
-            return;
+          if (!allowed && sub) {
+            navigate('/account');
           }
         }}
       >
         {isCreating ?
           (isEditMode ? t("post_service.updating") : t("post_service.publishing"))
           :
-          (isEditMode ? t("post_service.save_changes") : allowed && sub ? t("post_service.publish_service") : t("post_service.subscribe_or_pay"))
+          (isEditMode 
+            ? t("post_service.save_changes") 
+            : allowed && sub 
+              ? t("post_service.publish_service") 
+              : !allowed && sub 
+                ? t("post_service.get_extra_service")
+                : t("post_service.not_allowed_to_post"))
         }
       </Button>
       {!isEditMode && !sub && !allowed && (

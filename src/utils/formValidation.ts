@@ -84,10 +84,6 @@ const normalizeDigits = (value: string) => {
 };
 
 export const validateWhatsappNumber = ({countryCode, number}: {countryCode: string, number: string}): ValidationResult => {
-  if (!number.trim()) {
-    return { isValid: false, message: 'رقم الهاتف مطلوب' };
-  }
-
   return {
     isValid: true,
     message: ''

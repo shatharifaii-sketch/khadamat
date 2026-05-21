@@ -110,9 +110,9 @@ export const useSubscription = () => {
       if (!user) return null;
 
       const { data, error } = await supabase
-        .from('subscriptions')
+        .from('subscriptions_dev')
         .select(`*, 
-          subscription_tier:subscriptions_tier_id_fkey (
+          subscription_tier:subscriptions_dev_tier_id_fkey (
             id,
             title,
             allowed_services,
@@ -144,9 +144,9 @@ notes
       if (!user) return null;
 
       const { data: activeSubscription, error: activeSubscriptionError } = await supabase
-        .from('subscriptions')
+        .from('subscriptions_dev')
         .select(`*, 
-          subscription_tier:subscriptions_tier_id_fkey (
+          subscription_tier:subscriptions_dev_tier_id_fkey (
             id,
             title,
             allowed_services,
@@ -155,9 +155,9 @@ notes
             price_monthly_value,
             price_yearly_value,
             class_name,
-badge_class_name,
-free_trial_period_text,
-notes
+            badge_class_name,
+            free_trial_period_text,
+            notes
           )`)
         .eq('user_id', user.id)
         .eq('status', 'active')
@@ -168,10 +168,12 @@ notes
         throw activeSubscriptionError;
       }
 
+      console.log('Active subscription:', activeSubscription);
+
       const { data: inactiveSubscriptions, error: inactiveSubscriptionsError } = await supabase
-        .from('subscriptions')
+        .from('subscriptions_dev')
         .select(`*, 
-          subscription_tier:subscriptions_tier_id_fkey (
+          subscription_tier:subscriptions_dev_tier_id_fkey (
             id,
             title,
             allowed_services,
