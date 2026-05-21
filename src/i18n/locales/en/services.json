@@ -74,7 +74,8 @@
         "service_loading": "Loading service details...",
         "no_user_title": "Login Required",
         "no_user_message": "Login is required to post a service",
-        "sign_in": "Login"
+        "sign_in": "Login",
+        "subscribe_or_pay": "Subscribe to post a service"
     },
 
     "find_service": {

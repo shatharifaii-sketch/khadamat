@@ -73,7 +73,8 @@
         "service_loading": "جاري تحميل بيانات الخدمة...",
         "no_user_title": "تسجيل الدخول مطلوب",
         "no_user_message": "يجب تسجيل الدخول أولاً لتتمكن من نشر خدماتك",
-        "sign_in": "تسجيل الدخول"
+        "sign_in": "تسجيل الدخول",
+        "subscribe_or_pay": "الاشتراك لنشر الخدمة"
     },
     "find_service": {
         "find_the_right_service": "ابحث عن الخدمة المناسبة",
