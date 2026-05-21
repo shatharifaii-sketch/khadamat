@@ -13,7 +13,7 @@ interface StripeActions {
     isCreateCheckoutSessionError: boolean;
     isCreateCheckoutSessionSuccess: boolean;
 
-    verifySession: (sessionId: string) => void;
+    verifySession: (sessionId: string) => any;
     isVerifyingSessionPending: boolean;
     isVerifySessionError: boolean;
     isVerifySessionSuccess: boolean;
@@ -54,7 +54,7 @@ const createStripeCheckoutSession = async ({ priceId, userId, email }: { priceId
 
 const verifyStripeSessionId = async (sessionId: string) => {
     const { data, error } = await supabase.functions.invoke(
-        "verify-stripe-checkout-session-id-dev",
+        "verify-stripe-checkout-session-id",
         {
             body: JSON.stringify({ sessionId }),
         }
@@ -95,7 +95,7 @@ const verifyStripeSessionId = async (sessionId: string) => {
 
 const getBillingPortalSession = async (customerId: string) => {
     const { data, error } = await supabase.functions.invoke(
-        "stripe-billing-portal-dev",
+        "stripe-billing-portal",
         {
             body: JSON.stringify({ customerId }),
         }
@@ -114,7 +114,7 @@ const createExtraStripeCheckoutSession = async ({ userId, email, name }: { userI
     console.log('Creating extra checkout session for user:', userId, email, name);
 
     const { data, response, error } = await supabase.functions.invoke(
-        "create-extra-product-checkout-session-dev",
+        "create-extra-product-checkout-session",
         {
             body: {
                 userId: userId,

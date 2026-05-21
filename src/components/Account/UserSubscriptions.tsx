@@ -164,7 +164,7 @@ const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
                                         >
                                             {t("subscriptions.billing_portal")}
                                         </Button>
-                                        <Button
+                                        {/* <Button
                                             onClick={() => {
                                                 createExtraCheckoutSession({
                                                     userId: user.id,
@@ -176,7 +176,7 @@ const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
                                             disabled={isCreatingExtraCheckoutSessionPending || activeSubscription.services_used < activeSubscription.services_allowed}
                                         >
                                             {t("subscriptions.get_extra_service")}
-                                        </Button>
+                                        </Button> */}
                                         <Button
                                             onClick={() => setOpenPaymentModal(true)} className='flex-1 mt-3'
                                             disabled={true}
