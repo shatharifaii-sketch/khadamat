@@ -99,7 +99,7 @@ const sendEmailNotification = async ({ message, userId }: { message: Message | a
         return { success: true, message: 'Message is not older than 2 hours' }
     }
 
-    const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-email-notification-dev`, {
+    const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-email-notification`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

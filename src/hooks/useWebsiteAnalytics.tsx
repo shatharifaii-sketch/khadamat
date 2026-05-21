@@ -206,7 +206,7 @@ export const useWebsiteAnalytics = () => {
     } = useQuery({
         queryKey: ["analytics"],
         queryFn: async () => {
-            const { data, error } = await supabase.from("web_analytics_dev").select("*").not("path", "like", "/admin%").order("created_at", { ascending: false });
+            const { data, error } = await supabase.from("web_analytics").select("*").not("path", "like", "/admin%").order("created_at", { ascending: false });
 
             if (error) throw error;
             return data;
@@ -220,7 +220,7 @@ export const useWebsiteAnalytics = () => {
             const result = checkVisitData();
             const normalizedPath = normalizePath(location.pathname);
 
-            const { error } = await supabase.from("web_analytics_dev").insert({
+            const { error } = await supabase.from("web_analytics").insert({
                 visitor_id: result.id,
                 path: normalizedPath,
                 is_new_visit: result.isNewVisit,
@@ -246,7 +246,7 @@ export const useWebsiteAnalytics = () => {
                 {
                     event: "INSERT",
                     schema: "public",
-                    table: "web_analytics_dev"
+                    table: "web_analytics"
                 },
                 (payload) => {
                     const newRow = payload.new;
