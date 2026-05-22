@@ -74,7 +74,7 @@ const ServiceFormSubmit = ({ isCreating, canPostService: editMode, isEditMode = 
           <DialogTitle></DialogTitle>
           <Suspense fallback={<div>Loading...</div>}>
             <ErrorBoundary fallback={<div>Something went wrong</div>}>
-              <SubscriptionsModal user={user} />
+              <SubscriptionsModal user={user} setDrawerOpen={setOpenSubscribeModal} />
             </ErrorBoundary>
           </Suspense>
         </DrawerContent>
