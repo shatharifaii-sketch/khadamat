@@ -2,7 +2,7 @@ import { Card, CardContent, CardFooter, CardHeader } from '../ui/card';
 import { cn } from '@/lib/utils';
 import { Button } from '../ui/button'
 import { Switch } from '../ui/switch';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '../ui/badge';
 import { Star } from 'lucide-react';
@@ -31,14 +31,19 @@ interface SubscriptionCardProps {
     onNavigate: (priceId: string) => void;
     isCreatingCheckoutSessionPending: boolean;
     setDrawerOpen?: (isOpen: boolean) => void;
+    success: boolean
 }
 
-const SubscriptionCard = ({ subscription, yearly, selectedSubscription, cardClassName, onSelect, onNavigate, isCreatingCheckoutSessionPending, setDrawerOpen }: SubscriptionCardProps) => {
+const SubscriptionCard = ({ subscription, yearly, selectedSubscription, cardClassName, onSelect, onNavigate, isCreatingCheckoutSessionPending, setDrawerOpen, success }: SubscriptionCardProps) => {
     const { t } = useTranslation("subscriptions");
     const lang = localStorage.getItem("language") || "en";
     const [open, setOpen] = useState(false);
 
-    console.log("subscription: ", subscription, lang);
+    useEffect(() => {
+        if (success) {
+            setOpen(false);
+        }
+    }, [success]);
 
     return (
         <Card className={cn('col-span-1 flex flex-col justify-between', subscription.class_name, cardClassName)}>
@@ -168,7 +173,7 @@ const SubscriptionsModal = ({ cardClassName, switchClassName, user, setDrawerOpe
     const navigate = useNavigate()
 
     const { subscriptionTiersData } = useSubscriptionTiers();
-    const { createCheckoutSession, isCreatingCheckoutSessionPending } = useStripe();
+    const { createCheckoutSession, isCreatingCheckoutSessionPending, isCreateCheckoutSessionSuccess } = useStripe();
 
     const handleSubscriptionSelect = (subscriptionTier: any) => {
         setSelectedSubscription(subscriptionTier);
@@ -222,6 +227,7 @@ const SubscriptionsModal = ({ cardClassName, switchClassName, user, setDrawerOpe
                                     onNavigate={handleNavigationToPaymentWindow}
                                     isCreatingCheckoutSessionPending={isCreatingCheckoutSessionPending}
                                     setDrawerOpen={setDrawerOpen}
+                                    success={isCreateCheckoutSessionSuccess}
                                 />
                             ))}
                         </div>
