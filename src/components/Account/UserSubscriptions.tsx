@@ -34,6 +34,9 @@ const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
 
     const { activeSubscription, inactiveSubscriptions } = getUserSubscriptions.data;
 
+    console.log('activeSubscription: ', activeSubscription);
+    console.log('inactiveSubscriptions: ', inactiveSubscriptions);
+
     const isPayable = activeSubscription ? new Date() > new Date(activeSubscription.next_payment_date) && !activeSubscription.is_in_trial : false;
 
     const handleDeactivate = async () => {
@@ -291,7 +294,7 @@ const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
                                         <CardHeader className='flex flex-row items-start justify-between w-[300px]'>
                                             <div className='text-lg font-bold'>
                                                 {subscription.subscription_tier.title}
-                                                <p className='text-muted-foreground text-sm'>{subscription.billing_cycle === "Monthly" ? "شهري" : "سنوي"}</p>
+                                                <p className='text-muted-foreground text-sm'>{(subscription.billing_cycle === "Monthly" || subscription.billing_cycle === "monthly") ? "شهري" : "سنوي"}</p>
                                             </div>
                                             <Badge>
                                                 {subscription.status === 'active' ? 'جاري' : 'متوقف'}

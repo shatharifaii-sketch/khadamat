@@ -50,6 +50,7 @@ export const useSubscriptionsPayment = () => {
                     )
                     `)
                 .eq('user_id', user.id)
+                .not('subscription_id', 'is', null)
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
@@ -57,6 +58,8 @@ export const useSubscriptionsPayment = () => {
             return data as SubscriptionTransaction[];
         }
     });
+
+    console.log("getUserTransactions", getUserTransactions);
 
     return {
         paymentTransactions: getUserTransactions.data || [],
