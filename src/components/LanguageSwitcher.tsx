@@ -1,13 +1,17 @@
 import { Button } from '@/components/ui/button';
 import { Globe } from 'lucide-react';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 const LanguageSwitcher = () => {
-  const { language, setLanguage } = useLanguage();
+  const { i18n } = useTranslation();
+
+  const currentLanguage = i18n.language;
 
   const toggleLanguage = () => {
-    setLanguage(language === 'ar' ? 'en' : 'ar');
-  };
+    const newLanguage = currentLanguage === 'ar' ? 'en' : 'ar';
+
+    i18n.changeLanguage(newLanguage);
+  }
 
   return (
     <Button
@@ -15,12 +19,12 @@ const LanguageSwitcher = () => {
       size="sm"
       aria-label="Change language"
       onClick={toggleLanguage}
-      className="gap-1 notranslate"
-      translate="no"
+      className="gap-1"
     >
       <Globe size={16} />
       <span className="text-xs font-medium">
-        {language === 'ar' ? 'EN' : 'ع'}
+        {currentLanguage === 'en' && 'EN'}
+        {currentLanguage === 'ar' && 'ع'}
       </span>
     </Button>
   );

@@ -20,24 +20,6 @@
 
   <body>
     <div id="root"></div>
-    <div id="google_translate_element" style="display:none"></div>
-    <script type="text/javascript">
-      function googleTranslateElementInit() {
-        new google.translate.TranslateElement({
-          pageLanguage: 'ar',
-          includedLanguages: 'ar,en',
-          autoDisplay: false,
-          layout: google.translate.TranslateElement.InlineLayout.SIMPLE
-        }, 'google_translate_element');
-      }
-    </script>
-    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-    <style>
-      .goog-te-banner-frame, .skiptranslate { display: none !important; }
-      body { top: 0 !important; }
-      font[style] { background: none !important; box-shadow: none !important; }
-      html.translating-lang * { transition: opacity 0.25s ease; }
-    </style>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 type Language = 'ar' | 'en';
 
@@ -63,53 +63,8 @@ interface LanguageProviderProps {
   children: ReactNode;
 }
 
-const setGoogleTranslateCookie = (lang: Language) => {
-  // Google Translate reads the `googtrans` cookie to choose target language.
-  const value = lang === 'ar' ? '/ar/ar' : '/ar/en';
-  const hostname = window.location.hostname;
-  const domains = ['', hostname, '.' + hostname];
-  // Clear existing cookies first
-  domains.forEach((d) => {
-    document.cookie = `googtrans=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/${d ? `;domain=${d}` : ''}`;
-  });
-  document.cookie = `googtrans=${value};path=/`;
-  document.cookie = `googtrans=${value};path=/;domain=${hostname}`;
-  document.cookie = `googtrans=${value};path=/;domain=.${hostname}`;
-};
-
 export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
-  const [language, setLanguageState] = useState<Language>(() => {
-    if (typeof window === 'undefined') return 'ar';
-    const stored = localStorage.getItem('app_language') as Language | null;
-    return stored === 'en' || stored === 'ar' ? stored : 'ar';
-  });
-
-  const applyLanguage = (lang: Language) => {
-    const html = document.documentElement;
-    html.setAttribute('lang', lang);
-    html.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
-    html.classList.add('translating-lang');
-    setGoogleTranslateCookie(lang);
-    // Trigger Google Translate to re-evaluate by reloading once cookie is set.
-    // A reload is the most reliable way for the widget to pick up the new cookie.
-    setTimeout(() => {
-      window.location.reload();
-    }, 150);
-  };
-
-  // Apply direction on initial mount without reloading.
-  useEffect(() => {
-    const html = document.documentElement;
-    html.setAttribute('lang', language);
-    html.setAttribute('dir', language === 'ar' ? 'rtl' : 'ltr');
-  }, []);
-
-  const setLanguage = (lang: Language) => {
-    if (lang === language) return;
-    localStorage.setItem('app_language', lang);
-    setLanguageState(lang);
-    applyLanguage(lang);
-  };
+  const [language, setLanguage] = useState<Language>('ar');
 
   const t = (key: string): string => {
     return translations[language][key] || key;
