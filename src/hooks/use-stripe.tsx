@@ -83,7 +83,7 @@ const verifyStripeSessionId = async (sessionId: string) => {
           )`)
         .eq('user_id', data.subscription.metadata.user_id)
         .eq('status', 'active')
-        .single();
+        .maybeSingle();
 
     if (userSubError) {
         console.log(error);
