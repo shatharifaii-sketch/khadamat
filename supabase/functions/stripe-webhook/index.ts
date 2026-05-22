@@ -546,18 +546,7 @@ async function handleSubscriptionUpdated(subscription: any) {
     const paymentsStart = new Date(subscription.items.data[0].current_period_start * 1000);
     const endedAt = new Date(subscription.ended_at * 1000);
 
-    if (subscription.status === 'canceled' || subscription.status === 'past_due') {
-      const deactivateResponse = await deactivateSub(
-        subscription.id,
-        endedAt
-      );
-
-      if (!deactivateResponse) {
-        return false;
-      };
-    }
-
-    if (subscription.status === 'canceled') {
+    if (subscription.cancellation_details ? subscription.cancellation_details.reason === 'cancellation_requested' : false) {
       const { error: resendError } = await resend.emails.send({
         from: "Khedemtak <support@mail.khedemtak.com>",
         to: subscription.metadata.email,
@@ -575,6 +564,15 @@ async function handleSubscriptionUpdated(subscription: any) {
 
       if (resendError) {
         console.log('subscription creation resend error: ', resendError);
+        return false;
+      };
+
+      const deactivateResponse = await deactivateSub(
+        subscription.id,
+        endedAt
+      );
+
+      if (!deactivateResponse) {
         return false;
       };
     }
