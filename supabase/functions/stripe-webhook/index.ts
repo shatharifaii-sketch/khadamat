@@ -546,18 +546,7 @@ async function handleSubscriptionUpdated(subscription: any) {
     const paymentsStart = new Date(subscription.items.data[0].current_period_start * 1000);
     const endedAt = new Date(subscription.ended_at * 1000);
 
-    if (subscription.status === 'canceled' || subscription.status === 'past_due') {
-      const deactivateResponse = await deactivateSub(
-        subscription.id,
-        endedAt
-      );
-
-      if (!deactivateResponse) {
-        return false;
-      };
-    }
-
-    if (subscription.status === 'canceled') {
+    if (subscription.cancellation_details ? subscription.cancellation_details.reason === 'cancellation_requested' : false) {
       const { error: resendError } = await resend.emails.send({
         from: "Khedemtak <support@mail.khedemtak.com>",
         to: subscription.metadata.email,
@@ -575,6 +564,15 @@ async function handleSubscriptionUpdated(subscription: any) {
 
       if (resendError) {
         console.log('subscription creation resend error: ', resendError);
+        return false;
+      };
+
+      const deactivateResponse = await deactivateSub(
+        subscription.id,
+        endedAt
+      );
+
+      if (!deactivateResponse) {
         return false;
       };
     }
@@ -659,7 +657,7 @@ Deno.serve(async (req: Request) => {
   let data;
   let eventType;
 
-  const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET")!;
+  const webhookSecret = Deno.env.get("LIVE_STRIPE_WEBHOOK_SECRET")!;
   console.log("wh sec: ", webhookSecret);
 
   if (webhookSecret) {
@@ -983,44 +981,6 @@ Deno.serve(async (req: Request) => {
         event_type: 'customer.subscription.trial_will_end',
       });
 
-      break;
-    case 'charge.updated':
-      const { data: subUpdatedEvent } = await supabase.from('stripe_events').select('id').eq('event_id', data.object.id).maybeSingle();
-
-      if (subUpdatedEvent) {
-        return new Response("Event already happened: ", {
-          status: 200,
-          headers: {
-            ...corsHeaders,
-            "Content-Type": "application/json",
-          },
-        })
-      };
-
-      await supabase.from('stripe_events').insert({
-        event_id: data.object.id,
-        event_type: 'charge.updated',
-      });
-
-      break;
-    case 'payment_intent.succeeded':
-      const { data: subUpdatedEvent } = await supabase.from('stripe_events').select('id').eq('event_id', data.object.id).maybeSingle();
-
-      if (subUpdatedEvent) {
-        return new Response("Event already happened: ", {
-          status: 200,
-          headers: {
-            ...corsHeaders,
-            "Content-Type": "application/json",
-          },
-        })
-      };
-
-      await supabase.from('stripe_events').insert({
-        event_id: data.object.id,
-        event_type: 'payment_intent.succeeded',
-      });
-      
       break;
     case 'customer.subscription.updated':
       const { data: subUpdatedEvent } = await supabase.from('stripe_events').select('id').eq('event_id', data.object.id).maybeSingle();

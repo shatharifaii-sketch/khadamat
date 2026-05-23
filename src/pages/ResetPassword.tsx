@@ -37,7 +37,7 @@ const ResetPassword = () => {
       })
     }
 
-    if (formData.newPassword.length < 6) {
+    if (formData.newPassword && formData.newPassword.length < 6) {
       newErrors.push({
         field: 'newPassword',
         message: t("reset_password_page.errors.new_password_min")
@@ -122,6 +122,12 @@ const ResetPassword = () => {
                   type={showPassword ? 'text' : 'password'}
                   value={formData.newPassword}
                   onChange={(e) => handleChange('newPassword', e.target.value)}
+                  aria-invalid={!!getError('newPassword')}
+                  className={
+                    getError('newPassword')
+                      ? 'border-red-500 focus-visible:ring-red-500'
+                      : ''
+                  }
                 />
                 {getError('newPassword') && (
                   <p className="text-red-500 text-sm mt-1">
@@ -135,6 +141,12 @@ const ResetPassword = () => {
                   type={showPassword ? 'text' : 'password'}
                   value={formData.confirmPassword}
                   onChange={(e) => handleChange('confirmPassword', e.target.value)}
+                  aria-invalid={!!getError('confirmPassword')}
+                  className={
+                    getError('confirmPassword')
+                      ? 'border-red-500 focus-visible:ring-red-500'
+                      : ''
+                  }
                 />
                 {getError('confirmPassword') && (
                   <p className="text-red-500 text-sm mt-1">
