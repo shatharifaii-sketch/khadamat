@@ -94,7 +94,7 @@ export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
       clearPendingService();
 
       // Navigate to account page to see the service
-      navigate('/account');
+      navigate('/account', { state: { servicePending: true }});
     } catch (error) {
       console.error('Error submitting service:', error);
     }

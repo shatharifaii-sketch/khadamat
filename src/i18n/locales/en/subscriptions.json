@@ -31,6 +31,7 @@
         "subscription_details_title": "Subscription details",
         "allowed_services": "Allowed services",
         "go_home": "Go to homepage",
-        "invalid_session_redirect": "Redirecting to homepage"
+        "invalid_session_redirect": "Redirecting to homepage",
+        "available_services": "Available services count:"
     }
 }

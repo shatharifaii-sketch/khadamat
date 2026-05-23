@@ -167,7 +167,7 @@ const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
                                         >
                                             {t("subscriptions.billing_portal")}
                                         </Button>
-                                        {/* <Button
+                                        <Button
                                             onClick={() => {
                                                 createExtraCheckoutSession({
                                                     userId: user.id,
@@ -176,16 +176,18 @@ const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
                                                 })
                                             }}
                                             className='flex-1 mt-1'
-                                            disabled={isCreatingExtraCheckoutSessionPending || activeSubscription.services_used < activeSubscription.services_allowed}
+                                            // disabled={isCreatingExtraCheckoutSessionPending || activeSubscription.services_used < activeSubscription.services_allowed}
+                                            disabled={true}
                                         >
                                             {t("subscriptions.get_extra_service")}
-                                        </Button> */}
-                                        <Button
+                                            {lang === "en" ? ' (coming soon)' : '(قريبا)'}
+                                        </Button>
+                                        {/* <Button
                                             onClick={() => setOpenPaymentModal(true)} className='flex-1 mt-3'
                                             disabled={true}
                                         >
                                             {t("subscriptions.pay_now")}
-                                        </Button>
+                                        </Button> */}
                                         {/*<button onClick={handlePay} className='flex-1 mt-3 bg-green-600 text-white p-2 rounded-md'>
                                             pay
                                         </button>*/}
@@ -254,20 +256,12 @@ const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
             </Dialog> */}
 
             <Drawer
-                direction='right'
+                direction={lang === "ar" ? 'right' : 'left'}
                 open={openSubscribeModal}
                 onOpenChange={() => setOpenSubscribeModal(false)}
             >
                 <DrawerContent className='h-screen w-full sm:w-4/5 lg:w-2/5 transition-all rounded-none'>
-                    <DrawerHeader className='flex items-center justify-between'>
-                        <DrawerTitle className='text-2xl text-start'>
-                            أنواع الاشتراك
-                        </DrawerTitle>
-                    </DrawerHeader>
                     <DrawerDescription className='flex flex-col gap-4 px-5 overflow-y-auto'>
-                        <div>
-                            <p>يجب على الجميع الاشتراك بأحد العروض المتوفرة للحصول على قدرة نشر الخدمات</p>
-                        </div>
                         <Suspense fallback={<div>Loading...</div>}>
                             <ErrorBoundary fallback={<div>Something went wrong</div>}>
                                 <SubscriptionsModal setDrawerOpen={() => setOpenSubscribeModal(false)} user={user} />
@@ -276,7 +270,7 @@ const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
                     </DrawerDescription>
                     <DrawerFooter>
                         <DrawerClose className='flex'>
-                            <Button variant='ghost' className='flex-1'>إلغاء</Button>
+                            <Button variant='ghost' className='flex-1'>{t("subscriptions.drawer.close")}</Button>
                         </DrawerClose>
                     </DrawerFooter>
                 </DrawerContent>

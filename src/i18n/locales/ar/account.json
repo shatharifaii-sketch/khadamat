@@ -51,6 +51,7 @@
     "experience_years_placeholder": "عدد سنوات الخبرة",
     "service_provider": "مقدم خدمة",
     "service_provider_description": "تم تفعيل هذا تلقائياً لأن لديك خدمات منشورة",
+    "service_pending": "الخدمة معلقة",
     "subscriptions": {
         "subscriptions_info": "معلومات الاشتراك",
         "subscriptions_description": "إدارة ومتابعة اشتراكاتك",
@@ -78,7 +79,10 @@
         "deactivate_button": "تأكيد الغاء الاشتراك",
         "past_subscriptions": "الاشتراكات السابقة",
         "no_past_subscriptions": "لا توجد اشتراكات سابقة",
-        "get_extra_service": "احصل على خدمة إضافية"
+        "get_extra_service": "احصل على خدمة إضافية",
+        "drawer": {
+            "close": "إلغاء"
+        }
     },
     "transactions": {
             "title": "الدفعات السابقة",

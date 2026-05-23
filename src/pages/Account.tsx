@@ -15,7 +15,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { useServices } from '@/hooks/useServices';
 import { useSubscription } from '@/hooks/useSubscription';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 import ServiceManagementCard from '@/components/Account/ServiceManagementCard';
@@ -34,6 +34,14 @@ import { useIsMobile } from '@/hooks/use-mobile';
 const Account = () => {
   const { t } = useTranslation("account");
   const lang = localStorage.getItem("language") || "en";
+  const location = useLocation();
+  const servicePending = location.state?.servicePending as boolean ?? false;
+
+  useEffect(() => {
+    if (servicePending) {
+      toast.success(t("service_pending"));
+    }
+  }, [servicePending, t]);
 
   const isMobile = useIsMobile();
   const { user, loading } = useAuth();

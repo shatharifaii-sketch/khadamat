@@ -119,9 +119,12 @@ const { data } = useSuspenseQuery({
 }
 
 export const useServiceToEditData = (id: string) => {
-  const { data } = useSuspenseQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['service-edit-data', id],
+    enabled: !!id,
     queryFn: async () => {
+      if (!id) return { service: null };
+
       const { data: serviceData, error: serviceError } = await 
         supabase
           .from('services')
@@ -166,5 +169,8 @@ export const useServiceToEditData = (id: string) => {
     }
   });
 
-  return data;
+  return {
+    service: data?.service,
+    isLoading
+  };
 }
