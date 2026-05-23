@@ -32,6 +32,7 @@
     "experience_years_placeholder": "Number of years of experience",
     "service_provider": "Service Provider",
     "service_provider_description": "This has been automatically activated because you have published services",
+    "service_pending": "Service pending Approval",
     "subscriptions": {
         "subscriptions_info": "Subscription Information",
         "subscriptions_description": "Manage and track your subscriptions",
@@ -59,7 +60,10 @@
         "deactivate_button": "Deactivate",
         "past_subscriptions": "Past Subscriptions",
         "no_past_subscriptions": "No past subscriptions",
-        "get_extra_service": "Get an extra service"
+        "get_extra_service": "Get an extra service",
+        "drawer": {
+            "close": "Close"
+        }
     },
     "transactions": {
         "title": "Previous Transactions",

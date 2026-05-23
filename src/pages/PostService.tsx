@@ -17,19 +17,21 @@ const PostService = () => {
   const [searchParams] = useSearchParams();
   const editServiceId = searchParams.get('edit');
   const { user, loading } = useAuth();
-  const {service} = editServiceId ? useServiceToEditData(editServiceId ?? '') : { service: null };
+  const { service, isLoading } = useServiceToEditData(editServiceId);
 
   const isEditMode = !!editServiceId;
   
 
   // Wait for auth to load
-  if (loading) {
+  if (loading || isLoading) {
     return (
       <div className="min-h-screen bg-background arabic">
         <div className="max-w-4xl mx-auto py-12 px-4">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-            <p className="mt-4 text-muted-foreground">جاري التحميل...</p>
+            <p className="mt-4 text-muted-foreground">
+              {t("post_service.loading")}
+            </p>
           </div>
         </div>
       </div>

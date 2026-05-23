@@ -5,7 +5,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { useToast } from '@/hooks/use-toast';
 import { Plus, Edit, Trash2, Eye } from 'lucide-react';
 import { Service, useAdminFunctionality } from '@/hooks/useAdminFunctionality';
 import ServiceForm from './ui/ServiceForm';
@@ -13,10 +12,7 @@ import { NavLink } from 'react-router-dom';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { SelectLabel } from '@radix-ui/react-select';
 import { toast } from 'sonner';
-import { ServiceLink } from '../PostService/ServiceLinks';
-import { Json } from '@/integrations/supabase/types';
 import { useTranslation } from 'react-i18next';
-
 
 
 export interface UserProfile {
