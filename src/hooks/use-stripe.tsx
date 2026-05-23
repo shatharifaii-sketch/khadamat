@@ -34,7 +34,7 @@ const createStripeCheckoutSession = async ({ priceId, userId, email }: { priceId
     if (!userId) return;
 
     const { data, response, error } = await supabase.functions.invoke(
-        "create-checkout-session-dev",
+        "create-checkout-session",
         {
             body: JSON.stringify({
                 priceId,
@@ -54,7 +54,7 @@ const createStripeCheckoutSession = async ({ priceId, userId, email }: { priceId
 
 const verifyStripeSessionId = async (sessionId: string) => {
     const { data, error } = await supabase.functions.invoke(
-        "verify-stripe-checkout-session-id-dev",
+        "verify-stripe-checkout-session-id",
         {
             body: JSON.stringify({ sessionId }),
         }
@@ -66,9 +66,9 @@ const verifyStripeSessionId = async (sessionId: string) => {
     }
 
     const { data: userSub, error: userSubError } = await supabase
-        .from('subscriptions_dev')
+        .from('subscriptions')
         .select(`*, 
-          subscription_tier:subscriptions_dev_tier_id_fkey (
+          subscription_tier:subscriptions_tier_id_fkey (
             id,
             title,
             allowed_services,
@@ -95,7 +95,7 @@ const verifyStripeSessionId = async (sessionId: string) => {
 
 const getBillingPortalSession = async (customerId: string) => {
     const { data, error } = await supabase.functions.invoke(
-        "stripe-billing-portal-dev",
+        "stripe-billing-portal",
         {
             body: JSON.stringify({ customerId }),
         }
@@ -114,7 +114,7 @@ const createExtraStripeCheckoutSession = async ({ userId, email, name }: { userI
     console.log('Creating extra checkout session for user:', userId, email, name);
 
     const { data, response, error } = await supabase.functions.invoke(
-        "create-extra-product-checkout-session-dev",
+        "create-extra-product-checkout-session",
         {
             body: {
                 userId: userId,

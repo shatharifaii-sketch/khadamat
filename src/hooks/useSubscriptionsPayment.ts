@@ -33,18 +33,18 @@ export const useSubscriptionsPayment = () => {
         queryKey: ['subscriptions-transactions'],
         queryFn: async () => {
             const { data, error } = await supabase
-                .from('subscription_transactions_dev')
+                .from('subscription_transactions')
                 .select(`
                     *,
-                    subscription: subscription_transactions_dev_subscription_id_fkey (
-                        tier: subscriptions_dev_tier_id_fkey (title),
+                    subscription: subscription_transactions_subscription_id_fkey (
+                        tier: subscriptions_tier_id_fkey (title),
                         billing_cycle,
                         started_at,
                         expires_at,
                         services_allowed,
                         services_used
                     ),
-                    coupon: subscription_transactions_dev_coupon_id_fkey (
+                    coupon: subscription_transactions_coupon_id_fkey (
                         code,
                         type
                     )
