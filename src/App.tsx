@@ -36,6 +36,7 @@ import ScrollToTop from "./components/ScrollToTop";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import { useWebsiteAnalytics } from "./hooks/useWebsiteAnalytics";
+import ExtraPaymentSuccess from "./pages/payments/ExtraPaymentSuccess";
 
 const queryClient = new QueryClient();
 
@@ -85,6 +86,7 @@ function App() {
 
 
                   <Route path="payment-success" element={<PaymentSuccess /> } />
+                  <Route path="extra-payment-success" element={<ExtraPaymentSuccess /> } />
                   <Route path="payment-failed" element={<PaymentFailed /> } />
 
 

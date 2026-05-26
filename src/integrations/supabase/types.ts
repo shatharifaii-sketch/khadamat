@@ -1612,14 +1612,16 @@ export type Database = {
           created_at: string
           currency: string | null
           email_sent: boolean | null
+          extra_stripe_customer_id: string | null
           id: string
           invoice_id: number | null
           invoice_url: string | null
           payment_date: string | null
           payment_status: string | null
-          status: string
+          stripe_charge_id: string | null
           stripe_customer_id: string | null
           stripe_invoice_id: string | null
+          stripe_payment_intent_id: string | null
           stripe_price_id: string | null
           stripe_product_id: string | null
           stripe_subscription_id: string | null
@@ -1638,14 +1640,16 @@ export type Database = {
           created_at?: string
           currency?: string | null
           email_sent?: boolean | null
+          extra_stripe_customer_id?: string | null
           id?: string
           invoice_id?: number | null
           invoice_url?: string | null
           payment_date?: string | null
           payment_status?: string | null
-          status?: string
+          stripe_charge_id?: string | null
           stripe_customer_id?: string | null
           stripe_invoice_id?: string | null
+          stripe_payment_intent_id?: string | null
           stripe_price_id?: string | null
           stripe_product_id?: string | null
           stripe_subscription_id?: string | null
@@ -1664,14 +1668,16 @@ export type Database = {
           created_at?: string
           currency?: string | null
           email_sent?: boolean | null
+          extra_stripe_customer_id?: string | null
           id?: string
           invoice_id?: number | null
           invoice_url?: string | null
           payment_date?: string | null
           payment_status?: string | null
-          status?: string
+          stripe_charge_id?: string | null
           stripe_customer_id?: string | null
           stripe_invoice_id?: string | null
+          stripe_payment_intent_id?: string | null
           stripe_price_id?: string | null
           stripe_product_id?: string | null
           stripe_subscription_id?: string | null
@@ -2050,6 +2056,7 @@ export type Database = {
       users_with_extra_products: {
         Row: {
           created_at: string
+          extra_products_count: number | null
           id: string
           product_id: string | null
           stripe_customer_id: string | null
@@ -2059,6 +2066,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          extra_products_count?: number | null
           id?: string
           product_id?: string | null
           stripe_customer_id?: string | null
@@ -2068,6 +2076,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          extra_products_count?: number | null
           id?: string
           product_id?: string | null
           stripe_customer_id?: string | null
@@ -2086,14 +2095,14 @@ export type Database = {
           {
             foreignKeyName: "users_with_extra_products_user_id_fkey"
             columns: ["user_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "users_with_extra_products_user_id_fkey"
             columns: ["user_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "profiles_with_email"
             referencedColumns: ["id"]
           },

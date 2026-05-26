@@ -32,10 +32,11 @@ const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
     const [openDeactivateModal, setOpenDeactivateModal] = useState<boolean>(false);
     const [currency, setCurrency] = useState<string>('ILS');
 
-    const { activeSubscription, inactiveSubscriptions } = getUserSubscriptions.data;
+    const { activeSubscription, inactiveSubscriptions, extraProductsCount } = getUserSubscriptions.data;
 
     console.log('activeSubscription: ', activeSubscription);
     console.log('inactiveSubscriptions: ', inactiveSubscriptions);
+    console.log('extraProductsCount: ', extraProductsCount);
 
     const isPayable = activeSubscription ? new Date() > new Date(activeSubscription.next_payment_date) && !activeSubscription.is_in_trial : false;
 
@@ -176,8 +177,7 @@ const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
                                                 })
                                             }}
                                             className='flex-1 mt-1'
-                                            // disabled={isCreatingExtraCheckoutSessionPending || activeSubscription.services_used < activeSubscription.services_allowed}
-                                            disabled={true}
+                                            disabled={isCreatingExtraCheckoutSessionPending || activeSubscription.services_used < (activeSubscription.services_allowed + extraProductsCount)}
                                         >
                                             {t("subscriptions.get_extra_service")}
                                             {lang === "en" ? ' (coming soon)' : '(قريبا)'}

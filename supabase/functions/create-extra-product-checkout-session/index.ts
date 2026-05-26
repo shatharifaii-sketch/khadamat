@@ -62,6 +62,18 @@ async function getStripeData(name: string, user_id: string) {
   }
 }
 
+async function getCustomerIdFromDB(user_id: string) {
+  const { data: { stripe_customer_id }, error: customerError } = await supabase.from("profiles").select("*").eq("id", user_id).maybeSingle();
+
+  if (customerError) {
+    console.log(customerError);
+
+    return null;
+  }
+
+  return stripe_customer_id
+}
+
 Deno.serve(async (req: Request) => {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
@@ -97,6 +109,27 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    let customerId = await getCustomerIdFromDB(userId);
+
+    if (!customerId) {
+      const customer = await stripe.customers.create({
+        email,
+        metadata: {
+          userId
+        }
+      });
+      
+      customerId = customer.id;
+
+      const { error } = await supabase.from("profiles").update({
+        stripe_customer_id: customerId
+      }).eq("id", userId);
+
+      if (error) {
+        console.log(error);
+      }
+    }
+
     const { priceId, stripeCustomerId, productId } = await getStripeData(name, userId);
 
     if (!priceId || !stripeCustomerId || !productId) {
@@ -117,7 +150,7 @@ Deno.serve(async (req: Request) => {
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      customer_email: email,
+      customer: customerId,
       line_items: [
         {
           price: priceId,

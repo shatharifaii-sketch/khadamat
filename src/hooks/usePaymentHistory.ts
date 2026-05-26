@@ -31,7 +31,7 @@ export const usePaymentHistory = () => {
       if (!user) return [];
       
       const { data, error } = await supabase
-        .from('subscription_transactions')
+        .from('subscription_transactions_dev')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });

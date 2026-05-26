@@ -76,7 +76,7 @@ async function cancelSubscription({
   stripe_sub_id
 }: CancelSubscriptionInput) {
   const { data, error } = await supabase.functions.invoke(
-    'cancel-subscription', {
+    'cancel-subscription-dev', {
     body: JSON.stringify({
       sub_id,
       email,
@@ -110,9 +110,9 @@ export const useSubscription = () => {
       if (!user) return null;
 
       const { data, error } = await supabase
-        .from('subscriptions')
+        .from('subscriptions_dev')
         .select(`*, 
-          subscription_tier:subscriptions_tier_id_fkey (
+          subscription_tier:subscriptions_dev_tier_id_fkey (
             id,
             title,
             allowed_services,
@@ -144,9 +144,9 @@ notes
       if (!user) return null;
 
       const { data: activeSubscription, error: activeSubscriptionError } = await supabase
-        .from('subscriptions')
+        .from('subscriptions_dev')
         .select(`*, 
-          subscription_tier:subscriptions_tier_id_fkey (
+          subscription_tier:subscriptions_dev_tier_id_fkey (
             id,
             title,
             allowed_services,
@@ -171,9 +171,9 @@ notes
       console.log('Active subscription:', activeSubscription);
 
       const { data: inactiveSubscriptions, error: inactiveSubscriptionsError } = await supabase
-        .from('subscriptions')
+        .from('subscriptions_dev')
         .select(`*, 
-          subscription_tier:subscriptions_tier_id_fkey (
+          subscription_tier:subscriptions_dev_tier_id_fkey (
             id,
             title,
             allowed_services,
@@ -194,12 +194,24 @@ notes
         throw inactiveSubscriptionsError;
       }
 
+      const { data: userExtraProducts, error: userExtraProductsError } = await supabase
+        .from('users_with_extra_products')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (userExtraProductsError && userExtraProductsError.code !== 'PGRST116') {
+        console.error('Error fetching subscription:', userExtraProductsError);
+      }
+
       return {
         activeSubscription,
-        inactiveSubscriptions
+        inactiveSubscriptions,
+        extraProductsCount: userExtraProducts?.extra_products_count || 0
       } as {
         activeSubscription: Subscription;
         inactiveSubscriptions: Subscription[];
+        extraProductsCount: number;
       };
     },
   });
@@ -348,12 +360,20 @@ notes
         };
       }
 
+      const { data: userExtraProducts, error: extraProductsError } = await supabase.from("users_with_extra_products").select("*").eq("user_id", user.id).maybeSingle();
+
+      if (extraProductsError) {
+        console.error('Error checking user extra products for quota:', extraProductsError);
+      }
+
       const currentServiceCount = userServices?.length || 0;
+
+      const canPost = currentServiceCount < (subscription.services_allowed + (userExtraProducts?.extra_products_count || 0));
 
       return {
         user: true,
         subscription: true,
-        canPost: currentServiceCount < subscription.services_allowed
+        canPost
       };
     }
   })

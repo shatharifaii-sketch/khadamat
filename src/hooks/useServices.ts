@@ -77,7 +77,7 @@ export const useServices = () => {
       }
       
       const { data: subscription, error: subError } = await supabase
-        .from('subscriptions')
+        .from('subscriptions_dev')
         .select('services_allowed, services_used')
         .eq('user_id', user?.id)
         .eq('status', 'active')
@@ -98,11 +98,17 @@ export const useServices = () => {
         console.error('Error checking user services:', servicesError);
         throw new Error('خطأ في التحقق من الخدمات: ' + servicesError.message);
       }
+
+      const { data: userExtraProducts, error: extraProductsError } = await supabase.from("users_with_extra_products").select("*").eq("user_id", user.id).maybeSingle();
+
+      if (extraProductsError) {
+        console.error('Error checking user extra products for quota:', extraProductsError);
+      }
       
       const currentServiceCount = userServices?.length || 0;
       
       // If no subscription exists or user already has services equal to or more than allowed
-      if (!subscription || currentServiceCount >= (subscription.services_allowed || 0)) {
+      if (!subscription || currentServiceCount >= (subscription.services_allowed + (userExtraProducts?.extra_products_count || 0))) {
         const message = subscription ? 'لقد استنفدت حصتك من الخدمات. يرجى الدفع لنشر المزيد من الخدمات.' : 'لا يوجد اشتراك نشط. يرجى الدفع لنشر الخدمات.'
         throw new Error(message);
       }
@@ -165,7 +171,7 @@ export const useServices = () => {
       // Update services_used count to reflect actual service count
       console.log('Updating services_used count...');
       const { error: updateError } = await supabase
-        .from('subscriptions')
+        .from('subscriptions_dev')
         .update({ 
           services_used: currentServiceCount + 1,
           updated_at: new Date().toISOString()

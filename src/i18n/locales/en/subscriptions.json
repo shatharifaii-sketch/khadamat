@@ -33,5 +33,17 @@
         "go_home": "Go to homepage",
         "invalid_session_redirect": "Redirecting to homepage",
         "available_services": "Available services count:"
+    },
+    "extra_payment_success": {
+        "loading_title": "Verifying payment...",
+        "error_title": "Payment verification failed",
+        "error_description": "An error occurred while processing the payment. Please try again.",
+        "back_home": "Back to Home",
+        "success_title": "Payment Successful",
+        "success_description": "An extra service slot has been added to your account successfully. You can now post a new service.",
+        "what_happened_title": "What happened now?",
+        "what_happened_description": "You purchased an additional service after reaching the maximum number of services allowed by your current subscription.",
+        "post_new_service": "Post a New Service",
+        "go_to_account": "Go to My Account"
     }
 }

@@ -73,7 +73,8 @@
         "subscription_type": "Subscription Type",
         "status": "Status",
         "receipt": "Receipt",
-        "download_receipt": "Download Receipt"
+        "download_receipt": "Download Receipt",
+        "extra_product_payment": "Extra Product Payment"
     },
     "change_email": "Change Email",
     "confirm": "Confirm",
@@ -100,5 +101,17 @@
     "drag_and_drop_or_click_button": "Choose Image",
     "save_image": "Save Image",
     "saving_changes": "Saving changes...",
-    "save_changes": "Save Changes"
+    "save_changes": "Save Changes",
+    "service_card": {
+        "badge_new": "New",
+        "published_at": "Published at",
+        "views": "Views",
+        "edit_service": "Edit Service",
+        "contact": "Contacted",
+        "published": "Published",
+        "draft": "Draft",
+        "pending": "Pending",
+        "pending-approval": "Pending Approval",
+        "unknown": "Unknown"
+    }
 }

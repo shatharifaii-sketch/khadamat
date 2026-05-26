@@ -92,7 +92,8 @@
             "subscription_type": "نوع الاشتراك",
             "status": "الحالة",
             "receipt": "الفاتورة",
-            "download_receipt": "تحميل الفاتورة"
+            "download_receipt": "تحميل الفاتورة",
+            "extra_product_payment": "دفعة خدمة اضافية"
     },
     "change_email": "تغيير البريد الإلكتروني",
     "confirm": "تأكيد",
@@ -119,5 +120,17 @@
     "drag_and_drop_or_click_button": "اختر صورة",
     "save_image": "حفظ الصورة",
     "saving_changes": "جاري حفظ التغييرات",
-    "save_changes": "حفظ التغييرات"
+    "save_changes": "حفظ التغييرات",
+    "service_card": {
+        "badge_new": "جديد",
+        "published_at": "نشر في",
+        "views": "مشاهدة",
+        "edit_service": "تعديل الخدمة",
+        "contact": "تواصل",
+        "published": "منشور",
+        "draft": "مسودة",
+        "pending": "في الانتظار",
+        "pending-approval": "قيد المراجعة",
+        "unknown": "غير معروف"
+    }
 }
