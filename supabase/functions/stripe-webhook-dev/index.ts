@@ -191,11 +191,10 @@ async function handleExtraProductInvoiceCreated(invoice: any) {
     };
 
     const { data: transactionData, error: transactionError } = await supabase.from("subscription_transactions_dev").update({
-      stripe_invoice_id: invoice.id ?? null,
       invoice_id: data?.id ?? null,
       invoice_url: invoice.invoice_pdf,
       stripe_price_id: invoice.lines.data[0].pricing.price_details.price
-    }).eq('extra_stripe_customer_id', invoice.customer).select('id').maybeSingle();
+    }).eq('extra_stripe_customer_id', invoice.customer).eq('stripe_invoice_id', invoice.id).select('id').maybeSingle();
 
     if (transactionError) {
       console.log('Error updating transaction in database: ', transactionError);
@@ -352,7 +351,7 @@ async function handleSubscriptionCheckoutSessionCompleted(session: any) {
 
 async function handleExtraProductCheckoutSessionCompleted(session: any) {
   try {
-    const { data: userExtraProducts, error: userWithExtraProductError } = await supabase.from("users_with_extra_products").select("*").eq("id", session.client_reference_id).maybeSingle();
+    const { data: userExtraProducts, error: userWithExtraProductError } = await supabase.from("users_with_extra_products").select("*").eq("user_id", session.client_reference_id).maybeSingle();
 
     if (userWithExtraProductError) {
       console.log('checkout session user with extra product error: ', userWithExtraProductError);
@@ -379,6 +378,26 @@ async function handleExtraProductCheckoutSessionCompleted(session: any) {
     if (productError) {
       console.log('checkout session product error: ', productError);
       return false;
+    }
+
+    const { data: existingData, error: dataError } = await supabase.from("users_with_extra_products").select("*").eq("user_id", session.client_reference_id).maybeSingle();
+
+    if (dataError) {
+      console.log('checkout session data error: ', dataError);
+      return false;
+    }
+
+    if (existingData) {
+      const { error } = await supabase.from("users_with_extra_products").update({
+        extra_products_count: productCount
+      }).eq("id", existingData.id);
+
+      if (error) {
+        console.log('checkout session product error: ', error);
+        return false;
+      }
+
+      return true;
     }
 
     const { error } = await supabase.from("users_with_extra_products").upsert({
