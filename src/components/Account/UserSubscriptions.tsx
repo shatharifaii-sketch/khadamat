@@ -180,7 +180,6 @@ const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
                                             disabled={isCreatingExtraCheckoutSessionPending || activeSubscription.services_used < (activeSubscription.services_allowed + extraProductsCount)}
                                         >
                                             {t("subscriptions.get_extra_service")}
-                                            {lang === "en" ? ' (coming soon)' : '(قريبا)'}
                                         </Button>
                                         {/* <Button
                                             onClick={() => setOpenPaymentModal(true)} className='flex-1 mt-3'
