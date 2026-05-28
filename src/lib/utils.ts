@@ -8,6 +8,7 @@ import {
   FaLinkedin,
   FaTiktok
 } from "react-icons/fa6";
+import parsePhoneNumberFromString from "libphonenumber-js";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -68,3 +69,27 @@ export const platforms = [
 ];
 
 export const isMobile = /Android|iphone/i.test(navigator.userAgent);
+
+export const validateWhatsappPhone = (value: string) => {
+    const parsed = parsePhoneNumberFromString(value);
+
+    if (!parsed) {
+      return {
+        valid: false,
+        message: 'Invalid phone number',
+      };
+    }
+
+    if (!parsed.isValid()) {
+      return {
+        valid: false,
+        message: 'Invalid phone number',
+      };
+    }
+
+    return {
+      valid: true,
+      formatted: parsed.number,
+      country: parsed.country,
+    };
+  };

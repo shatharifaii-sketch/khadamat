@@ -52,6 +52,7 @@
     "service_provider": "مقدم خدمة",
     "service_provider_description": "تم تفعيل هذا تلقائياً لأن لديك خدمات منشورة",
     "service_pending": "الخدمة معلقة",
+    "not_whatsapp_valid": "الرقم قد لا يعمل للتواصل عبر الواتساب",
     "subscriptions": {
         "subscriptions_info": "معلومات الاشتراك",
         "subscriptions_description": "إدارة ومتابعة اشتراكاتك",

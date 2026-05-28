@@ -58,7 +58,7 @@ const ServiceView = ({
   const { t } = useTranslation("services");
   const lang = localStorage.getItem("language") || "en";
   return (
-    <div className='flex flex-col gap-5 md:gap-10' dir={lang === "ar" ? "rtl" : "ltr"}>
+    <div className='flex flex-col gap-2 md:gap-4' dir={lang === "ar" ? "rtl" : "ltr"}>
       <ServiceHeader
         title={service?.title}
         category={service?.category}
