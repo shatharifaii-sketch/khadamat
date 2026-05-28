@@ -33,6 +33,7 @@
     "service_provider": "Service Provider",
     "service_provider_description": "This has been automatically activated because you have published services",
     "service_pending": "Service pending Approval",
+    "not_whatsapp_valid": "Number may not be valid for WhatsApp",
     "subscriptions": {
         "subscriptions_info": "Subscription Information",
         "subscriptions_description": "Manage and track your subscriptions",

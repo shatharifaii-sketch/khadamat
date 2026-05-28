@@ -30,12 +30,15 @@ import ChangeEmailComponent from '@/components/Account/ChangeEmailComponent';
 import ChangePasswordComponent from '@/components/Account/ChangePasswordComponent';
 import { useTranslation } from 'react-i18next';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { validateWhatsappPhone } from '@/lib/utils';
 
 const Account = () => {
   const { t } = useTranslation("account");
   const lang = localStorage.getItem("language") || "en";
   const location = useLocation();
   const servicePending = location.state?.servicePending as boolean ?? false;
+  const [isNumberValid, setIsNumberValid] = useState(true);
+
 
   useEffect(() => {
     if (servicePending) {
@@ -79,7 +82,30 @@ const Account = () => {
     }
   }, [profile]);
 
+  useEffect(() => {
+    if (profile) {
+      const phoneValidation = validateWhatsappPhone(profile.phone);
+
+      if (!phoneValidation.valid) {
+        setIsNumberValid(false);
+      } else {
+        setIsNumberValid(true);
+      }
+    }
+  }, [profile]);
+
   const handleInputChange = (field: string, value: string | number) => {
+    if (field === 'phone' && typeof value === 'string') {
+      const phoneValidation = validateWhatsappPhone(value);
+
+      console.log('PHONE VALIDATION: ', phoneValidation);
+
+      if (!phoneValidation.valid) {
+        setIsNumberValid(false);
+      } else {
+        setIsNumberValid(true);
+      }
+    }
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -87,8 +113,21 @@ const Account = () => {
     e.preventDefault();
     setIsUpdating(true);
 
+    setIsNumberValid(true);
+
+    const phoneValidation = validateWhatsappPhone(formData.phone);
+
+    if (!phoneValidation.valid) {
+      setIsNumberValid(false);
+    }
+
+    const payload = {
+      ...formData,
+      phone: phoneValidation.formatted
+    }
+
     try {
-      await updateProfile.mutateAsync(formData);
+      await updateProfile.mutateAsync(payload);
       toast.success('تم تحديث الملف الشخصي بنجاح');
     } catch (error) {
       toast.error('فشل في تحديث الملف الشخصي');
@@ -313,6 +352,7 @@ const Account = () => {
                     onChange={(e) => handleInputChange('phone', e.target.value)}
                     placeholder={t("phone")}
                   />
+                  {!isNumberValid && <p className="text-red-500 text-sm">{t("not_whatsapp_valid")}</p>}
                 </div>
               </div>
 

@@ -14,7 +14,6 @@ const ProfileHeader = ({
     phone,
     email
 }: Props) => {
-    console.log(image, name, phone)
     return (
         <div>
             <div className='flex flex-col items-center justify-center w-3/4 mx-auto'>

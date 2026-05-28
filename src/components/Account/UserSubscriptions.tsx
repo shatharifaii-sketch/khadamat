@@ -281,7 +281,7 @@ const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
                 <Label className='text-lg'>{t("subscriptions.past_subscriptions")}</Label>
                 {
                     inactiveSubscriptions && inactiveSubscriptions.length > 0 ? (
-                        <div className='grid grid-cols-2 w-full gap-3 overflow-y-auto max-h-[300px] border p-2 rounded-md'>
+                        <div className='grid grid-cols-2 w-full gap-3 overflow-y-auto max-h-[300px] border p-2 rounded-md bg-muted'>
                             {
                                 inactiveSubscriptions.map((subscription: Subscription) => (
                                     <Card key={subscription.id} className='col-span-1'>

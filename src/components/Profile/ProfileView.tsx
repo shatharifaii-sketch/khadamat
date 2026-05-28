@@ -5,6 +5,7 @@ import ProfileDataCard from './ui/ProfileDataCard';
 import ContactOptions from '../Chat/ui/ContactOptions';
 import ReportDrawer from '../ReportDrawer';
 import { useAuth } from '@/contexts/AuthContext';
+import { validateWhatsappPhone } from '@/lib/utils';
 
 interface Props {
   profile: Tables<'profiles_with_email'>;
@@ -43,6 +44,7 @@ const ProfileView = ({
           setIsConvo={setIsConvo}
           email={profile.email}
           phone={profile.phone}
+          whatsappNumber={validateWhatsappPhone(profile.phone).formatted}
         />
         <ReportDrawer
           itemId={profile?.id}

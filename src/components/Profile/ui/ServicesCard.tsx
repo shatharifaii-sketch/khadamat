@@ -26,10 +26,11 @@ const ServicesCard = ({
             </CardDescription>
         </CardHeader>
         <CardContent>
-            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 border rounded-lg p-2 bg-muted overflow-y-auto'>
                 {
                 services.map((service) => (
                     <ServiceDataCard
+                        key={service.id}
                         service={service}
                     />
                 ))
