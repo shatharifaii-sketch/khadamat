@@ -159,7 +159,7 @@ Deno.serve(async (req: Request) => {
       ],
       allow_promotion_codes: true,
       success_url:
-        Deno.env.get("STRIPE_SUCCESS_URL_LIVE"), //"http://localhost:8080/payment-success?session_id={CHECKOUT_SESSION_ID}",
+        Deno.env.get("EXTRA_STRIPE_SUCCESS_URL_LIVE"), //"http://localhost:8080/payment-success?session_id={CHECKOUT_SESSION_ID}",
       cancel_url: Deno.env.get("STRIPE_FAIL_URL_LIVE"),
       client_reference_id: userId,
       metadata: {
