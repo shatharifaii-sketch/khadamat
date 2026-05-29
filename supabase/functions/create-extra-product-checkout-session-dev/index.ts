@@ -29,7 +29,8 @@ async function getStripeData(name: string, user_id: string) {
     return {
       priceId: null,
       stripeCustomerId: null,
-      productId: null
+      productId: null,
+      subscriptionId: null
     }
   }
 
@@ -41,25 +42,53 @@ async function getStripeData(name: string, user_id: string) {
     return {
       priceId: null,
       stripeCustomerId: null,
-      productId: null
+      productId: null,
+      subscriptionId: null
+    }
+  }
+  
+  const { data: { id }, error: subscriptionError } = await supabase.from("subscriptions_dev").select("id").eq("user_id", user_id).eq("status", "active").maybeSingle();
+
+  if (subscriptionError) {
+    console.log(subscriptionError);
+
+    return {
+      priceId: null,
+      stripeCustomerId: null,
+      productId: null,
+      subscriptionId: null
     }
   }
 
-  if (!stripe_price_id || !stripe_product_id || !stripe_customer_id) {
+  if (!stripe_price_id || !stripe_product_id || !stripe_customer_id || !id) {
     console.log("missing stripe data", stripe_price_id, stripe_product_id, stripe_customer_id);
 
     return {
       priceId: null,
       stripeCustomerId: null,
-      productId: null
+      productId: null,
+      subscriptionId: null
     }
   }
 
   return {
     priceId: stripe_price_id,
     stripeCustomerId: stripe_customer_id,
-    productId: stripe_product_id
+    productId: stripe_product_id,
+    subscriptionId: id
   }
+}
+
+async function getCustomerIdFromDB(user_id: string) {
+  const { data: { stripe_customer_id }, error: customerError } = await supabase.from("profiles").select("*").eq("id", user_id).maybeSingle();
+
+  if (customerError) {
+    console.log(customerError);
+
+    return null;
+  }
+
+  return stripe_customer_id
 }
 
 Deno.serve(async (req: Request) => {
@@ -97,9 +126,30 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const { priceId, stripeCustomerId, productId } = await getStripeData(name, userId);
+    let customerId = await getCustomerIdFromDB(userId);
 
-    if (!priceId || !stripeCustomerId || !productId) {
+    if (!customerId) {
+      const customer = await stripe.customers.create({
+        email,
+        metadata: {
+          userId
+        }
+      });
+      
+      customerId = customer.id;
+
+      const { error } = await supabase.from("profiles").update({
+        stripe_customer_id: customerId
+      }).eq("id", userId);
+
+      if (error) {
+        console.log(error);
+      }
+    }
+
+    const { priceId, stripeCustomerId, productId, subscriptionId } = await getStripeData(name, userId);
+
+    if (!priceId || !stripeCustomerId || !productId || !subscriptionId) {
       return new Response(
         JSON.stringify({
           success: false,
@@ -118,7 +168,7 @@ Deno.serve(async (req: Request) => {
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      customer_email: email,
+      customer: customerId,      
       line_items: [
         {
           price: priceId,
@@ -129,11 +179,17 @@ Deno.serve(async (req: Request) => {
       success_url: "http://localhost:8080/extra-payment-success?session_id={CHECKOUT_SESSION_ID}",
       cancel_url: "http://localhost:8080/payment-failed",
       client_reference_id: userId,
+      invoice_creation: {
+        enabled: true
+      },
       metadata: {
         user_id: userId,
         customer_id: stripeCustomerId,
         email: email,
-        subscription_tier_id: productId
+        extra_product_id: productId,
+        extra_price_id: priceId,
+        subscription_id: subscriptionId,
+        billing_reason: "extra_product_payment"
       }
     });
 

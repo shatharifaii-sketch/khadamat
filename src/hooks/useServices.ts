@@ -98,11 +98,17 @@ export const useServices = () => {
         console.error('Error checking user services:', servicesError);
         throw new Error('خطأ في التحقق من الخدمات: ' + servicesError.message);
       }
+
+      const { data: userExtraProducts, error: extraProductsError } = await supabase.from("users_with_extra_products").select("*").eq("user_id", user.id).maybeSingle();
+
+      if (extraProductsError) {
+        console.error('Error checking user extra products for quota:', extraProductsError);
+      }
       
       const currentServiceCount = userServices?.length || 0;
       
       // If no subscription exists or user already has services equal to or more than allowed
-      if (!subscription || currentServiceCount >= (subscription.services_allowed || 0)) {
+      if (!subscription || currentServiceCount >= (subscription.services_allowed + (userExtraProducts?.extra_products_count || 0))) {
         const message = subscription ? 'لقد استنفدت حصتك من الخدمات. يرجى الدفع لنشر المزيد من الخدمات.' : 'لا يوجد اشتراك نشط. يرجى الدفع لنشر الخدمات.'
         throw new Error(message);
       }

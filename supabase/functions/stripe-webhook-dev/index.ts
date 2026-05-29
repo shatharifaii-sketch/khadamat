@@ -40,12 +40,12 @@ async function checkDiscount(subscriptionId: string) {
     if (!discount) return null;
 
     const { data, error } = await supabase
-        .from('coupons')
-        .select('id')
-        .eq('stripe_coupon_id', discount.source.coupon)
-        .eq('stripe_promo_id', discount.promotion_code)
-        .maybeSingle();
-    
+      .from('coupons')
+      .select('id')
+      .eq('stripe_coupon_id', discount.source.coupon)
+      .eq('stripe_promo_id', discount.promotion_code)
+      .maybeSingle();
+
     if (error) {
       console.log('discount fetch error: ', error);
       return null;
@@ -164,7 +164,156 @@ async function handleInvoiceCreated(invoice: any) {
   }
 }
 
-async function handleCheckoutSessionCompleted(session: any) {
+async function handleExtraProductInvoiceCreated(invoice: any) {
+  try {
+    console.log('creating invoice in database');
+    const { data, error } = await supabase
+      .from('invoices_dev')
+      .insert({
+        user_id: invoice.lines.data[0].metadata.user_id,
+        amount: invoice.amount_due / 100,
+        stripe_invoice_id: invoice.id,
+        status: invoice.status,
+        subtotal: invoice.subtotal,
+        url: invoice.invoice_pdf,
+        stripe_price_id: invoice.lines.data[0].pricing.price_details.price,
+        stripe_product_id: invoice.lines.data[0].pricing.price_details.product,
+        stripe_customer_id: invoice.customer,
+        billing_reason: `${invoice.billing_reason}: extra_product_payment`
+      })
+      .select('*')
+      .maybeSingle();
+
+    if (error) {
+      console.log('Error creating invoice in database: ', error);
+
+      return false;
+    };
+
+    const { data: transactionData, error: transactionError } = await supabase.from("subscription_transactions_dev").update({
+      invoice_id: data?.id ?? null,
+      invoice_url: invoice.invoice_pdf,
+      stripe_price_id: invoice.lines.data[0].pricing.price_details.price
+    }).eq('extra_stripe_customer_id', invoice.customer).eq('stripe_invoice_id', invoice.id).select('id').maybeSingle();
+
+    if (transactionError) {
+      console.log('Error updating transaction in database: ', transactionError);
+
+      return false;
+    };
+
+    const { error: invoiceUpdateError } = await supabase.from('invoices_dev').update({
+      subscription_transaction_id: transactionData?.id ?? null,
+    }).eq('stripe_invoice_id', invoice.id);
+
+    if (invoiceUpdateError) {
+      console.log('Error updating invoice in database: ', invoiceUpdateError);
+      return false;
+    };
+
+    // const { data: resendData, error: resendError } = await resend.emails.send({
+    //   from: "Khedemtak <support@mail.khedemtak.com>",
+    //   to: invoice.lines.data[0].metadata.email,
+    //   template: {
+    //     id: "invoice-created",
+    //     variables: {
+    //       name: invoice.customer_name,
+    //       total: (invoice.amount_due / 100).toString(),
+    //       action_link: invoice.hosted_invoice_url,
+    //       help_url: Deno.env.get("APP_HELP_URL_LIVE"),//Deno.env.get("APP_HELP_URL"),
+    //     },
+    //   }
+    // })
+
+    // if (resendError) {
+    //   console.log('Error sending invoice email: ', resendError);
+    //   return false;
+    // }
+
+    return true;
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
+}
+
+async function handleExtraProductInvoicePaymentPaid(invoice: any) {
+  try {
+    const paymentDate = new Date(invoice.status_transitions.paid_at * 1000);
+
+    // --- 1. UPSERT INVOICE (idempotent, removes dependency on invoice.created)
+    const { data: inv, error: invoiceUpsertError } = await supabase
+      .from('invoices_dev')
+      .upsert(
+        {
+          stripe_invoice_id: invoice.id,
+          status: invoice.status,
+          amount: invoice.amount_paid / 100,
+          currency: invoice.currency,
+          url: invoice.invoice_pdf,
+          stripe_customer_id: invoice.customer,
+          billing_reason: `${invoice.billing_reason}: extra_product_payment`,
+        },
+        { onConflict: 'stripe_invoice_id' }
+      )
+      .select('*')
+      .maybeSingle();
+
+    if (invoiceUpsertError || !inv) {
+      console.log('invoice upsert error:', invoiceUpsertError);
+      return false;
+    }
+
+    // --- 6. PREVENT DUPLICATE EMAILS
+    const { data: existingTx, error: existingTxError } = await supabase
+      .from('subscription_transactions_dev')
+      .select('id, email_sent')
+      .eq('stripe_invoice_id', invoice.id)
+      .maybeSingle();
+
+    if (existingTxError) {
+      console.log('invoice payment existingTx error: ', existingTxError);
+      return false;
+    }
+
+    if (existingTx?.email_sent) {
+      return true;
+    }
+
+    const { error: resendError } = await resend.emails.send({
+      from: "Khedemtak <support@mail.khedemtak.com>",
+      to: invoice.customer_email,
+      template: {
+        id: "extra-product-confirmation",
+        variables: {
+          name: invoice.customer_name,
+          total: (invoice.amount_paid / 100).toString(),
+          paid_at_date: paymentDate.toDateString(),
+          invoice_url: invoice.hosted_invoice_url,
+          action_link: Deno.env.get('APP_ACCOUNT_PAGE'),
+          help_url: Deno.env.get('APP_HELP_URL'),
+        }
+      }
+    });
+
+    if (resendError) {
+      console.log('invoice payment resend error: ', resendError);
+      return false;
+    }
+
+    await supabase.from('subscription_transactions_dev').update({
+      email_sent: true,
+      payment_date: paymentDate.toISOString(),
+    }).eq('id', existingTx.id);
+
+    return true;
+  } catch (error) {
+    console.log('error with invoice payment: ', error);
+    return false;
+  }
+}
+
+async function handleSubscriptionCheckoutSessionCompleted(session: any) {
   try {
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
@@ -190,6 +339,78 @@ async function handleCheckoutSessionCompleted(session: any) {
     if (invoiceError) {
       console.log('checkout session invoice error: ', invoiceError);
 
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.log('checkout session error: ', error);
+    return false;
+  }
+}
+
+async function handleExtraProductCheckoutSessionCompleted(session: any) {
+  try {
+    const { data: userExtraProducts, error: userWithExtraProductError } = await supabase.from("users_with_extra_products").select("*").eq("user_id", session.client_reference_id).maybeSingle();
+
+    if (userWithExtraProductError) {
+      console.log('checkout session user with extra product error: ', userWithExtraProductError);
+    }
+
+    const productCount =
+      (userExtraProducts?.extra_products_count ?? 0) + 1;
+
+    const { error: transactionError } = await supabase.from("subscription_transactions_dev").update({
+      billing_reason: "extra_product_payment",
+      subscription_id: session.metadata.subscription_id,
+      user_id: session.client_reference_id,
+      stripe_product_id: session.metadata.extra_product_id,
+      stripe_invoice_id: session.invoice
+    }).eq('stripe_payment_intent_id', session.payment_intent).eq('extra_stripe_customer_id', session.customer);
+
+    if (transactionError) {
+      console.log('checkout session transaction error: ', transactionError);
+      return false;
+    }
+
+    const { data: { id: product_id }, error: productError } = await supabase.from("extra_products").select("id").eq("stripe_product_id", session.metadata.extra_product_id).eq("active", true).maybeSingle();
+
+    if (productError) {
+      console.log('checkout session product error: ', productError);
+      return false;
+    }
+
+    const { data: existingData, error: dataError } = await supabase.from("users_with_extra_products").select("*").eq("user_id", session.client_reference_id).maybeSingle();
+
+    if (dataError) {
+      console.log('checkout session data error: ', dataError);
+      return false;
+    }
+
+    if (existingData) {
+      const { error } = await supabase.from("users_with_extra_products").update({
+        extra_products_count: productCount
+      }).eq("id", existingData.id);
+
+      if (error) {
+        console.log('checkout session product error: ', error);
+        return false;
+      }
+
+      return true;
+    }
+
+    const { error } = await supabase.from("users_with_extra_products").upsert({
+      user_id: session.client_reference_id,
+      product_id: product_id,
+      stripe_product_id: session.metadata.extra_product_id,
+      stripe_price_id: session.metadata.extra_price_id,
+      stripe_customer_id: session.customer,
+      extra_products_count: productCount
+    }, { onConflict: "user_id" });
+
+    if (error) {
+      console.log('checkout session product error: ', error);
       return false;
     }
 
@@ -492,12 +713,12 @@ async function handleInvoicePaymentFailed(invoice: any) {
       return false;
     }
 
-    const { data: subscriptionData, error: subscriptionError } = 
-    await supabase.from('subscriptions_dev')
-                  .select('started_at')
-                  .eq('user_id', data.user_id)
-                  .eq('status', 'active')
-                  .maybeSingle();
+    const { data: subscriptionData, error: subscriptionError } =
+      await supabase.from('subscriptions_dev')
+        .select('started_at')
+        .eq('user_id', data.user_id)
+        .eq('status', 'active')
+        .maybeSingle();
 
     if (subscriptionError) {
       console.log('invoice payment failed SUB error: ', subscriptionError);
@@ -505,24 +726,24 @@ async function handleInvoicePaymentFailed(invoice: any) {
     }
 
     const { error: resendError } = await resend.emails.send({
-        from: "Khedemtak <support@mail.khedemtak.com>",
-        to: userData.email,
-        template: {
-          id: "payment-failed",
-          variables: {
-            name: userData.full_name ?? 'مستخدم',
-            total: (invoice.amount_due / 100).toString(),
-            subscription_date: formatDate(subscriptionData.started_at),
-            invoice_url: invoice.hosted_invoice_url,
-            help_url: Deno.env.get('APP_HELP_URL'),
-          }
+      from: "Khedemtak <support@mail.khedemtak.com>",
+      to: userData.email,
+      template: {
+        id: "payment-failed",
+        variables: {
+          name: userData.full_name ?? 'مستخدم',
+          total: (invoice.amount_due / 100).toString(),
+          subscription_date: formatDate(subscriptionData.started_at),
+          invoice_url: invoice.hosted_invoice_url,
+          help_url: Deno.env.get('APP_HELP_URL'),
         }
-      });
+      }
+    });
 
-      if (resendError) {
-        console.log('subscription creation resend error: ', resendError);
-        return false;
-      };
+    if (resendError) {
+      console.log('subscription creation resend error: ', resendError);
+      return false;
+    };
 
     return true;
   } catch (error) {
@@ -633,6 +854,10 @@ async function handleTrialEnding(subscription: any) {
   }
 }
 
+async function handlePaymentIntentCreated(paymentIntent: any) {
+
+}
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -705,18 +930,24 @@ Deno.serve(async (req: Request) => {
 
       // Payment is successful and the subscription is created.
       // You should provision the subscription and save the customer ID to your database.
-      const checkoutResponse = await handleCheckoutSessionCompleted(
-        data.object
-      );
+      if (data.object.metadata?.billing_reason === 'extra_product_payment' && data.object.mode === 'payment') {
+        const checkoutResponse = await handleExtraProductCheckoutSessionCompleted(
+          data.object
+        );
+      } else if (data.object.mode === 'subscription') {
+        const checkoutResponse = await handleSubscriptionCheckoutSessionCompleted(
+          data.object
+        );
 
-      if (!checkoutResponse) {
-        return new Response("Error in checkout.session.completed: ", {
-          status: 200,
-          headers: {
-            ...corsHeaders,
-            "Content-Type": "application/json",
-          },
-        })
+        if (!checkoutResponse) {
+          return new Response("Error in checkout.session.completed: ", {
+            status: 200,
+            headers: {
+              ...corsHeaders,
+              "Content-Type": "application/json",
+            },
+          })
+        }
       }
 
       await supabase.from('stripe_events').insert({
@@ -743,7 +974,6 @@ Deno.serve(async (req: Request) => {
         .select('*')
         .eq('status', 'paid')
         .eq('stripe_invoice_id', data.object.id)
-        .eq('user_id', data.object.lines.data[0].metadata.user_id)
         .maybeSingle();
 
       if (invError) {
@@ -767,18 +997,36 @@ Deno.serve(async (req: Request) => {
         })
       };
 
-      const createInvoiceResponse = await handleInvoiceCreated(
-        data.object,
-      );
 
-      if (!createInvoiceResponse) {
-        return new Response("Error in invoice.created: ", {
-          status: 200,
-          headers: {
-            ...corsHeaders,
-            "Content-Type": "application/json",
-          },
-        })
+      if (data.object.lines.data[0].description === 'Extra Services') {
+        const createExtraProductInvoiceResponse = await handleExtraProductInvoiceCreated(
+          data.object
+        )
+
+
+        if (!createExtraProductInvoiceResponse) {
+          return new Response("Error in invoice.created: ", {
+            status: 200,
+            headers: {
+              ...corsHeaders,
+              "Content-Type": "application/json",
+            },
+          })
+        }
+      } else {
+        const createInvoiceResponse = await handleInvoiceCreated(
+          data.object,
+        );
+
+        if (!createInvoiceResponse) {
+          return new Response("Error in invoice.created: ", {
+            status: 200,
+            headers: {
+              ...corsHeaders,
+              "Content-Type": "application/json",
+            },
+          })
+        }
       }
 
       await supabase.from('stripe_events').insert({
@@ -800,18 +1048,34 @@ Deno.serve(async (req: Request) => {
         })
       };
 
-      const invoicePaidResponse = await handleInvoicePaymentPaid(
-        data.object
-      )
+      if (data.object.lines.data[0].description === 'Extra Services') {
+        const invoicePaymentPaidResponse = await handleExtraProductInvoicePaymentPaid(
+          data.object
+        )
 
-      if (!invoicePaidResponse) {
-        return new Response("Error in invoice_payment.paid: ", {
-          status: 200,
-          headers: {
-            ...corsHeaders,
-            "Content-Type": "application/json",
-          },
-        })
+        if (!invoicePaymentPaidResponse) {
+          return new Response("Error in invoice_payment.paid: ", {
+            status: 200,
+            headers: {
+              ...corsHeaders,
+              "Content-Type": "application/json",
+            },
+          })
+        }
+      } else {
+        const invoicePaidResponse = await handleInvoicePaymentPaid(
+          data.object
+        )
+
+        if (!invoicePaidResponse) {
+          return new Response("Error in invoice_payment.paid: ", {
+            status: 200,
+            headers: {
+              ...corsHeaders,
+              "Content-Type": "application/json",
+            },
+          })
+        }
       }
 
       await supabase.from('stripe_events').insert({
@@ -982,6 +1246,70 @@ Deno.serve(async (req: Request) => {
       await supabase.from('stripe_events').insert({
         event_id: data.object.id,
         event_type: 'customer.subscription.trial_will_end',
+      });
+
+      break;
+    case 'charge.updated':
+      const { data: chargeUpdatedEvent } = await supabase.from('stripe_events').select('id').eq('event_id', data.object.id).maybeSingle();
+
+      if (chargeUpdatedEvent) {
+        return new Response("Event already happened: ", {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        })
+      };
+
+      console.log(data.object);
+
+      await supabase.from('stripe_events').insert({
+        event_id: data.object.id,
+        event_type: 'charge.updated',
+      });
+
+      break;
+    case 'payment_intent.succeeded':
+      const { data: paymentSucceededEvent } = await supabase.from('stripe_events').select('id').eq('event_id', data.object.id).maybeSingle();
+
+      if (paymentSucceededEvent) {
+        return new Response("Event already happened: ", {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        })
+      };
+
+      console.log(data.object);
+
+      const { error } = await supabase
+        .from("subscription_transactions_dev")
+        .insert({
+          stripe_payment_intent_id: data.object.id,
+          payment_status: data.object.status === 'succeeded' ? 'paid' : data.object.status,
+          amount: data.object.amount / 100,
+          currency: data.object.currency,
+          stripe_charge_id: data.object.latest_charge,
+          extra_stripe_customer_id: data.object.customer,
+        });
+
+      if (error) {
+        console.log('Error upserting payment intent: ', error);
+        return new Response("Error in payment_intent.succeeded: ", {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        })
+      }
+
+      await supabase.from('stripe_events').insert({
+        event_id: data.object.id,
+        event_type: 'payment_intent.succeeded',
       });
 
       break;

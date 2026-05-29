@@ -1,5 +1,4 @@
 import { SubscriptionTransaction, useSubscriptionsPayment } from '@/hooks/useSubscriptionsPayment';
-import React from 'react'
 import { Card, CardContent, CardHeader } from '../ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Badge } from '../ui/badge';
@@ -47,7 +46,9 @@ function UserTransactions() {
                                 </TableCell>
                                 <TableCell>
                                     <Badge variant="outline">
-                                        {payment.subscription.tier.title}
+                                        {
+                                            payment.billing_reason === 'extra_product_payment' ? t("transactions.extra_product_payment") : (payment.subscription.tier?.title || '')
+                                        }
                                     </Badge>
                                 </TableCell>
                                 <TableCell>

@@ -194,12 +194,24 @@ notes
         throw inactiveSubscriptionsError;
       }
 
+      const { data: userExtraProducts, error: userExtraProductsError } = await supabase
+        .from('users_with_extra_products')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (userExtraProductsError && userExtraProductsError.code !== 'PGRST116') {
+        console.error('Error fetching subscription:', userExtraProductsError);
+      }
+
       return {
         activeSubscription,
-        inactiveSubscriptions
+        inactiveSubscriptions,
+        extraProductsCount: userExtraProducts?.extra_products_count || 0
       } as {
         activeSubscription: Subscription;
         inactiveSubscriptions: Subscription[];
+        extraProductsCount: number;
       };
     },
   });
@@ -348,12 +360,20 @@ notes
         };
       }
 
+      const { data: userExtraProducts, error: extraProductsError } = await supabase.from("users_with_extra_products").select("*").eq("user_id", user.id).maybeSingle();
+
+      if (extraProductsError) {
+        console.error('Error checking user extra products for quota:', extraProductsError);
+      }
+
       const currentServiceCount = userServices?.length || 0;
+
+      const canPost = currentServiceCount < (subscription.services_allowed + (userExtraProducts?.extra_products_count || 0));
 
       return {
         user: true,
         subscription: true,
-        canPost: currentServiceCount < subscription.services_allowed
+        canPost
       };
     }
   })

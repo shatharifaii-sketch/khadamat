@@ -17,6 +17,11 @@ interface StripeActions {
     isVerifyingSessionPending: boolean;
     isVerifySessionError: boolean;
     isVerifySessionSuccess: boolean;
+    
+    verifyExtraSession: (sessionId: string) => any;
+    isVerifyingExtraSessionPending: boolean;
+    isVerifyExtraSessionError: boolean;
+    isVerifyExtraSessionSuccess: boolean;
 
     billingPortalSession: (customerId: string) => void;
     isCreatingBillingPortalSession: boolean;
@@ -91,6 +96,22 @@ const verifyStripeSessionId = async (sessionId: string) => {
     }
 
     return userSub as Subscription;
+}
+
+const verifyExtraStripeSessionId = async (sessionId: string): Promise<boolean> => {
+    const { data, error } = await supabase.functions.invoke(
+        "verify-extra-stripe-checkout-session-id",
+        {
+            body: JSON.stringify({ sessionId }),
+        }
+    );
+
+    if (error) {
+        console.error(error);
+        return false;
+    }
+
+    return true;
 }
 
 const getBillingPortalSession = async (customerId: string) => {
@@ -201,6 +222,22 @@ const useStripe = (): StripeActions => {
         }
     })
 
+    const {
+        mutateAsync: verifyExtraSession,
+        isPending: isVerifyingExtraSessionPending,
+        isError: isVerifyExtraSessionError,
+        isSuccess: isVerifyExtraSessionSuccess,
+    } = useMutation({
+        mutationKey: ['verify-extra-session'],
+        mutationFn: verifyExtraStripeSessionId,
+        onSuccess: (data) => {
+            console.log(data);
+        },
+        onError: (error) => {
+            console.log(error);
+        }
+    })
+
 
     return {
         createCheckoutSession,
@@ -212,6 +249,11 @@ const useStripe = (): StripeActions => {
         isVerifyingSessionPending,
         isVerifySessionError,
         isVerifySessionSuccess,
+        
+        verifyExtraSession,
+        isVerifyingExtraSessionPending,
+        isVerifyExtraSessionError,
+        isVerifyExtraSessionSuccess,
 
         billingPortalSession,
         isCreatingBillingPortalSession,

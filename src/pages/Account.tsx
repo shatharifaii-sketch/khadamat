@@ -251,7 +251,7 @@ const Account = () => {
                   <Loader2 className="h-8 w-8 animate-spin" />
                 </div>
               ) : services && services.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto bg-muted rounded-lg p-2">
                   {services.map((service) => (
                     <ServiceManagementCard key={service.id} service={service} canPost={subscription?.status === 'active'} />
                   ))}
