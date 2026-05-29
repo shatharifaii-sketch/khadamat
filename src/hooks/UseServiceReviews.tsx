@@ -140,7 +140,7 @@ export const useServiceReviews = (serviceId: string) => {
 
     const deleteReview = useMutation({
         mutationFn: async (reviewId: string) => {
-            if (userAllowed.reviews?.map(r => r.id).indexOf(reviewId) === -1 || admin) {
+            if (userAllowed.reviews?.map(r => r.id).indexOf(reviewId) === -1) {
                 console.log('User not allowed to delete this review');
                 throw new Error('You are not allowed to delete this review');
             }

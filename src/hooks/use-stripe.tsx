@@ -12,10 +12,26 @@ interface StripeActions {
     isCreatingCheckoutSessionPending: boolean;
     isCreateCheckoutSessionError: boolean;
     isCreateCheckoutSessionSuccess: boolean;
+
     verifySession: (sessionId: string) => any;
     isVerifyingSessionPending: boolean;
     isVerifySessionError: boolean;
     isVerifySessionSuccess: boolean;
+    
+    verifyExtraSession: (sessionId: string) => any;
+    isVerifyingExtraSessionPending: boolean;
+    isVerifyExtraSessionError: boolean;
+    isVerifyExtraSessionSuccess: boolean;
+
+    billingPortalSession: (customerId: string) => void;
+    isCreatingBillingPortalSession: boolean;
+    isCreateBillingPortalSessionError: boolean;
+    isCreateBillingPortalSessionSuccess: boolean;
+
+    createExtraCheckoutSession: ({ userId, email, name }: { userId: string, email: string, name: string }) => void;
+    isCreatingExtraCheckoutSessionPending: boolean;
+    isCreateExtraCheckoutSessionError: boolean;
+    isCreateExtraCheckoutSessionSuccess: boolean;
 }
 
 const createStripeCheckoutSession = async ({ priceId, userId, email }: { priceId: string, userId: string, email: string }) => {
@@ -72,14 +88,69 @@ const verifyStripeSessionId = async (sessionId: string) => {
           )`)
         .eq('user_id', data.subscription.metadata.user_id)
         .eq('status', 'active')
-        .single();
-    
+        .maybeSingle();
+
     if (userSubError) {
         console.log(error);
         return error;
     }
 
     return userSub as Subscription;
+}
+
+const verifyExtraStripeSessionId = async (sessionId: string): Promise<boolean> => {
+    const { data, error } = await supabase.functions.invoke(
+        "verify-extra-stripe-checkout-session-id",
+        {
+            body: JSON.stringify({ sessionId }),
+        }
+    );
+
+    if (error) {
+        console.error(error);
+        return false;
+    }
+
+    return true;
+}
+
+const getBillingPortalSession = async (customerId: string) => {
+    const { data, error } = await supabase.functions.invoke(
+        "stripe-billing-portal",
+        {
+            body: JSON.stringify({ customerId }),
+        }
+    );
+
+    if (error) {
+        console.log(error);
+        return error;
+    }
+
+    return data.url;
+}
+
+const createExtraStripeCheckoutSession = async ({ userId, email, name }: { userId: string, email: string, name: string }) => {
+
+    console.log('Creating extra checkout session for user:', userId, email, name);
+
+    const { data, response, error } = await supabase.functions.invoke(
+        "create-extra-product-checkout-session",
+        {
+            body: {
+                userId: userId,
+                email: email,
+                name: name
+            },
+        }
+    )
+
+    if (error && !response.ok && !data.success) {
+        console.log(error);
+        return error;
+    }
+
+    return data.sessionUrl;
 }
 
 const useStripe = (): StripeActions => {
@@ -117,16 +188,82 @@ const useStripe = (): StripeActions => {
         }
     })
 
+    const {
+        mutateAsync: billingPortalSession,
+        isPending: isCreatingBillingPortalSession,
+        isError: isCreateBillingPortalSessionError,
+        isSuccess: isCreateBillingPortalSessionSuccess,
+    } = useMutation({
+        mutationKey: ['create-billing-portal-session'],
+        mutationFn: getBillingPortalSession,
+        onSuccess: (portalUrl) => {
+            console.log(portalUrl);
+            window.open(portalUrl, "_blank", "noopener,noreferrer");
+        },
+        onError: (error) => {
+            console.log(error);
+        }
+    });
+
+    const {
+        mutateAsync: createExtraCheckoutSession,
+        isPending: isCreatingExtraCheckoutSessionPending,
+        isError: isCreateExtraCheckoutSessionError,
+        isSuccess: isCreateExtraCheckoutSessionSuccess,
+    } = useMutation({
+        mutationKey: ['create-extra-checkout-session'],
+        mutationFn: createExtraStripeCheckoutSession,
+        onSuccess: (sessionUrl) => {
+            console.log(sessionUrl);
+            window.open(sessionUrl, "_blank", "noopener,noreferrer");
+        },
+        onError: (error) => {
+            console.log(error);
+        }
+    })
+
+    const {
+        mutateAsync: verifyExtraSession,
+        isPending: isVerifyingExtraSessionPending,
+        isError: isVerifyExtraSessionError,
+        isSuccess: isVerifyExtraSessionSuccess,
+    } = useMutation({
+        mutationKey: ['verify-extra-session'],
+        mutationFn: verifyExtraStripeSessionId,
+        onSuccess: (data) => {
+            console.log(data);
+        },
+        onError: (error) => {
+            console.log(error);
+        }
+    })
+
 
     return {
         createCheckoutSession,
         isCreatingCheckoutSessionPending,
         isCreateCheckoutSessionError,
         isCreateCheckoutSessionSuccess,
+
         verifySession,
         isVerifyingSessionPending,
         isVerifySessionError,
-        isVerifySessionSuccess
+        isVerifySessionSuccess,
+        
+        verifyExtraSession,
+        isVerifyingExtraSessionPending,
+        isVerifyExtraSessionError,
+        isVerifyExtraSessionSuccess,
+
+        billingPortalSession,
+        isCreatingBillingPortalSession,
+        isCreateBillingPortalSessionError,
+        isCreateBillingPortalSessionSuccess,
+
+        createExtraCheckoutSession,
+        isCreatingExtraCheckoutSessionPending,
+        isCreateExtraCheckoutSessionError,
+        isCreateExtraCheckoutSessionSuccess
     }
 }
 

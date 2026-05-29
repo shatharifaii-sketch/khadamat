@@ -44,6 +44,7 @@ export interface Subscription {
     free_trial_period_text: string;
     notes: string[];
   }
+  stripe_customer_id: string;
 }
 
 type CancelSubscriptionInput = {
@@ -154,9 +155,9 @@ notes
             price_monthly_value,
             price_yearly_value,
             class_name,
-badge_class_name,
-free_trial_period_text,
-notes
+            badge_class_name,
+            free_trial_period_text,
+            notes
           )`)
         .eq('user_id', user.id)
         .eq('status', 'active')
@@ -166,6 +167,8 @@ notes
         console.error('Error fetching subscription:', activeSubscriptionError);
         throw activeSubscriptionError;
       }
+
+      console.log('Active subscription:', activeSubscription);
 
       const { data: inactiveSubscriptions, error: inactiveSubscriptionsError } = await supabase
         .from('subscriptions')
@@ -191,12 +194,24 @@ notes
         throw inactiveSubscriptionsError;
       }
 
+      const { data: userExtraProducts, error: userExtraProductsError } = await supabase
+        .from('users_with_extra_products')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (userExtraProductsError && userExtraProductsError.code !== 'PGRST116') {
+        console.error('Error fetching subscription:', userExtraProductsError);
+      }
+
       return {
         activeSubscription,
-        inactiveSubscriptions
+        inactiveSubscriptions,
+        extraProductsCount: userExtraProducts?.extra_products_count || 0
       } as {
         activeSubscription: Subscription;
         inactiveSubscriptions: Subscription[];
+        extraProductsCount: number;
       };
     },
   });
@@ -345,12 +360,20 @@ notes
         };
       }
 
+      const { data: userExtraProducts, error: extraProductsError } = await supabase.from("users_with_extra_products").select("*").eq("user_id", user.id).maybeSingle();
+
+      if (extraProductsError) {
+        console.error('Error checking user extra products for quota:', extraProductsError);
+      }
+
       const currentServiceCount = userServices?.length || 0;
+
+      const canPost = currentServiceCount < (subscription.services_allowed + (userExtraProducts?.extra_products_count || 0));
 
       return {
         user: true,
         subscription: true,
-        canPost: currentServiceCount < subscription.services_allowed
+        canPost
       };
     }
   })

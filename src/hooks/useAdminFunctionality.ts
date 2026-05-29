@@ -1,11 +1,11 @@
 import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabaseAdmin } from "@/integrations/supabase/adminClient";
 import { User } from "@/components/Admin/ui/UserForm";
-import { Tables } from "@/integrations/supabase/types";
-import { json } from "react-router-dom";
+import { Json, Tables } from "@/integrations/supabase/types";
 import { toast } from "sonner";
+import { ServiceLink } from "@/components/PostService/ServiceLinks";
+import { useEmail } from "./useEmail";
 
 interface UserProfile {
   id: string;
@@ -34,6 +34,12 @@ export interface Service {
   created_at: string;
   updated_at: string;
   user_id: string;
+  is_online?: boolean;
+  links: [] | ServiceLink[] | Json;
+  whatsapp_number?: {
+    countryCode: string;
+    number: string;
+  } | string;
   publisher: {
     full_name: string;
   };
@@ -58,7 +64,7 @@ interface SaveImageProps {
 
 export const useIsAdmin = (): boolean => {
   const { user } = useAuth();
-  
+
   const { data, error } = useQuery({
     queryKey: ['is-admin'],
     queryFn: async () => {
@@ -79,17 +85,39 @@ export const useIsAdmin = (): boolean => {
 export const useAdminData = () => {
   const admin = useIsAdmin();
 
-  if (!admin) return null;
-
   const { data: adminData } = useSuspenseQuery({
     queryKey: ['admin-data'],
     queryFn: async () => {
       const { data: profiles, error: usersError } = await supabase
-        .from('profiles')
+        .from('profiles_with_email')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (usersError) throw usersError;
+
+      const { 
+        data: { 
+          success, 
+          data: roles, 
+          error 
+        }, 
+        error: rolesError 
+      } = await supabase.functions.invoke("get-user-roles");
+
+      if (rolesError) throw rolesError;
+
+      const adminSet = new Set(
+        roles
+          .filter(r => r.role === "admin")
+          .map(r => r.user_id)
+      );
+
+      const profilesWithAdminFlag = profiles.map(profile => ({
+        ...profile,
+        is_admin: adminSet.has(profile.id),
+      }));
+
+      console.log(profilesWithAdminFlag);
 
       const { data: services, error: servicesError } = await supabase.from('services')
         .select(`
@@ -102,7 +130,6 @@ export const useAdminData = () => {
       image_name,
       image_url
         )`)
-        .neq('status', 'pending-approval')
         .order('created_at', { ascending: false });
 
       if (servicesError) throw servicesError;
@@ -148,7 +175,7 @@ export const useAdminData = () => {
 
 
       return {
-        profiles,
+        profiles: profilesWithAdminFlag,
         services,
         stats,
         coupons,
@@ -164,7 +191,7 @@ export const useAdminData = () => {
 
 export const useAdminFunctionality = () => {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const { sendPasswordUpdateEmail } = useEmail();
 
   // Admin check - in a real app, you'd check this from the database
   const admin = useIsAdmin();
@@ -178,13 +205,21 @@ export const useAdminFunctionality = () => {
 
       console.log('Creating user...');
 
-      const { data: user, error: userError } = await supabaseAdmin.auth.admin.createUser({
-        email: formData.email,
-        password: formData.password,
-        phone: formData.phone,
-      })
+      const { data: { success, user, error: userError }, error } = await supabase.functions.invoke("admin-create-user", {
+        body: {
+          email: formData.email,
+          password: formData.password,
+          phone: formData.phone,
+          is_admin: formData.is_admin
+        }
+      });
 
-      if (userError) throw userError;
+      if (userError || error) {
+        toast.error(userError.code === "email_exists" ? "البريد الإلكتروني مستخدم بالفعل" : "خطأ في إنشاء المستخدم");
+        throw userError ?? error
+      };
+
+      await sendPasswordUpdateEmail.mutateAsync({ email: formData.email! });
 
       const { data: profile, error: profileError } = await supabase.from('profiles')
         .update({
@@ -213,16 +248,13 @@ export const useAdminFunctionality = () => {
         throw new Error("Only admins can delete users");
       }
 
-      const { error } = await supabase
-        .from('profiles')
-        .delete()
-        .eq('id', id);
+      const { error } = await supabase.functions.invoke("admin-delete-user", {
+        body: {
+          id
+        }
+      });
 
       if (error) throw error;
-
-      const { error: deleteUserError } = await supabaseAdmin.auth.admin.deleteUser(id);
-
-      if (deleteUserError) throw deleteUserError;
 
       return;
     },
@@ -239,7 +271,7 @@ export const useAdminFunctionality = () => {
         { event: 'INSERT', schema: 'public', table: 'profiles' },
         (payload) => {
           console.log('New user registered:', payload.new);
-          toast("مستخدم جديد",{
+          toast("مستخدم جديد", {
             description: `انضم ${payload.new.full_name || 'مستخدم جديد'} للموقع`,
           });
           queryClient.invalidateQueries({ queryKey: ['admin-data'] });
@@ -272,21 +304,36 @@ export const useAdminFunctionality = () => {
   const updateUser = useMutation({
     mutationFn: async (formData: Partial<User>) => {
       if (!admin) {
-        throw new Error("Only admins can delete users");
+        throw new Error("Only admins can update users");
       }
 
-      if ((formData.email || formData.password)) {
-        if (formData.email) {
-          const { error } = await supabaseAdmin.auth.admin.updateUserById(formData.id!, { email: formData.email });
-          if (error) throw error;
+      if (formData.email || formData.password || formData.phone) {
+        const { data, error } = await supabase.functions.invoke("admin-update-user", {
+          body: {
+            id: formData.id,
+            email: formData.email,
+            password: formData.password,
+            phone: formData.phone,
+            is_admin: formData.is_admin
+          }
+        });
+
+        if (error || !data?.success) {
+          toast.error(
+            data?.error?.code === "email_exists"
+              ? "البريد الإلكتروني مستخدم بالفعل"
+              : "خطأ في تحديث المستخدم"
+          );
+
+          throw error || data?.error;
         }
-        if (formData.password) {
-          const { error } = await supabaseAdmin.auth.admin.updateUserById(formData.id!, { password: formData.password });
-          if (error) throw error;
+
+        if (formData.email && formData.password) {
+          await sendPasswordUpdateEmail.mutateAsync({ email: formData.email });
         }
       }
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
         .update({
           full_name: formData.full_name,
@@ -296,7 +343,7 @@ export const useAdminFunctionality = () => {
           is_service_provider: formData.is_service_provider,
           experience_years: formData.experience_years
         })
-        .eq('id', formData.id);
+        .eq('id', formData.id).select('id').maybeSingle();
 
       if (error) throw error;
 
@@ -346,6 +393,9 @@ export const useAdminFunctionality = () => {
           experience: formData.experience,
           status: formData.status,
           user_id: formData.user_id,
+          is_online: formData.is_online,
+          links: formData.links as [],
+          whatsapp_number: String(formData.whatsapp_number)
         })
         .select('*')
         .single();
@@ -391,7 +441,10 @@ export const useAdminFunctionality = () => {
           phone: formData.phone,
           email: formData.email,
           experience: formData.experience,
-          status: formData.status
+          status: formData.status,
+          is_online: formData.is_online,
+          links: formData.links as [],
+          whatsapp_number: String(formData.whatsapp_number)
         })
         .eq('id', formData.id)
         .select('*')
@@ -439,7 +492,7 @@ export const useAdminFunctionality = () => {
       queryClient.invalidateQueries({ queryKey: ['admin-data'] });
       toast.success('تم تحديث الخدمة بنجاح!');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       console.error('Error updating service:', error);
       toast.error(error.message || 'حدث خطأ في تحديث الخدمة');
     }
@@ -498,7 +551,7 @@ export const useAdminFunctionality = () => {
         throw error;
       }
 
-      return json({ success: true });
+      return { success: true };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-data'] });

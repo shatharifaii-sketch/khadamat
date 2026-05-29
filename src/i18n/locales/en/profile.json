@@ -1,0 +1,28 @@
+{
+    "رام الله": "Ramallah",
+    "القدس": "Jerusalem",
+    "بيت لحم": "Bethlehem",
+    "الخليل": "Hebron",
+    "نابلس": "Nablus",
+    "جنين": "Jenin",
+    "طولكرم": "Tulkarm",
+    "قلقيلية": "Qalqilya",
+    "سلفيت": "Salfit",
+    "أريحا": "Jericho",
+    "طوباس": "Tubas",
+    "غزة": "Gaza",
+    "رفح": "Rafah",
+    "خان يونس": "Khan Younis",
+    "دير البلح": "Deir al-Balah",
+    "description": "description",
+    "location": "location",
+    "not_specified": "not specified",
+    "experience_years": "experience",
+    "joined_at": "joined at",
+    "services": {
+        "title": "services",
+        "num": "number of services",
+        "newly_published": "new",
+        "views": "views"
+    }
+}

@@ -2,6 +2,7 @@ import { useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-quer
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Service } from './useAdminFunctionality';
+import { ServiceLink } from '@/components/PostService/ServiceLinks';
 
 export interface PublicService {
   id: string;
@@ -16,6 +17,9 @@ export interface PublicService {
   views: number;
   created_at: string;
   user_id: string;
+  is_online?: boolean;
+  links: [];
+  whatsapp_number?: string;
   updated_at: string;
   publisher: {
     id: string;
@@ -76,8 +80,7 @@ export const usePublicServices = () => {
         return [];
       }
 
-      console.log('Fetched services with publisher:', services);
-      return services as PublicService[];
+      return services;
     },
     retry: 1,
     staleTime: 30000, // 30 seconds
@@ -107,7 +110,7 @@ const { data } = useSuspenseQuery({
       if (serviceRes.error) throw serviceRes.error;
 
       return {
-        service: serviceRes.data as PublicService,
+        service: serviceRes.data,
       };
     },
   });
@@ -115,11 +118,13 @@ const { data } = useSuspenseQuery({
   return data;
 }
 
-export const useServiceToEditData = (id: string, userId: string) => {
-  if (!userId || !id) return { service: null };
-  const { data } = useSuspenseQuery({
-    queryKey: ['service-edit-data', id, userId],
+export const useServiceToEditData = (id: string) => {
+  const { data, isLoading } = useQuery({
+    queryKey: ['service-edit-data', id],
+    enabled: !!id,
     queryFn: async () => {
+      if (!id) return { service: null };
+
       const { data: serviceData, error: serviceError } = await 
         supabase
           .from('services')
@@ -129,9 +134,8 @@ export const useServiceToEditData = (id: string, userId: string) => {
               full_name
             )
             `)
-          .eq('user_id', userId)
           .eq('id', id)
-          .single();
+          .maybeSingle();
 
       if (serviceError) {
         console.log('Error fetching service data:', serviceError);
@@ -162,8 +166,11 @@ export const useServiceToEditData = (id: string, userId: string) => {
       return {
         service: serviceRes as Service,
       };
-    },
+    }
   });
 
-  return data;
+  return {
+    service: data?.service,
+    isLoading
+  };
 }

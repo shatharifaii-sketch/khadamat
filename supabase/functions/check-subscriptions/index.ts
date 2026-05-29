@@ -48,7 +48,7 @@ async function sendReminderEmail(sub: any, user: any, client: any) {
       action_url: Deno.env.get("POSTMARK_REMINDER_TEMPLATE_ACTION_URL"),
       support_email: Deno.env.get("APP_SUPPORT_EMAIL"),
       sender_name: Deno.env.get("EMAIL_SENDER_NAME"),
-      help_url: Deno.env.get("APP_HELP_URL"),
+      help_url: Deno.env.get("APP_HELP_URL_LIVE"),//Deno.env.get("APP_HELP_URL"),
     },
   });
 

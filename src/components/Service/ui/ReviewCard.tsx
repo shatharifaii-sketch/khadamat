@@ -15,9 +15,9 @@ const ReviewCard = ({
     review
 }: Props) => {
     return (
-        <Card className='w-96 p-4 hover:shadow-md transition-shadow cursor-pointer min-h-[250px]'>
-            <CardHeader className='flex justify-between items-center flex-row'>
-                <div className='flex gap-2 items-center'>
+        <Card className='md:min-w-96 min-w-62 p-4 hover:shadow-md transition-shadow cursor-pointer min-h-[250px]'>
+            <CardHeader className='flex justify-between items-center md:flex-row flex-col'>
+                <div className='flex gap-2 items-center w-full'>
                     {
                         review?.reviewer.profile_image_url ? (
                             <Avatar className='size-7'>
@@ -35,7 +35,7 @@ const ReviewCard = ({
                     }
                     <h3>{review.reviewer.full_name}</h3>
                 </div>
-                <div className='flex mt-2 items-center justify-start gap-2' dir='ltr'>
+                <div className='flex mt-2 items-center justify-start gap-2 w-full' dir='ltr'>
                     <div className='flex gap-1'>
                         {[...Array(5)].map((_, index) => (
                         <StarIcon

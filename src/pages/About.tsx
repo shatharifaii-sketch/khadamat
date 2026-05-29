@@ -3,25 +3,28 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, Target, Heart, Shield, Award, CheckCircle } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import { useHomeStats } from '@/hooks/useHomeStats';
+import { useTranslation } from 'react-i18next';
 
 const About = () => {
+  const { t } = useTranslation("about");
+  const lang = localStorage.getItem("language") || "en";
   const { data: homeStats, isLoading, error } = useHomeStats();
 
   const features = [
     {
       icon: Shield,
-      title: 'أمان وثقة',
-      description: 'نضمن لك تجربة آمنة مع التحقق من هوية جميع مقدمي الخدمات'
+      title: t("about.features.security.title"),
+      description: t("about.features.security.description")
     },
     {
       icon: Users,
-      title: 'شبكة واسعة',
-      description: 'آلاف مقدمي الخدمات المحترفين في جميع أنحاء فلسطين'
+      title: t("about.features.network.title"),
+      description: t("about.features.network.description")
     },
     {
       icon: CheckCircle,
-      title: 'سهولة الاستخدام',
-      description: 'واجهة بسيطة وسهلة للعثور على الخدمة المناسبة بسرعة'
+      title: t("about.features.ease.title"),
+      description: t("about.features.ease.description")
     }
   ];
 
@@ -29,9 +32,9 @@ const About = () => {
   const getDynamicStats = () => {
     if (isLoading) {
       return [
-        { number: '...', label: 'مقدم خدمة' },
-        { number: '...', label: 'خدمة متاحة' },
-        { number: '...', label: 'فئة خدمة' },
+        { number: '...', label: t("about.stats.service_provider") },
+        { number: '...', label: t("about.stats.available_service") },
+        { number: '...', label: t("about.stats.service_category") },
       ];
     }
 
@@ -44,16 +47,16 @@ const About = () => {
 
     return [
       { 
-        number: serviceProvidersCount === 0 ? 'قريباً' : `${serviceProvidersCount}+`, 
-        label: 'مقدم خدمة' 
+        number: serviceProvidersCount === 0 ? t("about.stats.coming_soon") : `${serviceProvidersCount}+`, 
+        label: t("about.stats.service_provider") 
       },
       { 
-        number: publishedServicesCount === 0 ? 'قريباً' : `${publishedServicesCount}+`, 
-        label: 'خدمة متاحة' 
+        number: publishedServicesCount === 0 ? t("about.stats.coming_soon") : `${publishedServicesCount}+`, 
+        label: t("about.stats.available_service") 
       },
       { 
-        number: categoriesCount === 0 ? 'قريباً' : `${categoriesCount}+`, 
-        label: 'فئة خدمة' 
+        number: categoriesCount === 0 ? t("about.stats.coming_soon") : `${categoriesCount}+`, 
+        label: t("about.stats.service_category")
       },
     ];
   };
@@ -62,14 +65,14 @@ const About = () => {
   const isNewPlatform = !isLoading && (homeStats?.serviceProvidersCount || 0) < 10 && (homeStats?.publishedServicesCount || 0) < 20;
 
   return (
-      <div className="max-w-6xl mx-auto py-12 px-4">
+      <div className="max-w-6xl mx-auto py-12 px-4" dir={lang === "ar" ? "rtl" : "ltr"}>
         {/* Hero Section */}
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
-            من نحن
+            {t("about.hero.title")}
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto">
-            منصة فلسطينية رائدة تهدف إلى ربط مقدمي الخدمات المحترفين مع الأشخاص الباحثين عن الخدمات
+            {t("about.hero.description")}
           </p>
         </div>
 
@@ -79,12 +82,12 @@ const About = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-3 text-2xl">
                 <Target className="text-primary" size={32} />
-                رسالتنا
+                {t("about.mission.title")}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-xl-large text-muted-foreground">
-                نسعى لتسهيل الوصول إلى الخدمات المهنية عالية الجودة في فلسطين، وتوفير فرص عمل للمهنيين المحليين من خلال منصة آمنة وموثوقة.
+              <p className="text-xl-large text-muted-foreground text-start">
+                {t("about.mission.description")}
               </p>
             </CardContent>
           </Card>
@@ -93,12 +96,12 @@ const About = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-3 text-2xl">
                 <Heart className="text-primary" size={32} />
-                رؤيتنا
+                {t("about.vision.title")}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-xl-large text-muted-foreground">
-                أن نكون المنصة الأولى والأكثر ثقة في فلسطين لربط الخدمات المهنية، ودعم الاقتصاد المحلي من خلال تمكين المواهب الفلسطينية.
+              <p className="text-xl-large text-muted-foreground text-start">
+                {t("about.vision.description")}
               </p>
             </CardContent>
           </Card>
@@ -107,12 +110,12 @@ const About = () => {
         {/* Stats Section */}
         <div className="bg-card py-16 px-8 rounded-lg mb-16">
           <h2 className="text-3xl font-bold text-center mb-12">
-            {isNewPlatform ? 'منصة جديدة في نمو مستمر' : 'أرقامنا تتحدث'}
+            {isNewPlatform ? t("about.stats.new_platform_title") : t("about.stats.stats_title")}
           </h2>
           
           {isNewPlatform && (
             <p className="text-center text-muted-foreground mb-8 text-large">
-              انضم إلينا في بداية رحلتنا وكن جزءاً من مجتمع الخدمات المهنية الفلسطيني
+              {t("about.stats.new_platform_description")}
             </p>
           )}
           
@@ -133,7 +136,7 @@ const About = () => {
         {/* Features */}
         <div className="mb-16">
           <h2 className="text-3xl font-bold text-center mb-12">
-            لماذا نحن مختلفون؟
+            {t("about.features.title")}
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
             {features.map((feature, index) => {
@@ -145,8 +148,8 @@ const About = () => {
                       <Icon size={32} className="text-primary" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                      <p className="text-large text-muted-foreground">{feature.description}</p>
+                      <h3 className="text-xl font-semibold mb-2 text-start">{feature.title}</h3>
+                      <p className="text-large text-muted-foreground text-start">{feature.description}</p>
                     </div>
                   </div>
                 </Card>
@@ -158,19 +161,21 @@ const About = () => {
         {/* Our Story */}
         <Card className="mb-16">
           <CardHeader>
-            <CardTitle className="text-2xl text-center">قصتنا</CardTitle>
+            <CardTitle className="text-2xl text-center">
+              {t("about.story.title")}
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <p className="text-xl-large text-muted-foreground">
-              بدأت فكرة "خدمتك" من الحاجة الماسة لوجود منصة تربط بين المواهب الفلسطينية والأشخاص الباحثين عن خدمات مهنية موثوقة. لاحظنا أن العديد من المهنيين المهرة يواجهون صعوبة في الوصول إلى العملاء، بينما يجد الناس صعوبة في العثور على مقدمي خدمات موثوقين.
+            <p className="text-xl-large text-muted-foreground text-start">
+              {t("about.story.paragraph_1")}
             </p>
-            <p className="text-xl-large text-muted-foreground">
-              من هنا ولدت فكرة إنشاء منصة إلكترونية تجمع بين الطرفين، تتميز بسهولة الاستخدام والأمان والجودة. نحن نؤمن بأن التكنولوجيا يمكن أن تكون جسراً يربط بين الحاجات والحلول، وأن المواهب الفلسطينية تستحق منصة تليق بها.
+            <p className="text-xl-large text-muted-foreground text-start">
+             {t("about.story.paragraph_2")}
             </p>
-            <p className="text-xl-large text-muted-foreground">
+            <p className="text-xl-large text-muted-foreground text-start">
               {isNewPlatform 
-                ? 'نحن في بداية رحلتنا ونتطلع لخدمة مجتمعنا ودعم المهنيين الفلسطينيين في تحقيق دخل مستدام من خلال مهاراتهم وخبراتهم.'
-                : 'اليوم، نحن فخورون بخدمة آلاف المستخدمين ودعم مئات المهنيين في تحقيق دخل مستدام من خلال مهاراتهم وخبراتهم.'
+                ? t("about.story.new_platform_paragraph")
+                : t("about.story.existing_platform_paragraph")
               }
             </p>
           </CardContent>
@@ -178,27 +183,35 @@ const About = () => {
 
         {/* Values */}
         <div className="text-center">
-          <h2 className="text-3xl font-bold mb-8">قيمنا</h2>
+          <h2 className="text-3xl font-bold mb-8">
+            {t("about.values.title")}
+          </h2>
           <div className="grid md:grid-cols-3 gap-6">
             <Card className="p-6">
               <div className="text-4xl mb-4">🤝</div>
-              <h3 className="text-xl font-semibold mb-2">الثقة</h3>
+              <h3 className="text-xl font-semibold mb-2">
+                {t("about.values.trust.title")}
+              </h3>
               <p className="text-large text-muted-foreground">
-                نبني الثقة من خلال الشفافية والجودة في جميع خدماتنا
+                {t("about.values.trust.description")}
               </p>
             </Card>
             <Card className="p-6">
               <div className="text-4xl mb-4">💡</div>
-              <h3 className="text-xl font-semibold mb-2">الابتكار</h3>
+              <h3 className="text-xl font-semibold mb-2">
+                {t("about.values.innovation.title")}
+              </h3>
               <p className="text-large text-muted-foreground">
-                نسعى دائماً لتطوير حلول مبتكرة تخدم مجتمعنا
+                {t("about.values.innovation.description")}
               </p>
             </Card>
             <Card className="p-6">
               <div className="text-4xl mb-4">🌐</div>
-              <h3 className="text-xl font-semibold mb-2">التواصل</h3>
+              <h3 className="text-xl font-semibold mb-2">
+                {t("about.values.communication.title")}
+              </h3>
               <p className="text-large text-muted-foreground">
-                نربط بين الناس ونسهل التواصل بين مقدمي الخدمات والعملاء
+                {t("about.values.communication.description")}
               </p>
             </Card>
           </div>

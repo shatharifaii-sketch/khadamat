@@ -7,6 +7,7 @@ import { PublicService } from './usePublicServices';
 import { useParams } from 'react-router-dom';
 import { useImageUpload } from './useImageUpload';
 import { ServiceFormData } from '@/types/service';
+import { ServiceLink } from '@/components/PostService/ServiceLinks';
 
 export interface Service {
   id?: string;
@@ -20,6 +21,9 @@ export interface Service {
   experience?: string;
   status?: string;
   user_id?: string;
+  is_online?: boolean;
+  links?: [];
+  whatsapp_number?: string;
 }
 
 export interface ServiceImageProps {
@@ -72,8 +76,6 @@ export const useServices = () => {
         throw new Error('يجب تسجيل الدخول أولاً');
       }
       
-      // Check user's service quota before creating
-      console.log('Checking service quota...', user?.id);
       const { data: subscription, error: subError } = await supabase
         .from('subscriptions')
         .select('services_allowed, services_used')
@@ -96,18 +98,21 @@ export const useServices = () => {
         console.error('Error checking user services:', servicesError);
         throw new Error('خطأ في التحقق من الخدمات: ' + servicesError.message);
       }
+
+      const { data: userExtraProducts, error: extraProductsError } = await supabase.from("users_with_extra_products").select("*").eq("user_id", user.id).maybeSingle();
+
+      if (extraProductsError) {
+        console.error('Error checking user extra products for quota:', extraProductsError);
+      }
       
       const currentServiceCount = userServices?.length || 0;
-      console.log('Current service count:', currentServiceCount, 'Allowed:', subscription?.services_allowed || 0);
       
       // If no subscription exists or user already has services equal to or more than allowed
-      if (!subscription || currentServiceCount >= (subscription.services_allowed || 0)) {
+      if (!subscription || currentServiceCount >= (subscription.services_allowed + (userExtraProducts?.extra_products_count || 0))) {
         const message = subscription ? 'لقد استنفدت حصتك من الخدمات. يرجى الدفع لنشر المزيد من الخدمات.' : 'لا يوجد اشتراك نشط. يرجى الدفع لنشر الخدمات.'
         throw new Error(message);
       }
       
-      // First, ensure the user has a profile
-      console.log('Checking user profile...');
       const { data: existingProfile, error: profileCheckError } = await supabase
         .from('profiles')
         .select('id, is_service_provider')
@@ -148,8 +153,6 @@ export const useServices = () => {
         }
       }
 
-      // Now create the service
-      console.log('Creating service...');
       const { data, error } = await supabase
         .from('services')
         .insert({
@@ -173,7 +176,8 @@ export const useServices = () => {
           services_used: currentServiceCount + 1,
           updated_at: new Date().toISOString()
         })
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .eq('status', 'active');
 
       if (updateError) {
         console.error('Error updating services_used:', updateError);
@@ -194,7 +198,7 @@ export const useServices = () => {
       queryClient.invalidateQueries({ queryKey: ['service-images'] });
       toast.success('تم نشر الخدمة بنجاح!');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       console.error('Error creating service:', error);
       toast.error(error.message || 'حدث خطأ في نشر الخدمة');
     }
@@ -242,12 +246,11 @@ export const useServices = () => {
       queryClient.invalidateQueries({ queryKey: ['user-services'] });
       queryClient.invalidateQueries({ queryKey: ['public-services'] });
       queryClient.invalidateQueries({ queryKey: ['admin-data'] });
-      toast('تم تحديث الخدمة بنجاح!', { 
+      toast.success('تم تحديث الخدمة بنجاح!', { 
         description: 'انتظر الموافقة من الإدارة.', 
-        type: 'success'
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       console.error('Error updating service:', error);
       toast.error(error.message || 'حدث خطأ في تحديث الخدمة');
     }
@@ -314,6 +317,12 @@ export const useServiceImages = (serviceId: string) => {
   const { data: images } = useSuspenseQuery({
     queryKey: ['service-images'],
     queryFn: async () => {
+      if (!serviceId) {
+        console.error('No service id found when trying to fetch service images');
+
+        return []
+      }
+
       const { data: images, error } = await supabase
       .from('service_images')
       .select('*')
@@ -325,7 +334,7 @@ export const useServiceImages = (serviceId: string) => {
       }
 
       return images as ServiceImageProps[];
-    }
+    },
   })
 
   return images;
