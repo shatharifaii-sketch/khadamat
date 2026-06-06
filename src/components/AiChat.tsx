@@ -31,7 +31,7 @@ const AiChat = () => {
         </div>
         {/* <p className={cn("text-sm", open ? "" : "hidden")}>AI Chat Coming Soon!</p> */}
         <div className="w-full grid grid-rows-5 h-full">
-          <MessagesBox className="row-span-4 border" />
+          <MessagesBox className="row-span-4" />
           <MessageInputField />
         </div>
       </div>
