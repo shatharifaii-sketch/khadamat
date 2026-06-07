@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient, useSuspenseQuery } from '@tansta
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 export interface UserProfile {
   id: string;
@@ -17,6 +18,7 @@ export interface UserProfile {
 
 export const useProfile = () => {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   const getProfile = useQuery({
@@ -52,11 +54,11 @@ export const useProfile = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['profile'] });
-      toast.success('تم تحديث الملف الشخصي بنجاح!');
+      toast.success(t("profile_updated_successfully"));
     },
     onError: (error: any) => {
       console.error('Error updating profile:', error);
-      toast.error('حدث خطأ في تحديث الملف الشخصي');
+      toast.error(t("profile_update_failed"));
     }
   });
 
@@ -71,7 +73,7 @@ export const useProfile = () => {
       });
 
       if (error) {
-        toast.error(error.code === "otp_expired" ? ' انتهت صلاحية الرمز' : 'حدث خطاء في التحقق من البريد الألكتروني');
+        toast.error(error.code === "otp_expired" ? t("otp_expired") : t("unknown_validation_error"));
         console.error('Error verifying OTP:', error);
         return { error };
       }
@@ -81,7 +83,7 @@ export const useProfile = () => {
       const response = await supabase.functions.invoke('confirm-new-email', { body: JSON.stringify({ email, user_id }) });
 
       if (!response.data.success) {
-        toast.error('حدث خطاء في التحقق من البريد الألكتروني');
+        toast.error(t("unknown_validation_error"));
         console.error('Error verifying OTP:', response.data.error);
         return { error: response.data.error };
       }
