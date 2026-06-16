@@ -10,7 +10,7 @@ const lang = localStorage.getItem("language") || "en";
 
 export const validateEmail = (email: string): ValidationResult => {
   if (!email.trim()) {
-    return { isValid: false, message: 'البريد الإلكتروني مطلوب' };
+    return { isValid: false, message: lang === 'ar' ? 'البريد الإلكتروني مطلوب' : 'Email Address is required!' };
   }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
