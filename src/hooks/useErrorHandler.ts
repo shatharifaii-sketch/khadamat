@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 interface UseErrorHandlerReturn {
@@ -10,6 +11,7 @@ interface UseErrorHandlerReturn {
 }
 
 export const useErrorHandler = (): UseErrorHandlerReturn => {
+  const { t } = useTranslation("responses");
   const [error, setError] = useState<Error | null>(null);
 
   const handleError = useCallback((error: Error | string) => {
@@ -17,7 +19,7 @@ export const useErrorHandler = (): UseErrorHandlerReturn => {
     setError(errorObj);
     
     // Show user-friendly error messages
-    const userMessage = getUserFriendlyMessage(errorObj.message);
+    const userMessage = getUserFriendlyMessage(errorObj.message, t);
     toast.error(userMessage);
     
     // Log to console for debugging
@@ -32,9 +34,9 @@ export const useErrorHandler = (): UseErrorHandlerReturn => {
     try {
       clearError();
       await action();
-      toast.success('تم بنجاح!');
+      toast.success(t("action_completed_successfully"));
     } catch (err) {
-      handleError(err instanceof Error ? err : new Error('حدث خطأ غير متوقع'));
+      handleError(err instanceof Error ? err : new Error(t("unknown_error_occurred")));
     }
   }, [handleError, clearError]);
 
@@ -47,19 +49,19 @@ export const useErrorHandler = (): UseErrorHandlerReturn => {
   };
 };
 
-const getUserFriendlyMessage = (errorMessage: string): string => {
+const getUserFriendlyMessage = (errorMessage: string, t = (key: string) => key): string => {
   // Map technical errors to user-friendly Arabic messages
   const errorMap: Record<string, string> = {
-    'Network Error': 'مشكلة في الاتصال بالإنترنت',
-    'Unauthorized': 'يجب تسجيل الدخول أولاً',
-    'Forbidden': 'ليس لديك صلاحية للقيام بهذا الإجراء',
-    'Not Found': 'المحتوى المطلوب غير موجود',
-    'Internal Server Error': 'خطأ في الخادم، يرجى المحاولة لاحقاً',
-    'Bad Request': 'البيانات المدخلة غير صحيحة',
-    'Timeout': 'انتهت مهلة الاتصال',
-    'Invalid email': 'البريد الإلكتروني غير صحيح',
-    'Invalid password': 'كلمة المرور غير صحيحة',
-    'Email already exists': 'البريد الإلكتروني مستخدم بالفعل'
+    'Network Error': t("network_error") || 'مشكلة في الاتصال بالإنترنت',
+    'Unauthorized': t("unauthorized") || 'يجب تسجيل الدخول أولاً',
+    'Forbidden': t("forbidden") || 'ليس لديك صلاحية للقيام بهذا الإجراء',
+    'Not Found': t("not_found") || 'المحتوى المطلوب غير موجود',
+    'Internal Server Error': t("internal_server_error") || 'خطأ في الخادم، يرجى المحاولة لاحقاً',
+    'Bad Request': t("bad_request") || 'البيانات المدخلة غير صحيحة',
+    'Timeout': t("timeout") || 'انتهت مهلة الاتصال',
+    'Invalid email': t("invalid_email") || 'البريد الإلكتروني غير صحيح',
+    'Invalid password': t("invalid_password") || 'كلمة المرور غير صحيحة',
+    'Email already exists': t("email_exists_error") || 'البريد الإلكتروني مستخدم بالفعل'
   };
 
   // Check for partial matches
@@ -70,5 +72,5 @@ const getUserFriendlyMessage = (errorMessage: string): string => {
   }
 
   // Default message for unknown errors
-  return 'حدث خطأ غير متوقع، يرجى المحاولة مرة أخرى';
+  return t("unknown_error_occurred") || 'حدث خطأ غير متوقع، يرجى المحاولة مرة أخرى';
 };

@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 async function sendContact(formData: {
@@ -68,6 +69,7 @@ async function sendPasswordUpdate({email}: {email: string}) {
 
 export const useEmail = () => {
     const queryClient = useQueryClient();
+    const { t } = useTranslation("responses");
 
     const sendContactEmail = useMutation({
         mutationKey: ['send-contact-email'],
@@ -94,7 +96,7 @@ export const useEmail = () => {
         return { error: response.data.error };
       }
       
-      toast.success('أرسلنا لك رابط التحقق');
+      toast.success(t("email_update_link_sent"));
 
       return response.data.success;
     },
@@ -103,7 +105,7 @@ export const useEmail = () => {
     },
     onError: (error: any) => {
       console.error('Error updating profile:', error);
-      toast.error('حدث خطأ في تحديث الملف الشخصي');
+      toast.error(t("email_update_failed"));
     }
   });
 

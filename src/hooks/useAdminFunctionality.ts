@@ -6,6 +6,7 @@ import { Json, Tables } from "@/integrations/supabase/types";
 import { toast } from "sonner";
 import { ServiceLink } from "@/components/PostService/ServiceLinks";
 import { useEmail } from "./useEmail";
+import { useTranslation } from "react-i18next";
 
 interface UserProfile {
   id: string;
@@ -191,6 +192,7 @@ export const useAdminData = () => {
 
 export const useAdminFunctionality = () => {
   const queryClient = useQueryClient();
+  const { t } = useTranslation("responses")
   const { sendPasswordUpdateEmail } = useEmail();
 
   // Admin check - in a real app, you'd check this from the database
@@ -215,7 +217,7 @@ export const useAdminFunctionality = () => {
       });
 
       if (userError || error) {
-        toast.error(userError.code === "email_exists" ? "البريد الإلكتروني مستخدم بالفعل" : "خطأ في إنشاء المستخدم");
+        toast.error(userError.code === "email_exists" ? t("email_exists_error") : t("user_creation_error"));
         throw userError ?? error
       };
 
@@ -271,8 +273,8 @@ export const useAdminFunctionality = () => {
         { event: 'INSERT', schema: 'public', table: 'profiles' },
         (payload) => {
           console.log('New user registered:', payload.new);
-          toast("مستخدم جديد", {
-            description: `انضم ${payload.new.full_name || 'مستخدم جديد'} للموقع`,
+          toast(t("new_user"), {
+            description: `انضم ${payload.new.full_name || t("new_user")} للموقع`,
           });
           queryClient.invalidateQueries({ queryKey: ['admin-data'] });
         }
@@ -286,8 +288,8 @@ export const useAdminFunctionality = () => {
         { event: 'INSERT', schema: 'public', table: 'services' },
         (payload) => {
           console.log('New service posted:', payload.new);
-          toast("خدمة جديدة", {
-            description: `تم إضافة خدمة جديدة: ${payload.new.title}`,
+          toast(t("new_service"), {
+            description: `${t("new_service_added")}: ${payload.new.title}`,
           });
           queryClient.invalidateQueries({ queryKey: ['admin-data'] });
         }
@@ -321,8 +323,8 @@ export const useAdminFunctionality = () => {
         if (error || !data?.success) {
           toast.error(
             data?.error?.code === "email_exists"
-              ? "البريد الإلكتروني مستخدم بالفعل"
-              : "خطأ في تحديث المستخدم"
+              ? t("email_exists_error")
+              : t("user_creation_error")
           );
 
           throw error || data?.error;
@@ -490,11 +492,11 @@ export const useAdminFunctionality = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-data'] });
-      toast.success('تم تحديث الخدمة بنجاح!');
+      toast.success(t("service_approved"));
     },
     onError: (error: Error) => {
       console.error('Error updating service:', error);
-      toast.error(error.message || 'حدث خطأ في تحديث الخدمة');
+      toast.error(error.message || t("service_update_error"));
     }
   })
 
