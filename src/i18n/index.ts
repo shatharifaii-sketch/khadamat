@@ -15,6 +15,7 @@ import enAdmin from "./locales/en/admin.json";
 import enSubscriptions from "./locales/en/subscriptions.json";
 import enAuth from "./locales/en/auth.json";
 import enResponses from "./locales/en/responses.json";
+import enAiChat from "./locales/en/aiChat.json";
 
 import arNavbar from "./locales/ar/navbar.json";
 import arServices from "./locales/ar/services.json";
@@ -30,6 +31,7 @@ import arAdmin from "./locales/ar/admin.json";
 import arSubscriptions from "./locales/ar/subscriptions.json";
 import arAuth from "./locales/ar/auth.json";
 import arResponses from "./locales/ar/responses.json";
+import arAiChat from "./locales/ar/aiChat.json";
 
 const savedLanguage = localStorage.getItem("language") || "ar";
 
@@ -52,6 +54,7 @@ i18n
                 subscriptions: enSubscriptions,
                 auth: enAuth,
                 responses: enResponses
+                aiChat: enAiChat
             },
             ar: {
                 navbar: arNavbar,
@@ -68,6 +71,7 @@ i18n
                 subscriptions: arSubscriptions,
                 auth: arAuth,
                 responses: arResponses
+                aiChat: arAiChat
             },
         },
 
@@ -89,6 +93,7 @@ i18n
             "subscriptions",
             "auth",
             "responses"
+            "aiChat"
         ],
 
         interpolation: {

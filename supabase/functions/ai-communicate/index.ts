@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { messages, userPrompt, currentPage, userName } = await req.json();
+    const { messages, userPrompt, currentPage, userName, lang } = await req.json();
 
     const prompt = `
 Current page:
@@ -42,7 +42,7 @@ User message:
 ${userPrompt}
 `;
 
-const systemInstructions = `
+    const systemInstructions = `
 You are the AI assistant for Khedemtak, a marketplace for local services.
 
 Users can:
@@ -64,6 +64,8 @@ Guidelines:
 - explain navigation clearly
 - mention relevant pages when useful
 - do not invent features that do not exist
+
+Language: ${lang === "ar" ? "Arabic" : "English"}
 `;
 
     const response = await ai.models.generateContent({
