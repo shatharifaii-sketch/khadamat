@@ -3,6 +3,7 @@ import { useChat } from "@/contexts/ChatContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -115,6 +116,7 @@ const getConvoMessagesData = async (conversationId: string, userId: string) => {
 
 export const useConversations = () => {
     const { user } = useAuth();
+    const { t } = useTranslation("responses")
 
     const getConversations = useSuspenseQuery({
         queryKey: ['get-conversations', user?.id],
@@ -198,7 +200,7 @@ export const useConversations = () => {
                 await query.maybeSingle();
 
             if (existingConvoError && existingConvoError.code !== 'PGRST116') {
-                toast.error('حدث خطأ أثناء بدء المحادثة');
+                toast.error(t("conversation_start_error"));
                 console.error(existingConvoError);
 
                 throw existingConvoError;
@@ -243,7 +245,7 @@ export const useConversations = () => {
                 throw error;
             }
 
-            toast.success(`تم بدء المحادثة مع ${providerName}`);
+            toast.success(t("conversation_started", { providerName }));
 
             return {
                 id: data.id

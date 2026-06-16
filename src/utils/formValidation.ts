@@ -6,16 +6,21 @@ export interface ValidationResult {
   message: string;
 }
 
+const lang = localStorage.getItem("language") || "en";
+
 export const validateEmail = (email: string): ValidationResult => {
   if (!email.trim()) {
-    return { isValid: false, message: 'البريد الإلكتروني مطلوب' };
+    return { isValid: false, message: lang === 'ar' ? 'البريد الإلكتروني مطلوب' : 'Email Address is required!' };
   }
-  
+
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
-    return { isValid: false, message: 'يرجى إدخال بريد إلكتروني صحيح (مثال: info@khedemtak.com)' };
+    return {
+      isValid: false,
+      message: lang === 'ar' ? 'يرجى إدخال بريد إلكتروني صحيح (مثال: info@khedemtak.com)' : 'Please enter a valid email address (e.g., info@khedemtak.com)'
+    };
   }
-  
+
   return { isValid: true, message: '' };
 };
 
@@ -40,14 +45,14 @@ export const validateLinks = (links: ServiceLink[]): ValidationResult => {
     if (!link.type.trim()) {
       return {
         isValid: false,
-        message: `يرجى إدخال نوع رابط رقم ${row}`
+        message: lang === 'ar' ? `يرجى إدخال نوع للرابط رقم ${row}` : `Please enter a type for link number ${row}`
       }
     }
 
     if (!link.url.trim()) {
       return {
         isValid: false,
-        message: `يرجى إدخال رابط رقم ${row}`
+        message: lang === 'ar' ? `يرجى إدخال رابط للرابط رقم ${row}` : `Please enter a link for link number ${row}`
       }
     }
 
@@ -62,14 +67,14 @@ export const validateLinks = (links: ServiceLink[]): ValidationResult => {
         if (!matches) {
           return {
             isValid: false,
-            message: `يرجى إدخال رابط صحيح من نوع ${link.type} رقم ${row}`
+            message: lang === 'ar' ? `يرجى إدخال رابط صحيح من نوع ${link.type} رقم ${row}` : `Please enter a valid link of type ${link.type} for link number ${row}`
           }
         }
       }
     } catch (error) {
       return {
         isValid: false,
-        message: `يرجى إدخال رابط صحيح من نوع ${link.type} رقم ${row}`
+        message: lang === 'ar' ? `يرجى إدخال رابط صحيح من نوع ${link.type} رقم ${row}` : `Please enter a valid link of type ${link.type} for link number ${row}`
       }
     }
   }
@@ -83,20 +88,23 @@ const normalizeDigits = (value: string) => {
     .replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - 1776));
 };
 
-export const validateWhatsappNumber = ({countryCode, number}: {countryCode: string, number: string}): ValidationResult => {
+export const validateWhatsappNumber = ({ countryCode, number }: { countryCode: string, number: string }): ValidationResult => {
   return {
     isValid: true,
     message: ''
   };
 };
 
-export const formatWhatsappNumber = ({countryCode, number}: {countryCode: string, number: string}) => {
+export const formatWhatsappNumber = ({ countryCode, number }: { countryCode: string, number: string }) => {
   return `${countryCode}${number.replace(/^0+/, "")}`;
 }
 
 export const validatePhone = (phone: string): ValidationResult => {
   if (!phone.trim()) {
-    return { isValid: false, message: 'رقم الهاتف مطلوب' };
+    return { 
+      isValid: false, 
+      message: lang === 'ar' ? 'رقم الهاتف مطلوب' : 'Phone number is required'
+    };
   }
 
   const cleanPhone = normalizeDigits(phone)
@@ -106,7 +114,10 @@ export const validatePhone = (phone: string): ValidationResult => {
   const phoneRegex = /^(059|056|057|058|052)\d{7}$/;
 
   if (!phoneRegex.test(cleanPhone)) {
-    return { isValid: false, message: 'يرجى إدخال رقم هاتف صحيح (مثال: 0599123456)' };
+    return { 
+      isValid: false, 
+      message: lang === 'ar' ? 'يرجى إدخال رقم هاتف صحيح (مثال: 0599123456)' : "Please enter a valid phone number (e.g. 0599123456)" 
+    };
   }
 
   return { isValid: true, message: '' };
@@ -114,7 +125,10 @@ export const validatePhone = (phone: string): ValidationResult => {
 
 export const validateRequired = (value: string, fieldName: string): ValidationResult => {
   if (!value.trim()) {
-    return { isValid: false, message: `${fieldName} مطلوب` };
+    return { 
+      isValid: false, 
+      message: lang === 'ar' ? `${fieldName} مطلوب` : `${fieldName} is required`
+    };
   }
   return { isValid: true, message: '' };
 };
@@ -127,7 +141,10 @@ export const validateLocation = (value: string, fieldName: string): ValidationRe
 
     return {
       isValid,
-      message: isValid ? '' : `يرجى اختيار ${fieldName} من القائمة`
+      message: isValid ? '' : (
+        lang === 'ar' ? `يرجى اختيار ${fieldName} من القائمة`
+          : `Please select ${fieldName} from the list`
+      )
     };
   }
 
@@ -135,20 +152,32 @@ export const validateLocation = (value: string, fieldName: string): ValidationRe
 
 export const validateTitle = (title: string): ValidationResult => {
   if (!title.trim()) {
-    return { isValid: false, message: 'عنوان الخدمة مطلوب' };
+    return { 
+      isValid: false, 
+      message: lang === 'ar' ? 'عنوان الخدمة مطلوب' : "Service title is required"
+    };
   }
   if (title.length < 5) {
-    return { isValid: false, message: 'عنوان الخدمة يجب أن يكون 5 أحرف على الأقل' };
+    return { 
+      isValid: false, 
+      message: lang === 'ar' ? 'عنوان الخدمة يجب أن يكون 5 أحرف على الأقل' : "Service title must be at least 5 characters"
+    };
   }
   return { isValid: true, message: '' };
 };
 
 export const validateDescription = (description: string): ValidationResult => {
   if (!description.trim()) {
-    return { isValid: false, message: 'وصف الخدمة مطلوب' };
+    return { 
+      isValid: false, 
+      message: lang === 'ar' ? 'وصف الخدمة مطلوب' : "Service description is required"
+    };
   }
   if (description.length < 20) {
-    return { isValid: false, message: 'وصف الخدمة يجب أن يكون 20 حرف على الأقل' };
+    return { 
+      isValid: false, 
+      message: lang === 'ar' ? 'وصف الخدمة يجب أن يكون 20 حرف على الأقل' : "Service description must be at least 20 characters"
+    };
   }
   return { isValid: true, message: '' };
 };

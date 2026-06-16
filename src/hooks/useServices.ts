@@ -8,6 +8,7 @@ import { useParams } from 'react-router-dom';
 import { useImageUpload } from './useImageUpload';
 import { ServiceFormData } from '@/types/service';
 import { ServiceLink } from '@/components/PostService/ServiceLinks';
+import { useTranslation } from 'react-i18next';
 
 export interface Service {
   id?: string;
@@ -36,6 +37,7 @@ export interface ServiceImageProps {
 export const useServices = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   const saveImages = async ({serviceId, images}: {serviceId: string, images: ServiceFormData['images']}) => {
     console.log('saving service images: ', images);
@@ -65,7 +67,7 @@ export const useServices = () => {
         console.log('Service image uploaded successfully:', data);
       }
 
-      toast.success('تم تحميل صور الخدمة بنجاح!');
+      toast.success(t("service_images_uploaded") || 'تم تحميل صور الخدمة بنجاح!');
       return true;
   }
 
@@ -73,7 +75,7 @@ export const useServices = () => {
     mutationFn: async (serviceData: Service) => {
       if (!user) {
         console.error('No user found when trying to create service');
-        throw new Error('يجب تسجيل الدخول أولاً');
+        throw new Error(t("unauthorized") || 'يجب تسجيل الدخول أولاً');
       }
       
       const { data: subscription, error: subError } = await supabase
@@ -85,7 +87,7 @@ export const useServices = () => {
 
       if (subError) {
         console.error('Error checking subscription:', subError);
-        throw new Error('خطأ في التحقق من الاشتراك: ' + subError.message);
+        throw new Error(t("subscription_check_error") || ('خطأ في التحقق من الاشتراك: ' + subError.message));
       }
 
       // For new subscription model: Check actual service count vs allowed
@@ -96,7 +98,7 @@ export const useServices = () => {
         
       if (servicesError) {
         console.error('Error checking user services:', servicesError);
-        throw new Error('خطأ في التحقق من الخدمات: ' + servicesError.message);
+        throw new Error(t("service_check_error") || ('خطأ في التحقق من الخدمات: ' + servicesError.message));
       }
 
       const { data: userExtraProducts, error: extraProductsError } = await supabase.from("users_with_extra_products").select("*").eq("user_id", user.id).maybeSingle();
@@ -109,7 +111,7 @@ export const useServices = () => {
       
       // If no subscription exists or user already has services equal to or more than allowed
       if (!subscription || currentServiceCount >= (subscription.services_allowed + (userExtraProducts?.extra_products_count || 0))) {
-        const message = subscription ? 'لقد استنفدت حصتك من الخدمات. يرجى الدفع لنشر المزيد من الخدمات.' : 'لا يوجد اشتراك نشط. يرجى الدفع لنشر الخدمات.'
+        const message = subscription ? t("no_more_services_available") : t("no_active_subscription");
         throw new Error(message);
       }
       
@@ -121,7 +123,7 @@ export const useServices = () => {
       
       if (profileCheckError) {
         console.error('Error checking profile:', profileCheckError);
-        throw new Error('خطأ في التحقق من الملف الشخصي: ' + profileCheckError.message);
+        throw new Error(t("profile_check_error") || ('خطأ في التحقق من الملف الشخصي: ' + profileCheckError.message));
       }
 
       if (!existingProfile) {
@@ -137,7 +139,7 @@ export const useServices = () => {
         
         if (profileCreateError) {
           console.error('Error creating profile:', profileCreateError);
-          throw new Error('فشل في إنشاء الملف الشخصي: ' + profileCreateError.message);
+          throw new Error(t("profile_create_error") || ('فشل في إنشاء الملف الشخصي: ' + profileCreateError.message));
         }
       } else if (!existingProfile.is_service_provider) {
         // Profile exists but is not marked as service provider, update it
@@ -149,7 +151,7 @@ export const useServices = () => {
         
         if (profileUpdateError) {
           console.error('Error updating profile:', profileUpdateError);
-          throw new Error('فشل في تحديث الملف الشخصي: ' + profileUpdateError.message);
+          throw new Error(t("profile_update_error") || ('فشل في تحديث الملف الشخصي: ' + profileUpdateError.message));
         }
       }
 
@@ -165,7 +167,7 @@ export const useServices = () => {
 
       if (error) {
         console.error('Error creating service:', error);
-        throw new Error('فشل في إنشاء الخدمة: ' + error.message);
+        throw new Error(t("service_create_error") || ('فشل في إنشاء الخدمة: ' + error.message));
       }
       
       // Update services_used count to reflect actual service count
@@ -196,7 +198,7 @@ export const useServices = () => {
       queryClient.invalidateQueries({ queryKey: ['home-stats'] });
       queryClient.invalidateQueries({ queryKey: ['admin-data'] });
       queryClient.invalidateQueries({ queryKey: ['service-images'] });
-      toast.success('تم نشر الخدمة بنجاح!');
+      toast.success(t("service_created") || 'تم نشر الخدمة بنجاح!');
     },
     onError: (error: Error) => {
       console.error('Error creating service:', error);
@@ -208,7 +210,7 @@ export const useServices = () => {
     mutationFn: async (serviceData: Service & { id: string }) => {
       if (!user) {
         console.error('No user found when trying to update service');
-        throw new Error('يجب تسجيل الدخول أولاً');
+        throw new Error(t("unauthorized") || 'يجب تسجيل الدخول أولاً');
       }
       
       console.log('Updating service:', serviceData.id);
@@ -235,7 +237,7 @@ export const useServices = () => {
 
       if (error) {
         console.error('Error updating service:', error);
-        throw new Error('فشل في تحديث الخدمة: ' + error.message);
+        throw new Error(t("service_update_error") || ('فشل في تحديث الخدمة: ' + error.message));
       }
       
       console.log('Service updated successfully:', data);
@@ -246,8 +248,8 @@ export const useServices = () => {
       queryClient.invalidateQueries({ queryKey: ['user-services'] });
       queryClient.invalidateQueries({ queryKey: ['public-services'] });
       queryClient.invalidateQueries({ queryKey: ['admin-data'] });
-      toast.success('تم تحديث الخدمة بنجاح!', { 
-        description: 'انتظر الموافقة من الإدارة.', 
+      toast.success(t("service_update_successful") || 'تم تحديث الخدمة بنجاح!', { 
+        description: t("service_pending_approval") || 'انتظر الموافقة من الإدارة.', 
       });
     },
     onError: (error: Error) => {

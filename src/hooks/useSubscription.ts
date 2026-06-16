@@ -6,6 +6,7 @@ import { json } from 'react-router-dom';
 import { useCoupon } from './useCoupon';
 import { useState } from 'react';
 import { usePaymentLogic } from './usePaymentLogic';
+import { useTranslation } from 'react-i18next';
 
 export interface Subscription {
   id: string;
@@ -100,6 +101,7 @@ async function cancelSubscription({
 export const useSubscription = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { t } = useTranslation("responses");
   const { appliedCoupon } = useCoupon();
   const [token, setToken] = useState<string | null>(null);
 
@@ -410,11 +412,11 @@ notes
     },
     onSuccess() {
       queryClient.invalidateQueries({ queryKey: ['user-subscription'] });
-      toast.success('تم انشاء الاشتراك بنجاح! يمكنك الآن نشر خدماتك.');
+      toast.success(t("subscription_created_successfully") || 'تم انشاء الاشتراك بنجاح! يمكنك الآن نشر خدماتك.');
     },
     onError(error: any) {
       console.error('Error creating new subscription:', error);
-      toast.error('حدث خطاء في انشاء الاشتراك: ' + error.message);
+      toast.error(t("subscription_create_error") || ('حدث خطاء في انشاء الاشتراك: ' + error.message));
     },
   })
 
@@ -424,11 +426,11 @@ notes
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-subscription', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['user-subscriptions', user?.id] });
-      toast.success('تم انهاء الاشتراك بنجاح!.');
+      toast.success(t("subscription_deactivation_success") || 'تم انهاء الاشتراك بنجاح!.');
     },
     onError(error: any) {
       console.error('Error deactivating subscription:', error);
-      toast.error('حدث خطاء في انهاء الاشتراك: ' + error.message);
+      toast.error(t("subscription_deactivation_error") || ('حدث خطاء في انهاء الاشتراك: ' + error.message));
     },
   })
 
