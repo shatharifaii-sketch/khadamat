@@ -8,6 +8,7 @@ import MessageInputField from "./AiComponents/MessageInputField";
 const AiChat = () => {
   const isMobile = useIsMobile();
   const [open, setOpen] = useState<boolean>(false);
+  const [message, setMessage] = useState<string>('');
 
   return (
     <div className={cn(
@@ -31,8 +32,8 @@ const AiChat = () => {
         </div>
         {/* <p className={cn("text-sm", open ? "" : "hidden")}>AI Chat Coming Soon!</p> */}
         <div className="w-full grid grid-rows-5 h-full">
-          <MessagesBox className="row-span-4" />
-          <MessageInputField />
+          <MessagesBox className="row-span-4" setMessage={setMessage} />
+          <MessageInputField message={message} setMessage={setMessage} />
         </div>
       </div>
     </div>

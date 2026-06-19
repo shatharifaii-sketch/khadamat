@@ -53,7 +53,7 @@ i18n
                 admin: enAdmin,
                 subscriptions: enSubscriptions,
                 auth: enAuth,
-                responses: enResponses
+                responses: enResponses,
                 aiChat: enAiChat
             },
             ar: {
@@ -70,7 +70,7 @@ i18n
                 admin: arAdmin,
                 subscriptions: arSubscriptions,
                 auth: arAuth,
-                responses: arResponses
+                responses: arResponses,
                 aiChat: arAiChat
             },
         },
@@ -92,7 +92,7 @@ i18n
             "admin",
             "subscriptions",
             "auth",
-            "responses"
+            "responses",
             "aiChat"
         ],
 

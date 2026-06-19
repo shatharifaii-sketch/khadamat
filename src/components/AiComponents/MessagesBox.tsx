@@ -1,17 +1,23 @@
 import { cn } from "@/lib/utils"
 import { useAiChatStore } from "@/stores/useAiChatStore"
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import EmptyChat from "./EmptyChat";
+import { ChatSuggestions } from "@/types/ai";
 
 interface Props {
-    className?: string
+    className?: string;
+    setMessage: React.Dispatch<React.SetStateAction<string>>
 }
 
-const MessagesBox = ({ className }: Props) => {
+const MessagesBox = ({ className, setMessage }: Props) => {
   const { t } = useTranslation("aiChat");
   const lang = localStorage.getItem("language") || "en";
 
+
   const { messages, isLoading } = useAiChatStore();
+
+  console.log(messages);
 
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -29,11 +35,9 @@ const MessagesBox = ({ className }: Props) => {
     dir={lang === "ar" ? "rtl" : "ltr"}
     >
       {messages.length === 0 && (
-        <div
-          className="text-center text-muted-foreground mt-10"
-        >
-          {t("no_messages")}
-        </div>
+          <EmptyChat
+            setSuggestion={setMessage}
+          />
       )}
 
       {messages.map((msg) => (
@@ -55,6 +59,9 @@ const MessagesBox = ({ className }: Props) => {
           className="bg-background border rounded-lg px-3 py-2 self-start"
         >
           {t("typing")}
+          <div className="h-2 w-2 rounded-full bg-muted-foreground animate-bounce [animation-delay:-0.3s]" />
+      <div className="h-2 w-2 rounded-full bg-muted-foreground animate-bounce [animation-delay:-0.15s]" />
+      <div className="h-2 w-2 rounded-full bg-muted-foreground animate-bounce" />
         </div>
       )}
 

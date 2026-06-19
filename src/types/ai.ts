@@ -6,3 +6,5 @@ export interface ChatMessage {
     content: string;
     created_at?: string;
 }
+
+export type ChatSuggestions = string[];

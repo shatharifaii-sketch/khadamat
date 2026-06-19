@@ -1,4 +1,10 @@
 {
-    "no_messages": "No messages yet. Start the conversation!",
-    "message_placeholder": "Type your message here..."
+    "no_messages": "Start a new chat with our AI Assistant!",
+    "message_placeholder": "Type your message here...",
+    "suggestions": "Suggestions for our AI Assistant:",
+    "suggestions_list": {
+        "where_start_subscription": "Where can I start my subscription?",
+        "start_without_bank": "Can I start my subscription without bank information?",
+        "file_complaint": "How can I file a complaint about a user or service?"
+    }
 }

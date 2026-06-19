@@ -1,4 +1,10 @@
 {
-    "no_messages": "لا توجد رسائل بعد. ابدأ المحادثة!",
-    "message_placeholder": "اكتب رسالتك هنا..."
+    "no_messages": "إبدأ محادثة جديدة مع المساعد الآلي!",
+    "message_placeholder": "اكتب رسالتك هنا...",
+    "suggestions": "اقتراحات للمساعد الآلي:",
+    "suggestions_list": {
+        "where_start_subscription": "وين بقدر أبدأ إشتراكي؟",
+        "start_without_bank": "بقدر أبدأ اشتراكي بدون معلومات البنك؟",
+        "file_complaint": "كيف بدي أعمل شكوى على مستخدم أو خدمة؟"
+    }
 }

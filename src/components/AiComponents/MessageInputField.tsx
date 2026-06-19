@@ -6,13 +6,20 @@ import { useTranslation } from "react-i18next"
 import { useLocation } from "react-router-dom"
 import { useAiChatStore } from "@/stores/useAiChatStore"
 
-const MessageInputField = () => {
+interface Props {
+  message: string;
+  setMessage: React.Dispatch<React.SetStateAction<string>>
+}
+
+const MessageInputField = ({
+  message,
+  setMessage
+}: Props) => {
   const { t } = useTranslation("aiChat");
   const lang = localStorage.getItem("language") || "en";
 
   const { pathname } = useLocation();
 
-  const [message, setMessage] = useState<string>('')
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const { sendMessage, isLoading } = useAiChatStore();
