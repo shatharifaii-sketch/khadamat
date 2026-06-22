@@ -6,7 +6,7 @@ export const useSubscriptionTiers = () => {
         queryKey: ['subscription-tiers'],
         queryFn: async () => {
             const { data, error } = await supabase
-            .from('subscription_tiers')
+            .from('subscription_tiers_dev')
             .select('*');
 
             if (error) {
@@ -21,5 +21,37 @@ export const useSubscriptionTiers = () => {
     return {
         subscriptionTiersData: subscriptionTiers.data,
         subscriptionTiersSuccess: subscriptionTiers.isSuccess
+    }
+}
+
+export const useSubscriptionTierData = (tierId: string) => {
+    const {
+        data,
+        error,
+        isPending,
+        isError
+    } = useSuspenseQuery({
+        queryKey: ['subscription-tiers', tierId],
+        queryFn: async () => {
+            const { data, error } = await supabase
+            .from('subscription_tiers_dev')
+            .select('*')
+            .eq('id', tierId)
+            .maybeSingle();
+
+            if (error) {
+                console.error('Error fetching subscription tier data:', error);
+                throw new Error(error.message);
+            }
+
+            return data;
+        }
+    });
+
+    return {
+        subscriptionTierData: data,
+        subscriptionTierError: error,
+        isSubscriptionTierError: isError,
+        subscriptionTierIsPending: isPending
     }
 }

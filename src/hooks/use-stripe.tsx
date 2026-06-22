@@ -39,7 +39,7 @@ const createStripeCheckoutSession = async ({ priceId, userId, email }: { priceId
     if (!userId) return;
 
     const { data, response, error } = await supabase.functions.invoke(
-        "create-checkout-session",
+        "create-checkout-session-dev",
         {
             body: JSON.stringify({
                 priceId,
@@ -59,7 +59,7 @@ const createStripeCheckoutSession = async ({ priceId, userId, email }: { priceId
 
 const verifyStripeSessionId = async (sessionId: string) => {
     const { data, error } = await supabase.functions.invoke(
-        "verify-stripe-checkout-session-id",
+        "verify-stripe-checkout-session-id-dev",
         {
             body: JSON.stringify({ sessionId }),
         }
@@ -71,9 +71,9 @@ const verifyStripeSessionId = async (sessionId: string) => {
     }
 
     const { data: userSub, error: userSubError } = await supabase
-        .from('subscriptions')
+        .from('subscriptions_dev')
         .select(`*, 
-          subscription_tier:subscriptions_tier_id_fkey (
+          subscription_tier:subscriptions_dev_tier_id_fkey (
             id,
             title,
             allowed_services,
@@ -100,7 +100,7 @@ const verifyStripeSessionId = async (sessionId: string) => {
 
 const verifyExtraStripeSessionId = async (sessionId: string): Promise<boolean> => {
     const { data, error } = await supabase.functions.invoke(
-        "verify-extra-stripe-checkout-session-id",
+        "verify-extra-stripe-checkout-session-id-dev",
         {
             body: JSON.stringify({ sessionId }),
         }
@@ -116,7 +116,7 @@ const verifyExtraStripeSessionId = async (sessionId: string): Promise<boolean> =
 
 const getBillingPortalSession = async (customerId: string) => {
     const { data, error } = await supabase.functions.invoke(
-        "stripe-billing-portal",
+        "stripe-billing-portal-dev",
         {
             body: JSON.stringify({ customerId }),
         }
@@ -135,7 +135,7 @@ const createExtraStripeCheckoutSession = async ({ userId, email, name }: { userI
     console.log('Creating extra checkout session for user:', userId, email, name);
 
     const { data, response, error } = await supabase.functions.invoke(
-        "create-extra-product-checkout-session",
+        "create-extra-product-checkout-session-dev",
         {
             body: {
                 userId: userId,

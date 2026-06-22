@@ -45,5 +45,15 @@
         "what_happened_description": "You purchased an additional service after reaching the maximum number of services allowed by your current subscription.",
         "post_new_service": "Post a New Service",
         "go_to_account": "Go to My Account"
-    }
+    },
+    "starter": {
+        "title": "Ready to start?",
+        "start_button": "Start Now",
+        "description": "Notes before starting your subscription:",
+        "description_text": "You will now start a free trial of 4 months. After that you will be charged {{ amount }} ILS per {{ cycle }}.",
+        "description_text_2": "You will not need to enter any information related to your bank account until the trial period ends and you decide to continue with your subscription.",
+        "tier_data": "Subscription Information"
+    },
+    "year": "year",
+    "month": "month"
 }
