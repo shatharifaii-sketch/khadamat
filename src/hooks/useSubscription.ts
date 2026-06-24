@@ -77,7 +77,7 @@ async function cancelSubscription({
   stripe_sub_id
 }: CancelSubscriptionInput) {
   const { data, error } = await supabase.functions.invoke(
-    'cancel-subscription-dev', {
+    'cancel-subscription', {
     body: JSON.stringify({
       sub_id,
       email,
@@ -113,9 +113,9 @@ export const useSubscription = () => {
       if (!user) return null;
 
       const { data, error } = await supabase
-        .from('subscriptions_dev')
+        .from('subscriptions')
         .select(`*, 
-          subscription_tier:subscriptions_dev_tier_id_fkey (
+          subscription_tier:subscriptions_tier_id_fkey (
             id,
             title,
             allowed_services,
@@ -147,9 +147,9 @@ notes
       if (!user) return null;
 
       const { data: activeSubscription, error: activeSubscriptionError } = await supabase
-        .from('subscriptions_dev')
+        .from('subscriptions')
         .select(`*, 
-          subscription_tier:subscriptions_dev_tier_id_fkey (
+          subscription_tier:subscriptions_tier_id_fkey (
             id,
             title,
             allowed_services,
@@ -174,9 +174,9 @@ notes
       console.log('Active subscription:', activeSubscription);
 
       const { data: inactiveSubscriptions, error: inactiveSubscriptionsError } = await supabase
-        .from('subscriptions_dev')
+        .from('subscriptions')
         .select(`*, 
-          subscription_tier:subscriptions_dev_tier_id_fkey (
+          subscription_tier:subscriptions_tier_id_fkey (
             id,
             title,
             allowed_services,

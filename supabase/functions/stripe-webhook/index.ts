@@ -531,7 +531,7 @@ async function handleSubscriptionCreated(subscription: any) {
     console.log('handle function subscription created - discount: ', discount);
 
     const { data: subscriptionTier, error: tierError } = await supabase
-      .from('subscription_tiers_dev')
+      .from('subscription_tiers')
       .select('*')
       .eq(
         'stripe_product_id',
