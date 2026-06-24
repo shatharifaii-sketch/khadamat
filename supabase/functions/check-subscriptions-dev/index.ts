@@ -3,6 +3,10 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "npm:resend@latest";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY")!);
+const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -21,18 +25,22 @@ function formatDate(date?: string | Date | null) {
 }
 
 //helper 1: Handle expired subscriptions
-async function handleExpiredSubs(sub: any, supabase: any) {
-  if (!sub.expires_at || new Date(sub.expires_at) >= new Date()) return false;
-
+async function handleExpiredSubs(sub: any) {
   console.log(`Subscription ${sub.id} has expired. Skipping.`);
   const { error: updateError } = await supabase
-    .from('subscriptions')
-    .update({ status: 'expired' })
+    .from('subscriptions_dev')
+    .update({
+      status: 'trial_expired',
+      is_in_trial: false,
+      updated_at: new Date().toISOString()
+    })
     .eq('id', sub.id);
 
 
   if (updateError) {
     console.error(`Error updating subscription ${sub.id} to expired:`, updateError);
+
+    return false;
   }
 
   return true
@@ -52,7 +60,7 @@ async function sendReminderEmail(sub: any, user: any) {
       from: "Khedemtak <support@mail.khedemtak.com>",
       to: user.email,
       template: {
-        id: "subscription-cancel",
+        id: "ending_trial",
         variables: {
           name: user.full_name ?? 'مستخدم',
           subscription_date: formatDate(res.data.started_at),
@@ -80,15 +88,14 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
+    const now = new Date().toISOString();
 
     const { data: subs, error: subsError } = await supabase
-      .from("subscriptions")
+      .from("subscriptions_dev")
       .select("*")
-      .eq("status", "active");
+      .eq("is_in_trial", true)
+      .eq("status", "active")
+      .lt("trial_expires_at", now);
 
     if (subsError) throw subsError;
 
@@ -120,3 +127,15 @@ Deno.serve(async (req) => {
     );
   }
 });
+
+/* To invoke locally:
+
+  1. Run `supabase start` (see: https://supabase.com/docs/reference/cli/supabase-start)
+  2. Make an HTTP request:
+
+  curl -i --location --request POST 'http://127.0.0.1:54321/functions/v1/check-subscriptions-dev' \
+    --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0' \
+    --header 'Content-Type: application/json' \
+    --data '{"name":"Functions"}'
+
+*/

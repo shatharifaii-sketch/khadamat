@@ -85,13 +85,13 @@ const SubscriptionCard = ({ subscription, yearly, selectedSubscription, cardClas
                 </div>
             </CardContent>
             <CardFooter>
-                <Link
+                {/* <Link
                     to={`/subscription-starter/${subscription.id}/${yearly ? "yearly" : "monthly"}`}
                     className='bg-white text-muted-foreground flex-1 shadow-md border hover:text-white hover:bg-primary transition-all duration-200 rounded-md text-center py-2'
                 >
                     {t("subscribe")}
-                </Link>
-                {/* <Dialog open={open} onOpenChange={setOpen}>
+                </Link> */}
+                <Dialog open={open} onOpenChange={setOpen}>
                     <DialogTrigger asChild>
                         <Button
                             onClick={() => onSelect(subscription)}
@@ -164,7 +164,7 @@ const SubscriptionCard = ({ subscription, yearly, selectedSubscription, cardClas
                             </Button>
                         </DialogFooter>
                     </DialogContent>
-                </Dialog> */}
+                </Dialog>
             </CardFooter>
         </Card>
     );

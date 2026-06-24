@@ -66,7 +66,7 @@ function App() {
                     <Route path="chat/:id/:client_id/:service_id?/:provider_id" element={<ChatPage />} />
                     <Route path="convos" element={<ConversationsPage />} />
                     <Route path="payment" element={<Payment />} />
-                    <Route path="subscription-starter/:tier_id/:cycle" element={<SubscriptionStarter />} />
+                    {/* <Route path="subscription-starter/:tier_id/:cycle" element={<SubscriptionStarter />} /> */}
                     <Route path="checkout" element={<Checkout />} />
                     <Route path="subscription-plans" element={<SubscriptionPlans />} />
                     <Route path="faq" element={<FAQ />} />

@@ -98,7 +98,8 @@ Deno.serve(async (req: Request) => {
           email: email,
           subscription_tier_id: subscriptionTierId
         }
-      }
+      },
+      payment_method_collection: "if_required"
     });
 
     return new Response(

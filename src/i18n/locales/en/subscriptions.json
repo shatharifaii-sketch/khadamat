@@ -32,7 +32,18 @@
         "allowed_services": "Allowed services",
         "go_home": "Go to homepage",
         "invalid_session_redirect": "Redirecting to homepage",
-        "available_services": "Available services count:"
+        "available_services": "Available services count:",
+        "service_name": "Service name",
+        "payment_amount": "Payment amount",
+        "status": "Current Status",
+        "extra_service_title": "Subscription details",
+        "what_happens_next": "What happens next?",
+        "next_step_1": "Update your account details, if needed.",
+        "next_step_2": "Post your first service.",
+        "next_step_3": "Start providing and earning.",
+        "paid": "In Trial",
+        "post_service": "Post a service",
+        "go_to_account": "Go to My Account"
     },
     "extra_payment_success": {
         "loading_title": "Verifying payment...",

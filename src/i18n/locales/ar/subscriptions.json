@@ -32,7 +32,18 @@
         "allowed_services": "عدد الخدمات المتاحة",
         "go_home": "الانتقال إلى الصفحة الرئيسية",
         "invalid_session_redirect": "سيتم تحويلك إلى الصفحة الرئيسية",
-        "available_services": "عدد الخدمات المتاحة:"
+        "available_services": "عدد الخدمات المتاحة:",
+        "service_name": "نوع الاشتراك",
+        "payment_amount": "القيمة الشهرية",
+        "status": "حالة الاشتراك",
+        "extra_service_title": "معلومات الاشتراك",
+        "what_happens_next": "ماذا سيحدث الآن؟",
+        "next_step_1": "قم بتحديث معلومات حسابك، اذا كانت مطلوبة.",
+        "next_step_2": "انشر أول خدمة.",
+        "next_step_3": "ابداء في تقديم خدماتك واكسب.",
+        "paid": "فترة تجريبية",
+        "post_service": "انشر خدمة",
+        "go_to_account": "الذهاب إلى حسابي"
     },
     "extra_payment_success": {
         "loading_title": "جاري التحقق من عملية الدفع...",
