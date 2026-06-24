@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '../ui/button'
 import { Switch } from '../ui/switch';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Badge } from '../ui/badge';
 import { Star } from 'lucide-react';
 import { useSubscriptionTiers } from '@/hooks/useSubscriptionTiers';
@@ -64,10 +64,10 @@ const SubscriptionCard = ({ subscription, yearly, selectedSubscription, cardClas
                                 {t("important_points")}
                             </span>
                             <ul className='list-disc list-inside'>
-                                {lang === "ar" && (subscription.notes ?? []).map((note: string) => (
+                                {lang === "ar" && (subscription.notes as [] ?? []).map((note: string) => (
                                     <li className='text-start' key={note}>{note}</li>
                                 ))}
-                                {lang === "en" && (subscription.notes_english ?? []).map((note: string) => (
+                                {lang === "en" && (subscription.notes_english as [] ?? []).map((note: string) => (
                                     <li className='text-start' key={note}>{note}</li>
                                 ))}
                             </ul>
@@ -85,6 +85,12 @@ const SubscriptionCard = ({ subscription, yearly, selectedSubscription, cardClas
                 </div>
             </CardContent>
             <CardFooter>
+                {/* <Link
+                    to={`/subscription-starter/${subscription.id}/${yearly ? "yearly" : "monthly"}`}
+                    className='bg-white text-muted-foreground flex-1 shadow-md border hover:text-white hover:bg-primary transition-all duration-200 rounded-md text-center py-2'
+                >
+                    {t("subscribe")}
+                </Link> */}
                 <Dialog open={open} onOpenChange={setOpen}>
                     <DialogTrigger asChild>
                         <Button

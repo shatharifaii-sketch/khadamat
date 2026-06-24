@@ -24,7 +24,7 @@ import ServicePage from "./pages/ServicePage";
 import UserProfilePage from "./pages/UserProfilePage";
 import UserLayout from "./layouts/UserLayout";
 import AdminDashboard from "./layouts/AdminDashboard";
-import SubscriptionPayment from "./pages/SubscriptionPayment";
+import SubscriptionStarter from "./pages/SubscriptionStarter";
 import CompletedPayment from "./pages/CompletedPayment";
 import ChatPage from "./pages/ChatPage";
 import { ChatProvider } from "./contexts/ChatContext";
@@ -66,7 +66,7 @@ function App() {
                     <Route path="chat/:id/:client_id/:service_id?/:provider_id" element={<ChatPage />} />
                     <Route path="convos" element={<ConversationsPage />} />
                     <Route path="payment" element={<Payment />} />
-                    <Route path="subscription-payment" element={<SubscriptionPayment />} />
+                    {/* <Route path="subscription-starter/:tier_id/:cycle" element={<SubscriptionStarter />} /> */}
                     <Route path="checkout" element={<Checkout />} />
                     <Route path="subscription-plans" element={<SubscriptionPlans />} />
                     <Route path="faq" element={<FAQ />} />

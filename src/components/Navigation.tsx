@@ -80,7 +80,7 @@ const Navigation = () => {
     </NavLink>
   );
 
-  const ConvosButton = ({ mobile = false }: { mobile?: boolean }) => (
+  const ConvosButton = ({ mobile = false }: { mobile?: boolean }) => location.pathname.startsWith('/subscription-starter') ? <></> : (
     <NavLink to="/convos" onClick={mobile ? () => setIsOpen(false) : undefined} className={cn('flex items-center gap-4 justify-start', { 'text-primary': location.pathname === '/convos' || location.pathname.startsWith('/chat') })}>
       <div className="flex items-center gap-2 relative">
         <MessageCircle size={20} />
@@ -93,7 +93,10 @@ const Navigation = () => {
   );
 
   return (
-    <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+    <nav className={cn(
+      'bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50',
+      location.pathname.startsWith('/subscription-starter') ? 'border-none' : 'border-b'
+      )}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -102,7 +105,10 @@ const Navigation = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-5" dir={lang === "ar" ? "rtl" : "ltr"}>
+          <div className={cn(
+            'hidden md:flex items-center gap-5',
+            location.pathname.startsWith('/subscription-starter') && 'hidden md:hidden'
+            )} dir={lang === "ar" ? "rtl" : "ltr"}>
             <NavLink to="/find-service">
               <div className="flex items-center gap-2">
                 <Search size={16} />
@@ -158,7 +164,10 @@ const Navigation = () => {
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden">
+          <div className={cn(
+            'md:hidden',
+            location.pathname.startsWith('/subscription-starter') && 'hidden md:hidden'
+            )}>
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="sm">

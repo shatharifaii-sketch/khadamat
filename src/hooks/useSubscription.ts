@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient, useSuspenseQuery, UseMutateFunct
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { json } from 'react-router-dom';
+import { json, useNavigate } from 'react-router-dom';
 import { useCoupon } from './useCoupon';
 import { useState } from 'react';
 import { usePaymentLogic } from './usePaymentLogic';
@@ -103,6 +103,7 @@ export const useSubscription = () => {
   const queryClient = useQueryClient();
   const { t } = useTranslation("responses");
   const { appliedCoupon } = useCoupon();
+  const navigate = useNavigate();
   const [token, setToken] = useState<string | null>(null);
 
   // Get user's current subscription
@@ -383,36 +384,30 @@ notes
   const createNewSubscription = useMutation({
     mutationKey: ['create-new-subscription'],
     mutationFn: async ({ subscriptionTierId, billingCycle, finalAmount }: { subscriptionTierId: string, billingCycle: string, finalAmount: number }) => {
-      const { data: { session } } = await supabase.auth.getSession();
-
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-subscription`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
-        },
+      const { data: response, error } = await supabase.functions.invoke('create-subscription', {
         body: JSON.stringify({
           user_id: user?.id,
+          user_email: user?.email,
           subscription_tier_id: subscriptionTierId,
           billing_cycle: billingCycle,
-          used_coupon_on_start: !!appliedCoupon?.valid,
-          coupon_id: appliedCoupon?.valid ? appliedCoupon.coupon_id : null,
+          //used_coupon_on_start: !!appliedCoupon?.valid,
+          //coupon_id: appliedCoupon?.valid ? appliedCoupon.coupon_id : null,
           final_amount: finalAmount
         })
       });
 
-      if (response.status !== 200) {
+      if (error) {
         console.log('Error creating new subscription:', response);
         throw new Error('error');
       }
 
-      const data = await response.json();
-
-      return data.subscription;
+      return response;
     },
     onSuccess() {
       queryClient.invalidateQueries({ queryKey: ['user-subscription'] });
       toast.success(t("subscription_created_successfully") || 'تم انشاء الاشتراك بنجاح! يمكنك الآن نشر خدماتك.');
+
+      navigate("/", { replace: true });
     },
     onError(error: any) {
       console.error('Error creating new subscription:', error);
