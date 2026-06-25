@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
 export interface UserProfile {
   id: string;
@@ -20,6 +21,7 @@ export const useProfile = () => {
   const { user } = useAuth();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const getProfile = useQuery({
     queryKey: ['profile', user?.id],
@@ -114,6 +116,12 @@ export const useProfile = () => {
       }
 
       return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+      toast.success(t("password_updated_successfully"));
+
+      navigate('/', { replace: true });
     }
   });
 

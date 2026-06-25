@@ -17,7 +17,6 @@ const ResetPassword = () => {
   const { t } = useTranslation("auth");
   const lang = localStorage.getItem("language") || "en";
 
-  const navigate = useNavigate();
   const [errors, setErrors] = useState<{ message: string, field: string }[]>([]);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -81,13 +80,6 @@ const ResetPassword = () => {
 
     await changePassword.mutateAsync(formData.newPassword);
   }
-
-  useEffect(() => {
-    if (changePassword.isSuccess) {
-      setFormData({ newPassword: '', confirmPassword: '' });
-      navigate('/', { replace: true });
-    }
-  }, [changePassword.isSuccess, navigate]);
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4 arabic">
