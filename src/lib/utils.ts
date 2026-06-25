@@ -71,6 +71,12 @@ export const platforms = [
 export const isMobile = /Android|iphone/i.test(navigator.userAgent);
 
 export const validateWhatsappPhone = (value: string) => {
+    if (!value) {
+      return {
+        valid: false,
+        message: 'Phone number is required',
+      };
+    }
     const parsed = parsePhoneNumberFromString(value);
 
     if (!parsed) {

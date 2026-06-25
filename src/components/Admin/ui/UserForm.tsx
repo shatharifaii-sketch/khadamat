@@ -30,6 +30,7 @@ interface Props {
 
 const countries = [
   { code: "970", label: "PS +970" },
+  { code: "972", label: "IS +972" },
   { code: "966", label: "SA +966" },
   { code: "20", label: "EG +20" },
   { code: "971", label: "AE +971" },
