@@ -305,6 +305,8 @@ export const useConversationData = ({ conversationId }: { conversationId: string
         }
     });
 
+    if (!getConversation.data) return { conversation: null };
+
     useEffect(() => {
         if (!conversationId) return;
 
@@ -312,9 +314,7 @@ export const useConversationData = ({ conversationId }: { conversationId: string
             setActiveConversation(getConversation.data);
         }
 
-    }, [conversationId, getConversation.data, setActiveConversation]);
-
-    if (!getConversation.data) return { conversation: null };
+    }, [conversationId, getConversation.data]);
 
     return {
         conversation: getConversation.data,

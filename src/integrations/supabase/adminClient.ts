@@ -1,4 +1,3 @@
-import { config } from "@/config";
 import { createClient } from "@supabase/supabase-js";
 
-export const supabaseAdmin = createClient(config.API_URL, config.SUPABASE_SERVICE_ROLE_KEY || 'service-role-key-placeholder');
+export const supabaseAdmin = createClient('https://zfnewzekaxofgrindsmb.supabase.co', import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY || 'service-role-key-placeholder');
