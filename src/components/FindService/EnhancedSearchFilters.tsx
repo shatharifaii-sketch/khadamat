@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Search, MapPin, Filter, X } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { categories } from '@/components/FindService/ServiceCategories';
+import { useTranslation } from 'react-i18next';
 
 interface EnhancedSearchFiltersProps {
   searchTerm: string;
@@ -34,6 +35,7 @@ const EnhancedSearchFilters = ({
   submittedSearchTerm,
   setSubmittedSearchTerm
 }: EnhancedSearchFiltersProps) => {
+  const { t } = useTranslation("services");
   const [showFilters, setShowFilters] = useState(false);
   
   const hasActiveFilters = selectedCategory !== 'all' || selectedLocation !== 'all' || submittedSearchTerm || searchTerm;
@@ -52,7 +54,7 @@ const EnhancedSearchFilters = ({
             <div className="relative flex-1">
               <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
-                placeholder="ابحث عن خدمة..."
+                placeholder={t("find_service.search_placeholder")}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyDown={(e) => {
@@ -83,7 +85,7 @@ const EnhancedSearchFilters = ({
               className="shrink-0"
             >
               <Filter className="h-4 w-4 ml-2" />
-              فلترة
+              {t("find_service.filter")}
               {hasActiveFilters && (
                 <Badge variant="destructive" className="mr-2 h-5 w-5 p-0 flex items-center justify-center text-xs">
                   !
@@ -100,16 +102,18 @@ const EnhancedSearchFilters = ({
           <CardContent className="p-4">
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium mb-2 block">التصنيف</label>
+                <label className="text-sm font-medium mb-2 block">
+                  {t("find_service.category")}
+                </label>
                 <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                   <SelectTrigger className="text-right">
-                    <SelectValue placeholder="اختر التصنيف" />
+                    <SelectValue placeholder={t("find_service.category_placeholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">جميع التصنيفات</SelectItem>
+                    <SelectItem value="all">{t("find_service.all_categories")}</SelectItem>
                     {categories.map((category) => (
                       <SelectItem key={category.value} value={category.value}>
-                        {category.label}
+                        {t(category.label)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -117,18 +121,22 @@ const EnhancedSearchFilters = ({
               </div>
 
               <div>
-                <label className="text-sm font-medium mb-2 block">الموقع</label>
+                <label className="text-sm font-medium mb-2 block">
+                  {t("find_service.location")}
+                </label>
                 <Select value={selectedLocation} onValueChange={setSelectedLocation}>
                   <SelectTrigger className="text-right">
-                    <SelectValue placeholder="اختر الموقع" />
+                    <SelectValue placeholder={t("find_service.location_placeholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">جميع المواقع</SelectItem>
+                    <SelectItem value="all">
+                      {t("find_service.all_locations")}
+                    </SelectItem>
                     {locations.map((location) => (
                       <SelectItem key={location} value={location}>
                         <div className="flex items-center gap-2">
                           <MapPin className="h-4 w-4" />
-                          {location}
+                          {t(location)}
                         </div>
                       </SelectItem>
                     ))}
@@ -145,11 +153,11 @@ const EnhancedSearchFilters = ({
                   setSubmittedSearchTerm?.('');
                 }}>
                   <X className="h-4 w-4 ml-2" />
-                  مسح الفلاتر
+                  {t("find_service.clear_filters")}
                 </Button>
                 {resultsCount !== undefined && (
                   <span className="text-sm text-muted-foreground">
-                    {resultsCount} نتيجة
+                    {t("find_service.results_count", { count: resultsCount })}
                   </span>
                 )}
               </div>

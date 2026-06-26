@@ -24,7 +24,7 @@ import ServicePage from "./pages/ServicePage";
 import UserProfilePage from "./pages/UserProfilePage";
 import UserLayout from "./layouts/UserLayout";
 import AdminDashboard from "./layouts/AdminDashboard";
-import SubscriptionPayment from "./pages/SubscriptionPayment";
+import SubscriptionStarter from "./pages/SubscriptionStarter";
 import CompletedPayment from "./pages/CompletedPayment";
 import ChatPage from "./pages/ChatPage";
 import { ChatProvider } from "./contexts/ChatContext";
@@ -33,6 +33,10 @@ import PaymentSuccess from "./pages/payments/PaymentSuccess";
 import PaymentFailed from "./pages/payments/PaymentFailed";
 import CodeVerification from "./pages/verify/CodeVerification";
 import ScrollToTop from "./components/ScrollToTop";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+import { useWebsiteAnalytics } from "./hooks/useWebsiteAnalytics";
+import ExtraPaymentSuccess from "./pages/payments/ExtraPaymentSuccess";
 
 const queryClient = new QueryClient();
 
@@ -59,10 +63,10 @@ function App() {
                     <Route path="about" element={<About />} />
                     <Route path="contact" element={<Contact />} />
                     <Route path="profile/:id" element={<UserProfilePage />} />
-                    <Route path="chat/:id/:client_id/:service_id/:provider_id" element={<ChatPage />} />
+                    <Route path="chat/:id/:client_id/:service_id?/:provider_id" element={<ChatPage />} />
                     <Route path="convos" element={<ConversationsPage />} />
                     <Route path="payment" element={<Payment />} />
-                    <Route path="subscription-payment" element={<SubscriptionPayment />} />
+                    {/* <Route path="subscription-starter/:tier_id/:cycle" element={<SubscriptionStarter />} /> */}
                     <Route path="checkout" element={<Checkout />} />
                     <Route path="subscription-plans" element={<SubscriptionPlans />} />
                     <Route path="faq" element={<FAQ />} />
@@ -70,6 +74,8 @@ function App() {
                   </Route>
 
                   <Route path="auth" element={<Auth />} />
+                  <Route path="forgot-password" element={<ForgotPassword />} />
+                  <Route path="reset-password" element={<ResetPassword />} />
 
 
                   <Route path="admin" element={<AdminDashboard />}>
@@ -80,6 +86,7 @@ function App() {
 
 
                   <Route path="payment-success" element={<PaymentSuccess /> } />
+                  <Route path="extra-payment-success" element={<ExtraPaymentSuccess /> } />
                   <Route path="payment-failed" element={<PaymentFailed /> } />
 
 

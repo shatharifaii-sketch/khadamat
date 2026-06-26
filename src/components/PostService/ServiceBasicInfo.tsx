@@ -1,8 +1,9 @@
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { serviceCategories } from './ServiceCategoryData';
 import FormField from '@/components/ui/form-field';
 import { useEffect } from 'react';
+import { categories } from '../FindService/ServiceCategories';
+import { useTranslation } from 'react-i18next';
 
 interface ServiceBasicInfoProps {
   title: string;
@@ -31,13 +32,14 @@ const ServiceBasicInfo = ({
   categoryError,
   descriptionError
 }: ServiceBasicInfoProps) => {
+  const { t } = useTranslation("services");
   return (
     <>
       {/* Service Title */}
       <FormField
-        label="عنوان الخدمة"
+        label={t("post_service.title")}
         id="title"
-        placeholder="مثال: تصوير الأفراح والمناسبات"
+        placeholder={t("post_service.title_placeholder")}
         value={title}
         onChange={onTitleChange}
         onBlur={onTitleBlur}
@@ -47,21 +49,21 @@ const ServiceBasicInfo = ({
 
       {/* Category */}
       <div className="space-y-2">
-        <label className="text-large font-semibold text-foreground">
-          فئة الخدمة *
+        <label className="text-sm font-semibold text-foreground">
+          {t("post_service.category")} *
         </label>
         <Select onValueChange={onCategoryChange} value={category} required>
           <SelectTrigger className={`text-large ${categoryError ? 'border-destructive' : ''}`}>
-            <SelectValue placeholder="اختر فئة الخدمة" />
+            <SelectValue placeholder={t("post_service.category_placeholder")} />
           </SelectTrigger>
           <SelectContent>
-            {serviceCategories.map((category) => {
+            {categories.map((category) => {
               const Icon = category.icon;
               return (
                 <SelectItem key={category.value} value={category.value}>
                   <div className="flex items-center gap-2">
                     <Icon size={18} />
-                    <span>{category.label}</span>
+                    <span>{t(category.label)}</span>
                   </div>
                 </SelectItem>
               );
@@ -77,10 +79,10 @@ const ServiceBasicInfo = ({
 
       {/* Description */}
       <FormField
-        label="وصف تفصيلي للخدمة"
+        label={t("post_service.description")}
         id="description"
         type="textarea"
-        placeholder="اكتب وصفاً مفصلاً عن خدمتك، خبرتك، والمميزات التي تقدمها..."
+        placeholder={t("post_service.description_placeholder")}
         value={description}
         onChange={onDescriptionChange}
         onBlur={onDescriptionBlur}

@@ -9,6 +9,7 @@ export interface SubscriptionTransaction {
     coupon_used: boolean;
     payment_status: string;
     invoice_url: string;
+    billing_reason: string;
     coupon?: {
         code: string;
         type: string;
@@ -58,7 +59,9 @@ export const useSubscriptionsPayment = () => {
         }
     });
 
+    console.log("getUserTransactions", getUserTransactions);
+
     return {
-        paymentTransactions: getUserTransactions.data || [],
+        paymentTransactions: getUserTransactions?.data || [],
     }
 }

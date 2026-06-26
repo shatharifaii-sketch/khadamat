@@ -2,10 +2,11 @@ import { useQuery, useMutation, useQueryClient, useSuspenseQuery, UseMutateFunct
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { json } from 'react-router-dom';
+import { json, useNavigate } from 'react-router-dom';
 import { useCoupon } from './useCoupon';
 import { useState } from 'react';
 import { usePaymentLogic } from './usePaymentLogic';
+import { useTranslation } from 'react-i18next';
 
 export interface Subscription {
   id: string;
@@ -44,6 +45,7 @@ export interface Subscription {
     free_trial_period_text: string;
     notes: string[];
   }
+  stripe_customer_id: string;
 }
 
 type CancelSubscriptionInput = {
@@ -99,7 +101,9 @@ async function cancelSubscription({
 export const useSubscription = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { t } = useTranslation("responses");
   const { appliedCoupon } = useCoupon();
+  const navigate = useNavigate();
   const [token, setToken] = useState<string | null>(null);
 
   // Get user's current subscription
@@ -154,9 +158,9 @@ notes
             price_monthly_value,
             price_yearly_value,
             class_name,
-badge_class_name,
-free_trial_period_text,
-notes
+            badge_class_name,
+            free_trial_period_text,
+            notes
           )`)
         .eq('user_id', user.id)
         .eq('status', 'active')
@@ -166,6 +170,8 @@ notes
         console.error('Error fetching subscription:', activeSubscriptionError);
         throw activeSubscriptionError;
       }
+
+      console.log('Active subscription:', activeSubscription);
 
       const { data: inactiveSubscriptions, error: inactiveSubscriptionsError } = await supabase
         .from('subscriptions')
@@ -191,12 +197,24 @@ notes
         throw inactiveSubscriptionsError;
       }
 
+      const { data: userExtraProducts, error: userExtraProductsError } = await supabase
+        .from('users_with_extra_products')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (userExtraProductsError && userExtraProductsError.code !== 'PGRST116') {
+        console.error('Error fetching subscription:', userExtraProductsError);
+      }
+
       return {
         activeSubscription,
-        inactiveSubscriptions
+        inactiveSubscriptions,
+        extraProductsCount: userExtraProducts?.extra_products_count || 0
       } as {
         activeSubscription: Subscription;
         inactiveSubscriptions: Subscription[];
+        extraProductsCount: number;
       };
     },
   });
@@ -345,12 +363,20 @@ notes
         };
       }
 
+      const { data: userExtraProducts, error: extraProductsError } = await supabase.from("users_with_extra_products").select("*").eq("user_id", user.id).maybeSingle();
+
+      if (extraProductsError) {
+        console.error('Error checking user extra products for quota:', extraProductsError);
+      }
+
       const currentServiceCount = userServices?.length || 0;
+
+      const canPost = currentServiceCount < (subscription.services_allowed + (userExtraProducts?.extra_products_count || 0));
 
       return {
         user: true,
         subscription: true,
-        canPost: currentServiceCount < subscription.services_allowed
+        canPost
       };
     }
   })
@@ -358,40 +384,34 @@ notes
   const createNewSubscription = useMutation({
     mutationKey: ['create-new-subscription'],
     mutationFn: async ({ subscriptionTierId, billingCycle, finalAmount }: { subscriptionTierId: string, billingCycle: string, finalAmount: number }) => {
-      const { data: { session } } = await supabase.auth.getSession();
-
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-subscription`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
-        },
+      const { data: response, error } = await supabase.functions.invoke('create-subscription', {
         body: JSON.stringify({
           user_id: user?.id,
+          user_email: user?.email,
           subscription_tier_id: subscriptionTierId,
           billing_cycle: billingCycle,
-          used_coupon_on_start: !!appliedCoupon?.valid,
-          coupon_id: appliedCoupon?.valid ? appliedCoupon.coupon_id : null,
+          //used_coupon_on_start: !!appliedCoupon?.valid,
+          //coupon_id: appliedCoupon?.valid ? appliedCoupon.coupon_id : null,
           final_amount: finalAmount
         })
       });
 
-      if (response.status !== 200) {
+      if (error) {
         console.log('Error creating new subscription:', response);
         throw new Error('error');
       }
 
-      const data = await response.json();
-
-      return data.subscription;
+      return response;
     },
     onSuccess() {
       queryClient.invalidateQueries({ queryKey: ['user-subscription'] });
-      toast.success('تم انشاء الاشتراك بنجاح! يمكنك الآن نشر خدماتك.');
+      toast.success(t("subscription_created_successfully") || 'تم انشاء الاشتراك بنجاح! يمكنك الآن نشر خدماتك.');
+
+      navigate("/", { replace: true });
     },
     onError(error: any) {
       console.error('Error creating new subscription:', error);
-      toast.error('حدث خطاء في انشاء الاشتراك: ' + error.message);
+      toast.error(t("subscription_create_error") || ('حدث خطاء في انشاء الاشتراك: ' + error.message));
     },
   })
 
@@ -401,11 +421,11 @@ notes
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-subscription', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['user-subscriptions', user?.id] });
-      toast.success('تم انهاء الاشتراك بنجاح!.');
+      toast.success(t("subscription_deactivation_success") || 'تم انهاء الاشتراك بنجاح!.');
     },
     onError(error: any) {
       console.error('Error deactivating subscription:', error);
-      toast.error('حدث خطاء في انهاء الاشتراك: ' + error.message);
+      toast.error(t("subscription_deactivation_error") || ('حدث خطاء في انهاء الاشتراك: ' + error.message));
     },
   })
 

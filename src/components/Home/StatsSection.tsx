@@ -1,5 +1,6 @@
 
 import { Users, Briefcase, TrendingUp } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface StatsSectionProps {
   serviceProvidersCount: number;
@@ -8,6 +9,7 @@ interface StatsSectionProps {
 }
 
 const StatsSection = ({ serviceProvidersCount, publishedServicesCount, isLoading }: StatsSectionProps) => {
+  const { t } = useTranslation("home");
   if (isLoading) {
     return (
       <section className="py-16 px-4 bg-card">
@@ -30,12 +32,12 @@ const StatsSection = ({ serviceProvidersCount, publishedServicesCount, isLoading
     { 
       icon: Users, 
       value: serviceProvidersCount.toString(), 
-      label: 'مقدم خدمة' 
+      label: t("stats.service_providers") 
     },
     { 
       icon: Briefcase, 
       value: publishedServicesCount.toString(), 
-      label: 'خدمة متاحة' 
+      label: t("stats.published_services") 
     },
   ];
 
@@ -49,10 +51,10 @@ const StatsSection = ({ serviceProvidersCount, publishedServicesCount, isLoading
           <div className="text-center mb-8">
             <TrendingUp size={32} className="text-primary mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-foreground mb-2">
-              منصة جديدة في نمو مستمر
+              {t("stats.encouraging_message.title")}
             </h3>
             <p className="text-muted-foreground">
-              انضم إلينا في بداية رحلتنا وكن جزءاً من مجتمع الخدمات المهنية
+              {t("stats.encouraging_message.description")}
             </p>
           </div>
         )}

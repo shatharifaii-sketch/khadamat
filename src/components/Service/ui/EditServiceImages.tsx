@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Upload, X, ImageIcon } from 'lucide-react';
 import { useImageUpload } from '@/hooks/useImageUpload';
 import ServiceImageComponent from './ServiceImageComponent';
+import { useTranslation } from 'react-i18next';
 
 //TODO: refresh images when deleted
 
@@ -17,6 +18,7 @@ interface ServicePortfolioProps {
 }
 
 const ServiceImages = ({ onImagesChange, serviceImages }: ServicePortfolioProps) => {
+    const { t } = useTranslation("services");
     const { images, uploading, handleFileSelect, removeImage, deleteImage, deletingImage } = useImageUpload();
     const fileInputRef = useRef<HTMLInputElement>(null);
     let allImagesCount = images.length + (serviceImages ? serviceImages.length : 0);
@@ -56,7 +58,7 @@ const ServiceImages = ({ onImagesChange, serviceImages }: ServicePortfolioProps)
             {serviceImages && serviceImages.length > 0 && (
                 <div className='space-y-2'>
                     <Label className="text-large font-semibold">
-                        صور محملة مسبقا
+                        {t("post_service.existing_images")}
                     </Label>
 
                     <div className="grid grid-cols-3 gap-4">
@@ -76,7 +78,7 @@ const ServiceImages = ({ onImagesChange, serviceImages }: ServicePortfolioProps)
             )}
             <div className='space-y-2'>
                 <Label className="text-large font-semibold">
-                    أضف صور للخدمة
+                    {t("post_service.add_images")}
                 </Label>
 
                 {/* Upload Area */}
@@ -88,11 +90,11 @@ const ServiceImages = ({ onImagesChange, serviceImages }: ServicePortfolioProps)
                 >
                     <Upload size={48} className="mx-auto text-muted-foreground mb-4" />
                     <p className="text-large text-muted-foreground mb-2">
-                        {uploading ? 'جاري رفع الصور...' : 'اسحب الصور هنا أو اضغط للرفع'}
+                        {uploading ? t("post_service.uploading_images") : t("post_service.drag_images")}
                     </p>
-                    <p className="text-muted-foreground">PNG, JPG حتى 10MB • 6 صور كحد أقصى</p>
+                    <p className="text-muted-foreground">{t("post_service.image_upload_description")}</p>
                     <Button variant="outline" className="mt-4" type="button" disabled={uploading}>
-                        {uploading ? 'جاري الرفع...' : 'اختر الصور'}
+                        {uploading ? t("post_service.uploading...") : t("post_service.choose_images")}
                     </Button>
                     <input
                         ref={fileInputRef}
@@ -119,7 +121,7 @@ const ServiceImages = ({ onImagesChange, serviceImages }: ServicePortfolioProps)
 
                 {allImagesCount > 0 && (
                     <p className="text-sm text-muted-foreground text-center">
-                        تم رفع {allImagesCount} من أصل 6 صور
+                        {t("post_service.images_uploaded", { count: allImagesCount })}
                     </p>
                 )}
             </div>

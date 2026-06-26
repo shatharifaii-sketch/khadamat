@@ -11,12 +11,14 @@ import { truncateString } from '@/lib/utils';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 interface EnhancedServiceCardProps {
   service: PublicService;
 }
 
 const EnhancedServiceCard = ({ service }: EnhancedServiceCardProps) => {
+  const { t } = useTranslation("services");
   const { incrementView } = useServiceViews();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -38,7 +40,7 @@ const EnhancedServiceCard = ({ service }: EnhancedServiceCardProps) => {
           <div className="flex-1 text-right">
             <div className="flex items-center gap-2 justify-end mb-2">
               <Badge variant="secondary" className="text-xs font-medium">
-                {categoryLabel}
+                {t(categoryLabel)}
               </Badge>
             </div>
             <CardTitle className="text-lg leading-tight group-hover:text-primary transition-colors line-clamp-2">
@@ -69,10 +71,10 @@ const EnhancedServiceCard = ({ service }: EnhancedServiceCardProps) => {
         <div className="space-y-2">
           <div className="flex items-center gap-2 justify-end">
             <span className="font-semibold text-primary">{service.price_range}</span>
-            <Badge variant="outline" className="text-xs">السعر</Badge>
+            <Badge variant="outline" className="text-xs">{t("find_service.card.price")}</Badge>
           </div>
           <div className="flex items-center gap-2 justify-end text-sm text-muted-foreground">
-            <span>{service.location}</span>
+            <span>{t(service.location)}</span>
             <MapPin className="h-4 w-4" />
           </div>
         </div>
