@@ -1,6 +1,7 @@
 
 import { Users, Briefcase, TrendingUp } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import StatCard from './components/StatCard';
 
 interface StatsSectionProps {
   serviceProvidersCount: number;
@@ -60,20 +61,14 @@ const StatsSection = ({ serviceProvidersCount, publishedServicesCount, isLoading
         )}
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {stats.map((stat, index) => {
-            const Icon = stat.icon;
-            return (
-              <div key={index} className="text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4">
-                  <Icon size={32} className="text-primary" />
-                </div>
-                <div className="text-3xl font-bold text-foreground mb-2">
-                  {stat.value === '0' ? 'قريباً' : `${stat.value}+`}
-                </div>
-                <div className="text-large text-muted-foreground">{stat.label}</div>
-              </div>
-            );
-          })}
+          {stats.map((stat, index) => (
+            <StatCard 
+              key={index}
+              icon={stat.icon}
+              value={Number(stat.value)}
+              label={stat.label}
+            />
+          ))}
         </div>
       </div>
     </section>
