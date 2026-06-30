@@ -27,7 +27,7 @@
     "timeout": "انتهت مهلة الاتصال",
     "invalid_email": "البريد الإلكتروني غير صحيح",
     "invalid_password": "كلمة المرور غير صحيحة",
-    "invalid_image_type": "نوع الملف غير مدعوم. الرجاء رفع صورة بصيغة JPEG أو PNG",
+    "invalid_image_type": "'نوع الملف غير مدعوم. الرجاء رفع ملف بصيغة JPEG أو PNG أو MP4 أو WEBM'",
     "image_too_large": "حجم الصورة يجب أن يكون أقل من 10 ميجابايت",
     "image_upload_failed": "فشل في رفع الصورة، يرجى المحاولة لاحقاً",
     "max_images_limit": "يمكنك رفع 6 صور كحد أقصى",
