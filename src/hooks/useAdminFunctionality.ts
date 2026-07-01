@@ -44,11 +44,13 @@ export interface Service {
   publisher: {
     full_name: string;
   };
-  service_images: {
+  service_media: {
     id: string;
-    image_name: string;
-    image_url: string;
-  }[]
+    name: string;
+    url: string;
+    thumbnail_url?: string;
+    type?: 'image' | 'video';
+  }[];
 }
 
 interface UploadedImage {
@@ -126,11 +128,13 @@ export const useAdminData = () => {
         publisher:fk_services_user_id (
           full_name
         ),
-        service_images (
+        service_media (
         id,
-      image_name,
-      image_url
+      name,
+      url,
+      thumbnail_url
         )`)
+        .eq('status', 'published')
         .order('created_at', { ascending: false });
 
       if (servicesError) throw servicesError;
@@ -141,10 +145,11 @@ export const useAdminData = () => {
         publisher:fk_services_user_id (
           full_name
         ),
-        service_images (
+        service_media (
         id,
-      image_name,
-      image_url
+      name,
+      url,
+      thumbnail_url
         )`)
         .eq('status', 'pending-approval')
         .order('created_at', { ascending: false });

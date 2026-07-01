@@ -17,7 +17,7 @@ export interface PendingServiceData {
     countryCode: string;
     number: string;
   };
-  images: { id: string; image_name: string; image_url: string }[];
+  media: { id: string; name: string; url: string; thumbnail_url?: string, type?: string }[];
 }
 
 export const PENDING_SERVICE_KEY = 'pending_service_data';

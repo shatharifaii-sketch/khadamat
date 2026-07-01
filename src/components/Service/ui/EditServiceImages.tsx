@@ -8,18 +8,15 @@ import { useTranslation } from 'react-i18next';
 import { VideoPlayer } from '@/components/VideoPlayer';
 
 type MediaItem = {
-  id: string;
-  url: string;
-  name: string;
-  type: 'image' | 'video';
+    id: string;
+    url: string;
+    name: string;
+    thumbnail?: string;
+    type?: 'image' | 'video';
 }
 
 interface ServicePortfolioProps {
-    serviceMedia?: Array<{ 
-        id: string; 
-        image_url: string; 
-        image_name: string 
-    }> | [];
+    serviceMedia?: Array<MediaItem> | [];
     onMediaChange?: (media: MediaItem[]) => void;
 }
 
@@ -64,27 +61,38 @@ const ServiceImages = ({ onMediaChange, serviceMedia }: ServicePortfolioProps) =
             {serviceMedia && serviceMedia.length > 0 && (
                 <div className='space-y-2'>
                     <Label className="text-large font-semibold">
-                        {t("post_service.existing_images")}
+                        {t("post_service.existing_files")}
                     </Label>
 
                     <div className="grid grid-cols-3 gap-4">
-                        {serviceMedia.map((image) => (
-                            <ServiceImageComponent
-                                key={image.id}
-                                className='size-40'
-                                image={image}
-                                removeImage={deleteImage}
-                                imageUrl={image.image_url}
-                                deletingImage={deletingImage}
-                            />
-                        ))}
+                        {serviceMedia.map((image: MediaItem) =>
+                            image.type === "image" ? (
+                                <ServiceImageComponent
+                                    key={image.id}
+                                    className='size-40'
+                                    image={image}
+                                    removeImage={deleteImage}
+                                    imageUrl={image.url}
+                                    deletingImage={deletingImage}
+                                />
+                            ) : (
+                                <VideoPlayer
+                                    key={image.id}
+                                    id={image.id}
+                                    url={image.url}
+                                    thumbnail={image.thumbnail}
+                                    removeVideo={deleteImage}
+                                    deletingVideo={deletingImage}
+                                />
+                            )
+                        )}
                     </div>
 
                 </div>
             )}
             <div className='space-y-2'>
                 <Label className="text-large font-semibold">
-                    {t("post_service.add_images")}
+                    {t("post_service.add_files")}
                 </Label>
 
                 {/* Upload Area */}
@@ -96,16 +104,16 @@ const ServiceImages = ({ onMediaChange, serviceMedia }: ServicePortfolioProps) =
                 >
                     <Upload size={48} className="mx-auto text-muted-foreground mb-4" />
                     <p className="text-large text-muted-foreground mb-2">
-                        {uploading ? t("post_service.uploading_images") : t("post_service.drag_images")}
+                        {uploading ? t("post_service.uploading_files") : t("post_service.drag_files")}
                     </p>
-                    <p className="text-muted-foreground">{t("post_service.image_upload_description")}</p>
+                    <p className="text-muted-foreground">{t("post_service.file_upload_description")}</p>
                     <Button variant="outline" className="mt-4" type="button" disabled={uploading}>
-                        {uploading ? t("post_service.uploading...") : t("post_service.choose_images")}
+                        {uploading ? t("post_service.uploading...") : t("post_service.choose_files")}
                     </Button>
                     <input
                         ref={fileInputRef}
                         type="file"
-                        accept="image/png,image/jpeg,image/jpg"
+                        accept="image/png,image/jpeg,image/jpg,video/mp4,video/webm"
                         multiple
                         className="hidden"
                         onChange={handleFileInputChange}
@@ -114,19 +122,21 @@ const ServiceImages = ({ onMediaChange, serviceMedia }: ServicePortfolioProps) =
 
                 {/* Uploaded Images Grid */}
                 {media.length > 0 && (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                        {media.map((item) => 
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                        {media.map((item) =>
                             item.type === "image" ? (
                                 <ServiceImageComponent
-                                key={item.id}
-                                image={item}
-                                removeImage={removeImage}
-                            />
+                                    key={item.id}
+                                    image={item}
+                                    removeImage={removeImage}
+                                />
                             ) : (
-                                <div key={item.id} className="aspect-auto rounded-lg overflow-hidden border border-border z-10">
-                                    <video src={item.url} className="w-full h-full object-cover" />
-                                    <VideoPlayer id={item.id} url={item.url} removeVideo={removeImage} deleteVideo={deleteImage} />
-                                </div>
+                                <VideoPlayer
+                                    id={item.id}
+                                    url={item.url}
+                                    removeVideo={removeImage}
+                                    thumbnail={item.thumbnail}
+                                />
                             )
                         )}
                     </div>
@@ -134,7 +144,7 @@ const ServiceImages = ({ onMediaChange, serviceMedia }: ServicePortfolioProps) =
 
                 {allImagesCount > 0 && (
                     <p className="text-sm text-muted-foreground text-center">
-                        {t("post_service.images_uploaded", { count: allImagesCount })}
+                        {t("post_service.files_uploaded", { count: allImagesCount })}
                     </p>
                 )}
             </div>

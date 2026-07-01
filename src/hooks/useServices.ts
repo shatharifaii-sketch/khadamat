@@ -30,8 +30,9 @@ export interface Service {
 export interface ServiceImageProps {
   id: string;
   service_id: string;
-  image_url: string;
-  image_name: string;
+  url: string;
+  name: string;
+  thumbnail?: string;
 }
 
 export const useServices = () => {
@@ -39,7 +40,7 @@ export const useServices = () => {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
 
-  const saveImages = async ({serviceId, images}: {serviceId: string, images: ServiceFormData['images']}) => {
+  const saveImages = async ({serviceId, images}: {serviceId: string, images: ServiceFormData['media']}) => {
     console.log('saving service images: ', images);
       if (!user || images.length === 0 || !serviceId) {
         console.error('No user or images found when trying to upload service images');
@@ -51,11 +52,12 @@ export const useServices = () => {
 
       for (const image of images) {
         const { data, error } = await supabase
-          .from('service_images')
+          .from('service_media')
           .insert({
             service_id: serviceId,
-            image_url: image.image_url,
-            image_name: image.image_name
+            url: image.url,
+            name: image.name,
+            thumbnail_url: image.thumbnail_url
           })
           .single();
 

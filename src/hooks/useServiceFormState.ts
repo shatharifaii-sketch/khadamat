@@ -25,11 +25,12 @@ export const useServiceFormState = (serviceToEdit?: Service | null) => {
       countryCode: '',
       number: '',
     },
-    images: [
+    media: [
       {
         id: '',
-        image_name: '',
-        image_url: '',
+        name: '',
+        url: '',
+        thumbnail_url: '',
       }
     ],
   });
@@ -54,7 +55,7 @@ export const useServiceFormState = (serviceToEdit?: Service | null) => {
           countryCode: digits.slice(0, digits.length - 9),
           number: digits.slice(digits.length - 9),
         },
-        images: serviceToEdit.service_images,
+        media: serviceToEdit.service_media,
       });
 
     } else if (pendingService && !isEditMode) {
@@ -72,7 +73,7 @@ export const useServiceFormState = (serviceToEdit?: Service | null) => {
 
   const handleInputChange = (
     field: string, value: string | 
-    { id: string; image_name: string; image_url: string; }[] | 
+    { id: string; name: string; url: string; thumbnail_url?: string, type?: string }[] | 
     boolean | 
     ServiceLink[] |
     { 

@@ -6,7 +6,7 @@ interface Props {
         id: string;
         url: string;
         name: string;
-        type: 'image' | 'video';
+        type?: 'image' | 'video';
     }
     removeImage: (imageId: string, imageUrl?: string) => void
     className?: string
@@ -15,7 +15,7 @@ interface Props {
 }
 
 const ServiceImageComponent = ({ image, removeImage, className, imageUrl, deletingImage }: Props) => {
-    console.log('deletingImage', deletingImage);
+
     return (
         <div className="relative group">
             {deletingImage && (

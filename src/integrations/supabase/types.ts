@@ -989,30 +989,33 @@ export type Database = {
           },
         ]
       }
-      service_images: {
+      service_media: {
         Row: {
           created_at: string
           display_order: number | null
           id: string
-          image_name: string | null
-          image_url: string
+          name: string | null
           service_id: string
+          thumbnail_url: string | null
+          url: string
         }
         Insert: {
           created_at?: string
           display_order?: number | null
           id?: string
-          image_name?: string | null
-          image_url: string
+          name?: string | null
           service_id: string
+          thumbnail_url?: string | null
+          url: string
         }
         Update: {
           created_at?: string
           display_order?: number | null
           id?: string
-          image_name?: string | null
-          image_url?: string
+          name?: string | null
           service_id?: string
+          thumbnail_url?: string | null
+          url?: string
         }
         Relationships: [
           {
