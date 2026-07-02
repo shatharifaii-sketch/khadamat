@@ -32,7 +32,8 @@ export interface ServiceImageProps {
   service_id: string;
   url: string;
   name: string;
-  thumbnail?: string;
+  thumbnail_url?: string;
+  type?: string;
 }
 
 export const useServices = () => {
@@ -50,6 +51,8 @@ export const useServices = () => {
 
       console.log('Uploading service images for service:', serviceId);
 
+      console.log('Images to upload:', images);
+
       for (const image of images) {
         const { data, error } = await supabase
           .from('service_media')
@@ -57,7 +60,8 @@ export const useServices = () => {
             service_id: serviceId,
             url: image.url,
             name: image.name,
-            thumbnail_url: image.thumbnail_url
+            thumbnail_url: image.thumbnail,
+            type: image.type
           })
           .single();
 
@@ -319,7 +323,7 @@ export const useCategoryServices = (category: string, serviceId: string) => {
 
 export const useServiceImages = (serviceId: string) => {
   const { data: images } = useSuspenseQuery({
-    queryKey: ['service-images'],
+    queryKey: ['service-media'],
     queryFn: async () => {
       if (!serviceId) {
         console.error('No service id found when trying to fetch service images');
@@ -328,7 +332,7 @@ export const useServiceImages = (serviceId: string) => {
       }
 
       const { data: images, error } = await supabase
-      .from('service_images')
+      .from('service_media')
       .select('*')
       .eq('service_id', serviceId);
 

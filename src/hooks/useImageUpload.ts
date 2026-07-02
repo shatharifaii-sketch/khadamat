@@ -311,7 +311,7 @@ export const useImageUpload = () => {
         }
       }
 
-      const { error: dbError } = await supabase.from('service_images')
+      const { error: dbError } = await supabase.from('service_media')
         .delete()
         .eq('id', imageId);
 

@@ -142,7 +142,7 @@ const PendingServicesManagement = ({ services }: Props) => {
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>{t("table.pending_services_management.dialogs.cencel")}</AlertDialogCancel>
+                          <AlertDialogCancel>{t("table.pending_services_management.dialogs.cancel")}</AlertDialogCancel>
                           <AlertDialogAction onClick={() => handleDeleteService(service.id)} className="bg-destructive text-destructive-foreground">
                             {t("table.pending_services_management.dialogs.confirm_delete")}
                           </AlertDialogAction>

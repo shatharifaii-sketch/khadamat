@@ -4,7 +4,7 @@ import HeroVideoDialog from "./ui/HeroVideoDialog";
 interface Props {
   id: string;
   url: string;
-  removeVideo: (id: string, url?: string, type?: string, thumbnail?: string) => void
+  removeVideo?: (id: string, url?: string, type?: string, thumbnail?: string) => void
   deletingVideo?: boolean;
   thumbnail?: string
 }
@@ -40,13 +40,15 @@ export function VideoPlayer({
         />
       </div>
 
-      <button
+      {removeVideo && (
+        <button
         type="button"
-        onClick={() => removeVideo(id, url, "video", thumbnail)}
+        onClick={() => removeVideo?.(id, url, "video", thumbnail)}
         className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10"
       >
         <X size={16} />
       </button>
+      )}
     </div>
   )
 }

@@ -989,7 +989,7 @@ export type Database = {
           },
         ]
       }
-      service_media: {
+      service_images: {
         Row: {
           created_at: string
           display_order: number | null
@@ -1027,6 +1027,54 @@ export type Database = {
           },
           {
             foreignKeyName: "service_images_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_media: {
+        Row: {
+          created_at: string
+          display_order: number | null
+          id: string
+          name: string | null
+          service_id: string
+          thumbnail_url: string | null
+          type: string | null
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          name?: string | null
+          service_id: string
+          thumbnail_url?: string | null
+          type?: string | null
+          url: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          name?: string | null
+          service_id?: string
+          thumbnail_url?: string | null
+          type?: string | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_media_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "public_services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_media_service_id_fkey"
             columns: ["service_id"]
             isOneToOne: false
             referencedRelation: "services"

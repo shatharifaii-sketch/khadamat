@@ -36,7 +36,7 @@ const ServiceForm = ({ isEdit, serviceProviders, service, closeForm }: Props) =>
         experience: '',
         user_id: '',
         status: 'published',
-        service_images: [],
+        service_media: [],
         is_online: false,
         links: [] as ServiceLink[],
         whatsapp_number: ''
@@ -235,10 +235,10 @@ const ServiceForm = ({ isEdit, serviceProviders, service, closeForm }: Props) =>
 
                 </div>
                 <ServiceImages
-                    onImagesChange={(images) => {
-                        setFormData((prev) => ({ ...prev, service_images: images }));
+                    onMediaChange={(media) => {
+                        setFormData((prev) => ({ ...prev, service_media: media }));
                     }}
-                    serviceImages={service ? service.service_images : []} />
+                    serviceMedia={service ? service.service_media : []} />
             </div>
 
             <Button

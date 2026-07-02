@@ -39,7 +39,7 @@ const ServiceDetailsModal = ({ service, isOpen, onClose, onViewProvider }: Servi
       if (!service?.id) return [];
       
       const { data, error } = await supabase
-        .from('service_images')
+        .from('service_media')
         .select('*')
         .eq('service_id', service.id)
         .order('display_order');
@@ -132,7 +132,7 @@ const ServiceDetailsModal = ({ service, isOpen, onClose, onViewProvider }: Servi
             <div className="relative mb-6">
               <div className="relative w-full h-64 bg-muted rounded-lg overflow-hidden">
                 <img
-                  src={serviceImages[currentImageIndex]?.image_url}
+                  src={serviceImages[currentImageIndex]?.url}
                   alt={`صورة الخدمة ${currentImageIndex + 1}`}
                   className="w-full h-full object-cover"
                 />

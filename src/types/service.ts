@@ -37,6 +37,7 @@ export interface ServiceFormData {
     id: string;
     name: string;
     url: string;
-    thumbnail_url?: string;
+    thumbnail?: string;
+    type?: string;
   }[];
 }

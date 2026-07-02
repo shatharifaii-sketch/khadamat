@@ -12,6 +12,7 @@ type MediaItem = {
     url: string;
     name: string;
     thumbnail?: string;
+    thumbnail_url?: string;
     type?: 'image' | 'video';
 }
 
@@ -54,6 +55,7 @@ const ServiceImages = ({ onMediaChange, serviceMedia }: ServicePortfolioProps) =
     };
 
     console.log("media: ", media);
+    console.log("serviceMedia: ", serviceMedia);
 
     return (
         <div className="space-y-4 flex flex-col mt-5">
@@ -80,9 +82,8 @@ const ServiceImages = ({ onMediaChange, serviceMedia }: ServicePortfolioProps) =
                                     key={image.id}
                                     id={image.id}
                                     url={image.url}
-                                    thumbnail={image.thumbnail}
+                                    thumbnail={image.thumbnail || image.thumbnail_url}
                                     removeVideo={deleteImage}
-                                    deletingVideo={deletingImage}
                                 />
                             )
                         )}

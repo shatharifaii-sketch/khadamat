@@ -410,14 +410,15 @@ export const useAdminFunctionality = () => {
 
       if (serviceError) throw serviceError;
 
-      if (formData.service_images) {
-        for (const image of formData.service_images) {
+      if (formData.service_media) {
+        for (const image of formData.service_media) {
           const { error: imageError } = await supabase
-            .from('service_images')
+            .from('service_media')
             .insert({
               service_id: data?.id,
-              image_url: image.image_url,
-              image_name: image.image_name,
+              url: image.url,
+              name: image.name,
+              thumbnail_url: image.thumbnail_url,
             });
 
           if (imageError) throw imageError;
@@ -457,14 +458,15 @@ export const useAdminFunctionality = () => {
         .select('*')
         .single();
 
-      if (formData.service_images) {
-        for (const image of formData.service_images) {
+      if (formData.service_media) {
+        for (const image of formData.service_media) {
           const { error: imageError } = await supabase
-            .from('service_images')
+            .from('service_media')
             .insert({
               service_id: data?.id,
-              image_url: image.image_url,
-              image_name: image.image_name,
+              url: image.url,
+              name: image.name,
+              thumbnail_url: image.thumbnail_url,
             });
 
           if (imageError) throw imageError;

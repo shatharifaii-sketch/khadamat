@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { Play, XIcon } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
+import { createPortal } from "react-dom"
 
 import { cn } from "@/lib/utils"
 
@@ -81,7 +82,9 @@ export default function HeroVideoDialog({
         type="button"
         aria-label="Play video"
         className="group relative cursor-pointer size-full bg-transparent p-0"
-        onClick={() => setIsVideoOpen(true)}
+        onClick={() => {
+          setIsVideoOpen(true);
+        }}
       >
         <img
           src={thumbnailSrc}
@@ -106,43 +109,59 @@ export default function HeroVideoDialog({
           </div>
         </div>
       </button>
-      <AnimatePresence>
-        {isVideoOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => {
-              if (e.key === "Escape" || e.key === "Enter" || e.key === " ") {
-                setIsVideoOpen(false)
-              }
-            }}
-            onClick={() => setIsVideoOpen(false)}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md"
-          >
+
+      {isVideoOpen &&
+        createPortal(
+          <AnimatePresence>
             <motion.div
-              {...selectedAnimation}
-              transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="relative mx-4 aspect-video w-full max-w-4xl md:mx-0"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Escape" || e.key === "Enter" || e.key === " ") {
+                  setIsVideoOpen(false);
+                }
+              }}
+              onClick={() => setIsVideoOpen(false)}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md"
             >
-              <motion.button className="absolute -top-16 right-0 rounded-full bg-neutral-900/50 p-2 text-xl text-white ring-1 backdrop-blur-md dark:bg-neutral-100/50 dark:text-black">
-                <XIcon className="size-5" />
-              </motion.button>
-              <div className="relative isolate z-1 size-full overflow-hidden rounded-2xl border-2 border-white">
-                <iframe
-                  src={videoSrc}
-                  title="Hero Video player"
-                  className="mt-0 size-full rounded-2xl"
-                  allowFullScreen
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                ></iframe>
-              </div>
+              <motion.div
+                {...selectedAnimation}
+                transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                className="relative mx-4 aspect-video w-full max-w-4xl md:mx-0"
+              >
+                <motion.button className="absolute -top-16 right-0 rounded-full bg-neutral-900/50 p-2 text-xl text-white ring-1 backdrop-blur-md dark:bg-neutral-100/50 dark:text-black">
+                  <XIcon className="size-5" />
+                </motion.button>
+                <div className="relative isolate z-1 size-full overflow-hidden rounded-2xl border-2 border-white">
+                  <iframe
+                    src={videoSrc}
+                    title="Hero Video player"
+                    className="mt-0 size-full rounded-2xl"
+                    allowFullScreen
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  ></iframe>
+                </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </AnimatePresence>
+          ,
+          document.body
+        )
+      }
+
+      {/* {isVideoOpen &&
+  createPortal(
+    <div
+      className="fixed inset-0 z-[99999] bg-black/80 flex items-center justify-center"
+      onClick={() => setIsVideoOpen(false)}
+    >
+      TEST
+    </div>,
+    document.body
+  )} */}
     </div>
   )
 }
