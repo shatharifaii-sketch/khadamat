@@ -66,9 +66,9 @@ const ServiceImages = ({ onMediaChange, serviceMedia }: ServicePortfolioProps) =
                         {t("post_service.existing_files")}
                     </Label>
 
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-4 md:grid-cols-5 gap-5">
                         {serviceMedia.map((image: MediaItem) =>
-                            image.type === "image" ? (
+                            image.type == "image" ? (
                                 <ServiceImageComponent
                                     key={image.id}
                                     className='size-40'
@@ -84,6 +84,8 @@ const ServiceImages = ({ onMediaChange, serviceMedia }: ServicePortfolioProps) =
                                     url={image.url}
                                     thumbnail={image.thumbnail || image.thumbnail_url}
                                     removeVideo={deleteImage}
+                                    className='size-40'
+                                    deletingVideo={deletingImage}
                                 />
                             )
                         )}
@@ -125,7 +127,7 @@ const ServiceImages = ({ onMediaChange, serviceMedia }: ServicePortfolioProps) =
                 {media.length > 0 && (
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
                         {media.map((item) =>
-                            item.type === "image" ? (
+                            item.type == "image" ? (
                                 <ServiceImageComponent
                                     key={item.id}
                                     image={item}

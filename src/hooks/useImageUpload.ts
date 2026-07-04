@@ -300,9 +300,9 @@ export const useImageUpload = () => {
         return;
       }
 
-      if (type === "video" && thumbnail) {
+      if (type == "video" && thumbnail) {
         const { error: thumbnailError } = await supabase.storage
-          .from('service-thumbnails')
+          .from('video-thumbnails')
           .remove([thumbnail]);
 
         if (thumbnailError) {

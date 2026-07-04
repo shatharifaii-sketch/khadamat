@@ -37,9 +37,6 @@ const ServiceImageComponent = ({ image, removeImage, className, imageUrl, deleti
             >
                 <X size={16} />
             </button>
-            <div className="absolute bottom-2 left-2 right-2 bg-black/50 text-white text-xs p-1 rounded truncate opacity-0 group-hover:opacity-100 transition-opacity overflow-x-auto max-w-[150px] z-10">
-                {image.name}
-            </div>
         </div>
     )
 }

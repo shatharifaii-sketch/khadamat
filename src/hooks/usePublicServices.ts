@@ -143,7 +143,7 @@ export const useServiceToEditData = (id: string) => {
       };
 
       const { data: media, error: imagesError } = await supabase
-        .from('service_images')
+        .from('service_media')
         .select('*')
         .eq('service_id', id);
 
@@ -157,6 +157,7 @@ export const useServiceToEditData = (id: string) => {
         name: item.name,
         url: item.url,
         thumbnail_url: item.thumbnail_url,
+        type: item.type
       })) as Service['service_media'];
 
       const serviceRes = {

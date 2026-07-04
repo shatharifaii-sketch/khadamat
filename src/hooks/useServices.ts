@@ -39,7 +39,7 @@ export interface ServiceImageProps {
 export const useServices = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const { t } = useTranslation();
+  const { t } = useTranslation("responses");
 
   const saveImages = async ({serviceId, images}: {serviceId: string, images: ServiceFormData['media']}) => {
     console.log('saving service images: ', images);
@@ -48,10 +48,6 @@ export const useServices = () => {
 
         return
       }
-
-      console.log('Uploading service images for service:', serviceId);
-
-      console.log('Images to upload:', images);
 
       for (const image of images) {
         const { data, error } = await supabase
@@ -69,8 +65,6 @@ export const useServices = () => {
           console.error('Error uploading service image:', error);
           return;
         }
-
-        console.log('Service image uploaded successfully:', data);
       }
 
       toast.success(t("service_images_uploaded") || 'تم تحميل صور الخدمة بنجاح!');
