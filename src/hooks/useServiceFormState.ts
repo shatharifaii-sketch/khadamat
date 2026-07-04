@@ -9,7 +9,7 @@ export const useServiceFormState = (serviceToEdit?: Service | null) => {
   const { user } = useAuth();
   const { pendingService } = usePendingService();
   const isEditMode = !!serviceToEdit;
-  
+
   const [formData, setFormData] = useState<ServiceFormData>({
     title: '',
     category: '',
@@ -30,7 +30,8 @@ export const useServiceFormState = (serviceToEdit?: Service | null) => {
         id: '',
         name: '',
         url: '',
-        thumbnail_url: '',
+        thumbnail: '',
+        type: '',
       }
     ],
   });
@@ -55,7 +56,15 @@ export const useServiceFormState = (serviceToEdit?: Service | null) => {
           countryCode: digits.slice(0, digits.length - 9),
           number: digits.slice(digits.length - 9),
         },
-        media: serviceToEdit.service_media,
+        media: [
+          {
+            id: '',
+            name: '',
+            url: '',
+            thumbnail: '',
+            type: '',
+          }
+        ],
       });
 
     } else if (pendingService && !isEditMode) {
@@ -72,11 +81,11 @@ export const useServiceFormState = (serviceToEdit?: Service | null) => {
   }, [user.email, isEditMode, formData.email]);
 
   const handleInputChange = (
-    field: string, value: string | 
-    { id: string; name: string; url: string; thumbnail_url?: string, type?: string }[] | 
-    boolean | 
-    ServiceLink[] |
-    { 
+    field: string, value: string |
+      { id: string; name: string; url: string; thumbnail_url?: string, type?: string }[] |
+      boolean |
+      ServiceLink[] |
+    {
       countryCode: string;
       number: string;
     }

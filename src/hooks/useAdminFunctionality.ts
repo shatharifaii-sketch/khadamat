@@ -132,7 +132,8 @@ export const useAdminData = () => {
         id,
       name,
       url,
-      thumbnail_url
+      thumbnail_url,
+      type
         )`)
         .eq('status', 'published')
         .order('created_at', { ascending: false });
@@ -149,7 +150,8 @@ export const useAdminData = () => {
         id,
       name,
       url,
-      thumbnail_url
+      thumbnail_url,
+      type
         )`)
         .eq('status', 'pending-approval')
         .order('created_at', { ascending: false });
