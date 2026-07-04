@@ -57,7 +57,7 @@ const ServiceImages = ({ serviceId }: Props) => {
                         <CarouselPrevious className='bg-primary' />
                     </Carousel>
                     <div className="text-muted-foreground py-2 text-center text-xs">
-                        صورة {current} من {count}
+                        {t('service.images_count', { current, count })}
                     </div>
                 </>
             ) : (

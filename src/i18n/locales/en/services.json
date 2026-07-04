@@ -133,6 +133,7 @@
         "email": "Email",
         "phone": "Phone Number",
         "no_images": "No images attached to this service",
+        "images_count": "file {{current}} of {{count}}",
         "report": {
             "toast_error": "An error occurred while sending the report. Please try again.",
             "toast_success": "Report submitted successfully",

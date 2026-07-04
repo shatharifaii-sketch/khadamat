@@ -25,15 +25,7 @@ export const useServiceFormState = (serviceToEdit?: Service | null) => {
       countryCode: '',
       number: '',
     },
-    media: [
-      {
-        id: '',
-        name: '',
-        url: '',
-        thumbnail: '',
-        type: '',
-      }
-    ],
+    media: [],
   });
 
   // Load service data for editing or pending service data
@@ -56,15 +48,7 @@ export const useServiceFormState = (serviceToEdit?: Service | null) => {
           countryCode: digits.slice(0, digits.length - 9),
           number: digits.slice(digits.length - 9),
         },
-        media: [
-          {
-            id: '',
-            name: '',
-            url: '',
-            thumbnail: '',
-            type: '',
-          }
-        ],
+        media: [],
       });
 
     } else if (pendingService && !isEditMode) {
