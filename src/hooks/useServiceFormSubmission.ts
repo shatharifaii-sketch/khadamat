@@ -17,6 +17,9 @@ export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
   const isEditMode = !!serviceToEdit;
 
   const handleSubmit = async (formData: ServiceFormData) => {
+
+    console.log('Submitting form data:', formData);
+    
     // If we're editing, update the service
     if (isEditMode && serviceToEdit) {
       try {
@@ -38,12 +41,12 @@ export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
           })
         });
 
-        if (formData.images && formData.images.length > 0) {
-        await saveImages({
-          serviceId: serviceToEdit.id,
-          images: formData.images
-        });
-      }
+        if (formData.media && formData.media.length > 0) {
+          await saveImages({
+            serviceId: serviceToEdit.id,
+            images: formData.media
+          });
+        }
         
         navigate('/account');
       } catch (error) {
@@ -83,10 +86,10 @@ export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
       });
 
       //TODO: Handle image uploads here if necessary
-      if (formData.images && formData.images.length > 0) {
+      if (formData.media && formData.media.length > 0) {
         await saveImages({
           serviceId: result.id,
-          images: formData.images
+          images: formData.media
         });
       }
     

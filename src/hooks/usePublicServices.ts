@@ -142,8 +142,8 @@ export const useServiceToEditData = (id: string) => {
         throw serviceError;
       };
 
-      const { data: images, error: imagesError } = await supabase
-        .from('service_images')
+      const { data: media, error: imagesError } = await supabase
+        .from('service_media')
         .select('*')
         .eq('service_id', id);
 
@@ -152,15 +152,17 @@ export const useServiceToEditData = (id: string) => {
         throw imagesError;
       };
 
-      const serviceImage = images.map((image) => ({
-        id: image.id,
-        image_name: image.image_name,
-        image_url: image.image_url
-      })) as Service['service_images'];
+      const serviceImage = media.map((item) => ({
+        id: item.id,
+        name: item.name,
+        url: item.url,
+        thumbnail_url: item.thumbnail_url,
+        type: item.type
+      })) as Service['service_media'];
 
       const serviceRes = {
         ...serviceData,
-        service_images: serviceImage,
+        service_media: serviceImage,
       };
       
       return {

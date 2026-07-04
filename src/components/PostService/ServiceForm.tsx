@@ -111,10 +111,10 @@ const ServiceForm = ({ serviceToEdit }: ServiceFormProps) => {
             handleInputChange('images', images);
           }} /> */}
           <ServiceImages
-           onImagesChange={(images) => {
-            handleInputChange('images', images);
+           onMediaChange={(media) => {
+            handleInputChange('media', media);
           }}
-            serviceImages={serviceToEdit?.service_images}
+            serviceMedia={serviceToEdit?.service_media}
           />
 
           <ServiceFormSubmit

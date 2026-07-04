@@ -33,9 +33,11 @@ export interface ServiceFormData {
     countryCode: string;
     number: string;
   };
-  images: {
+  media: {
     id: string;
-    image_name: string;
-    image_url: string;
+    name: string;
+    url: string;
+    thumbnail?: string;
+    type?: string;
   }[];
 }

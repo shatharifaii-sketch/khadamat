@@ -30,16 +30,18 @@ export interface Service {
 export interface ServiceImageProps {
   id: string;
   service_id: string;
-  image_url: string;
-  image_name: string;
+  url: string;
+  name: string;
+  thumbnail_url?: string;
+  type?: string;
 }
 
 export const useServices = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const { t } = useTranslation();
+  const { t } = useTranslation("responses");
 
-  const saveImages = async ({serviceId, images}: {serviceId: string, images: ServiceFormData['images']}) => {
+  const saveImages = async ({serviceId, images}: {serviceId: string, images: ServiceFormData['media']}) => {
     console.log('saving service images: ', images);
       if (!user || images.length === 0 || !serviceId) {
         console.error('No user or images found when trying to upload service images');
@@ -47,15 +49,15 @@ export const useServices = () => {
         return
       }
 
-      console.log('Uploading service images for service:', serviceId);
-
       for (const image of images) {
         const { data, error } = await supabase
-          .from('service_images')
+          .from('service_media')
           .insert({
             service_id: serviceId,
-            image_url: image.image_url,
-            image_name: image.image_name
+            url: image.url,
+            name: image.name,
+            thumbnail_url: image.thumbnail,
+            type: image.type
           })
           .single();
 
@@ -63,8 +65,6 @@ export const useServices = () => {
           console.error('Error uploading service image:', error);
           return;
         }
-
-        console.log('Service image uploaded successfully:', data);
       }
 
       toast.success(t("service_images_uploaded") || 'تم تحميل صور الخدمة بنجاح!');
@@ -317,7 +317,7 @@ export const useCategoryServices = (category: string, serviceId: string) => {
 
 export const useServiceImages = (serviceId: string) => {
   const { data: images } = useSuspenseQuery({
-    queryKey: ['service-images'],
+    queryKey: ['service-media'],
     queryFn: async () => {
       if (!serviceId) {
         console.error('No service id found when trying to fetch service images');
@@ -326,7 +326,7 @@ export const useServiceImages = (serviceId: string) => {
       }
 
       const { data: images, error } = await supabase
-      .from('service_images')
+      .from('service_media')
       .select('*')
       .eq('service_id', serviceId);
 

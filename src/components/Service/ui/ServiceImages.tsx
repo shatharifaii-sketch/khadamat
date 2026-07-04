@@ -1,4 +1,5 @@
 import { Carousel, type CarouselApi, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import { VideoPlayer } from '@/components/VideoPlayer';
 import { useServiceImages } from '@/hooks/useServices';
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next';
@@ -13,6 +14,8 @@ const ServiceImages = ({ serviceId }: Props) => {
     const [api, setApi] = useState<CarouselApi>(null);
     const [current, setCurrent] = useState(0);
     const [count, setCount] = useState(0);
+
+    console.log('ServiceImages component rendered with serviceId:', images);
 
     useEffect(() => {
         if (!api) {
@@ -37,7 +40,16 @@ const ServiceImages = ({ serviceId }: Props) => {
                                 <CarouselItem
                                     key={image.id}
                                     className='basis-full shrink-0 flex items-center justify-center'>
-                                    <img className='border rounded-md object-contain max-h-70' src={image.image_url} alt={image.image_name} />
+                                    {image.type === "image" ? (
+                                        <img className='border rounded-md object-contain max-h-70' src={image.url} alt={image.name} key={image.id} />
+                                    ) : (
+                                        <VideoPlayer 
+                                        id={image.id}
+                                        url={image.url}
+                                        thumbnail={image.thumbnail_url}
+                                        key={image.id}
+                                        />
+                                    )}
                                 </CarouselItem>
                             ))}
                         </CarouselContent>
