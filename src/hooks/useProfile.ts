@@ -58,7 +58,7 @@ export const useProfile = () => {
       queryClient.invalidateQueries({ queryKey: ['profile'] });
       toast.success(t("profile_updated_successfully"));
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('Error updating profile:', error);
       toast.error(t("profile_update_failed"));
     }
@@ -96,7 +96,7 @@ export const useProfile = () => {
       queryClient.invalidateQueries({ queryKey: ['profile'] });
       window.location.reload();
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('Error updating profile:', error);
       toast.error('حدث خطأ في تحديث الملف الشخصي');
     }
@@ -150,8 +150,6 @@ export const usePublisherProfile = (userId: string) => {
     }
   });
 
-  if (!getProfile) return { profile: null, services: null };
-
   const { data: getServices } = useSuspenseQuery({
     queryKey: ['publisher-services', getProfile.id],
     queryFn: async () => {
@@ -162,13 +160,6 @@ export const usePublisherProfile = (userId: string) => {
 
       if (error) throw error;
       return services;
-    }
-  })
-
-  const sendReport = useMutation({
-    mutationKey: ['send-report'],
-    mutationFn: async (reportData: { reported_user_id: string; description: string; }) => {
-
     }
   })
 
