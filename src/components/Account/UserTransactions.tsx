@@ -47,7 +47,7 @@ function UserTransactions() {
                                 <TableCell>
                                     <Badge variant="outline">
                                         {
-                                            payment.billing_reason === 'extra_product_payment' ? t("transactions.extra_product_payment") : (payment.subscription.tier?.title || '')
+                                            payment.billing_reason === 'extra_product_payment' ? t("transactions.extra_product_payment") : (payment.subscription?.tier?.title || '')
                                         }
                                     </Badge>
                                 </TableCell>

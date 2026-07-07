@@ -19,7 +19,7 @@ export interface UserProfile {
 
 export const useProfile = () => {
   const { user } = useAuth();
-  const { t } = useTranslation();
+  const { t } = useTranslation("responses");
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -63,6 +63,43 @@ export const useProfile = () => {
       toast.error(t("profile_update_failed"));
     }
   });
+
+  const {
+    mutateAsync: deleteProfile,
+    isPending: isDeleting,
+    isError: isDeleteError,
+    error: deleteError
+  } = useMutation({
+    mutationKey: ['delete-profile'],
+    mutationFn: async () => {
+      if (!user) throw new Error('User must be authenticated');
+
+      const { data, error } = await supabase.functions.invoke('delete-user-profile', {
+        method: 'POST',
+        body: JSON.stringify({ user_id: user.id })
+      });
+
+      if (error) {
+        throw new Error(t(error.message));
+      }
+
+      if (!data.success && data.error) {
+        throw new Error(t(data.error));
+      }
+
+      await supabase.auth.signOut();
+
+      return navigate('/', { replace: true });
+    },
+    onError: (error: unknown) => {
+      console.error('Error deleting profile:', error);
+      toast.error(t("profile_delete_failed"));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+      toast.success(t("profile_deleted_successfully"));
+    }
+  })
 
   const confirmEmail = useMutation({
     mutationFn: async ({ otp, email, user_id }: { otp: string; email: string; user_id: string; }) => {
@@ -131,7 +168,11 @@ export const useProfile = () => {
     isLoading: getProfile.isLoading,
     isUpdating: updateProfile.isPending,
     confirmEmail,
-    changePassword
+    changePassword,
+    deleteProfile,
+    isDeleting,
+    isDeleteError,
+    deleteError
   };
 };
 

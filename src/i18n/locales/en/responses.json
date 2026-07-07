@@ -79,5 +79,12 @@
     "subscription_created_successfully": "Subscription created successfully",
     "subscription_create_error": "An error occurred while creating the subscription, please try again later",
     "subscription_deactivation_success": "Subscription deactivated successfully",
-    "subscription_deactivation_error": "An error occurred while deactivating the subscription, please try again later"
+    "subscription_deactivation_error": "An error occurred while deactivating the subscription, please try again later",
+    "profile_delete_failed": "An error occurred while deleting the profile",
+    "profile_deleted_successfully": "Profile deleted successfully",
+    "missing_user_id": "User ID is missing",
+    "missing_service_id": "Service ID is missing",
+    "missing_subscription_id": "Subscription ID is missing",
+    "server_error": "An error occurred on the server, please try again later",
+    "failed_to_deactivate_subscriptions": "Failed to deactivate subscriptions, please try again later"
 }
