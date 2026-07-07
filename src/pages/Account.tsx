@@ -31,6 +31,7 @@ import ChangePasswordComponent from '@/components/Account/ChangePasswordComponen
 import { useTranslation } from 'react-i18next';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { validateWhatsappPhone } from '@/lib/utils';
+import DeleteProfileComponent from '@/components/Account/DeleteProfileComponent';
 
 const Account = () => {
   const { t } = useTranslation("account");
@@ -50,7 +51,7 @@ const Account = () => {
   const { user, loading } = useAuth();
   
   const navigate = useNavigate();
-  const { profile, updateProfile, isLoading: profileLoading } = useProfile();
+  const { profile, updateProfile, isLoading: profileLoading, deleteProfile, isDeleting } = useProfile();
   const { getUserServices } = useServices();
   const { getUserSubscription, getUserSubscriptions } = useSubscription();
 
@@ -173,7 +174,10 @@ const Account = () => {
   return (
     <div className="max-w-4xl mx-auto py-12 px-4">
       <div className="text-center mb-8">
-        <MainUserDetails user={profile} />
+        <div>
+
+          <MainUserDetails user={profile} />
+        </div>
         <Button
           onClick={scrollToEdit}
           variant='ghost'
@@ -424,6 +428,12 @@ const Account = () => {
             </form>
           </CardContent>
         </Card>
+      </div>
+      <div>
+        <DeleteProfileComponent 
+          deleteProfile={deleteProfile}
+          isDeleting={isDeleting}
+        />
       </div>
     </div>
   );

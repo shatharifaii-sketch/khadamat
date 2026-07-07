@@ -1,7 +1,7 @@
 
 import { Link } from 'react-router-dom';
-import { Home, Facebook, Instagram } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { FaFacebook, FaInstagram } from 'react-icons/fa6';
 
 const Footer = () => {
   const { t } = useTranslation("footer");
@@ -27,7 +27,7 @@ const Footer = () => {
             className="text-muted-foreground hover:text-primary transition-colors"
             aria-label="Facebook"
           >
-            <Facebook size={24} />
+            <FaFacebook size={24} />
           </a>
           <a 
             href="https://www.instagram.com/khedemtak/?utm_source=ig_web_button_share_sheet" 
@@ -36,7 +36,7 @@ const Footer = () => {
             className="text-muted-foreground hover:text-primary transition-colors"
             aria-label="Instagram"
           >
-            <Instagram size={24} />
+            <FaInstagram size={24} />
           </a>
         </div>
         <div className="pt-6 border-t border-border text-muted-foreground">

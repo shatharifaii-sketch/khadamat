@@ -79,5 +79,12 @@
     "subscription_created_successfully": "تم انشاء الاشتراك بنجاح",
     "subscription_create_error": "خطاء في انشاء الاشتراك، يرجى المحاولة لاحقاً",
     "subscription_deactivation_success": "تم إلغاء الاشتراك بنجاح",
-    "subscription_deactivation_error": "حصل خطاء في الغاء الاشتراك، يرجى المحاولة لاحقاً"
+    "subscription_deactivation_error": "حصل خطاء في الغاء الاشتراك، يرجى المحاولة لاحقاً",
+    "profile_delete_failed": "حدث خطأ في حذف الملف الشخصي",
+    "profile_deleted_successfully": "تم حذف الملف الشخصي بنجاح",
+    "missing_user_id": "معرف المستخدم مفقود",
+    "missing_service_id": "معرف الخدمة مفقود",
+    "missing_subscription_id": "معرف الاشتراك مفقود",
+    "server_error": "حدث خطأ في الخادم، يرجى المحاولة لاحقاً",
+    "failed_to_deactivate_subscriptions": "فشل في إلغاء الاشتراكات، يرجى المحاولة لاحقاً"
 }

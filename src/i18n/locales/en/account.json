@@ -1,4 +1,20 @@
 {
+    "رام الله": "Ramallah",
+    "القدس": "Jerusalem",
+    "بيت لحم": "Bethlehem",
+    "الخليل": "Hebron",
+    "نابلس": "Nablus",
+    "جنين": "Jenin",
+    "طولكرم": "Tulkarm",
+    "قلقيلية": "Qalqilya",
+    "سلفيت": "Salfit",
+    "أريحا": "Jericho",
+    "طوباس": "Tubas",
+    "غزة": "Gaza",
+    "رفح": "Rafah",
+    "خان يونس": "Khan Younis",
+    "دير البلح": "Deir al-Balah",
+    
     "edit_profile_button": "Manage Your Profile",
     "my_services": "Published Services",
     "subscription": "Subscription",
@@ -114,5 +130,9 @@
         "pending": "Pending",
         "pending-approval": "Pending Approval",
         "unknown": "Unknown"
-    }
+    },
+    "delete_profile": "Delete Profile",
+    "delete_profile_title": "Are you sure you want to delete your profile?",
+    "delete_profile_description": "This will delete all your data including published services, subscriptions, and messages. This action cannot be undone.",
+    "delete": "Confirm Deletion"
 }
