@@ -2018,6 +2018,7 @@ export type Database = {
           details: Json | null
           id: string
           ip_address: unknown
+          method: string | null
           user_agent: string | null
           user_id: string
         }
@@ -2027,6 +2028,7 @@ export type Database = {
           details?: Json | null
           id?: string
           ip_address?: unknown
+          method?: string | null
           user_agent?: string | null
           user_id: string
         }
@@ -2036,6 +2038,7 @@ export type Database = {
           details?: Json | null
           id?: string
           ip_address?: unknown
+          method?: string | null
           user_agent?: string | null
           user_id?: string
         }
