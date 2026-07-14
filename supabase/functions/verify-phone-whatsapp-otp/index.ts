@@ -6,13 +6,17 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+type PhoneVerificationCodes = {
+  id: string;
+  expires_at: string;
+  attempts: number;
+  used: boolean;
+}
+
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
 );
-const whatsappAccessToken = Deno.env.get("WHATSAPP_ACCESS_TOKEN")!;
-const whatsappPhoneNumberId = Deno.env.get("WHATSAPP_PHONE_NUMBER_ID")!;
-const whatsappGraphApiVersion = Deno.env.get("WHATSAPP_GRAPH_API_VERSION")!;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -20,93 +24,125 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-async function generateOtp(phone: string) {
-  await supabase.from("phone_verification_codes").delete().eq("phone", phone);
-
-  const array = new Uint32Array(4);
-  crypto.getRandomValues(array);
-
-  const otp = (array[0] % 900000 + 100000).toString();
-
-  const hashBuffer = await crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(otp)
-  );
-
-  const otpHash = Array.from(new Uint8Array(hashBuffer))
-    .map(b => b.toString(16).padStart(2, "0"))
-    .join("");
-
-  
-
-  const { data, error } = await supabase.from("phone_verification_codes").insert({
-    phone,
-    code_hash: otpHash,
-    expires_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
-  });
-
-  if (error) {
-    return {
-      otp: null,
-      error,
-      success: false
-    }
-  };
-
-  return {
-    otp,
-    error: null,
-    success: true
-  };
-}
-
-async function sendWhatsappMessage(token: string, phoneNumber: string, lang: string) {
-  const url = `https://graph.facebook.com/${whatsappGraphApiVersion}/${whatsappPhoneNumberId}/messages`;
-
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${whatsappAccessToken}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      messaging_product: "whatsapp",
-      to: phoneNumber,
-      type: "template",
-      template: {
-        name: "verification_code",
-        language: {
-          code: lang == "en" ? "en" : "ar"
-        },
-        components: [
-          {
-            type: "body",
-            "parameters": [
-              {
-                type: "text",
-                text: lang == "en" ? `Your verification code is ${token}` : `رمز التحقق الخاص بك هو ${token}`
-              }
-            ]
-          }
-        ]
-      }
-    })
-  });
-
-  if (response.status !== 200) {
+function validateAttempt(data: PhoneVerificationCodes): { success: boolean, error: { code: string, message: string } } {
+  if (!data) {
     return {
       success: false,
-      error: `Failed to send WhatsApp message: ${response.statusText}`
-    }
+      error: {
+        code: "phone_not_found",
+        message: "Phone number not found",
+      },
+    };
+  }
+
+  if (new Date(data.expires_at) < new Date()) {
+    return {
+      success: false,
+      error: {
+        code: "token_expired",
+        message: "Token has expired",
+      },
+    };
+  }
+
+  if (data.used) {
+    return {
+      success: false,
+      error: {
+        code: "token_used",
+        message: "Token has already been used",
+      },
+    };
+  }
+
+  if (data.attempts >= 5) {
+    return {
+      success: false,
+      error: {
+        code: "too_many_attempts",
+        message: "Too many attempts",
+      },
+    };
   }
 
   return {
     success: true,
-    error: null
-  };
+    error: {
+      code: "",
+      message: "",
+    }
+  }
+}
+
+async function compareTokens(token: string, phone: string) {
+  const hashBuffer = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(token)
+  );
+
+  const codeHash = Array.from(new Uint8Array(hashBuffer))
+                .map(b => b.toString(16).padStart(2, "0"))
+                .join("");
+
+  const {
+    data,
+    error
+  } = await supabase
+  .from("phone_verification_codes")
+  .select("*")
+  .eq("phone", phone)
+  .order("created_at", { ascending: false })
+  .limit(1)
+  .maybeSingle();
+
+  if (error) {
+    return {
+      success: false,
+      error,
+    };
+  }
+
+  const { success, error: validateError } = validateAttempt(data);
+
+  if (!success) {
+    return {
+      success: false,
+      error: validateError,
+    };
+  }
+
+  if (data.code_hash !== codeHash) {
+    await supabase
+      .from("phone_verification_codes")
+      .update({ attempts: data.attempts + 1 })
+      .eq("id", data.id);
+
+      return {
+        success: false,
+        error: {
+          code: "invalid_token",
+          message: "Invalid token",
+        },
+      }
+  } else {
+    await supabase
+      .from("phone_verification_codes")
+      .update({
+        used: true,
+        attempts: data.attempts + 1,
+        code_hash: null
+      })
+      .eq("id", data.id);
+
+    return {
+      success: true,
+      error: null,
+    }
+  }
 }
 
 Deno.serve(async (req: Request) => {
+
   if (req.method === "OPTIONS") {
     return new Response("ok", {
       status: 200,
@@ -122,14 +158,70 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { phone, lang } = await req.json();
+    const { phone, token } = await req.json();
 
-    const { data: user, error: userError } = await supabase
-      .from("users")
-      .select("id")
-      .eq("phone", phone)
-      .maybeSingle();
+    const { data, error: profileError } = await supabase.from("profiles").select("*").eq("phone", phone).maybeSingle();
+
+    if (profileError) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: profileError,
+        }),
+        {
+          status: 400,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+
+    if (!data) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: {
+            code: "phone_not_found",
+            message: "Phone number not found",
+          },
+        }),
+        {
+          status: 400,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
     
+    const { success, error } = await compareTokens(token, phone);
+
+    if (!success) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: error,
+        }),
+        {
+          status: 400,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+
+    const { data: user, error: userError } = await supabase.auth.admin.updateUserById(
+      data.id,
+      {
+        phone_confirm: true
+      }
+    )
+
     if (userError) {
       return new Response(
         JSON.stringify({
@@ -146,69 +238,12 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    if (!user) {
-      return new Response(
-        JSON.stringify({
-          success: true,
-          error: "User not found",
-        }),
-        {
-          status: 200,
-          headers: {
-            ...corsHeaders,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    }
-
-    const { otp, error, success } = await generateOtp(phone);
-
-    if (!success || !otp) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: error,
-        }),
-        {
-          status: 400,
-          headers: {
-            ...corsHeaders,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    }
-
-    const { success: whatsappSuccess, error: whatsappError } = await sendWhatsappMessage(otp, phone, lang);
-
-    if (!whatsappSuccess) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: whatsappError,
-        }),
-        {
-          status: 400,
-          headers: {
-            ...corsHeaders,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    }
-
     return new Response(
       JSON.stringify({
         success: true,
         error: null
-      }), {
-      status: 200,
-      headers: {
-        ...corsHeaders,
-        "Content-Type": "application/json",
-      },
-    }
+      }),
+      { headers: { "Content-Type": "application/json" } },
     )
   } catch (error) {
     console.error("subscription cancellation error:", error);
@@ -234,7 +269,7 @@ Deno.serve(async (req: Request) => {
   1. Run `supabase start` (see: https://supabase.com/docs/reference/cli/supabase-start)
   2. Make an HTTP request:
 
-  curl -i --location --request POST 'http://127.0.0.1:54321/functions/v1/send-register-whatsapp-message' \
+  curl -i --location --request POST 'http://127.0.0.1:54321/functions/v1/verify-phone-whatsapp-otp' \
     --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0' \
     --header 'Content-Type: application/json' \
     --data '{"name":"Functions"}'

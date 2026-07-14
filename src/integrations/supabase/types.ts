@@ -761,6 +761,36 @@ export type Database = {
         }
         Relationships: []
       }
+      phone_verification_codes: {
+        Row: {
+          attempts: number | null
+          code_hash: string | null
+          created_at: string
+          expires_at: string | null
+          id: number
+          phone: string | null
+          used: boolean | null
+        }
+        Insert: {
+          attempts?: number | null
+          code_hash?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: number
+          phone?: string | null
+          used?: boolean | null
+        }
+        Update: {
+          attempts?: number | null
+          code_hash?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: number
+          phone?: string | null
+          used?: boolean | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           bio: string | null

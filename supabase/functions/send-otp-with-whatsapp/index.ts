@@ -20,7 +20,50 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+async function checkElgibility(phone: string) {
+  const { data, error } = await supabase
+    .from("phone_verification_codes")
+    .select("phone")
+    .eq("phone", phone)
+    .limit(1)
+    .single();
+  
+  if (error) {
+    return {
+      success: false,
+      error,
+    };
+  }
+
+  if (new Date(data.created_at) > new Date(Date.now() - 5 * 60 * 1000)) {
+    return {
+      success: false,
+      error: {
+        code: "too_many_requests",
+        message: "Too many requests",
+      },
+    };
+  } else {
+    return {
+      success: true,
+      error: null,
+    };
+  }
+}
+
 async function generateOtp(phone: string) {
+  const { success, error: elError } = await checkElgibility(phone);
+
+  if (!success) {
+    return {
+      otp: null,
+      error: elError,
+      success: false
+    }
+  }
+
+  await supabase.from("phone_verification_codes").delete().eq("phone", phone);
+
   const array = new Uint32Array(4);
   crypto.getRandomValues(array);
 
@@ -34,6 +77,8 @@ async function generateOtp(phone: string) {
   const otpHash = Array.from(new Uint8Array(hashBuffer))
     .map(b => b.toString(16).padStart(2, "0"))
     .join("");
+
+  
 
   const { data, error } = await supabase.from("phone_verification_codes").insert({
     phone,
@@ -118,7 +163,81 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { phone, lang } = await req.json();
+    const { phone, lang, name, password, passwordConfirm } = await req.json();
+
+    const { data: existingUserData, error: existingUserError } = await supabase.from("users").select("*").eq("phone", phone).maybeSingle();
+
+    if (existingUserError) {
+      console.error("Error checking existing user: ", existingUserError);
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: existingUserError,
+        }),
+        {
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+
+    if (existingUserData) {
+      console.error("User already exists");
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "User already exists",
+        }),
+        {
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+
+    if (password !== passwordConfirm) {
+      console.error("Passwords do not match");
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Passwords do not match",
+        }),
+        {
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+
+    const { data, error: userError } = await supabase.auth.admin.createUser({
+      phone,
+      password,
+      user_metadata: {
+        full_name: name,
+      }
+    })
+
+    if (userError) {
+      console.error("Error creating user: ", userError);
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: userError,
+        }),
+        {
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
 
     const { otp, error, success } = await generateOtp(phone);
 

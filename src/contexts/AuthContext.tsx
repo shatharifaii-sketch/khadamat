@@ -13,6 +13,7 @@ interface AuthContextType {
   signIn: (email: string | null, password: string, phone: { countryCode: string; number: string } | null, method: string) => Promise<{ error: unknown }>;
   signOut: () => Promise<void>;
   verifyOtp: (email: string, token: string) => Promise<{ error?: unknown, data?: unknown }>;
+  verifyPhoneOtp: (phone: { countryCode: string; number: string }, token: string, password: string) => Promise<{ error?: unknown, data?: User }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -51,27 +52,47 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const signUp = async (email: string | null, password: string, fullName: string, passwordConfirm: string, phone: { countryCode: string; number: string } | null, method: string) => {
-    console.log('Attempting sign up for:', email);
-    const { data, error } = await supabase.functions.invoke('register-user', {
-      body: JSON.stringify({
-        email,
-        password,
-        name: fullName,
-        passwordConfirm
-      })
-    })
+    if (method == "phone") {
+      const { data, error } = await supabase.functions.invoke('send-otp-with-whatsapp', {
+        body: JSON.stringify({
+          phone: `+${phone.countryCode}${phone.number}`
+        })
+      });
 
-    if (!data.success) {
-      const err = data.error;
+      if (error) {
+        console.error('Sign in error:', error);
 
-      if (err.code === 'email_exists') {
-        toast.error('البريد الإلكتروني مستخدم بالفعل');
+        return error
       }
 
-      return { data: null, error: err };
-    }
+      if (!data.success) {
+        return data.error;
+      }
 
-    return { data, error };
+      return data.success;
+    } else if (method == "email") {
+      console.log('Attempting sign up for:', email);
+      const { data, error } = await supabase.functions.invoke('register-user', {
+        body: JSON.stringify({
+          email,
+          password,
+          name: fullName,
+          passwordConfirm
+        })
+      })
+
+      if (!data.success) {
+        const err = data.error;
+
+        if (err.code === 'email_exists') {
+          toast.error('البريد الإلكتروني مستخدم بالفعل');
+        }
+
+        return { data: null, error: err };
+      }
+
+      return { data, error };
+    }
   };
 
   const signIn = async (email: string | null, password: string, phone: {
@@ -79,59 +100,32 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     number: string;
   } | null, method: string) => {
     console.log('Attempting sign in for:', email);
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
 
-    if (method == "phone") {
-      const { data, error } = await supabase.functions.invoke('send-otp-with-whatsapp', { body: JSON.stringify({ phone }) });
-
-      if (error) {
-        console.error('Sign in error:', error);
-      } else {
-        console.log('Sign in successful', userId);
-        const { error } = await supabase
-          .from('user_activity')
-          .insert({
-            activity_type: 'login',
-            user_id: data.user?.id,
-            details: { "page": "home" },
-            method: "phone"
-          });
-
-        if (error) {
-          console.error('Error tracking login:', error);
-          throw new Error('Error tracking login');
-        }
-
-      }
-
-      return { data, error };
-    } else if (method == "email") {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
+    if (error) {
+      console.error('Sign in error:', error);
+    } else {
+      console.log('Sign in successful', userId);
+      const { error } = await supabase
+        .from('user_activity')
+        .insert({
+          activity_type: 'login',
+          user_id: data.user?.id,
+          details: { "page": "home" },
+          method: "email"
+        });
 
       if (error) {
-        console.error('Sign in error:', error);
-      } else {
-        console.log('Sign in successful', userId);
-        const { error } = await supabase
-          .from('user_activity')
-          .insert({
-            activity_type: 'login',
-            user_id: data.user?.id,
-            details: { "page": "home" },
-            method: "email"
-          });
-
-        if (error) {
-          console.error('Error tracking login:', error);
-          throw new Error('Error tracking login');
-        }
-
+        console.error('Error tracking login:', error);
+        throw new Error('Error tracking login');
       }
 
-      return { data, error };
     }
+
+    return { data, error };
   };
 
   const userId: string | undefined = session?.user?.id;
@@ -178,6 +172,35 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return { data: 'OTP verified successfully' };
   }
 
+  const verifyPhoneOtp = async (phone: { countryCode: string; number: string }, token: string, password: string) => {
+    const { data, error } = await supabase.functions.invoke(
+      "verify-phone-whatsapp-otp", {
+      body: JSON.stringify({ phone, token })
+    }
+    );
+
+    if (error) {
+      console.error('Error verifying OTP:', error);
+      return { error };
+    }
+
+    const { data: user, error: userError } = await supabase.auth.signInWithPassword({
+        phone: `+${phone.countryCode}${phone.number}`,
+        password
+      })
+
+      if (userError) {
+        console.error('Sign in error:', userError);
+
+        throw error;
+      }
+
+    return {
+      error: null,
+      user
+    };
+  }
+
   const value = {
     user,
     session,
@@ -185,7 +208,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     signUp,
     signIn,
     signOut,
-    verifyOtp
+    verifyOtp,
+    verifyPhoneOtp
   };
 
   return (

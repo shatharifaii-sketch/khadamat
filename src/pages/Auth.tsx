@@ -6,13 +6,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { Home } from 'lucide-react';
+import { Home, Loader } from 'lucide-react';
 import GoogleSignInButton from '@/components/GoogleSignInButton';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { cn } from '@/lib/utils';
-import { FaWhatsapp } from 'react-icons/fa6';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog } from '@/components/ui/dialog';
+import PhoneVerification from '@/components/PhoneVerification';
 
 const countries = [
   { code: "970", label: "PS +970" },
@@ -29,14 +30,18 @@ const Auth = () => {
   const { t } = useTranslation("auth");
   const lang = localStorage.getItem("language") || "en";
   const [isLogin, setIsLogin] = useState(true);
+
   const [email, setEmail] = useState('');
+
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn, signUp, user, signInWithGoogle } = useAuth();
-  const [usePhone, setUsePhone] = useState(false);
 
+  const { signIn, signUp, user, signInWithGoogle } = useAuth();
+
+  const [usePhone, setUsePhone] = useState(false);
+  const [verifyingPhone, setVerifyingPhone] = useState(false);
   const [phone, setPhone] = useState({
     countryCode: '',
     number: '',
@@ -79,6 +84,7 @@ const Auth = () => {
           usePhone ? phone : null,
           usePhone ? "phone" : "email"
         );
+
         if (error) {
           console.error('Sign in error:', error);
 
@@ -91,10 +97,13 @@ const Auth = () => {
           } else {
             toast.error(t("login_error") + error);
           }
-        } else {
+
+        }
+        else {
           toast.success(t("login_success"));
           const from = location.state?.from?.pathname || '/';
           navigate(from, { replace: true });
+
         }
       } else {
         const { data, error } = await signUp(
@@ -106,8 +115,15 @@ const Auth = () => {
           usePhone ? "phone" : "email"
         );
         if (!error) {
-          toast.success(t("signup_success"));
-          navigate('/confirm-email', { state: { email } });
+          if (!usePhone) {
+            toast.success(t("signup_success"));
+            setLoading(false);
+            navigate('/confirm-email', { state: { email } });
+          } else {
+            toast.success(t("signup_success"));
+            setLoading(false);
+            setVerifyingPhone(true);
+          }
         }
       }
     } catch (error: unknown) {
@@ -146,10 +162,10 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4 arabic">
+    <div className="min-h-screen bg-background flex items-center justify-center" dir={lang === "ar" ? "rtl" : "ltr"}>
       <div className="w-full max-w-md">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 arabic">
           <Link to="/" className="inline-flex items-center space-x-2 space-x-reverse mb-6">
             <div className="bg-primary text-primary-foreground p-2 rounded-lg">
               <Home size={24} />
@@ -157,7 +173,7 @@ const Auth = () => {
             <img src="/application_logo_cut.png" className='h-10' alt="cut logo" />
           </Link>
         </div>
-        <Card className='mb-2' dir={lang === "ar" ? "rtl" : "ltr"}>
+        <Card className='mb-2 relative z-10' dir={lang === "ar" ? "rtl" : "ltr"}>
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">
               {isLogin ? t("login_title") : t("signup_title")}
@@ -306,16 +322,24 @@ const Auth = () => {
                   type="button"
                   onClick={() => setIsLogin(!isLogin)}
                   className="text-primary hover:underline mr-2"
+                  disabled={loading}
                 >
                   {isLogin ? t("switch_to_signup") : t("switch_to_login")}
                 </button>
               </p>
             </div>
+
           </CardContent>
         </Card>
 
         <LanguageSwitcher />
       </div>
+
+      <Dialog
+        open={verifyingPhone}
+      >
+        <PhoneVerification phone={phone} />
+      </Dialog>
     </div>
   );
 };
