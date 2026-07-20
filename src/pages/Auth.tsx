@@ -23,6 +23,7 @@ const countries = [
   { code: "971", label: "AE +971" },
   { code: "963", label: "SY +963" },
   { code: "962", label: "JO +962" },
+  { code: "31", label: "NL +31" },
   { code: "1", label: "US +1" },
 ];
 
@@ -59,12 +60,12 @@ const Auth = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!usePhone && !email || !password) {
+    if (!usePhone && (!email || !password)) {
       toast.error(t("required_fields_error"));
       return;
     }
 
-    if (usePhone && !phone.countryCode || !phone.number || !password) {
+    if (usePhone && (!phone.countryCode || !phone.number || !password)) {
       toast.error(t("required_fields_error"));
       return;
     }
@@ -120,7 +121,7 @@ const Auth = () => {
             setLoading(false);
             navigate('/confirm-email', { state: { email } });
           } else {
-            toast.success(t("signup_success"));
+            toast.success(t("phone_signup_success"));
             setLoading(false);
             setVerifyingPhone(true);
           }
@@ -338,7 +339,7 @@ const Auth = () => {
       <Dialog
         open={verifyingPhone}
       >
-        <PhoneVerification phone={phone} />
+        <PhoneVerification phone={phone} password={password} />
       </Dialog>
     </div>
   );

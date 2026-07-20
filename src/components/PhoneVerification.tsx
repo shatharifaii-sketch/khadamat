@@ -5,27 +5,51 @@ import { Button } from './ui/button'
 import { RefreshCwIcon } from 'lucide-react'
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from './ui/input-otp'
 import { useTranslation } from 'react-i18next'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface Props {
     phone: {number: string, countryCode: string};
+    password: string;
 }
 
 const PhoneVerification = ({
-    phone
+    phone,
+    password
 }: Props) => {
     const { t } = useTranslation("auth.verify_phone");
     const lang = localStorage.getItem("language") || "en";
 
-    const [openResend, setOpenResend] = useState(false);
+    const { verifyPhoneOtp } = useAuth();
 
+    const [openResend, setOpenResend] = useState(false);
+    const [otp, setOtp] = useState("");
+
+    const startCooldown = () => {
+      setOpenResend(true);
+
+      setTimeout(() => {
+        setOpenResend(false);
+      }, 60_000);
+    }
 
     useEffect(() => {
-      if (openResend) {
-        setTimeout(() => {
-          setOpenResend(false);
-        }, 3000);
-      }
-    });
+      startCooldown();
+    }, []);
+
+    const handleResend = async () => {
+      // RESEND CODE
+
+      startCooldown();
+      return;
+    };
+
+    const handleVerifyOtp = async (otp: string) => {
+      await verifyPhoneOtp(
+        phone,
+        otp,
+        password
+      );
+    };
 
     
   return (
@@ -45,12 +69,22 @@ const PhoneVerification = ({
               <FieldLabel htmlFor="otp-verification">
                 Verification code
               </FieldLabel>
-              <Button variant="outline" disabled={openResend}>
+              <Button
+              variant="outline"
+              disabled={!openResend}
+              onClick={handleResend}
+              >
                 <RefreshCwIcon />
                 Resend Code
               </Button>
             </div>
-            <InputOTP maxLength={6} id="otp-verification" required>
+            <InputOTP 
+            maxLength={6} 
+            id="otp-verification" 
+            value={otp}
+            onChange={(value) => setOtp(value)}
+            required
+            >
               <InputOTPGroup className="*:data-[slot=input-otp-slot]:h-12 *:data-[slot=input-otp-slot]:w-11 *:data-[slot=input-otp-slot]:text-xl">
                 <InputOTPSlot index={0} />
                 <InputOTPSlot index={1} />
@@ -66,7 +100,12 @@ const PhoneVerification = ({
           </Field>
 
           <DialogFooter className="">
-            <Button type="submit" className="flex-1">Submit</Button>
+            <Button
+            type="submit"
+            className="flex-1"
+            disabled={otp.length != 6}
+            onClick={() => handleVerifyOtp(otp)}
+            >Submit</Button>
           </DialogFooter>
         </DialogContent>
   )

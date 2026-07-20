@@ -804,6 +804,7 @@ export type Database = {
           profile_image_url: string | null
           stripe_customer_id: string | null
           updated_at: string
+          user_index: number | null
         }
         Insert: {
           bio?: string | null
@@ -817,6 +818,7 @@ export type Database = {
           profile_image_url?: string | null
           stripe_customer_id?: string | null
           updated_at?: string
+          user_index?: number | null
         }
         Update: {
           bio?: string | null
@@ -830,6 +832,7 @@ export type Database = {
           profile_image_url?: string | null
           stripe_customer_id?: string | null
           updated_at?: string
+          user_index?: number | null
         }
         Relationships: []
       }
@@ -2267,6 +2270,7 @@ export type Database = {
           phone: string | null
           profile_image_url: string | null
           updated_at: string | null
+          user_index: number | null
         }
         Relationships: []
       }

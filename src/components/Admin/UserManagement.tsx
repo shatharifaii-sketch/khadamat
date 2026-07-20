@@ -12,6 +12,7 @@ import { NavLink } from 'react-router-dom';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select';
 import UserForm from './ui/UserForm';
 import { useTranslation } from 'react-i18next';
+import PaginationComponent from '../PaginationComponent';
 
 export interface UserProfile {
   id: string;
@@ -214,6 +215,7 @@ export const UserManagement = ({ users }: UserManagementProps) => {
             ))}
           </TableBody>
         </Table>
+        <PaginationComponent />
       </CardContent>
     </Card>
   );

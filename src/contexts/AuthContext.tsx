@@ -22,6 +22,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const lang = localStorage.getItem("language") || "en";
 
   useEffect(() => {
     // Set up auth state listener
@@ -53,14 +54,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signUp = async (email: string | null, password: string, fullName: string, passwordConfirm: string, phone: { countryCode: string; number: string } | null, method: string) => {
     if (method == "phone") {
-      const { data, error } = await supabase.functions.invoke('send-otp-with-whatsapp', {
+      const { data, error } = await supabase.functions.invoke('register-with-whatsapp-otp', {
         body: JSON.stringify({
-          phone: `+${phone.countryCode}${phone.number}`
+          name: fullName,
+          lang,
+          phone: `+${phone.countryCode}${phone.number}`,
+          password,
+          passwordConfirm
         })
       });
 
       if (error) {
-        console.error('Sign in error:', error);
+        console.error('Sign up error:', error);
 
         return error
       }
@@ -99,6 +104,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     countryCode: string;
     number: string;
   } | null, method: string) => {
+    if (method == "phone") {
+      const { data, error } = await supabase.auth.signInWithOtp({
+        phone: `+${phone.countryCode}${phone.number}`,
+        options: {
+          channel: 'sms'
+        }
+      });
+
+      if (error) {
+        console.error('Sign in error:', error);
+        return error;
+      }
+
+      return data;
+    }
     console.log('Attempting sign in for:', email);
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -172,6 +192,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return { data: 'OTP verified successfully' };
   }
 
+  const resendOtp = async (phone: string) => {
+    return { data: 'OTP resent successfully' };
+  }
+
   const verifyPhoneOtp = async (phone: { countryCode: string; number: string }, token: string, password: string) => {
     const { data, error } = await supabase.functions.invoke(
       "verify-phone-whatsapp-otp", {
@@ -185,15 +209,31 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     const { data: user, error: userError } = await supabase.auth.signInWithPassword({
-        phone: `+${phone.countryCode}${phone.number}`,
-        password
-      })
+      phone: `+${phone.countryCode}${phone.number}`,
+      password
+    })
 
-      if (userError) {
-        console.error('Sign in error:', userError);
+    if (userError) {
+      console.error('Sign in error:', userError);
 
-        throw error;
+      throw error;
+    } else {
+      console.log('Sign in successful', userId);
+      const { error } = await supabase
+        .from('user_activity')
+        .insert({
+          activity_type: 'login',
+          user_id: data.user?.id,
+          details: { "page": "home" },
+          method: "email"
+        });
+
+      if (error) {
+        console.error('Error tracking login:', error);
+        throw new Error('Error tracking login');
       }
+
+    }
 
     return {
       error: null,

@@ -10,6 +10,10 @@ const whatsappAccessToken = Deno.env.get("WHATSAPP_ACCESS_TOKEN")!;
 const whatsappPhoneNumberId = Deno.env.get("WHATSAPP_PHONE_NUMBER_ID")!;
 const whatsappGraphApiVersion = Deno.env.get("WHATSAPP_GRAPH_API_VERSION")!;
 
+console.log(
+  `WHATSAPP_ACCESS_TOKEN: ${whatsappAccessToken}, WHATSAPP_PHONE_NUMBER_ID: ${whatsappPhoneNumberId}, WHATSAPP_GRAPH_API_VERSION: ${whatsappGraphApiVersion}`
+)
+
 
 async function checkEligibility(phone: string, supabase: any) {
   const { data, error } = await supabase
@@ -152,11 +156,15 @@ async function sendWhatsappMessage(
     }),
   });
 
+  const responseText = await response.text();
+
+  console.log("Status:", response.status);
+  console.log("Response:", responseText);
 
   if (!response.ok) {
     return {
       success: false,
-      error: await response.text(),
+      error: responseText,
     };
   }
 
@@ -175,6 +183,25 @@ export default {
       auth: ["publishable", "secret"],
     },
     async (req, ctx) => {
+      if (req.method !==
+        "POST"
+      ) {
+        return new Response(JSON.stringify({
+          error:
+            "Method not allowed"
+        }), {
+          status:
+            405
+          ,
+          headers: {
+            "Content-Type"
+              :
+              "application/json"
+          },
+        });
+      }
+
+      console.log("Registering user...");
 
       try {
         const supabase = ctx.supabaseAdmin;
@@ -188,30 +215,26 @@ export default {
           passwordConfirm,
         } = await req.json();
 
+        console.log(phone, lang, name, password, passwordConfirm);
 
-
-        const { data: existingUserData, error: existingUserError } =
-          await supabase
-            .from("profiles")
-            .select("id")
-            .eq("phone", phone)
-            .maybeSingle();
-
-
+        const { data: existingUserData, error: existingUserError } = await supabase.auth.admin.listUsers();
 
         if (existingUserError) {
           return Response.json(
             {
               success: false,
+              error_code: "existing_user_error",
               error: existingUserError,
             },
             { status: 400 }
           );
         }
 
+        const existingUser = existingUserData.users.find(
+          (user) => user.phone === phone
+        );
 
-
-        if (existingUserData) {
+        if (existingUser) {
           return Response.json(
             {
               success: false,
@@ -331,9 +354,8 @@ export default {
   1. Run `supabase start` (see: https://supabase.com/docs/reference/cli/supabase-start)
   2. Make an HTTP request:
 
-  curl -i --location --request POST 'http://127.0.0.1:54321/functions/v1/send-otp-with-whatsapp' \
-    --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0' \
-    --header 'Content-Type: application/json' \
+  curl -i --location --request POST 'http://127.0.0.1:54321/functions/v1/register-with-whatsapp-otp' \
+    --header 'apiKey: sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH' \
     --data '{"name":"Functions"}'
 
 */
