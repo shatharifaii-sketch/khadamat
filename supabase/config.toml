@@ -115,17 +115,6 @@ entrypoint = "./functions/create-checkout-session/index.ts"
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/create-checkout-session/*.html" ]
 
-[functions.checkout-session-stripe-webhook]
-enabled = true
-verify_jwt = true
-import_map = "./functions/checkout-session-stripe-webhook/deno.json"
-# Uncomment to specify a custom file path to the entrypoint.
-# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
-entrypoint = "./functions/checkout-session-stripe-webhook/index.ts"
-# Specifies static files to be bundled with the function. Supports glob patterns.
-# For example, if you want to serve static HTML pages in your function:
-# static_files = [ "./functions/checkout-session-stripe-webhook/*.html" ]
-
 [functions.verify-stripe-checkout-session-id]
 enabled = true
 verify_jwt = true
@@ -147,17 +136,6 @@ entrypoint = "./functions/register-user/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/register-user/*.html" ]
-
-[functions.verify-otp]
-enabled = true
-verify_jwt = true
-import_map = "./functions/verify-otp/deno.json"
-# Uncomment to specify a custom file path to the entrypoint.
-# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
-entrypoint = "./functions/verify-otp/index.ts"
-# Specifies static files to be bundled with the function. Supports glob patterns.
-# For example, if you want to serve static HTML pages in your function:
-# static_files = [ "./functions/verify-otp/*.html" ]
 
 [functions.cancel-subscription]
 enabled = true
@@ -181,16 +159,6 @@ entrypoint = "./functions/send-email-update-email/index.ts"
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/send-email-update-email/*.html" ]
 
-[functions.send-password-update-email]
-enabled = true
-verify_jwt = true
-import_map = "./functions/send-password-update-email/deno.json"
-# Uncomment to specify a custom file path to the entrypoint.
-# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
-entrypoint = "./functions/send-password-update-email/index.ts"
-# Specifies static files to be bundled with the function. Supports glob patterns.
-# For example, if you want to serve static HTML pages in your function:
-# static_files = [ "./functions/send-password-update-email/*.html" ]
 [functions.create-coupons-with-stripe]
 enabled = true
 verify_jwt = true
@@ -398,17 +366,6 @@ entrypoint = "./functions/create-extra-product-checkout-session/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/create-extra-product-checkout-session/*.html" ]
-
-[functions.create-extra-product-checkout-session-dec]
-enabled = true
-verify_jwt = true
-import_map = "./functions/create-extra-product-checkout-session-dec/deno.json"
-# Uncomment to specify a custom file path to the entrypoint.
-# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
-entrypoint = "./functions/create-extra-product-checkout-session-dec/index.ts"
-# Specifies static files to be bundled with the function. Supports glob patterns.
-# For example, if you want to serve static HTML pages in your function:
-# static_files = [ "./functions/create-extra-product-checkout-session-dec/*.html" ]
 
 [functions.create-extra-product-checkout-session-dev]
 enabled = true
