@@ -1,19 +1,32 @@
-import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useAuth } from '@/contexts/AuthContext';
-import { toast } from 'sonner';
-import { Home, Loader } from 'lucide-react';
-import GoogleSignInButton from '@/components/GoogleSignInButton';
-import { useTranslation } from 'react-i18next';
-import LanguageSwitcher from '@/components/LanguageSwitcher';
-import { cn } from '@/lib/utils';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog } from '@/components/ui/dialog';
-import PhoneVerification from '@/components/PhoneVerification';
+import { useState } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+import { Home, Loader, Mail, Phone } from "lucide-react";
+import GoogleSignInButton from "@/components/GoogleSignInButton";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Dialog } from "@/components/ui/dialog";
+import PhoneVerification from "@/components/PhoneVerification";
 
 const countries = [
   { code: "970", label: "PS +970" },
@@ -32,11 +45,11 @@ const Auth = () => {
   const lang = localStorage.getItem("language") || "en";
   const [isLogin, setIsLogin] = useState(true);
 
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
 
-  const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
-  const [passwordConfirm, setPasswordConfirm] = useState('');
+  const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
   const [loading, setLoading] = useState(false);
 
   const { signIn, signUp, user, signInWithGoogle } = useAuth();
@@ -44,8 +57,8 @@ const Auth = () => {
   const [usePhone, setUsePhone] = useState(false);
   const [verifyingPhone, setVerifyingPhone] = useState(false);
   const [phone, setPhone] = useState({
-    countryCode: '',
-    number: '',
+    countryCode: "",
+    number: "",
   });
 
   const navigate = useNavigate();
@@ -53,7 +66,7 @@ const Auth = () => {
 
   // Redirect if already logged in
   if (user) {
-    const from = location.state?.from?.pathname || '/';
+    const from = location.state?.from?.pathname || "/";
     navigate(from, { replace: true });
     return null;
   }
@@ -83,28 +96,25 @@ const Auth = () => {
           usePhone ? null : email,
           password,
           usePhone ? phone : null,
-          usePhone ? "phone" : "email"
+          usePhone ? "phone" : "email",
         );
 
         if (error) {
-          console.error('Sign in error:', error);
+          console.error("Sign in error:", error);
 
           if (error instanceof Error) {
-            if (error.message.includes('Invalid login credentials')) {
+            if (error.message.includes("Invalid login credentials")) {
               toast.error(t("invalid_credentials"));
-            } else if (error.message.includes('Email not confirmed')) {
+            } else if (error.message.includes("Email not confirmed")) {
               toast.error(t("email_not_confirmed"));
             }
           } else {
             toast.error(t("login_error") + error);
           }
-
-        }
-        else {
+        } else {
           toast.success(t("login_success"));
-          const from = location.state?.from?.pathname || '/';
+          const from = location.state?.from?.pathname || "/";
           navigate(from, { replace: true });
-
         }
       } else {
         const { data, error } = await signUp(
@@ -113,13 +123,13 @@ const Auth = () => {
           fullName,
           passwordConfirm,
           usePhone ? phone : null,
-          usePhone ? "phone" : "email"
+          usePhone ? "phone" : "email",
         );
         if (!error) {
           if (!usePhone) {
             toast.success(t("signup_success"));
             setLoading(false);
-            navigate('/confirm-email', { state: { email } });
+            navigate("/confirm-email", { state: { email } });
           } else {
             toast.success(t("phone_signup_success"));
             setLoading(false);
@@ -128,7 +138,7 @@ const Auth = () => {
         }
       }
     } catch (error: unknown) {
-      console.error('Auth error:', error);
+      console.error("Auth error:", error);
       toast.error(t("unexpected_error"));
     } finally {
       setLoading(false);
@@ -137,67 +147,92 @@ const Auth = () => {
 
   const handleGoogleSignIn = async () => {
     signInWithGoogle();
-  }
+  };
 
-  const handlePhone = ({ number: phone, countryCode: code }: { number: string, countryCode: string }) => {
+  const handlePhone = ({
+    number: phone,
+    countryCode: code,
+  }: {
+    number: string;
+    countryCode: string;
+  }) => {
     setPhone({
       number: phone,
-      countryCode: code
+      countryCode: code,
     });
-  }
+  };
 
   const hanldePhoneChange = (val: string) => {
     const digits = val.replace(/\D/g, "");
 
     handlePhone({
       ...phone,
-      number: digits
-    })
-  }
+      number: digits,
+    });
+  };
 
   const handleCountryChange = (code: string) => {
     handlePhone({
       ...phone,
       countryCode: code,
     });
-  }
+  };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center" dir={lang === "ar" ? "rtl" : "ltr"}>
+    <div
+      className="min-h-screen bg-background flex items-center justify-center"
+      dir={lang === "ar" ? "rtl" : "ltr"}
+    >
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8 arabic">
-          <Link to="/" className="inline-flex items-center space-x-2 space-x-reverse mb-6">
+          <Link
+            to="/"
+            className="inline-flex items-center space-x-2 space-x-reverse mb-6"
+          >
             <div className="bg-primary text-primary-foreground p-2 rounded-lg">
               <Home size={24} />
             </div>
-            <img src="/application_logo_cut.png" className='h-10' alt="cut logo" />
+            <img
+              src="/application_logo_cut.png"
+              className="h-10"
+              alt="cut logo"
+            />
           </Link>
         </div>
-        <Card className='mb-2 relative z-10' dir={lang === "ar" ? "rtl" : "ltr"}>
+        <Card
+          className="mb-2 relative z-10"
+          dir={lang === "ar" ? "rtl" : "ltr"}
+        >
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">
               {isLogin ? t("login_title") : t("signup_title")}
             </CardTitle>
             <CardDescription>
-              {isLogin
-                ? t("login_description")
-                : t("signup_description")
-              }
+              {isLogin ? t("login_description") : t("signup_description")}
             </CardDescription>
           </CardHeader>
-          <div className="flex justify-between items-center p-1 border rounded-md w-2/3 mx-auto bg-muted/70 overflow-hidden mb-2">
-            <div
-              onClick={() => setUsePhone(prev => !prev)}
-              className={cn("py-1 rounded-sm flex items-center justify-center w-1/2 hover:cursor-pointer transition-all", usePhone ? "bg-white text-primary shadow-md" : "")}
-            >
-              <p>use phone</p>
-            </div>
-            <div
-              onClick={() => setUsePhone(prev => !prev)}
-              className={cn("py-1 rounded-sm flex items-center justify-center w-1/2 hover:cursor-pointer transition-all", !usePhone ? "bg-white text-primary shadow-md" : "")}
-            >
-              <p>use email</p>
+          <div className="flex flex-col justify-center items-center mb-2">
+            <p className="text-sm font-medium text-muted-foreground/70">method</p>
+            <div className="flex justify-between items-center p-1 gap-2 border rounded-full w-fit mx-auto bg-muted/70 overflow-hidden">
+              <div
+                onClick={() => setUsePhone((prev) => !prev)}
+                className={cn(
+                  "p-2 rounded-full flex items-center justify-center w-1/2 hover:cursor-pointer transition-all",
+                  usePhone ? "bg-white text-primary shadow-md" : "",
+                )}
+              >
+                <Phone />
+              </div>
+              <div
+                onClick={() => setUsePhone((prev) => !prev)}
+                className={cn(
+                  "p-2 rounded-full flex items-center justify-center w-1/2 hover:cursor-pointer transition-all",
+                  !usePhone ? "bg-white text-primary shadow-md" : "",
+                )}
+              >
+                <Mail />
+              </div>
             </div>
           </div>
           <CardContent>
@@ -232,15 +267,12 @@ const Auth = () => {
                         <SelectContent>
                           <SelectGroup>
                             {countries.map((c) => (
-                              <SelectItem
-                                key={c.code} value={c.code}
-                              >
+                              <SelectItem key={c.code} value={c.code}>
                                 <div className="flex items-center gap-2">
                                   {c.label}
                                 </div>
                               </SelectItem>
-                            )
-                            )}
+                            ))}
                           </SelectGroup>
                         </SelectContent>
                       </Select>
@@ -294,7 +326,10 @@ const Auth = () => {
                 </div>
               )}
               {isLogin && (
-                <Link to="/forgot-password" className="text-sm text-primary hover:underline text-end">
+                <Link
+                  to="/forgot-password"
+                  className="text-sm text-primary hover:underline text-end"
+                >
                   {t("forgot_password")}
                 </Link>
               )}
@@ -309,8 +344,7 @@ const Auth = () => {
                   ? t("processing")
                   : isLogin
                     ? t("login_button")
-                    : t("signup_button")
-                }
+                    : t("signup_button")}
               </Button>
             </form>
 
@@ -329,16 +363,13 @@ const Auth = () => {
                 </button>
               </p>
             </div>
-
           </CardContent>
         </Card>
 
         <LanguageSwitcher />
       </div>
 
-      <Dialog
-        open={verifyingPhone}
-      >
+      <Dialog open={verifyingPhone}>
         <PhoneVerification phone={phone} password={password} />
       </Dialog>
     </div>

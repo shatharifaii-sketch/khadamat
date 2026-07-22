@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect, useState } from 'react'
+import React, { Dispatch, SetStateAction, Suspense, useEffect, useState } from 'react'
 import ActivityChart, { ActivityChartProps } from './ActivityChart'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
 import { BadgePercent, BarChart3, Eye, Search, Settings, TrendingUp, Users } from 'lucide-react'
@@ -22,10 +22,34 @@ interface Props {
     analyticsSummary: AnalyticsSummary;
     adminData: {
         services: Service[];
+        nextServicesCursor: number;
+
         profiles: UserProfile[];
+        nextUsersCursor: number;
+
         coupons: Tables<'coupons'>[];
+        nextCouponsCursor: number;
+
         pendingServices: Service[];
+        nextPendingServicesCursor: number;
     };
+    
+    usersPage: number;
+    setUsersPage: Dispatch<SetStateAction<number>>;
+    setUsersCursorHistory: Dispatch<SetStateAction<number[]>>;
+
+    servicesPage: number;
+    setServicesPage: Dispatch<SetStateAction<number>>;
+    setServicesCursorHistory: Dispatch<SetStateAction<number[]>>;
+
+    pendingServicesPage: number;
+    setPendingServicesPage: Dispatch<SetStateAction<number>>;
+    setPendingServicesCursorHistory: Dispatch<SetStateAction<number[]>>;
+
+    couponsPage: number;
+    setCouponsPage: Dispatch<SetStateAction<number>>;
+    setCouponsCursorHistory: Dispatch<SetStateAction<number[]>>;
+
     stats: {
         publishedServices: number;
         serviceProviders: number;
@@ -48,7 +72,31 @@ interface Props {
     }[];
 }
 
-const AdminView = ({ analyticsSummary, adminData, stats, dailyStats, monthlyStats, yearlyStats }: Props) => {
+const AdminView = ({
+    analyticsSummary,
+    adminData,
+    
+    usersPage,
+    setUsersPage,
+    setUsersCursorHistory,
+
+    servicesPage,
+    setServicesPage,
+    setServicesCursorHistory,
+
+    pendingServicesPage,
+    setPendingServicesPage,
+    setPendingServicesCursorHistory,
+
+    couponsPage,
+    setCouponsPage,
+    setCouponsCursorHistory,
+
+    stats,
+    dailyStats,
+    monthlyStats,
+    yearlyStats
+}: Props) => {
     const { t } = useTranslation("admin");
     const lang = localStorage.getItem("language") || "en";
     const [selectedService, setSelectedService] = useState<Service | null>(null);
@@ -262,7 +310,13 @@ const AdminView = ({ analyticsSummary, adminData, stats, dailyStats, monthlyStat
 
                 <TabsContent value="users">
                     {/* User Management */}
-                    <UserManagement users={adminData?.profiles} />
+                    <UserManagement
+                    users={adminData?.profiles}
+                    page={usersPage} 
+                    cursor={adminData?.nextUsersCursor} 
+                    setCursorHistory={setUsersCursorHistory}
+                    setPage={setUsersPage}
+                    />
                 </TabsContent>
 
                 {/** Service Management */}

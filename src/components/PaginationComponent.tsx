@@ -1,28 +1,56 @@
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "./ui/pagination";
 
-const PaginationComponent = () => {
+interface Props {
+  cursor: number;
+  page: number;
+  setCursorHistory: React.Dispatch<React.SetStateAction<number[]>>;
+  setPage: React.Dispatch<React.SetStateAction<number>>;
+}
+
+const PaginationComponent = ({
+  cursor,
+  page,
+  setCursorHistory,
+  setPage
+}: Props) => {
+  const handleNextPage = () => {
+    if (!cursor) return;
+
+    setCursorHistory(prev => [
+      ...prev,
+      cursor
+    ]);
+
+    setPage(prev => prev + 1);
+  }
+
+  const handlePreviousPage = () => {
+    if (page === 1) return;
+
+    setPage(prev => prev - 1);
+  }
+
   return (
     <Pagination>
       <PaginationContent>
         <PaginationItem>
-          <PaginationPrevious href="#" />
+          <PaginationPrevious href="#" onClick={(e) => {
+            e.preventDefault();
+            handlePreviousPage();
+          }} />
         </PaginationItem>
         <PaginationItem>
-          <PaginationLink href="#">1</PaginationLink>
-        </PaginationItem>
-        <PaginationItem>
-          <PaginationLink href="#" isActive>
-            2
+          <PaginationLink isActive>
+            {page}
           </PaginationLink>
         </PaginationItem>
         <PaginationItem>
-          <PaginationLink href="#">3</PaginationLink>
-        </PaginationItem>
-        <PaginationItem>
-          <PaginationEllipsis />
-        </PaginationItem>
-        <PaginationItem>
-          <PaginationNext href="#" />
+          <PaginationNext href="#" onClick={
+            (e) => {
+              e.preventDefault();
+              handleNextPage();
+            }
+          } />
         </PaginationItem>
       </PaginationContent>
     </Pagination>

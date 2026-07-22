@@ -64,9 +64,9 @@ export interface Service {
 
 type Pagination = {
   usersCursor: number | null;
-  servicesCursor: string | null;
-  pendingServicesCursor: string | null;
-  couponsCursor: string | null;
+  servicesCursor: number | null;
+  pendingServicesCursor: number | null;
+  couponsCursor: number | null;
 };
 
 interface UploadedImage {
@@ -81,7 +81,7 @@ interface SaveImageProps {
   serviceId: string;
 }
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 10;
 
 export const useIsAdmin = (): boolean => {
   const { user } = useAuth();
