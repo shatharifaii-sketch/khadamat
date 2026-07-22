@@ -63,7 +63,7 @@ async function checkDiscount(subscriptionId: string) {
   }
 }
 
-async function deactivateSub(stripe_sub_id: string, endedAt: Date) {
+async function deactivateSub(stripe_sub_id: string, endedAt: Date, user_id: string) {
   try {
     const { data: existingSub, error: subError } = await supabase.from('subscriptions').select('id, status').eq('stripe_subscription_id', stripe_sub_id).maybeSingle();
 
@@ -91,6 +91,15 @@ async function deactivateSub(stripe_sub_id: string, endedAt: Date) {
       console.log('subscription creation SUB error: ', updateError);
       return false;
     };
+
+    const { error: userServicesError } = await supabase.from("services").update({
+      status: "unpublished",
+    }).eq("user_id", user_id);
+
+    if (userServicesError) {
+      console.log('Error disabling user services');
+      return false;
+    }
 
     return true;
   } catch (error) {
@@ -771,7 +780,8 @@ async function handleSubscriptionUpdated(subscription: any) {
 
       const deactivateResponse = await deactivateSub(
         subscription.id,
-        endedAt
+        endedAt,
+        userData?.id
       );
 
       if (!deactivateResponse) {
@@ -1344,7 +1354,8 @@ Deno.serve(async (req: Request) => {
 
       const deleteSubResponse = await deactivateSub(
         data.object.items.data[0].subscription,
-        new Date(data.object.ended_at * 1000)
+        new Date(data.object.ended_at * 1000),
+        data.object.meta_data.user_id
       );
 
       if (!deleteSubResponse) {
