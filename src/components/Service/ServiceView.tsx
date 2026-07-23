@@ -34,6 +34,8 @@ export interface ServiceViewProps {
     full_name: string;
     profile_image_url: string;
   };
+  average_rating: number;
+  review_count: number;
 }
 
 interface Props {

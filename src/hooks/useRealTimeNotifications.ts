@@ -13,7 +13,7 @@ interface NotificationData {
   title: string;
   message: string;
   actionUrl?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export const useRealTimeNotifications = () => {
@@ -174,7 +174,7 @@ export const useRealTimeNotifications = () => {
       clearInterval(interval);
       supabase.removeChannel(notificationsChannel);
     };
-  }, [user, queryClient]);
+  }, [user, queryClient, t]);
 
   const showCustomNotification = (data: NotificationData) => {
     const getIcon = (type: NotificationType) => {

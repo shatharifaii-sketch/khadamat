@@ -41,7 +41,7 @@ const Reviews = ({
                 </DialogContent>
             </Dialog>
         </div>
-        <div className='flex flex-col gap-1 md:gap-4 items-start md:items-center justify-start md:overflow-x-auto overflow-y-auto pb-3 max-h-[400px]'>
+        <div className='flex flex-col gap-5 md:flex-row md:gap-4 items-center md:items-center justify-start md:overflow-x-auto overflow-y-auto pb-3 max-h-[400px]'>
             {reviews.length === 0 && (
                 <p className='text-muted-foreground/70 text-center mx-auto'>{t("service.reviews.no_reviews")}</p>
             )}

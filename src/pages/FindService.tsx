@@ -49,42 +49,40 @@ const FindService = () => {
   const filteredServices = useMemo(() => {
     if (!services) return [];
 
-    const filtered = services.filter(service => {
-      // Enhanced search that includes category labels and handles bilingual search
-      const matchesSearch = searchTerm === '' || (() => {
-        const searchLower = searchTerm.toLowerCase();
-
-        // Find category label for current service
-        const categoryData = categories.find(cat => cat.value === service.category);
-        const categoryLabel = categoryData?.label || '';
-
-        // Search in title, description, category value, and category label
-        return service.title.toLowerCase().includes(searchLower) ||
-          service.description.toLowerCase().includes(searchLower) ||
-          service.category.toLowerCase().includes(searchLower) ||
-          categoryLabel.includes(searchTerm) || // Arabic search
-          // Handle common English terms for categories
-          (searchLower === 'photography' && service.category === 'photography') ||
-          (searchLower === 'plumbing' && service.category === 'plumbing') ||
-          (searchLower === 'marketing' && service.category === 'digital-marketing') ||
-          (searchLower === 'design' && service.category === 'graphic-design') ||
-          (searchLower === 'development' && service.category === 'web-development') ||
-          (searchLower === 'printing' && service.category === 'printing') ||
-          (searchLower === 'nanny' && service.category === 'nanny') ||
-          (searchLower === 'dj' && service.category === 'dj') ||
-          (searchLower === 'hauling' && service.category === 'hauling');
-      })();
-
-      const matchesCategory = selectedCategory === 'all' || service.category === selectedCategory;
-
-      const matchesLocation = selectedLocation === 'all' ||
-        service.location.toLowerCase().includes(selectedLocation.toLowerCase());
-
-      return matchesSearch && matchesCategory && matchesLocation;
-    });
-
-    return filtered;
-  }, [services, selectedCategory, selectedLocation, submittedSearchTerm]);
+    return services.filter(service => {
+          // Enhanced search that includes category labels and handles bilingual search
+          const matchesSearch = searchTerm === '' || (() => {
+            const searchLower = searchTerm.toLowerCase();
+    
+            // Find category label for current service
+            const categoryData = categories.find(cat => cat.value === service.category);
+            const categoryLabel = categoryData?.label || '';
+    
+            // Search in title, description, category value, and category label
+            return service.title.toLowerCase().includes(searchLower) ||
+              service.description.toLowerCase().includes(searchLower) ||
+              service.category.toLowerCase().includes(searchLower) ||
+              categoryLabel.includes(searchTerm) || // Arabic search
+              // Handle common English terms for categories
+              (searchLower === 'photography' && service.category === 'photography') ||
+              (searchLower === 'plumbing' && service.category === 'plumbing') ||
+              (searchLower === 'marketing' && service.category === 'digital-marketing') ||
+              (searchLower === 'design' && service.category === 'graphic-design') ||
+              (searchLower === 'development' && service.category === 'web-development') ||
+              (searchLower === 'printing' && service.category === 'printing') ||
+              (searchLower === 'nanny' && service.category === 'nanny') ||
+              (searchLower === 'dj' && service.category === 'dj') ||
+              (searchLower === 'hauling' && service.category === 'hauling');
+          })();
+    
+          const matchesCategory = selectedCategory === 'all' || service.category === selectedCategory;
+    
+          const matchesLocation = selectedLocation === 'all' ||
+            service.location.toLowerCase().includes(selectedLocation.toLowerCase());
+    
+          return matchesSearch && matchesCategory && matchesLocation;
+        });
+  }, [services, searchTerm, selectedCategory, selectedLocation]);
 
   const clearFilters = () => {
     setSearchTerm('');

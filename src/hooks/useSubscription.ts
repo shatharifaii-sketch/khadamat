@@ -64,7 +64,7 @@ export interface PaymentTransaction {
   transaction_id?: string;
   services_quota: number;
   status: string;
-  payment_data?: any;
+  payment_data?: unknown;
   subscription_tier?: string;
   discount_applied?: number;
   original_amount?: number;
@@ -409,9 +409,9 @@ notes
 
       navigate("/", { replace: true });
     },
-    onError(error: any) {
+    onError(error: unknown) {
       console.error('Error creating new subscription:', error);
-      toast.error(t("subscription_create_error") || ('حدث خطاء في انشاء الاشتراك: ' + error.message));
+      toast.error(t("subscription_create_error") || ('حدث خطاء في انشاء الاشتراك: ' + (error instanceof Error ? error.message : "Unknown error")));
     },
   })
 
@@ -423,9 +423,9 @@ notes
       queryClient.invalidateQueries({ queryKey: ['user-subscriptions', user?.id] });
       toast.success(t("subscription_deactivation_success") || 'تم انهاء الاشتراك بنجاح!.');
     },
-    onError(error: any) {
+    onError(error: unknown) {
       console.error('Error deactivating subscription:', error);
-      toast.error(t("subscription_deactivation_error") || ('حدث خطاء في انهاء الاشتراك: ' + error.message));
+      toast.error(t("subscription_deactivation_error") || ('حدث خطاء في انهاء الاشتراك: ' + (error instanceof Error ? error.message : "Unknown error")));
     },
   })
 

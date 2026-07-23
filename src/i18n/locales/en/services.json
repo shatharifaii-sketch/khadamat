@@ -114,7 +114,8 @@
             "dm_contact": "Send Direct Message",
             "whatsapp_contact": "Contact via WhatsApp",
             "email_contact": "Send Email",
-            "phone_contact": "Call"
+            "phone_contact": "Call",
+            "be_first_to_review": "Leave the first review"
         }
     },
 

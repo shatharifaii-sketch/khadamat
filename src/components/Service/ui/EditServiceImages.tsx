@@ -135,6 +135,7 @@ const ServiceImages = ({ onMediaChange, serviceMedia }: ServicePortfolioProps) =
                                 />
                             ) : (
                                 <VideoPlayer
+                                    key={item.id}
                                     id={item.id}
                                     url={item.url}
                                     removeVideo={removeImage}

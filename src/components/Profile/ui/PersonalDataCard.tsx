@@ -15,7 +15,7 @@ const PersonalDataCard = ({
     joinedAt,
     location,
     experienceYears
-}) => {
+}: Props) => {
     const { t } = useTranslation("profile");
     const lang = localStorage.getItem("language") || "ar";
     return (

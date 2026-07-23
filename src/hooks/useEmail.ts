@@ -103,7 +103,7 @@ export const useEmail = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['profile'] });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('Error updating profile:', error);
       toast.error(t("email_update_failed"));
     }

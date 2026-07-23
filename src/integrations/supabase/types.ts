@@ -1173,6 +1173,7 @@ export type Database = {
       }
       services: {
         Row: {
+          average_rating: number
           category: string
           created_at: string
           description: string
@@ -1184,6 +1185,7 @@ export type Database = {
           location: string
           phone: string
           price_range: string
+          review_count: number
           status: string
           title: string
           updated_at: string
@@ -1192,6 +1194,7 @@ export type Database = {
           whatsapp_number: string | null
         }
         Insert: {
+          average_rating?: number
           category: string
           created_at?: string
           description: string
@@ -1203,6 +1206,7 @@ export type Database = {
           location: string
           phone: string
           price_range: string
+          review_count?: number
           status?: string
           title: string
           updated_at?: string
@@ -1211,6 +1215,7 @@ export type Database = {
           whatsapp_number?: string | null
         }
         Update: {
+          average_rating?: number
           category?: string
           created_at?: string
           description?: string
@@ -1222,6 +1227,7 @@ export type Database = {
           location?: string
           phone?: string
           price_range?: string
+          review_count?: number
           status?: string
           title?: string
           updated_at?: string
@@ -2425,6 +2431,10 @@ export type Database = {
           month: string
           user_count: number
         }[]
+      }
+      update_service_rating: {
+        Args: { service_uuid: string }
+        Returns: undefined
       }
       validate_admin_input: { Args: { input_text: string }; Returns: boolean }
       validate_coupon: {
