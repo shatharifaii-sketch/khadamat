@@ -12,6 +12,7 @@ import { NavLink } from 'react-router-dom';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select';
 import UserForm from './ui/UserForm';
 import { useTranslation } from 'react-i18next';
+import PaginationComponent from '../PaginationComponent';
 
 export interface UserProfile {
   id: string;
@@ -30,11 +31,21 @@ export interface UserProfile {
 
 interface UserManagementProps {
   users: UserProfile[];
+  page: number;
+  cursor: number;
+  setCursorHistory: React.Dispatch<React.SetStateAction<number[]>>;
+  setPage: React.Dispatch<React.SetStateAction<number>>;
 }
 
 type SortOption = "name-ar" | "name-en" | "date-asc" | "date-desc";
 
-export const UserManagement = ({ users }: UserManagementProps) => {
+export const UserManagement = ({
+  users,
+  page,
+  cursor,
+  setCursorHistory,
+  setPage
+}: UserManagementProps) => {
   const { t } = useTranslation("admin");
   const lang = localStorage.getItem("language") || "en";
   
@@ -214,6 +225,12 @@ export const UserManagement = ({ users }: UserManagementProps) => {
             ))}
           </TableBody>
         </Table>
+        <PaginationComponent
+          cursor={cursor}
+          page={page}
+          setPage={setPage}
+          setCursorHistory={setCursorHistory}
+        />
       </CardContent>
     </Card>
   );

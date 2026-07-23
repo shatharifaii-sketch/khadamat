@@ -9,10 +9,11 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName: string, passwordConfirm: string) => Promise<{ error: any, data: { user: User, session: Session } | { user: null, session: null } }>;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signUp: (email: string | null, password: string, fullName: string, passwordConfirm: string, phone: { countryCode: string; number: string } | null, method: string) => Promise<{ error: unknown, data: { user: User, session: Session } | { user: null, session: null } }>;
+  signIn: (email: string | null, password: string, phone: { countryCode: string; number: string } | null, method: string) => Promise<{ error: unknown }>;
   signOut: () => Promise<void>;
-  verifyOtp: (email: string, token: string) => Promise<{ error?: any, data?: any }>;
+  verifyOtp: (email: string, token: string) => Promise<{ error?: unknown, data?: unknown }>;
+  verifyPhoneOtp: (phone: { countryCode: string; number: string }, token: string, password: string) => Promise<{ error?: unknown, data?: User }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -21,6 +22,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const lang = localStorage.getItem("language") || "en";
 
   useEffect(() => {
     // Set up auth state listener
@@ -50,28 +52,74 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, []);
 
-  const signUp = async (email: string, password: string, fullName: string, passwordConfirm: string) => {
-    console.log('Attempting sign up for:', email);
-    const response: any = await supabase.functions.invoke('register-user', {
-      body: JSON.stringify({ email, password, name: fullName, passwordConfirm })
-    })
+  const signUp = async (email: string | null, password: string, fullName: string, passwordConfirm: string, phone: { countryCode: string; number: string } | null, method: string) => {
+    if (method == "phone") {
+      const { data, error } = await supabase.functions.invoke('register-with-whatsapp-otp', {
+        body: JSON.stringify({
+          name: fullName,
+          lang,
+          phone: `+${phone.countryCode}${phone.number}`,
+          password,
+          passwordConfirm
+        })
+      });
 
-    if (!response.data.success) {
-      const err = response.data.error;
+      if (error) {
+        console.error('Sign up error:', error);
 
-      if (err.code === 'email_exists') {
-        toast.error('البريد الإلكتروني مستخدم بالفعل');
+        return error
       }
 
-      return { data: null, error: err };
-    }
+      if (!data.success) {
+        return data.error;
+      }
 
-    return { data: response.data, error: response.error };
+      return data.success;
+    } else if (method == "email") {
+      console.log('Attempting sign up for:', email);
+      const { data, error } = await supabase.functions.invoke('register-user', {
+        body: JSON.stringify({
+          email,
+          password,
+          name: fullName,
+          passwordConfirm
+        })
+      })
+
+      if (!data.success) {
+        const err = data.error;
+
+        if (err.code === 'email_exists') {
+          toast.error('البريد الإلكتروني مستخدم بالفعل');
+        }
+
+        return { data: null, error: err };
+      }
+
+      return { data, error };
+    }
   };
 
-  const signIn = async (email: string, password: string) => {
-    console.log('Attempting sign in for:', email);
+  const signIn = async (email: string | null, password: string, phone: {
+    countryCode: string;
+    number: string;
+  } | null, method: string) => {
+    if (method == "phone") {
+      const { data, error } = await supabase.auth.signInWithOtp({
+        phone: `+${phone.countryCode}${phone.number}`,
+        options: {
+          channel: 'sms'
+        }
+      });
 
+      if (error) {
+        console.error('Sign in error:', error);
+        return error;
+      }
+
+      return data;
+    }
+    console.log('Attempting sign in for:', email);
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password
@@ -86,7 +134,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         .insert({
           activity_type: 'login',
           user_id: data.user?.id,
-          details: { "page": "home" }
+          details: { "page": "home" },
+          method: "email"
         });
 
       if (error) {
@@ -143,6 +192,55 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return { data: 'OTP verified successfully' };
   }
 
+  const resendOtp = async (phone: string) => {
+    return { data: 'OTP resent successfully' };
+  }
+
+  const verifyPhoneOtp = async (phone: { countryCode: string; number: string }, token: string, password: string) => {
+    const { data, error } = await supabase.functions.invoke(
+      "verify-phone-whatsapp-otp", {
+      body: JSON.stringify({ phone, token })
+    }
+    );
+
+    if (error) {
+      console.error('Error verifying OTP:', error);
+      return { error };
+    }
+
+    const { data: user, error: userError } = await supabase.auth.signInWithPassword({
+      phone: `+${phone.countryCode}${phone.number}`,
+      password
+    })
+
+    if (userError) {
+      console.error('Sign in error:', userError);
+
+      throw error;
+    } else {
+      console.log('Sign in successful', userId);
+      const { error } = await supabase
+        .from('user_activity')
+        .insert({
+          activity_type: 'login',
+          user_id: data.user?.id,
+          details: { "page": "home" },
+          method: "email"
+        });
+
+      if (error) {
+        console.error('Error tracking login:', error);
+        throw new Error('Error tracking login');
+      }
+
+    }
+
+    return {
+      error: null,
+      user
+    };
+  }
+
   const value = {
     user,
     session,
@@ -150,7 +248,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     signUp,
     signIn,
     signOut,
-    verifyOtp
+    verifyOtp,
+    verifyPhoneOtp
   };
 
   return (
