@@ -1,4 +1,4 @@
-import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
+import { QueryClient, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type {
   SearchAnalytic,
@@ -6,8 +6,14 @@ import type {
   ConversationAnalytic,
   AnalyticsSummary
 } from '@/types/analytics';
+import { useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 
 export const useAdminAnalytics = () => {
+  const location = useLocation();
+
+  const queryClient = useQueryClient();
+
   // Get search analytics
   const getSearchAnalytics = useQuery({
     queryKey: ['admin-search-analytics'],
@@ -65,9 +71,9 @@ export const useAdminAnalytics = () => {
     queryFn: async (): Promise<AnalyticsSummary> => {
       // Get basic counts
       const [
-        searchesResult, 
-        viewsResult, 
-        contactsResult, 
+        searchesResult,
+        viewsResult,
+        contactsResult,
         conversationsResult
       ] = await Promise.all([
         supabase.from('search_analytics').select('id', { count: 'exact', head: true }),
@@ -77,13 +83,18 @@ export const useAdminAnalytics = () => {
       ]);
 
       // Get top search terms - manual aggregation
+      const now = new Date();
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(now.getDate() - 30);
+
       const { data: searchData, error } = await supabase
         .from('search_analytics')
         .select('search_query')
+        .gte('created_at', thirtyDaysAgo.toISOString())
         .limit(1000);
-      
+
       if (error) throw error;
-      
+
       const filteredSearchData = (searchData || []).filter((item) => item.search_query !== null && item.search_query !== '' && item.search_query !== ' ');
 
       const searchTermCounts = (filteredSearchData || []).reduce((acc: Record<string, number>, item) => {
@@ -213,7 +224,20 @@ export const useAdminAnalytics = () => {
 
       return data;
     }
-  })
+  });
+
+  useEffect(() => {
+    if (location.pathname.startsWith('/admin')) {
+      queryClient.invalidateQueries({ queryKey: ['admin-search-analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-service-analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-conversation-analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-analytics-summary'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-login-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-daily-logins'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-monthly-logins'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-yearly-logins'] });
+    }
+  }, [location.pathname, queryClient]);
 
   return {
     searchAnalytics: getSearchAnalytics.data || [],

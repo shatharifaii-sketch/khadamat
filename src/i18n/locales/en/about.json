@@ -1,0 +1,62 @@
+{
+  "about": {
+    "hero": {
+      "title": "About Us",
+      "description": "A leading Palestinian platform that connects professional service providers with people searching for services"
+    },
+    "mission": {
+      "title": "Our Mission",
+      "description": "We aim to make high-quality professional services more accessible in Palestine while creating job opportunities for local professionals through a safe and trusted platform."
+    },
+    "vision": {
+      "title": "Our Vision",
+      "description": "To become the first and most trusted platform in Palestine for connecting professional services and supporting the local economy by empowering Palestinian talent."
+    },
+    "stats": {
+      "new_platform_title": "A New Platform Growing Every Day",
+      "stats_title": "Our Numbers Speak",
+      "new_platform_description": "Join us at the beginning of our journey and become part of the Palestinian professional services community",
+      "service_provider": "Service Provider",
+      "available_service": "Available Service",
+      "service_category": "Service Category",
+      "coming_soon": "Coming Soon"
+    },
+    "features": {
+      "title": "Why Are We Different?",
+      "security": {
+        "title": "Safety & Trust",
+        "description": "We ensure a secure experience by verifying the identity of all service providers"
+      },
+      "network": {
+        "title": "Wide Network",
+        "description": "Thousands of professional service providers across Palestine"
+      },
+      "ease": {
+        "title": "Ease of Use",
+        "description": "A simple and user-friendly interface to quickly find the right service"
+      }
+    },
+    "story": {
+      "title": "Our Story",
+      "paragraph_1": "The idea of \"Khedemtak\" was born from the urgent need for a platform that connects Palestinian talents with people looking for trusted professional services. We noticed that many skilled professionals struggled to reach customers, while people had difficulty finding reliable service providers.",
+      "paragraph_2": "From this idea, we created a digital platform that brings both sides together with a focus on simplicity, security, and quality. We believe technology can serve as a bridge between needs and solutions, and that Palestinian talent deserves a platform worthy of it.",
+      "new_platform_paragraph": "We are at the beginning of our journey and look forward to serving our community while helping Palestinian professionals achieve sustainable income through their skills and expertise.",
+      "existing_platform_paragraph": "Today, we are proud to serve thousands of users and support hundreds of professionals in achieving sustainable income through their skills and expertise."
+    },
+    "values": {
+      "title": "Our Values",
+      "trust": {
+        "title": "Trust",
+        "description": "We build trust through transparency and quality in all our services"
+      },
+      "innovation": {
+        "title": "Innovation",
+        "description": "We continuously strive to develop innovative solutions that serve our community"
+      },
+      "communication": {
+        "title": "Communication",
+        "description": "We connect people and make communication between service providers and customers easier"
+      }
+    }
+  }
+}

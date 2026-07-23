@@ -8,9 +8,14 @@ import { Separator } from "@/components/ui/separator";
 import LoadingReviews from "@/components/Service/ui/LoadingReviews";
 import ReviewQueryError from "@/components/ErrorViews/ReviewQueryError";
 import ServiceQueryError from "@/components/ErrorViews/ServiceQueryError";
+import { useTranslation } from "react-i18next";
+import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 
 const ServicePage = () => {
+  const { t } = useTranslation("services");
+  const isMobile = useIsMobile();
   const { id: serviceId } = useParams<{ id: string }>();
 
   if (!serviceId) {
@@ -18,9 +23,13 @@ const ServicePage = () => {
   };
 
   return (
-    <div className='max-w-4xl mx-auto py-12 px-4 space-y-10'>
+    <div className={cn(
+      isMobile 
+        ? 'max-w-4xl mx-auto py-5 px-4 space-y-5'
+        : 'max-w-4xl mx-auto py-12 px-4 space-y-10'
+      )}>
       <div className="flex items-center justify-center">
-        <h1 className="md:text-4xl font-bold text-2xl">معلومات الخدمة</h1>
+        <h1 className="md:text-2xl font-bold text-xl">{t("service.top_title")}</h1>
       </div>
       <Suspense fallback={<ServiceLoading />}>
         <ErrorBoundary fallback={<ServiceQueryError />}>

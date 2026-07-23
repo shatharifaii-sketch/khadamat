@@ -7,6 +7,8 @@ import { PublicService } from './usePublicServices';
 import { useParams } from 'react-router-dom';
 import { useImageUpload } from './useImageUpload';
 import { ServiceFormData } from '@/types/service';
+import { ServiceLink } from '@/components/PostService/ServiceLinks';
+import { useTranslation } from 'react-i18next';
 
 export interface Service {
   id?: string;
@@ -20,20 +22,26 @@ export interface Service {
   experience?: string;
   status?: string;
   user_id?: string;
+  is_online?: boolean;
+  links?: [];
+  whatsapp_number?: string;
 }
 
 export interface ServiceImageProps {
   id: string;
   service_id: string;
-  image_url: string;
-  image_name: string;
+  url: string;
+  name: string;
+  thumbnail_url?: string;
+  type?: string;
 }
 
 export const useServices = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { t } = useTranslation("responses");
 
-  const saveImages = async ({serviceId, images}: {serviceId: string, images: ServiceFormData['images']}) => {
+  const saveImages = async ({serviceId, images}: {serviceId: string, images: ServiceFormData['media']}) => {
     console.log('saving service images: ', images);
       if (!user || images.length === 0 || !serviceId) {
         console.error('No user or images found when trying to upload service images');
@@ -41,15 +49,15 @@ export const useServices = () => {
         return
       }
 
-      console.log('Uploading service images for service:', serviceId);
-
       for (const image of images) {
         const { data, error } = await supabase
-          .from('service_images')
+          .from('service_media')
           .insert({
             service_id: serviceId,
-            image_url: image.image_url,
-            image_name: image.image_name
+            url: image.url,
+            name: image.name,
+            thumbnail_url: image.thumbnail,
+            type: image.type
           })
           .single();
 
@@ -57,11 +65,9 @@ export const useServices = () => {
           console.error('Error uploading service image:', error);
           return;
         }
-
-        console.log('Service image uploaded successfully:', data);
       }
 
-      toast.success('تم تحميل صور الخدمة بنجاح!');
+      toast.success(t("service_images_uploaded") || 'تم تحميل صور الخدمة بنجاح!');
       return true;
   }
 
@@ -69,11 +75,9 @@ export const useServices = () => {
     mutationFn: async (serviceData: Service) => {
       if (!user) {
         console.error('No user found when trying to create service');
-        throw new Error('يجب تسجيل الدخول أولاً');
+        throw new Error(t("unauthorized") || 'يجب تسجيل الدخول أولاً');
       }
       
-      // Check user's service quota before creating
-      console.log('Checking service quota...', user?.id);
       const { data: subscription, error: subError } = await supabase
         .from('subscriptions')
         .select('services_allowed, services_used')
@@ -83,7 +87,7 @@ export const useServices = () => {
 
       if (subError) {
         console.error('Error checking subscription:', subError);
-        throw new Error('خطأ في التحقق من الاشتراك: ' + subError.message);
+        throw new Error(t("subscription_check_error") || ('خطأ في التحقق من الاشتراك: ' + subError.message));
       }
 
       // For new subscription model: Check actual service count vs allowed
@@ -94,20 +98,23 @@ export const useServices = () => {
         
       if (servicesError) {
         console.error('Error checking user services:', servicesError);
-        throw new Error('خطأ في التحقق من الخدمات: ' + servicesError.message);
+        throw new Error(t("service_check_error") || ('خطأ في التحقق من الخدمات: ' + servicesError.message));
+      }
+
+      const { data: userExtraProducts, error: extraProductsError } = await supabase.from("users_with_extra_products").select("*").eq("user_id", user.id).maybeSingle();
+
+      if (extraProductsError) {
+        console.error('Error checking user extra products for quota:', extraProductsError);
       }
       
       const currentServiceCount = userServices?.length || 0;
-      console.log('Current service count:', currentServiceCount, 'Allowed:', subscription?.services_allowed || 0);
       
       // If no subscription exists or user already has services equal to or more than allowed
-      if (!subscription || currentServiceCount >= (subscription.services_allowed || 0)) {
-        const message = subscription ? 'لقد استنفدت حصتك من الخدمات. يرجى الدفع لنشر المزيد من الخدمات.' : 'لا يوجد اشتراك نشط. يرجى الدفع لنشر الخدمات.'
+      if (!subscription || currentServiceCount >= (subscription.services_allowed + (userExtraProducts?.extra_products_count || 0))) {
+        const message = subscription ? t("no_more_services_available") : t("no_active_subscription");
         throw new Error(message);
       }
       
-      // First, ensure the user has a profile
-      console.log('Checking user profile...');
       const { data: existingProfile, error: profileCheckError } = await supabase
         .from('profiles')
         .select('id, is_service_provider')
@@ -116,7 +123,7 @@ export const useServices = () => {
       
       if (profileCheckError) {
         console.error('Error checking profile:', profileCheckError);
-        throw new Error('خطأ في التحقق من الملف الشخصي: ' + profileCheckError.message);
+        throw new Error(t("profile_check_error") || ('خطأ في التحقق من الملف الشخصي: ' + profileCheckError.message));
       }
 
       if (!existingProfile) {
@@ -132,7 +139,7 @@ export const useServices = () => {
         
         if (profileCreateError) {
           console.error('Error creating profile:', profileCreateError);
-          throw new Error('فشل في إنشاء الملف الشخصي: ' + profileCreateError.message);
+          throw new Error(t("profile_create_error") || ('فشل في إنشاء الملف الشخصي: ' + profileCreateError.message));
         }
       } else if (!existingProfile.is_service_provider) {
         // Profile exists but is not marked as service provider, update it
@@ -144,12 +151,10 @@ export const useServices = () => {
         
         if (profileUpdateError) {
           console.error('Error updating profile:', profileUpdateError);
-          throw new Error('فشل في تحديث الملف الشخصي: ' + profileUpdateError.message);
+          throw new Error(t("profile_update_error") || ('فشل في تحديث الملف الشخصي: ' + profileUpdateError.message));
         }
       }
 
-      // Now create the service
-      console.log('Creating service...');
       const { data, error } = await supabase
         .from('services')
         .insert({
@@ -162,7 +167,7 @@ export const useServices = () => {
 
       if (error) {
         console.error('Error creating service:', error);
-        throw new Error('فشل في إنشاء الخدمة: ' + error.message);
+        throw new Error(t("service_create_error") || ('فشل في إنشاء الخدمة: ' + error.message));
       }
       
       // Update services_used count to reflect actual service count
@@ -173,7 +178,8 @@ export const useServices = () => {
           services_used: currentServiceCount + 1,
           updated_at: new Date().toISOString()
         })
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .eq('status', 'active');
 
       if (updateError) {
         console.error('Error updating services_used:', updateError);
@@ -192,9 +198,9 @@ export const useServices = () => {
       queryClient.invalidateQueries({ queryKey: ['home-stats'] });
       queryClient.invalidateQueries({ queryKey: ['admin-data'] });
       queryClient.invalidateQueries({ queryKey: ['service-images'] });
-      toast.success('تم نشر الخدمة بنجاح!');
+      toast.success(t("service_created") || 'تم نشر الخدمة بنجاح!');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       console.error('Error creating service:', error);
       toast.error(error.message || 'حدث خطأ في نشر الخدمة');
     }
@@ -204,7 +210,7 @@ export const useServices = () => {
     mutationFn: async (serviceData: Service & { id: string }) => {
       if (!user) {
         console.error('No user found when trying to update service');
-        throw new Error('يجب تسجيل الدخول أولاً');
+        throw new Error(t("unauthorized") || 'يجب تسجيل الدخول أولاً');
       }
       
       console.log('Updating service:', serviceData.id);
@@ -231,7 +237,7 @@ export const useServices = () => {
 
       if (error) {
         console.error('Error updating service:', error);
-        throw new Error('فشل في تحديث الخدمة: ' + error.message);
+        throw new Error(t("service_update_error") || ('فشل في تحديث الخدمة: ' + error.message));
       }
       
       console.log('Service updated successfully:', data);
@@ -242,12 +248,11 @@ export const useServices = () => {
       queryClient.invalidateQueries({ queryKey: ['user-services'] });
       queryClient.invalidateQueries({ queryKey: ['public-services'] });
       queryClient.invalidateQueries({ queryKey: ['admin-data'] });
-      toast('تم تحديث الخدمة بنجاح!', { 
-        description: 'انتظر الموافقة من الإدارة.', 
-        type: 'success'
+      toast.success(t("service_update_successful") || 'تم تحديث الخدمة بنجاح!', { 
+        description: t("service_pending_approval") || 'انتظر الموافقة من الإدارة.', 
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       console.error('Error updating service:', error);
       toast.error(error.message || 'حدث خطأ في تحديث الخدمة');
     }
@@ -312,10 +317,16 @@ export const useCategoryServices = (category: string, serviceId: string) => {
 
 export const useServiceImages = (serviceId: string) => {
   const { data: images } = useSuspenseQuery({
-    queryKey: ['service-images'],
+    queryKey: ['service-media'],
     queryFn: async () => {
+      if (!serviceId) {
+        console.error('No service id found when trying to fetch service images');
+
+        return []
+      }
+
       const { data: images, error } = await supabase
-      .from('service_images')
+      .from('service_media')
       .select('*')
       .eq('service_id', serviceId);
 
@@ -325,7 +336,7 @@ export const useServiceImages = (serviceId: string) => {
       }
 
       return images as ServiceImageProps[];
-    }
+    },
   })
 
   return images;

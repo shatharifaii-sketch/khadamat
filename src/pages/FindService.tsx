@@ -12,8 +12,10 @@ import LoadingGrid from '@/components/FindService/LoadingGrid';
 import { categories } from '@/components/FindService/ServiceCategories';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import { useTranslation } from 'react-i18next';
 
 const FindService = () => {
+  const { t } = useTranslation("services");
   const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -47,42 +49,40 @@ const FindService = () => {
   const filteredServices = useMemo(() => {
     if (!services) return [];
 
-    const filtered = services.filter(service => {
-      // Enhanced search that includes category labels and handles bilingual search
-      const matchesSearch = searchTerm === '' || (() => {
-        const searchLower = searchTerm.toLowerCase();
-
-        // Find category label for current service
-        const categoryData = categories.find(cat => cat.value === service.category);
-        const categoryLabel = categoryData?.label || '';
-
-        // Search in title, description, category value, and category label
-        return service.title.toLowerCase().includes(searchLower) ||
-          service.description.toLowerCase().includes(searchLower) ||
-          service.category.toLowerCase().includes(searchLower) ||
-          categoryLabel.includes(searchTerm) || // Arabic search
-          // Handle common English terms for categories
-          (searchLower === 'photography' && service.category === 'photography') ||
-          (searchLower === 'plumbing' && service.category === 'plumbing') ||
-          (searchLower === 'marketing' && service.category === 'digital-marketing') ||
-          (searchLower === 'design' && service.category === 'graphic-design') ||
-          (searchLower === 'development' && service.category === 'web-development') ||
-          (searchLower === 'printing' && service.category === 'printing') ||
-          (searchLower === 'nanny' && service.category === 'nanny') ||
-          (searchLower === 'dj' && service.category === 'dj') ||
-          (searchLower === 'hauling' && service.category === 'hauling');
-      })();
-
-      const matchesCategory = selectedCategory === 'all' || service.category === selectedCategory;
-
-      const matchesLocation = selectedLocation === 'all' ||
-        service.location.toLowerCase().includes(selectedLocation.toLowerCase());
-
-      return matchesSearch && matchesCategory && matchesLocation;
-    });
-
-    return filtered;
-  }, [services, selectedCategory, selectedLocation, submittedSearchTerm]);
+    return services.filter(service => {
+          // Enhanced search that includes category labels and handles bilingual search
+          const matchesSearch = searchTerm === '' || (() => {
+            const searchLower = searchTerm.toLowerCase();
+    
+            // Find category label for current service
+            const categoryData = categories.find(cat => cat.value === service.category);
+            const categoryLabel = categoryData?.label || '';
+    
+            // Search in title, description, category value, and category label
+            return service.title.toLowerCase().includes(searchLower) ||
+              service.description.toLowerCase().includes(searchLower) ||
+              service.category.toLowerCase().includes(searchLower) ||
+              categoryLabel.includes(searchTerm) || // Arabic search
+              // Handle common English terms for categories
+              (searchLower === 'photography' && service.category === 'photography') ||
+              (searchLower === 'plumbing' && service.category === 'plumbing') ||
+              (searchLower === 'marketing' && service.category === 'digital-marketing') ||
+              (searchLower === 'design' && service.category === 'graphic-design') ||
+              (searchLower === 'development' && service.category === 'web-development') ||
+              (searchLower === 'printing' && service.category === 'printing') ||
+              (searchLower === 'nanny' && service.category === 'nanny') ||
+              (searchLower === 'dj' && service.category === 'dj') ||
+              (searchLower === 'hauling' && service.category === 'hauling');
+          })();
+    
+          const matchesCategory = selectedCategory === 'all' || service.category === selectedCategory;
+    
+          const matchesLocation = selectedLocation === 'all' ||
+            service.location.toLowerCase().includes(selectedLocation.toLowerCase());
+    
+          return matchesSearch && matchesCategory && matchesLocation;
+        });
+  }, [services, searchTerm, selectedCategory, selectedLocation]);
 
   const clearFilters = () => {
     setSearchTerm('');
@@ -96,9 +96,11 @@ const FindService = () => {
       <div className="max-w-6xl mx-auto py-12 px-4">
         <Alert className="max-w-2xl mx-auto">
           <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>خطأ في تحميل الخدمات</AlertTitle>
+          <AlertTitle>
+            {t("find_service.error_loading_services")}
+          </AlertTitle>
           <AlertDescription>
-            حدث خطأ أثناء تحميل الخدمات. يرجى المحاولة مرة أخرى لاحقاً.
+            {t("find_service.error_loading_services_description")}
           </AlertDescription>
         </Alert>
       </div>
@@ -110,10 +112,10 @@ const FindService = () => {
       {/* Header */}
       <div className="text-center mb-8">
         <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
-          ابحث عن الخدمة المناسبة
+          {t("find_service.find_the_right_service")}
         </h1>
         <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-          اكتشف أفضل الخدمات المهنية في منطقتك واحصل على أفضل العروض
+          {t("find_service.discover_top_services")}
         </p>
       </div>
 

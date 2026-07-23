@@ -15,8 +15,8 @@ const ReviewCard = ({
     review
 }: Props) => {
     return (
-        <Card className='w-96 p-4 hover:shadow-md transition-shadow cursor-pointer min-h-[250px]'>
-            <CardHeader className='flex justify-between items-center flex-row'>
+        <Card className='md:min-w-96 min-w-62 py-2 md:p-4 hover:shadow-md transition-shadow cursor-pointer min-h-[250px]'>
+            <CardHeader className='flex flex-row justify-between items-center'>
                 <div className='flex gap-2 items-center'>
                     {
                         review?.reviewer.profile_image_url ? (

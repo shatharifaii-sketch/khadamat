@@ -7,6 +7,9 @@ import { useServiceForm } from '@/hooks/useServiceForm';
 import PaymentModal from './PaymentModal';
 import { DialogTitle } from '@radix-ui/react-dialog';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
+import { Navigate, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 interface ServiceFormSubmitProps {
   isCreating: boolean;
@@ -16,25 +19,22 @@ interface ServiceFormSubmitProps {
 }
 
 const ServiceFormSubmit = ({ isCreating, canPostService: editMode, isEditMode = false, savePendingService }: ServiceFormSubmitProps) => {
+  const { t } = useTranslation("services");
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [openSubscribeModal, setOpenSubscribeModal] = useState<boolean>(false);
   const { canPostServiceAsync } = useServiceForm();
   const [sub, setSub] = useState<boolean>(false);
   const [allowed, setAllowed] = useState<boolean>(false);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    if (!isEditMode) {
-      const checkCanPost = async () => {
-        canPostServiceAsync?.subscription ? setSub(canPostServiceAsync?.subscription) : setSub(false);
-        canPostServiceAsync?.canPost ? setAllowed(canPostServiceAsync?.canPost) : setAllowed(false);
-      }
-
-      checkCanPost();
-      if (!sub) {
-        setOpenSubscribeModal(true);
-      }
+    if (!isEditMode && canPostServiceAsync) {
+      setSub(!!canPostServiceAsync.subscription);
+      setAllowed(!!canPostServiceAsync.canPost);
+      setIsReady(true);
     }
-  }, [canPostServiceAsync, setSub, setAllowed]);
+  }, [canPostServiceAsync, isEditMode]);
 
   return (
     <div className="pt-6">
@@ -44,35 +44,37 @@ const ServiceFormSubmit = ({ isCreating, canPostService: editMode, isEditMode = 
         className="w-full text-xl py-6"
         disabled={isCreating}
         onClick={() => {
-          if (!editMode && !allowed) {
-            savePendingService();
+          if (isReady && !sub) {
             setOpenSubscribeModal(true);
-            return;
+          }
+          if (!allowed && sub) {
+            navigate('/account');
           }
         }}
       >
         {isCreating ?
-          (isEditMode ? 'جاري التحديث...' : 'جاري النشر...')
+          (isEditMode ? t("post_service.updating") : t("post_service.publishing"))
           :
-          (isEditMode ? 'حفظ التعديلات' : allowed && sub ? 'انشر الخدمة' : 'اشترك أو إدفع الان و انشر الخدمة')
+          (isEditMode 
+            ? t("post_service.save_changes") 
+            : allowed && sub 
+              ? t("post_service.publish_service") 
+              : !allowed && sub 
+                ? t("post_service.get_extra_service")
+                : !sub ? t("post_service.get_subscription") : t("post_service.not_allowed_to_post"))
         }
       </Button>
-      {!isEditMode && !sub && !allowed && (
-        <p className="text-center text-muted-foreground mt-4 text-large">
-          سيتم توجيهك لصفحة الدفع أولاً
-        </p>
-      )}
 
       <Drawer
-        direction='right'
+        direction='bottom'
         open={openSubscribeModal}
+        onOpenChange={setOpenSubscribeModal}
       >
-        <DrawerContent className='h-screen w-full sm:w-4/5 lg:w-2/5 transition-all rounded-none'>
+        <DrawerContent className=' transition-all rounded-none'>
           <DialogTitle></DialogTitle>
           <Suspense fallback={<div>Loading...</div>}>
             <ErrorBoundary fallback={<div>Something went wrong</div>}>
-              {((!allowed && !sub) || (allowed && !sub)) && <SubscriptionsModal user={user} />}
-              {!allowed && sub && <PaymentModal />}
+              <SubscriptionsModal user={user} setDrawerOpen={setOpenSubscribeModal} />
             </ErrorBoundary>
           </Suspense>
         </DrawerContent>

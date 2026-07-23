@@ -2,6 +2,7 @@ import { useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-quer
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Service } from './useAdminFunctionality';
+import { ServiceLink } from '@/components/PostService/ServiceLinks';
 
 export interface PublicService {
   id: string;
@@ -16,12 +17,17 @@ export interface PublicService {
   views: number;
   created_at: string;
   user_id: string;
+  is_online?: boolean;
+  links: [];
+  whatsapp_number?: string;
   updated_at: string;
   publisher: {
     id: string;
     full_name: string;
     profile_image_url: string;
   };
+  average_rating: number;
+  review_count: number;
 }
 
 export const usePublicServices = () => {
@@ -76,8 +82,7 @@ export const usePublicServices = () => {
         return [];
       }
 
-      console.log('Fetched services with publisher:', services);
-      return services as PublicService[];
+      return services;
     },
     retry: 1,
     staleTime: 30000, // 30 seconds
@@ -107,7 +112,7 @@ const { data } = useSuspenseQuery({
       if (serviceRes.error) throw serviceRes.error;
 
       return {
-        service: serviceRes.data as PublicService,
+        service: serviceRes.data,
       };
     },
   });
@@ -115,11 +120,13 @@ const { data } = useSuspenseQuery({
   return data;
 }
 
-export const useServiceToEditData = (id: string, userId: string) => {
-  if (!userId || !id) return { service: null };
-  const { data } = useSuspenseQuery({
-    queryKey: ['service-edit-data', id, userId],
+export const useServiceToEditData = (id: string) => {
+  const { data, isLoading } = useQuery({
+    queryKey: ['service-edit-data', id],
+    enabled: !!id,
     queryFn: async () => {
+      if (!id) return { service: null };
+
       const { data: serviceData, error: serviceError } = await 
         supabase
           .from('services')
@@ -129,17 +136,16 @@ export const useServiceToEditData = (id: string, userId: string) => {
               full_name
             )
             `)
-          .eq('user_id', userId)
           .eq('id', id)
-          .single();
+          .maybeSingle();
 
       if (serviceError) {
         console.log('Error fetching service data:', serviceError);
         throw serviceError;
       };
 
-      const { data: images, error: imagesError } = await supabase
-        .from('service_images')
+      const { data: media, error: imagesError } = await supabase
+        .from('service_media')
         .select('*')
         .eq('service_id', id);
 
@@ -148,22 +154,27 @@ export const useServiceToEditData = (id: string, userId: string) => {
         throw imagesError;
       };
 
-      const serviceImage = images.map((image) => ({
-        id: image.id,
-        image_name: image.image_name,
-        image_url: image.image_url
-      })) as Service['service_images'];
+      const serviceImage = media.map((item) => ({
+        id: item.id,
+        name: item.name,
+        url: item.url,
+        thumbnail_url: item.thumbnail_url,
+        type: item.type
+      })) as Service['service_media'];
 
       const serviceRes = {
         ...serviceData,
-        service_images: serviceImage,
+        service_media: serviceImage,
       };
       
       return {
         service: serviceRes as Service,
       };
-    },
+    }
   });
 
-  return data;
+  return {
+    service: data?.service,
+    isLoading
+  };
 }

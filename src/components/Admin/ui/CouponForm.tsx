@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { useEffect, useState } from "react";
 import { useAdminFunctionality } from "@/hooks/useAdminFunctionality";
+import { useTranslation } from "react-i18next";
 
 interface Props {
     closeForm: () => void
@@ -30,6 +31,9 @@ const couponTypes = [
 ];
 
 const CouponForm = ({ closeForm }: Props) => {
+    const { t } = useTranslation("admin");
+    const lang = localStorage.getItem("language") || "en";
+
     const { createCoupon, createCouponSuccess } = useAdminFunctionality();
 
     const [formData, setFormData] = useState({
@@ -59,7 +63,7 @@ const CouponForm = ({ closeForm }: Props) => {
 
             <div className="flex flex-col overflow-y-scroll h-[510px] space-x-2 pr-3">
                 <div className="ml-2">
-                    <Label htmlFor="code">نص الكوبون</Label>
+                    <Label htmlFor="code">{t("table.coupons_management.form.code")}</Label>
                     <Input
                         id="code"
                         value={formData.code}
@@ -67,15 +71,15 @@ const CouponForm = ({ closeForm }: Props) => {
                     />
                 </div>
                 <div>
-                    <Label htmlFor="type">الفئة</Label>
+                    <Label htmlFor="type">{t("table.coupons_management.form.type")}</Label>
                     <Select value={formData.type || ''} onValueChange={(value) => setFormData({ ...formData, type: value })}>
                         <SelectTrigger>
-                            <SelectValue placeholder="اختر الفئة" />
+                            <SelectValue placeholder={t("table.coupons_management.form.type_placeholder")} />
                         </SelectTrigger>
                         <SelectContent>
                             {couponTypes.map((type, index) => (
                                 <SelectItem key={index} value={type.label}>
-                                    {type.value}
+                                    {t(`table.coupons_management.form.${type.value}`)}
                                 </SelectItem>
                             ))}
                         </SelectContent>
@@ -83,7 +87,7 @@ const CouponForm = ({ closeForm }: Props) => {
                 </div>
 
                 <div>
-                    <Label htmlFor="discount_amount">القيمة الثابتة</Label>
+                    <Label htmlFor="discount_amount">{t("table.coupons_management.form.fixed_amount")}</Label>
                     <Input
                         id="discount_amount"
                         value={formData.discount_amount || 0}
@@ -95,7 +99,7 @@ const CouponForm = ({ closeForm }: Props) => {
                 </div>
 
                 <div>
-                    <Label htmlFor="discount_percentage">النسبة المئوية</Label>
+                    <Label htmlFor="discount_percentage">{t("table.coupons_management.form.percentage")}</Label>
                     <Input
                         id="discount_percentage"
                         value={formData.discount_percentage || 0}
@@ -108,7 +112,7 @@ const CouponForm = ({ closeForm }: Props) => {
                 </div>
 
                 <div>
-                    <Label htmlFor="description">الوصف</Label>
+                    <Label htmlFor="description">{t("table.coupons_management.form.description")}</Label>
                     <Textarea
                         id="description"
                         value={formData.description || ''}
@@ -119,7 +123,7 @@ const CouponForm = ({ closeForm }: Props) => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <Label htmlFor="usage_limit">مرات الاستخدام المسموحة</Label>
+                        <Label htmlFor="usage_limit">{t("table.coupons_management.form.usage_limit")}</Label>
                         <Input
                             id="usage_limit"
                             value={formData.usage_limit || ''}
@@ -129,7 +133,7 @@ const CouponForm = ({ closeForm }: Props) => {
                     </div>
 
                     <div>
-                        <Label htmlFor="expires_at">تاريخ الانتهاء</Label>
+                        <Label htmlFor="expires_at">{t("table.coupons_management.form.expires_at")}</Label>
                         <Input
                             id="expires_at"
                             type="date"
@@ -148,7 +152,7 @@ const CouponForm = ({ closeForm }: Props) => {
                 className="w-full"
                 disabled={createCoupon.isPending}
             >
-                {createCoupon.isPending ? "جاري الانشاء..." : "إنشاء الكوبون"}
+                {createCoupon.isPending ? t("table.coupons_management.form.creating") : t("table.coupons_management.form.create")}
             </Button>
         </div>
     )

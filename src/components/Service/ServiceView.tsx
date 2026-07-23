@@ -6,10 +6,41 @@ import { Link, NavLink } from 'react-router-dom';
 import { Button } from '../ui/button';
 import { MessageCircle } from 'lucide-react';
 import ReportDrawer from '../ReportDrawer';
+import { Conversation } from '@/hooks/useConversations';
+import { ServiceLink } from '../PostService/ServiceLinks';
+import { Json } from '@/integrations/supabase/types';
+import { useTranslation } from 'react-i18next';
+import { useIsMobile } from '@/hooks/use-mobile';
+
+export interface ServiceViewProps {
+  id: string;
+  title: string;
+  category: string;
+  description: string;
+  price_range: string;
+  location: string;
+  phone: string;
+  email: string;
+  experience?: string;
+  views: number;
+  created_at: string;
+  user_id: string;
+  is_online?: boolean;
+  links: ServiceLink[] | [] | Json;
+  whatsapp_number?: string;
+  updated_at: string;
+  publisher: {
+    id: string;
+    full_name: string;
+    profile_image_url: string;
+  };
+  average_rating: number;
+  review_count: number;
+}
 
 interface Props {
-  service: PublicService;
-  conversation?: any;
+  service: ServiceViewProps;
+  conversation?: Conversation;
   isConvo: boolean;
   convoId: string | null;
   setConvoId: (id: string | null) => void;
@@ -24,9 +55,12 @@ const ServiceView = ({
   setConvoId,
   setIsConvo,
   userId
-}: Props) => {  
+}: Props) => {
+  const isMobile = useIsMobile();
+  const { t } = useTranslation("services");
+  const lang = localStorage.getItem("language") || "en";
   return (
-    <div className='flex flex-col gap-10'>
+    <div className='flex flex-col gap-2 md:gap-4' dir={lang === "ar" ? "rtl" : "ltr"}>
       <ServiceHeader
         title={service?.title}
         category={service?.category}
@@ -50,7 +84,7 @@ const ServiceView = ({
           >
             <Button variant='ghost' className='shadow border'>
               <MessageCircle />
-              المحادثة
+              {t("find_service.service.conversation")}
             </Button>
           </NavLink>
         )}
@@ -68,6 +102,7 @@ const ServiceView = ({
           setConvoId={setConvoId}
           userId={userId}
           publisherId={service?.publisher.id}
+          whatsappNumber={service?.whatsapp_number}
         />
         <ReportDrawer
           itemId={service?.id}

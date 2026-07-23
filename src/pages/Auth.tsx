@@ -9,9 +9,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { Home } from 'lucide-react';
 import GoogleSignInButton from '@/components/GoogleSignInButton';
-import { useEmail } from '@/hooks/useEmail';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
+
 
 const Auth = () => {
+  const { t } = useTranslation("auth");
+  const lang = localStorage.getItem("language") || "en";
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -19,7 +23,7 @@ const Auth = () => {
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [loading, setLoading] = useState(false);
   const { signIn, signUp, user, signInWithGoogle } = useAuth();
-  const { sendWelcomeEmail } = useEmail();
+
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -33,12 +37,12 @@ const Auth = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      toast.error('يرجى ملء جميع الحقول المطلوبة');
+      toast.error(t("required_fields_error"));
       return;
     }
 
     if (!isLogin && !fullName) {
-      toast.error('يرجى إدخال الاسم الكامل');
+      toast.error(t("full_name_error"));
       return;
     }
 
@@ -50,41 +54,32 @@ const Auth = () => {
         if (error) {
           console.error('Sign in error:', error);
           if (error.message.includes('Invalid login credentials')) {
-            toast.error('بيانات الدخول غير صحيحة');
+            toast.error(t("invalid_credentials"));
           } else if (error.message.includes('Email not confirmed')) {
-            toast.error('يرجى تأكيد البريد الإلكتروني أولاً');
+            toast.error(t("email_not_confirmed"));
           } else {
-            toast.error('حدث خطأ في تسجيل الدخول: ' + error.message);
+            toast.error(t("login_error") + error.message);
           }
         } else {
-          toast.success('تم تسجيل الدخول بنجاح');
+          toast.success(t("login_success"));
           const from = location.state?.from?.pathname || '/';
           navigate(from, { replace: true });
         }
       } else {
         const { data, error } = await signUp(email, password, fullName, passwordConfirm);
-        if (error) {
-          console.error('Sign up error:', error);
-          if (error.message.includes('User already registered')) {
-            toast.error('هذا البريد الإلكتروني مسجل مسبقاً');
-          } else if (error.message.includes('Password should be')) {
-            toast.error('كلمة المرور يجب أن تحتوي على 6 أحرف على الأقل');
-          } else {
-            toast.error('حدث خطأ في إنشاء الحساب: ' + error.message);
-          }
-        } else {
-          toast.success('تم إنشاء الحساب بنجاح! يرجى تفقد بريدك الإلكتروني لتأكيد الحساب');
+        if (!error) {
+          toast.success(t("signup_success"));
           navigate('/confirm-email', { state: { email } });
         }
       }
-    } catch (error: any) {
-      console.error('Auth error:', error);
-      toast.error('حدث خطأ غير متوقع');
+    } catch (error: unknown) {
+      console.error('Auth error:', error instanceof Error ? error.message : error);
+      toast.error(t("unexpected_error"));
     } finally {
       setLoading(false);
     }
   };
-  
+
   const handleGoogleSignIn = async () => {
     signInWithGoogle();
   }
@@ -97,86 +92,91 @@ const Auth = () => {
             <div className="bg-primary text-primary-foreground p-2 rounded-lg">
               <Home size={24} />
             </div>
-            <span className="text-2xl font-bold text-primary">خدمتك</span>
+            <img src="/application_logo_cut.png" className='h-10' alt="cut logo" />
           </Link>
         </div>
 
-        <Card>
+        <Card className='mb-2' dir={lang === "ar" ? "rtl" : "ltr"}>
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">
-              {isLogin ? 'تسجيل الدخول' : 'إنشاء حساب جديد'}
+              {isLogin ? t("login_title") : t("signup_title")}
             </CardTitle>
             <CardDescription>
-              {isLogin 
-                ? 'أدخل بياناتك لتسجيل الدخول إلى حسابك'
-                : 'أنشئ حساباً جديداً للبدء في استخدام المنصة'
+              {isLogin
+                ? t("login_description")
+                : t("signup_description")
               }
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4 text-start">
               {!isLogin && (
                 <div className="space-y-2">
-                  <Label htmlFor="fullName">الاسم الكامل</Label>
+                  <Label htmlFor="fullName">{t("full_name")}</Label>
                   <Input
                     id="fullName"
                     type="text"
-                    placeholder="أدخل اسمك الكامل"
+                    placeholder={t("full_name_placeholder")}
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     required={!isLogin}
                   />
                 </div>
               )}
-              
+
               <div className="space-y-2">
-                <Label htmlFor="email">البريد الإلكتروني</Label>
+                <Label htmlFor="email">{t("email")}</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="info@khedemtak.com"
+                  placeholder={t("email_placeholder")}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </div>
-              
+
               <div className="space-y-2">
-                <Label htmlFor="password">كلمة المرور</Label>
+                <Label htmlFor="password">{t("password")}</Label>
                 <Input
                   id="password"
                   type="password"
-                  placeholder="أدخل كلمة المرور"
+                  placeholder={t("password_placeholder")}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                 />
               </div>
               {!isLogin && (
-              <div className="space-y-2">
-                <Label htmlFor="password">تأكيد كلمة المرور</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="أدخل كلمة المرور"
-                  value={passwordConfirm}
-                  onChange={(e) => setPasswordConfirm(e.target.value)}
-                  required
-                />
-              </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password">{t("confirm_password")}</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder={t("password_placeholder")}
+                    value={passwordConfirm}
+                    onChange={(e) => setPasswordConfirm(e.target.value)}
+                    required
+                  />
+                </div>
+              )}
+              {isLogin && (
+                <Link to="/forgot-password" className="text-sm text-primary hover:underline text-end">
+                  {t("forgot_password")}
+                </Link>
               )}
 
-              <Button 
-                type="submit" 
-                className="w-full" 
+              <Button
+                type="submit"
+                className="w-full"
                 size="lg"
                 disabled={loading}
               >
-                {loading 
-                  ? 'جاري المعالجة...' 
-                  : isLogin 
-                    ? 'تسجيل الدخول' 
-                    : 'إنشاء الحساب'
+                {loading
+                  ? t("processing")
+                  : isLogin
+                    ? t("login_button")
+                    : t("signup_button")
                 }
               </Button>
             </form>
@@ -185,18 +185,20 @@ const Auth = () => {
 
             <div className="mt-6 text-center">
               <p className="text-sm text-muted-foreground">
-                {isLogin ? 'ليس لديك حساب؟' : 'لديك حساب بالفعل؟'}
+                {isLogin ? t("no_account") : t("have_account")}
                 <button
                   type="button"
                   onClick={() => setIsLogin(!isLogin)}
                   className="text-primary hover:underline mr-2"
                 >
-                  {isLogin ? 'إنشاء حساب جديد' : 'تسجيل الدخول'}
+                  {isLogin ? t("switch_to_signup") : t("switch_to_login")}
                 </button>
               </p>
             </div>
           </CardContent>
         </Card>
+
+        <LanguageSwitcher />
       </div>
     </div>
   );
