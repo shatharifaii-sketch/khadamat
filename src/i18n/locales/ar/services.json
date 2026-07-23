@@ -112,7 +112,8 @@
             "dm_contact": "إرسال رسالة خاصة",
             "whatsapp_contact": "تواصل معنا عبر واتساب",
             "email_contact": "إرسال إيميل",
-            "phone_contact": "اتصال هاتفي"
+            "phone_contact": "اتصال هاتفي",
+            "be_first_to_review": "اترك أول تقييم!"
         }
     },
     "service": {

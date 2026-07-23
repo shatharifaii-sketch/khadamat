@@ -761,6 +761,36 @@ export type Database = {
         }
         Relationships: []
       }
+      phone_verification_codes: {
+        Row: {
+          attempts: number | null
+          code_hash: string | null
+          created_at: string
+          expires_at: string | null
+          id: number
+          phone: string | null
+          used: boolean | null
+        }
+        Insert: {
+          attempts?: number | null
+          code_hash?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: number
+          phone?: string | null
+          used?: boolean | null
+        }
+        Update: {
+          attempts?: number | null
+          code_hash?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: number
+          phone?: string | null
+          used?: boolean | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           bio: string | null
@@ -774,6 +804,7 @@ export type Database = {
           profile_image_url: string | null
           stripe_customer_id: string | null
           updated_at: string
+          user_index: number | null
         }
         Insert: {
           bio?: string | null
@@ -787,6 +818,7 @@ export type Database = {
           profile_image_url?: string | null
           stripe_customer_id?: string | null
           updated_at?: string
+          user_index?: number | null
         }
         Update: {
           bio?: string | null
@@ -800,6 +832,7 @@ export type Database = {
           profile_image_url?: string | null
           stripe_customer_id?: string | null
           updated_at?: string
+          user_index?: number | null
         }
         Relationships: []
       }
@@ -1140,6 +1173,7 @@ export type Database = {
       }
       services: {
         Row: {
+          average_rating: number
           category: string
           created_at: string
           description: string
@@ -1151,6 +1185,7 @@ export type Database = {
           location: string
           phone: string
           price_range: string
+          review_count: number
           status: string
           title: string
           updated_at: string
@@ -1159,6 +1194,7 @@ export type Database = {
           whatsapp_number: string | null
         }
         Insert: {
+          average_rating?: number
           category: string
           created_at?: string
           description: string
@@ -1170,6 +1206,7 @@ export type Database = {
           location: string
           phone: string
           price_range: string
+          review_count?: number
           status?: string
           title: string
           updated_at?: string
@@ -1178,6 +1215,7 @@ export type Database = {
           whatsapp_number?: string | null
         }
         Update: {
+          average_rating?: number
           category?: string
           created_at?: string
           description?: string
@@ -1189,6 +1227,7 @@ export type Database = {
           location?: string
           phone?: string
           price_range?: string
+          review_count?: number
           status?: string
           title?: string
           updated_at?: string
@@ -2018,6 +2057,7 @@ export type Database = {
           details: Json | null
           id: string
           ip_address: unknown
+          method: string | null
           user_agent: string | null
           user_id: string
         }
@@ -2027,6 +2067,7 @@ export type Database = {
           details?: Json | null
           id?: string
           ip_address?: unknown
+          method?: string | null
           user_agent?: string | null
           user_id: string
         }
@@ -2036,6 +2077,7 @@ export type Database = {
           details?: Json | null
           id?: string
           ip_address?: unknown
+          method?: string | null
           user_agent?: string | null
           user_id?: string
         }
@@ -2234,6 +2276,7 @@ export type Database = {
           phone: string | null
           profile_image_url: string | null
           updated_at: string | null
+          user_index: number | null
         }
         Relationships: []
       }
@@ -2388,6 +2431,10 @@ export type Database = {
           month: string
           user_count: number
         }[]
+      }
+      update_service_rating: {
+        Args: { service_uuid: string }
+        Returns: undefined
       }
       validate_admin_input: { Args: { input_text: string }; Returns: boolean }
       validate_coupon: {
