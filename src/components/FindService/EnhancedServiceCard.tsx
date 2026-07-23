@@ -12,6 +12,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
+import ReviewsComponent from '../Service/ui/ReviewsComponent';
 
 interface EnhancedServiceCardProps {
   service: PublicService;
@@ -19,6 +20,7 @@ interface EnhancedServiceCardProps {
 
 const EnhancedServiceCard = ({ service }: EnhancedServiceCardProps) => {
   const { t } = useTranslation("services");
+  const lang = localStorage.getItem("language") || "en";
   const { incrementView } = useServiceViews();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -80,12 +82,16 @@ const EnhancedServiceCard = ({ service }: EnhancedServiceCardProps) => {
         </div>
 
         {/* Stats */}
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <div dir={lang == "ar" ? "rtl" : "ltr"} className="flex items-center justify-between text-xs text-muted-foreground">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1">
               <span>{service.views}</span>
-              <Eye className="h-3 w-3" />
+              <Eye className="size-4" />
             </div>
+            <ReviewsComponent 
+              review_count={service.review_count}
+              avg_rating={service.average_rating}
+            />
           </div>
         </div>
 

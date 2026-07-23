@@ -97,7 +97,8 @@ export const useServiceReviews = (serviceId: string) => {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['service-reviews'] });
-            queryClient.invalidateQueries({ queryKey: ['number-of-user-reviews']})
+            queryClient.invalidateQueries({ queryKey: ['number-of-user-reviews']});
+            queryClient.invalidateQueries({ queryKey: ['service-with-convo', serviceId, user?.id]})
         }
     })
 

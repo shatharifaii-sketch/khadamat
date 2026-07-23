@@ -8,6 +8,7 @@ import { ServiceViewProps } from '../ServiceView';
 import { FaGlobe } from 'react-icons/fa6';
 import { useTranslation } from 'react-i18next';
 import { ServiceLink } from '@/components/PostService/ServiceLinks';
+import ReviewsComponent from './ReviewsComponent';
 
 interface Props {
     service: ServiceViewProps
@@ -35,6 +36,11 @@ const ServiceDataCard = ({
                                         <span className='text-lg'>{service?.views}</span>
                                         <Eye className="size-6" />
                                     </div>
+
+                                    <ReviewsComponent 
+                                        avg_rating={service.average_rating}
+                                        review_count={service.review_count}
+                                    />
                                 </div>
                             </div>
                         </div>

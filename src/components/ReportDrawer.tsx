@@ -65,7 +65,7 @@ const ReportDrawer = ({
             toast.success(t("service.report.toast_success"));
             setOpenDrawer(false);
         }
-    }, [sendReportEmail.isSuccess, sendReportEmail.mutateAsync])
+    }, [itemId, itemType, sendReportEmail.isSuccess, sendReportEmail.mutateAsync, t])
 
 
     return (

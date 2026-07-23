@@ -72,8 +72,8 @@ const Auth = () => {
           navigate('/confirm-email', { state: { email } });
         }
       }
-    } catch (error: any) {
-      console.error('Auth error:', error);
+    } catch (error: unknown) {
+      console.error('Auth error:', error instanceof Error ? error.message : error);
       toast.error(t("unexpected_error"));
     } finally {
       setLoading(false);

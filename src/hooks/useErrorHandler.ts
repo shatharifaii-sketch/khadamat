@@ -24,7 +24,7 @@ export const useErrorHandler = (): UseErrorHandlerReturn => {
     
     // Log to console for debugging
     console.error('Error handled:', errorObj);
-  }, []);
+  }, [t]);
 
   const clearError = useCallback(() => {
     setError(null);
@@ -38,7 +38,7 @@ export const useErrorHandler = (): UseErrorHandlerReturn => {
     } catch (err) {
       handleError(err instanceof Error ? err : new Error(t("unknown_error_occurred")));
     }
-  }, [handleError, clearError]);
+  }, [clearError, t, handleError]);
 
   return {
     error,
