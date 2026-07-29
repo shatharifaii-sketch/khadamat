@@ -11,18 +11,28 @@ import { Badge } from '../ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import CouponForm from './ui/CouponForm';
-import { useAdminFunctionality } from '@/hooks/useAdminFunctionality';
+import { useAdminFunctionality, useCoupons } from '@/hooks/useAdminFunctionality';
 import { useTranslation } from 'react-i18next';
 
 interface Props {
-    coupons: Tables<'coupons'>[];
+    count?: number;
 }
 
 type SortOption = "code-name" | "date-asc" | "date-desc";
 
-const CouponsManagement = ({ coupons }: Props) => {
+const CouponsManagement = ({
+    count
+}: Props) => {
     const { t } = useTranslation("admin");
     const lang = localStorage.getItem("language") || "en";
+
+    const [page, setPage] = useState<number>(0);
+    const [cursorHistory, setCursorHistory] = useState<number[]>([0]);
+    const cursor = cursorHistory[page - 1];
+
+    const { couponsList: coupons } = useCoupons({
+        couponsCursor: cursor
+    })
 
     const { toast } = useToast();
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -50,10 +60,10 @@ const CouponsManagement = ({ coupons }: Props) => {
                 title: t("table.coupons_management.toasts.deleted_title"),
                 description: t("table.coupons_management.toasts.deleted_description"),
             });
-        } catch (error: any) {
+        } catch (error: unknown) {
             toast({
                 title: t("table.coupons_management.toasts.error_title"),
-                description: error.message || t("table.coupons_management.toasts.error_description"),
+                description: error instanceof Error ? error.message : t("table.coupons_management.toasts.error_description"),
                 variant: "destructive",
             });
         }
@@ -79,7 +89,7 @@ const CouponsManagement = ({ coupons }: Props) => {
                         </DialogContent>
                     </Dialog>
                 </div>
-                <Select value={sortOption} onValueChange={(value) => setSortOption(value as any)}>
+                <Select value={sortOption} onValueChange={(value: SortOption) => setSortOption(value)}>
                     <SelectTrigger>
                         <SelectValue placeholder={t("table.coupons_management.sort.label")} />
                     </SelectTrigger>

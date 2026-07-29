@@ -14,7 +14,7 @@ const ProfileDataCard = ({
     services
 }: Props) => {
     return (
-        <div className='space-y-7'>
+        <div className='space-y-2 md:space-y-7'>
             <PersonalDataCard
                 description={profile.bio}
                 joinedAt={profile.created_at}

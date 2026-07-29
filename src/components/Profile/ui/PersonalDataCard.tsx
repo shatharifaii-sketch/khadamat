@@ -21,14 +21,14 @@ const PersonalDataCard = ({
     return (
         <Card>
             <CardHeader>
-                <CardTitle>{t("description")}</CardTitle>
-                <CardDescription className='text-muted-foreground border border-gray-100 rounded-lg p-4 text-lg'>
+                <CardTitle className='text-lg md:text-md'>{t("description")}</CardTitle>
+                <CardDescription className='text-muted-foreground border border-gray-100 rounded-lg p-2 md:p-4 text-lg'>
                     {description}
                 </CardDescription>
             </CardHeader>
             <CardContent dir={lang === "ar" ? "rtl" : "ltr"}>
-                <div className='flex items-center justify-between'>
-                    <div className='flex justify-start gap-5'>
+                <div className='flex md:flex-row flex-col items-center justify-between gap-5'>
+                    <div className='flex justify-start items-center gap-5'>
                         <div className='flex items-center justify-start gap-5'>
                             <CardTitle className='text-md'>{t("location")}:</CardTitle>
                             <CardDescription className={cn(location && 'text-primary text-lg', !location && 'text-muted-foreground')}>

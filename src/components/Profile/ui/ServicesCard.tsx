@@ -16,7 +16,7 @@ const ServicesCard = ({
   return (
     <Card>
         <CardHeader dir={lang === "ar" ? "rtl" : "ltr"}>
-            <CardTitle>{t("services.title")}:</CardTitle>
+            <CardTitle className='text-md md:text-lg'>{t("services.title")}:</CardTitle>
             
             <CardDescription>
                 <div className='flex items-center gap-2'>
@@ -25,7 +25,7 @@ const ServicesCard = ({
                 </div>
             </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className='px-2 md:px-3 pb-2'>
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 border rounded-lg p-2 bg-muted overflow-y-auto'>
                 {
                 services.map((service) => (

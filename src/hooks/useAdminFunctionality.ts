@@ -63,10 +63,10 @@ export interface Service {
 }
 
 type Pagination = {
-  usersCursor: number | null;
-  servicesCursor: number | null;
-  pendingServicesCursor: number | null;
-  couponsCursor: number | null;
+  usersCursor?: number | null;
+  servicesCursor?: number | null;
+  pendingServicesCursor?: number | null;
+  couponsCursor?: number | null;
 };
 
 interface UploadedImage {
@@ -103,15 +103,9 @@ export const useIsAdmin = (): boolean => {
   return data ?? false;
 };
 
-export const useAdminData = ({
-  usersCursor,
-  servicesCursor,
-  pendingServicesCursor,
-  couponsCursor,
-}: Pagination) => {
+export const useAdminData = () => {
   const [
     profilesQuery,
-    rolesQuery,
     servicesQuery,
     pendingServicesQuery,
     couponsQuery,
@@ -119,84 +113,177 @@ export const useAdminData = ({
     queries: [
       //Users query
       {
-        queryKey: ["profiles", usersCursor],
+        queryKey: ["profiles"],
         queryFn: async () => {
-          let query = supabase
-            .from("profiles_with_email")
-            .select("*")
-            .order("user_index", { ascending: true })
-            .limit(PAGE_SIZE + 1);
+          const query = supabase.from("profiles_with_email");
 
-          if (usersCursor !== null) {
-            query = query.gt("user_index", usersCursor);
-          }
+          const { data, count: usersCount, error: numQueryError } =
+            await query.select("id, created_at", { count: "exact" });
 
-          const { data, error } = await query;
+          if (numQueryError) throw numQueryError;
 
-          if (error) throw error;
-
-          return data;
-        },
-      },
-
-      // Roles
-      {
-        queryKey: ["user-roles"],
-        staleTime: 1000 * 60 * 10,
-        queryFn: async () => {
-          const {
-            data: { data, error },
-          } = await supabase.functions.invoke("get-user-roles");
-
-          if (error) throw error;
-
-          return data;
+          return {
+            data, 
+            usersCount
+          };
         },
       },
 
       // Published services
       {
-        queryKey: ["services", servicesCursor],
+        queryKey: ["services"],
         queryFn: async () => {
-          let query = supabase
+          const query = supabase
             .from("services")
-            .select(`
-              *,
-              publisher:fk_services_user_id (
-                full_name
-              ),
-              service_media (
-                id,
-                name,
-                url,
-                thumbnail_url,
-                type
-              )
-            `)
-            .eq("status", "published")
-            .order("created_at", { ascending: false })
-            .limit(PAGE_SIZE + 1);
+            .select("id, user_id", { count: "exact" });
 
-          if (servicesCursor) {
-            query = query.lt("created_at", servicesCursor);
-          }
+          const { data, count: servicesCount, error: numQueryError } = await query;
 
-          const { data, error } = await query;
+          if (numQueryError) throw numQueryError;
 
-          if (error) throw error;
+          const { count: pubServicesCount, error: pubNumQueryError } =
+            await query.eq("status", "published");
 
-          return data;
+          if (pubNumQueryError) throw pubNumQueryError;
+
+          return {
+            data,
+            servicesCount,
+            pubServicesCount,
+          };
         },
       },
 
       //Pending services query
       {
-        queryKey: ["pending-services", pendingServicesCursor],
+        queryKey: ["pending-services"],
         queryFn: async () => {
-          const { data, error } = await supabase
-            .from("services")
-            .select(
-              `
+          const query = supabase.from("services");
+
+          const { count: pendServicesCount, error: numQueryError } = await query
+            .select("id", { count: "exact", head: true })
+            .eq("status", "pending-approval");
+
+          if (numQueryError) throw numQueryError;
+
+          return pendServicesCount;
+        },
+      },
+
+      //Coupons query
+      {
+        queryKey: ["coupons"],
+        queryFn: async () => {
+          const query = supabase.from("coupons");
+
+          const { count: couponsCount, error: numQueryError } =
+            await query.select("id", { count: "exact", head: true });
+
+          if (numQueryError) throw numQueryError;
+
+          return couponsCount;
+        },
+      },
+    ],
+  });
+
+  const uniqueServiceProviders = servicesQuery.data.data
+    .map((service) => service.user_id)
+    .filter((value, index, self) => self.indexOf(value) === index).length;
+
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  const todaySignups = profilesQuery.data.data.filter(
+    (user) => new Date(user.created_at) >= todayStart,
+  ).length;
+
+  const stats = {
+    totalUsers: profilesQuery.data.usersCount,
+    serviceProviders: uniqueServiceProviders,
+    totalServices: servicesQuery.data.servicesCount,
+    publishedServices: servicesQuery.data.pubServicesCount,
+    todaySignups: todaySignups,
+    couponsCount: couponsQuery.data,
+    pendingServicesCount: pendingServicesQuery.data
+  };
+
+  return {
+    stats,
+  };
+};
+
+export const useUsers = ({ usersCursor }: Pagination) => {
+  const { data: usersData, isLoading: usersDataLoading } = useSuspenseQuery({
+    queryKey: ["admin-users-data", usersCursor],
+    queryFn: async () => {
+      let listQuery = supabase
+        .from("profiles_with_email")
+        .select("*")
+        .order("user_index", { ascending: true })
+        .limit(PAGE_SIZE + 1);
+
+      if (usersCursor !== null) {
+        listQuery = listQuery.gt("user_index", usersCursor);
+      }
+
+      const { data, error } = await listQuery;
+
+      if (error) throw error;
+
+      return data;
+    },
+  });
+
+  const { data: rolesQuery, isLoading: rolesQueryLoading } = useSuspenseQuery({
+    queryKey: ["user-roles"],
+    staleTime: 1000 * 60 * 10,
+    queryFn: async () => {
+      const {
+        data: { data, error },
+      } = await supabase.functions.invoke("get-user-roles");
+
+      if (error) throw error;
+
+      return data;
+    },
+  });
+
+  const adminSet = useMemo(
+    () =>
+      new Set(
+        rolesQuery.filter((r) => r.role === "admin").map((r) => r.user_id),
+      ),
+    [rolesQuery],
+  );
+
+  const profiles = useMemo(() => {
+    return usersData.map((profile) => ({
+      ...profile,
+      is_admin: adminSet.has(profile.id),
+    }));
+  }, [usersData, adminSet]);
+
+  const hasNextPage = usersData.length > PAGE_SIZE;
+
+  const nextCursor = hasNextPage ? usersData[PAGE_SIZE - 1].user_index : null;
+
+  return {
+    usersList: profiles.slice(0, PAGE_SIZE),
+    nextCursor,
+    hasNextPage,
+    isLoading: usersDataLoading || rolesQueryLoading,
+  };
+};
+
+export const useServices = ({ servicesCursor }: Pagination) => {
+  const { data: servicesData, isLoading: servicesDataLoading } =
+    useSuspenseQuery({
+      queryKey: ["admin-services-data", servicesCursor],
+      queryFn: async () => {
+        let listQuery = supabase
+          .from("services")
+          .select(
+            `
               *,
               publisher:fk_services_user_id (
                 full_name
@@ -209,119 +296,102 @@ export const useAdminData = ({
                 type
               )
             `,
-            )
-            .eq("status", "pending-approval")
-            .order("created_at", { ascending: false });
+          )
+          .eq("status", "published")
+          .order("created_at", { ascending: false })
+          .limit(PAGE_SIZE + 1);
 
-          if (error) throw error;
+        if (servicesCursor) {
+          listQuery = listQuery.lt("created_at", servicesCursor);
+        }
 
-          return data;
-        },
+        const { data, error } = await listQuery;
+
+        if (error) throw error;
+
+        return {
+          servicesList: data.slice(0, PAGE_SIZE)
+        };
       },
-
-      //Coupons query
-      {
-        queryKey: ["coupons", couponsCursor],
-        queryFn: async () => {
-          let query = supabase
-            .from("coupons")
-            .select("*")
-            .order("created_at", { ascending: false })
-            .limit(PAGE_SIZE + 1);
-
-          if (couponsCursor) {
-            query = query.lt("created_at", couponsCursor);
-          }
-
-          const { data, error } = await query;
-
-          if (error) throw error;
-
-          return data;
-        },
-      },
-    ],
-  });
-
-  const adminSet = useMemo(
-    () =>
-      new Set(
-        rolesQuery.data.filter((r) => r.role === "admin").map((r) => r.user_id),
-      ),
-    [rolesQuery.data],
-  );
-
-  const profiles = useMemo(() => {
-    return profilesQuery.data.slice(0, PAGE_SIZE).map((profile) => ({
-      ...profile,
-      is_admin: adminSet.has(profile.id),
-    }));
-  }, [profilesQuery.data, adminSet]);
-
-  const hasMoreUsers = profilesQuery.data.length > PAGE_SIZE;
-  const hasMoreServices = servicesQuery.data.length > PAGE_SIZE;
-  const hasMorePendingServices = pendingServicesQuery.data.length > PAGE_SIZE;
-  const hasMoreCoupons = couponsQuery.data.length > PAGE_SIZE;
-
-  const uniqueServiceProviders = servicesQuery.data.map(service => service.user_id).filter((value, index, self) => self.indexOf(value) === index).length;
-
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
-  const todaySignups = profiles.filter(
-    (user) => new Date(user.created_at) >= todayStart,
-  ).length;
-
-  const stats = {
-    totalUsers: profiles.length,
-    serviceProviders: uniqueServiceProviders,
-    totalServices: servicesQuery.data.length,
-    publishedServices: servicesQuery.data.filter(
-      (s) => s.status === "published",
-    ).length,
-    todaySignups: todaySignups,
-  };
+    });
 
   return {
-    profiles,
-    services: servicesQuery.data.slice(0, PAGE_SIZE),
-    coupons: couponsQuery.data.slice(0, PAGE_SIZE),
-    pendingServices: pendingServicesQuery.data.slice(0, PAGE_SIZE),
+    servicesList: servicesData.servicesList,
+    servicesDataLoading,
+  };
+};
 
-    hasMoreUsers,
-    hasMoreServices,
-    hasMorePendingServices,
-    hasMoreCoupons,
+export const usePendingServices = ({ pendingServicesCursor }: Pagination) => {
+  const { data: pendingServicesData, isLoading: pendingServicesDataLoading } =
+    useSuspenseQuery({
+      queryKey: ["admin-pending-services-data", pendingServicesCursor],
+      queryFn: async () => {
+        let listQuery = supabase
+          .from("services")
+          .select(
+            `
+              *,
+              publisher:fk_services_user_id (
+                full_name
+              ),
+              service_media (
+                id,
+                name,
+                url,
+                thumbnail_url,
+                type
+              )
+            `,
+          )
+          .eq("status", "pending-approval")
+          .order("created_at", { ascending: false })
+          .limit(PAGE_SIZE + 1);
 
-    stats,
+        if (pendingServicesCursor) {
+          listQuery = listQuery.lt("created_at", pendingServicesCursor);
+        }
 
+        const { data, error } = await listQuery;
 
-    nextUsersCursor:
-      profilesQuery.data.length > 0
-        ? profilesQuery.data[
-            Math.min(PAGE_SIZE - 1, profilesQuery.data.length - 1)
-          ].user_index
-        : null,
+        if (error) throw error;
 
-    nextServicesCursor:
-      servicesQuery.data.length > 0
-        ? servicesQuery.data[
-            Math.min(PAGE_SIZE - 1, servicesQuery.data.length - 1)
-          ].created_at
-        : null,
+        return data.slice(0, PAGE_SIZE);
+      },
+    });
 
-    nextPendingServicesCursor:
-      pendingServicesQuery.data.length > 0
-        ? pendingServicesQuery.data[
-            Math.min(PAGE_SIZE - 1, pendingServicesQuery.data.length - 1)
-          ].created_at
-        : null,
+  return {
+    pendingServicesList: pendingServicesData,
+    pendingServicesDataLoading,
+  };
+};
 
-    nextCouponsCursor:
-      couponsQuery.data.length > 0
-        ? couponsQuery.data[
-            Math.min(PAGE_SIZE - 1, couponsQuery.data.length - 1)
-          ].created_at
-        : null,
+export const useCoupons = ({ couponsCursor }: Pagination) => {
+  const { data: couponsData, isLoading: couponsDataLoading } = useSuspenseQuery(
+    {
+      queryKey: ["admin-coupons-data", couponsCursor],
+      queryFn: async () => {
+        let listQuery = supabase
+          .from("coupons")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .limit(PAGE_SIZE + 1);
+
+        if (couponsCursor) {
+          listQuery = listQuery.lt("created_at", couponsCursor);
+        }
+
+        const { data, error } = await listQuery;
+
+        if (error) throw error;
+
+        return data.slice(0, PAGE_SIZE);
+      },
+    },
+  );
+
+  return {
+    couponsList: couponsData,
+    couponsDataLoading,
   };
 };
 

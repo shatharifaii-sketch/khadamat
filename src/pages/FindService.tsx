@@ -108,13 +108,13 @@ const FindService = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <div className="max-w-7xl mx-auto py-4 md:py-8 px-2 md:px-4 sm:px-6 lg:px-8">
       {/* Header */}
-      <div className="text-center mb-8">
-        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
+      <div className="text-center mb-8 px-4">
+        <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-foreground mb-1">
           {t("find_service.find_the_right_service")}
         </h1>
-        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+        <p className="text-md md:text-xl text-muted-foreground max-w-2xl mx-auto">
           {t("find_service.discover_top_services")}
         </p>
       </div>

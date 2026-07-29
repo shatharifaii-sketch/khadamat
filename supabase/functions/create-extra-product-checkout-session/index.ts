@@ -93,7 +93,7 @@ Deno.serve(async (req: Request) => {
   try {
     const { userId, email, name } = await req.json();
 
-    if (!userId || !email || !name) {
+    if (!userId || !name) {
       return new Response(
         JSON.stringify({
           success: false,
@@ -107,6 +107,22 @@ Deno.serve(async (req: Request) => {
           },
         }
       );
+    }
+
+    if (!email || email.length < 3) {
+      return new Response(
+      JSON.stringify({
+        success: false,
+        error: "no_email",
+      }),
+      {
+        status: 200,
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json",
+        },
+      }
+    );
     }
 
     let customerId = await getCustomerIdFromDB(userId);

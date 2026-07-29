@@ -45,7 +45,7 @@ const CreateReviewForm = ({ serviceId, closeForm }: Props) => {
                             {t("service.reviews.dialog.rating_label")}
                         </Label>
                         <div className='flex items-center gap-2'>
-                            <div className='flex items-center'>
+                            <div className='flex items-center gap-2'>
                                 {[...Array(5)].map((_, index) => (
                                 <StarIcon
                                     key={index}
@@ -53,6 +53,7 @@ const CreateReviewForm = ({ serviceId, closeForm }: Props) => {
                                     fill={index < formData.rating ? '#fbbf24' : 'none'}
                                     stroke={index < formData.rating ? '#fbbf24' : '#d1d5db'}
                                     onClick={() => setFormData({ ...formData, rating: index + 1 })}
+                                    className='size-7'
                                 />
                             ))}
                             </div>

@@ -160,83 +160,10 @@ Deno.serve(async (req: Request) => {
   try {
     const { phone, token } = await req.json();
 
-    const { data, error: profileError } = await supabase.from("profiles").select("*").eq("phone", phone).maybeSingle();
-
-    if (profileError) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: profileError,
-        }),
-        {
-          status: 400,
-          headers: {
-            ...corsHeaders,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    }
-
-    if (!data) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: {
-            code: "phone_not_found",
-            message: "Phone number not found",
-          },
-        }),
-        {
-          status: 400,
-          headers: {
-            ...corsHeaders,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    }
-    
-    const { success, error } = await compareTokens(token, phone);
-
-    if (!success) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: error,
-        }),
-        {
-          status: 400,
-          headers: {
-            ...corsHeaders,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    }
-
-    const { data: user, error: userError } = await supabase.auth.admin.updateUserById(
-      data.id,
-      {
-        phone_confirm: true
-      }
-    )
-
-    if (userError) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: userError,
-        }),
-        {
-          status: 400,
-          headers: {
-            ...corsHeaders,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    }
+    const { data, error } = await supabase.auth.verifyOtp({
+      phone,
+      token
+    })
 
     return new Response(
       JSON.stringify({

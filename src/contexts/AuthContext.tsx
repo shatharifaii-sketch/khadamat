@@ -4,6 +4,8 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import AppLoading from '@/components/AppLoading';
 import { toast } from 'sonner';
+import { redirect } from 'react-router-dom';
+import { ArrowLeftToLine } from 'lucide-react';
 
 interface AuthContextType {
   user: User | null;
@@ -13,16 +15,42 @@ interface AuthContextType {
   signIn: (email: string | null, password: string, phone: { countryCode: string; number: string } | null, method: string) => Promise<{ error: unknown }>;
   signOut: () => Promise<void>;
   verifyOtp: (email: string, token: string) => Promise<{ error?: unknown, data?: unknown }>;
+  resendOtp: (phone: string) => Promise<{ error?: unknown, success?: boolean }>;
   verifyPhoneOtp: (phone: { countryCode: string; number: string }, token: string, password: string) => Promise<{ error?: unknown, data?: User }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+async function checkUser({
+  phone,
+  email,
+}: { phone: string, email: string, }): Promise<string> {
+  const { data, error: userExistsError } = await supabase.functions.invoke(
+      "check-if-user-exists",
+      {
+        body: {
+          phone: phone,
+          email: email
+        }
+      }
+    );
+
+    if (userExistsError) throw userExistsError;
+
+    if (data.userExists) {
+      return "user_exists";
+    }
+
+    return "";
+}
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const lang = localStorage.getItem("language") || "en";
+
+  console.log("USER DATA: ", user)
 
   useEffect(() => {
     // Set up auth state listener
@@ -53,15 +81,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const signUp = async (email: string | null, password: string, fullName: string, passwordConfirm: string, phone: { countryCode: string; number: string } | null, method: string) => {
+    const res = await checkUser({
+      phone: `+${phone.countryCode}${phone.number}`,
+      email
+    })
+
+    if (res == "user_exists") {
+      return { data: null, error: res}
+    }
+
     if (method == "phone") {
-      const { data, error } = await supabase.functions.invoke('register-with-whatsapp-otp', {
-        body: JSON.stringify({
-          name: fullName,
-          lang,
-          phone: `+${phone.countryCode}${phone.number}`,
-          password,
-          passwordConfirm
-        })
+      const { data, error } = await supabase.auth.signInWithOtp({
+        phone: `+${phone.countryCode}${phone.number}`,
+        options: {
+          shouldCreateUser: true,
+          channel: 'sms',
+          data: {
+            full_name: fullName
+          }
+        },
       });
 
       if (error) {
@@ -70,11 +108,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return error
       }
 
-      if (!data.success) {
-        return data.error;
-      }
-
-      return data.success;
+      return data;
     } else if (method == "email") {
       console.log('Attempting sign up for:', email);
       const { data, error } = await supabase.functions.invoke('register-user', {
@@ -90,7 +124,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const err = data.error;
 
         if (err.code === 'email_exists') {
-          toast.error('البريد الإلكتروني مستخدم بالفعل');
+          toast.error(lang == 'ar' ? 'البريد الإلكتروني مستخدم بالفعل' : "Email Address is already in use!");
         }
 
         return { data: null, error: err };
@@ -104,10 +138,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     countryCode: string;
     number: string;
   } | null, method: string) => {
+    const res = await checkUser({
+      phone: `+${phone.countryCode}${phone.number}`,
+      email
+    })
+
+    if (res != "user_exists") {
+      return { data: null, error: "user_not_found"}
+    }
+
     if (method == "phone") {
       const { data, error } = await supabase.auth.signInWithOtp({
         phone: `+${phone.countryCode}${phone.number}`,
         options: {
+          shouldCreateUser: false,
           channel: 'sms'
         }
       });
@@ -193,30 +237,48 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   const resendOtp = async (phone: string) => {
-    return { data: 'OTP resent successfully' };
+    const { data, error } = await supabase.auth.signInWithOtp({
+      phone,
+      options: {
+        shouldCreateUser: false,
+        channel: 'sms'
+      }
+    });
+
+    if (error) {
+      console.log("Error resending OTP: ", error)
+      return { success: false, error: null }
+    }
+    return { success: true, error: null };
   }
 
   const verifyPhoneOtp = async (phone: { countryCode: string; number: string }, token: string, password: string) => {
-    const { data, error } = await supabase.functions.invoke(
-      "verify-phone-whatsapp-otp", {
-      body: JSON.stringify({ phone, token })
-    }
-    );
+    // const { data, error } = await supabase.functions.invoke(
+    //   "verify-phone-whatsapp-otp", {
+    //   body: JSON.stringify({ phone, token })
+    // }
+    // );
 
-    if (error) {
-      console.error('Error verifying OTP:', error);
-      return { error };
-    }
+    // if (error) {
+    //   console.error('Error verifying OTP:', error);
+    //   return { error };
+    // }
 
-    const { data: user, error: userError } = await supabase.auth.signInWithPassword({
+    // const { data: user, error: userError } = await supabase.auth.signInWithPassword({
+    //   phone: `+${phone.countryCode}${phone.number}`,
+    //   password
+    // })
+
+    const { data, error: userError } = await supabase.auth.verifyOtp({
       phone: `+${phone.countryCode}${phone.number}`,
-      password
-    })
+      token,
+      type: 'sms'
+    });
 
     if (userError) {
       console.error('Sign in error:', userError);
 
-      throw error;
+      throw userError;
     } else {
       console.log('Sign in successful', userId);
       const { error } = await supabase
@@ -237,7 +299,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     return {
       error: null,
-      user
+      data
     };
   }
 
@@ -249,7 +311,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     signIn,
     signOut,
     verifyOtp,
-    verifyPhoneOtp
+    verifyPhoneOtp,
+    resendOtp
   };
 
   return (

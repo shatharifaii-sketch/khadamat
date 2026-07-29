@@ -25,11 +25,11 @@ const ServicePage = () => {
   return (
     <div className={cn(
       isMobile 
-        ? 'max-w-4xl mx-auto py-5 px-4 space-y-5'
+        ? 'max-w-4xl mx-auto py-5 px-4 space-y-2'
         : 'max-w-4xl mx-auto py-12 px-4 space-y-10'
       )}>
       <div className="flex items-center justify-center">
-        <h1 className="md:text-2xl font-bold text-xl">{t("service.top_title")}</h1>
+        <h1 className="md:text-2xl text-lg text-muted-foreground font-medium">{t("service.top_title")}</h1>
       </div>
       <Suspense fallback={<ServiceLoading />}>
         <ErrorBoundary fallback={<ServiceQueryError />}>

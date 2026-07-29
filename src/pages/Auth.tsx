@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { Home, Loader, Mail, Phone } from "lucide-react";
+import { ArrowLeftToLine, Home, Loader, Mail, Phone } from "lucide-react";
 import GoogleSignInButton from "@/components/GoogleSignInButton";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
@@ -27,18 +27,8 @@ import {
 } from "@/components/ui/select";
 import { Dialog } from "@/components/ui/dialog";
 import PhoneVerification from "@/components/PhoneVerification";
-
-const countries = [
-  { code: "970", label: "PS +970" },
-  { code: "972", label: "IS +972" },
-  { code: "966", label: "SA +966" },
-  { code: "20", label: "EG +20" },
-  { code: "971", label: "AE +971" },
-  { code: "963", label: "SY +963" },
-  { code: "962", label: "JO +962" },
-  { code: "31", label: "NL +31" },
-  { code: "1", label: "US +1" },
-];
+import { SelectLabel } from "@radix-ui/react-select";
+import { countries } from "@/types/constants";
 
 const Auth = () => {
   const { t } = useTranslation("auth");
@@ -78,7 +68,7 @@ const Auth = () => {
       return;
     }
 
-    if (usePhone && (!phone.countryCode || !phone.number || !password)) {
+    if (usePhone && (!phone.countryCode || !phone.number)) {
       toast.error(t("required_fields_error"));
       return;
     }
@@ -109,12 +99,36 @@ const Auth = () => {
               toast.error(t("email_not_confirmed"));
             }
           } else {
-            toast.error(t("login_error") + error);
+            if (typeof error == "string" && error == "user_not_found") {
+              toast.warning(
+                lang == "ar" ? "ما لقينا المستخدم!" : "User not found!",
+                {
+                  icon: (
+                    <>
+                      <ArrowLeftToLine size={16} />
+                    </>
+                  ),
+                  action: {
+                    label: lang == "ar" ? "إنشاء حساب!" : "Signup!",
+                    onClick: () => {
+                      setIsLogin(false);
+                    },
+                  },
+                },
+              );
+            }
           }
+
+          return;
         } else {
-          toast.success(t("login_success"));
-          const from = location.state?.from?.pathname || "/";
-          navigate(from, { replace: true });
+          if (usePhone) {
+            setLoading(false);
+            setVerifyingPhone(true);
+          } else {
+            toast.success(t("login_success"));
+            const from = location.state?.from?.pathname || "/";
+            navigate(from, { replace: true });
+          }
         }
       } else {
         const { data, error } = await signUp(
@@ -135,10 +149,30 @@ const Auth = () => {
             setLoading(false);
             setVerifyingPhone(true);
           }
+        } else if (error == "user_exists") {
+          toast.warning(
+            lang == "ar" ? "المستخدم مسجل من قبل!" : "User already exsts!",
+            {
+              icon: (
+                <>
+                  <ArrowLeftToLine size={16} />
+                </>
+              ),
+              action: {
+                label: lang == "ar" ? "تسجيل الدخول!" : "Login!",
+                onClick: () => {
+                  setIsLogin(true);
+                },
+              },
+            },
+          );
         }
       }
     } catch (error: unknown) {
-      console.error('Auth error:', error instanceof Error ? error.message : error);
+      console.error(
+        "Auth error:",
+        error instanceof Error ? error.message : error,
+      );
       toast.error(t("unexpected_error"));
     } finally {
       setLoading(false);
@@ -179,11 +213,8 @@ const Auth = () => {
   };
 
   return (
-    <div
-      className="min-h-screen bg-background flex items-center justify-center"
-      dir={lang === "ar" ? "rtl" : "ltr"}
-    >
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="w-full max-w-md" dir={lang === "ar" ? "rtl" : "ltr"}>
         {/* Header */}
         <div className="text-center mb-8 arabic">
           <Link
@@ -213,7 +244,6 @@ const Auth = () => {
             </CardDescription>
           </CardHeader>
           <div className="flex flex-col justify-center items-center mb-2">
-            <p className="text-sm font-medium text-muted-foreground/70">method</p>
             <div className="flex justify-between items-center p-1 gap-2 border rounded-full w-fit mx-auto bg-muted/70 overflow-hidden">
               <div
                 onClick={() => setUsePhone((prev) => !prev)}
@@ -262,10 +292,11 @@ const Auth = () => {
                         dir="rtl"
                       >
                         <SelectTrigger className="w-[130px]">
-                          <SelectValue />
+                          <SelectValue placeholder={t("code")} />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectGroup>
+                            <SelectLabel>{t("code")}</SelectLabel>
                             {countries.map((c) => (
                               <SelectItem key={c.code} value={c.code}>
                                 <div className="flex items-center gap-2">
@@ -301,18 +332,20 @@ const Auth = () => {
                 )}
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="password">{t("password")}</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder={t("password_placeholder")}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-              {!isLogin && (
+              {!usePhone && (
+                <div className="space-y-2">
+                  <Label htmlFor="password">{t("password")}</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder={t("password_placeholder")}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+              )}
+              {!isLogin && !usePhone && (
                 <div className="space-y-2">
                   <Label htmlFor="password">{t("confirm_password")}</Label>
                   <Input
@@ -325,7 +358,7 @@ const Auth = () => {
                   />
                 </div>
               )}
-              {isLogin && (
+              {isLogin && !usePhone && (
                 <Link
                   to="/forgot-password"
                   className="text-sm text-primary hover:underline text-end"

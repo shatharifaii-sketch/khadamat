@@ -5,16 +5,18 @@ interface Props {
   page: number;
   setCursorHistory: React.Dispatch<React.SetStateAction<number[]>>;
   setPage: React.Dispatch<React.SetStateAction<number>>;
+  hasNextPage: boolean
 }
 
 const PaginationComponent = ({
   cursor,
   page,
   setCursorHistory,
-  setPage
+  setPage,
+  hasNextPage
 }: Props) => {
   const handleNextPage = () => {
-    if (!cursor) return;
+    if (cursor == null) return;
 
     setCursorHistory(prev => [
       ...prev,

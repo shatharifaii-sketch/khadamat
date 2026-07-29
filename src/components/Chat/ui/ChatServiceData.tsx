@@ -14,30 +14,32 @@ interface Props {
 }
 const ChatServiceData = ({ service, images, setAttachment }: Props) => {
     const { t } = useTranslation("chat");
+    const lang = localStorage.getItem("language") || "en";
+
     const [imageHovered, setImageHovered] = useState<string | null>(null);
 
     return (
-        <div className='flex justify-center md:justify-start w-full items-start lg:items-start lg:flex-col lg:gap-10 gap-20' dir='ltr'>
+        <div className='flex justify-start w-full items-start lg:flex-col lg:gap-10 gap-20' dir={lang == "en" ? "ltr" : "rtl"}>
             <div className='flex gap-3 items-center justify-center'>
                     {images.length > 0 ? (
                         <div className='overflow-auto flex lg:flex-col gap-2 w-[200px] h-[130px] lg:w-[350px] lg:max-h-[500px] lg:min-h-[210px]'>
                             {images.map(image => (
                                 <div className='relative min-w-[200px] flex items-center object-center' key={image.id} onMouseEnter={() => setImageHovered(image.id)} onMouseLeave={() => setImageHovered(null)}>
                                     <Button 
-                                        onClick={() => setAttachment(image.image_url)} className={cn('absolute bottom-0 w-full backdrop-blur-md bg-black/30 z-10 rounded-b-md opacity-0 px-2 py-2 flex items-center gap-2', imageHovered === image.id && 'opacity-60 cursor-pointer bg-white')} variant='secondary' dir='rtl'>
+                                        onClick={() => setAttachment(image.url)} className={cn('absolute bottom-0 w-full backdrop-blur-md bg-black/30 z-10 rounded-b-md opacity-0 px-2 py-2 flex items-center gap-2', imageHovered === image.id && 'opacity-60 cursor-pointer bg-white')} variant='secondary' dir='rtl'>
                                         <Paperclip className='text-black' />
                                         <span className='text-xs text-black text-start opacity-100'>
                                             {t("add_attachment")}
                                         </span>
                                     </Button>
-                                    <img className='border rounded-md max-h-50 lg:min-w-[300px]' src={image.image_url} alt={image.image_name} />
+                                    <img className='border rounded-md max-h-50 lg:min-w-[300px]' src={image.url} alt={image.name} />
                                 </div>
                             ))}
                         </div>
                     ) : (
                         <></>
                     )}
-                <div className='text-center md:text-start'>
+                <div className='md:text-start w-full md:w-fit'>
                     <Link to={`/find-service/${service.id}`} className='text-xl font-bold  hover:underline-offset-1'>{service.title}</Link>
                     <p className='text-muted-foreground'>{service.price_range}</p>
                     <p className='text-muted-foreground text-sm'>{t(service.location)}</p>

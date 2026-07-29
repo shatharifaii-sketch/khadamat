@@ -52,6 +52,22 @@ Deno.serve(async (req: Request) => {
   try {
     const { priceId, userId, email, subscriptionTierId } = await req.json();
 
+    if (!email || email.length < 3) {
+      return new Response(
+      JSON.stringify({
+        success: false,
+        error: "no_email",
+      }),
+      {
+        status: 200,
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    }
+
     let customerId = await getCustomerIdFromDB(userId);
 
     if (!customerId) {
