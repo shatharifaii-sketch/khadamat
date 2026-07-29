@@ -71,7 +71,7 @@ const SubscriptionCard = ({
         cardClassName,
       )}
     >
-      <CardHeader className="text-2xl text-center font-bold">
+      <CardHeader className="md:text-2xl text-center font-bold">
         {subscription?.title}
         <span className="block mt-3">
           <Badge
@@ -138,12 +138,6 @@ const SubscriptionCard = ({
         </div>
       </CardContent>
       <CardFooter>
-        {/* <Link
-                    to={`/subscription-starter/${subscription.id}/${yearly ? "yearly" : "monthly"}`}
-                    className='bg-white text-muted-foreground flex-1 shadow-md border hover:text-white hover:bg-primary transition-all duration-200 rounded-md text-center py-2'
-                >
-                    {t("subscribe")}
-                </Link> */}
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button
@@ -298,6 +292,7 @@ const SubscriptionsModal = ({
       priceId: price_id,
       userId: user.id,
       email: user.email,
+      name: user.full_name
     });
 
     setDrawerOpen?.(false);
@@ -312,7 +307,7 @@ const SubscriptionsModal = ({
       <HeaderWrapper className="flex items-center justify-between">
         <TitleWrapper
           className={cn(
-            "text-2xl w-full",
+            "text-lg md:text-2xl w-full",
             asDrawer ? "text-start" : "text-center",
           )}
         >
@@ -327,13 +322,13 @@ const SubscriptionsModal = ({
           <div className="border-2 border-dashed rounded-lg p-2 lg:px-4">
             <p className="text-lg mb-2">{t("choose_plan")}</p>
             <div
-              dir="ltr"
+              dir={lang == "en" ? "ltr" : "rtl"}
               className="flex flex-col items-center justify-center gap-2 mb-4"
             >
-              <p className="my-2 text-center text-primary bg-[#fffaf5] px-5 py-2 rounded-sm shadow shadow-primary">
+              <p className="my-2 text-center text-primary bg-[#fffaf5] px-4 py-2 rounded-sm shadow shadow-primary">
                 {t("start_for_free")}
               </p>
-              <div className={cn("flex items-center gap-2", switchClassName)}>
+              <div dir="ltr" className={cn("flex items-center gap-2", switchClassName)}>
                 <span
                   className={cn(
                     !yearly && "text-primary",
