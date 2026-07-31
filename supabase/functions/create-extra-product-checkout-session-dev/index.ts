@@ -130,6 +130,7 @@ Deno.serve(async (req: Request) => {
 
     if (!customerId) {
       const customer = await stripe.customers.create({
+        name,
         email,
         metadata: {
           userId
