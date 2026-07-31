@@ -21,15 +21,21 @@ const corsHeaders = {
 };
 
 async function getCustomerIdFromDB(user_id: string) {
-  const { data: { stripe_customer_id }, error: customerError } = await supabase.from("profiles").select("*").eq("id", user_id).maybeSingle();
+  const { data: { stripe_customer_id, full_name }, error: customerError } = await supabase.from("profiles").select("*").eq("id", user_id).maybeSingle();
 
   if (customerError) {
     console.log(customerError);
 
-    return null;
+    return {
+      customerId: null,
+      name: null
+    };
   }
 
-  return stripe_customer_id
+  return {
+    custoemrId: stripe_customer_id,
+    name: full_name
+  }
 }
 
 Deno.serve(async (req: Request) => {
@@ -67,10 +73,27 @@ Deno.serve(async (req: Request) => {
     );
     }
 
-    let customerId = await getCustomerIdFromDB(userId);
+    let { customerId, name } = await getCustomerIdFromDB(userId);
+
+    if (!name) {
+      return new Response(
+      JSON.stringify({
+        success: false,
+        error: "no_name",
+      }),
+      {
+        status: 200,
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    }
 
     if (!customerId) {
       const customer = await stripe.customers.create({
+        name,
         email,
         metadata: {
           userId
