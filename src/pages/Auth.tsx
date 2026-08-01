@@ -117,6 +117,10 @@ const Auth = () => {
                 },
               );
             }
+
+            if (typeof error == "string" && error == "Too many requests. Please wait a minute before trying again.") {
+              toast.error(t("too_many_requests"));
+            }
           }
 
           return;
@@ -166,6 +170,8 @@ const Auth = () => {
               },
             },
           );
+        } else if (error == "Too many requests. Please wait a minute before trying again.") {
+          toast.error(t("too_many_requests"));
         }
       }
     } catch (error: unknown) {

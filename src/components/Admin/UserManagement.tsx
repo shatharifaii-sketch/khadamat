@@ -45,7 +45,7 @@ export const UserManagement = ({
   const [cursorHistory, setCursorHistory] = useState<(number | null)[]>([null]);
   const cursor = cursorHistory[page - 1];
 
-  const { usersList: users, nextCursor, hasNextPage } = useUsers({ usersCursor: cursor })
+  const { usersList: users, nextCursor, hasNextPage, numOfUsers } = useUsers({ usersCursor: cursor })
   
   const { toast } = useToast();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -227,8 +227,10 @@ export const UserManagement = ({
           cursor={nextCursor}
           page={page}
           setPage={setPage}
+          cursorHistory={cursorHistory}
           setCursorHistory={setCursorHistory}
           hasNextPage={hasNextPage}
+          count={numOfUsers}
         />
       </CardContent>
     </Card>

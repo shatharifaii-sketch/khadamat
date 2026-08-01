@@ -358,6 +358,7 @@ export type Database = {
         Row: {
           active: boolean
           code: string
+          coupon_index: number | null
           created_at: string
           description: string | null
           discount_amount: number | null
@@ -374,6 +375,7 @@ export type Database = {
         Insert: {
           active?: boolean
           code: string
+          coupon_index?: number | null
           created_at?: string
           description?: string | null
           discount_amount?: number | null
@@ -390,6 +392,7 @@ export type Database = {
         Update: {
           active?: boolean
           code?: string
+          coupon_index?: number | null
           created_at?: string
           description?: string | null
           discount_amount?: number | null
@@ -670,6 +673,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      otp_requests: {
+        Row: {
+          created_at: string | null
+          id: string
+          phone: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          phone: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          phone?: string
+        }
+        Relationships: []
       }
       otp_settings: {
         Row: {
@@ -1186,6 +1207,7 @@ export type Database = {
           phone: string
           price_range: string
           review_count: number
+          service_index: number | null
           status: string
           title: string
           updated_at: string
@@ -1207,6 +1229,7 @@ export type Database = {
           phone: string
           price_range: string
           review_count?: number
+          service_index?: number | null
           status?: string
           title: string
           updated_at?: string
@@ -1228,6 +1251,7 @@ export type Database = {
           phone?: string
           price_range?: string
           review_count?: number
+          service_index?: number | null
           status?: string
           title?: string
           updated_at?: string
@@ -2047,6 +2071,24 @@ export type Database = {
           inserted_at?: string
           name?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      trigger_debug: {
+        Row: {
+          created_at: string | null
+          id: number
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: never
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: never
+          user_id?: string | null
         }
         Relationships: []
       }

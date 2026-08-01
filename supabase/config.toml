@@ -498,3 +498,25 @@ entrypoint = "./functions/check-if-user-exists/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/check-if-user-exists/*.html" ]
+
+[functions.handle-otp]
+enabled = true
+verify_jwt = false
+import_map = "./functions/handle-otp/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/handle-otp/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/handle-otp/*.html" ]
+
+[functions.handle-phone-otp]
+enabled = true
+verify_jwt = false
+import_map = "./functions/handle-phone-otp/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/handle-phone-otp/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/handle-phone-otp/*.html" ]

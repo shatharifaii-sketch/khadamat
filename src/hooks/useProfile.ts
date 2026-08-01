@@ -36,7 +36,6 @@ export const useProfile = () => {
 
       if (error) throw error;
 
-      console.log(data);
       return data;
     },
     enabled: !!user

@@ -13,6 +13,7 @@ import ServiceForm from './ui/ServiceForm';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 import PendingServiceData from './ui/PendingServiceData';
 import { useTranslation } from 'react-i18next';
+import PaginationComponent from '../PaginationComponent';
 
 interface Props {
   count?: number
@@ -28,7 +29,7 @@ const PendingServicesManagement = ({ count }: Props) => {
   const [cursorHistory, setCursorHistory] = useState<number[]>([0]);
   const cursor = cursorHistory[page - 1];
 
-  const { pendingServicesList: services } = usePendingServices({ pendingServicesCursor: cursor }) 
+  const { pendingServicesList: services, hasNextPage, nextCursor, pendServicesCount } = usePendingServices({ pendingServicesCursor: cursor }) 
 
   const [serviceToAccept, setServiceToAccept] = useState<Service | null>(null);
   const [sortOption, setSortOption] = useState<SortOption>('date-desc');
@@ -166,6 +167,15 @@ const PendingServicesManagement = ({ count }: Props) => {
             )}
           </TableBody>
         </Table>
+        <PaginationComponent
+          cursor={nextCursor}
+          page={page}
+          setPage={setPage}
+          setCursorHistory={setCursorHistory}
+          hasNextPage={hasNextPage}
+          count={pendServicesCount}
+          cursorHistory={cursorHistory}
+        />
       </CardContent>
     </Card>
   );

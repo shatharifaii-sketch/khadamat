@@ -6,50 +6,50 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { withSupabase } from "@supabase/server";
 
-console.log("Hello from Functions!");
-
 // This endpoint uses 'publishable' | 'secret' access, apiKey is required.
 // Use publishable for Client-facing, key-validated endpoints
 // Use secret for Server-to-server, internal calls
 export default {
   fetch: withSupabase({ auth: ["publishable", "secret"] }, async (req, ctx) => {
-    // Called by another service with a secret key
-    // ctx.supabaseAdmin bypasses RLS — use for privileged operations
-    /*
-    if (ctx.authMode === "secret") {
-      const { user_id } = await req.json();
-      const { data } = await ctx.supabaseAdmin.auth.admin.getUserById(user_id);
+    try {
+      const supabase = ctx.supabaseAdmin;
 
+      const { phone, email, method } = await req.json();
+
+      console.log("DATA: ", phone, email, method);
+
+      if (method == "phone") {
+        const { data } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("phone", phone)
+          .maybeSingle();
+
+        return Response.json({
+          userExists: !!data,
+          error: data ? null : "no_user_exists",
+        });
+      } else {
+        const { data } = await supabase
+          .from("profiles_with_email")
+          .select("id")
+          .eq("email", email)
+          .maybeSingle();
+
+        console.log(data);
+
+        return Response.json({
+          userExists: !!data,
+          error: data ? null : "no_user_exists",
+        });
+      }
+    } catch (error) {
+      console.log("ERROR: ", error);
       return Response.json({
-        email: data?.user?.email,
+        userExists: false,
+        error: error,
       });
     }
-    */
-   try {
-    const supabase = ctx.supabaseAdmin;
-
-    const { phone, email } = await req.json();
-
-    const { data } = await supabase.auth.admin.listUsers();
-    const exists = data.users.some(user => {
-      if (phone.length > 3) {
-        return user.phone == phone;
-      } else if (email.length > 3) {
-        return user.email == email;
-      }
-    });
-
-    return Response.json({
-      userExists: !!exists,
-      error: null
-    });
-   } catch (error) {
-    console.log("ERROR: ", error);
-    return Response.json({
-      userExists: false,
-      error: error
-    });
-   }
   }),
 };
 

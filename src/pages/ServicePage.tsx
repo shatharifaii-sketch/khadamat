@@ -25,7 +25,7 @@ const ServicePage = () => {
   return (
     <div className={cn(
       isMobile 
-        ? 'max-w-4xl mx-auto py-5 px-4 space-y-2'
+        ? 'max-w-4xl mx-auto py-5 px-2 space-y-2'
         : 'max-w-4xl mx-auto py-12 px-4 space-y-10'
       )}>
       <div className="flex items-center justify-center">

@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { SelectLabel } from '@radix-ui/react-select';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import PaginationComponent from '../PaginationComponent';
 
 
 export interface UserProfile {
@@ -35,7 +36,7 @@ export const ServiceManagement = ({ count }: ServiceManagementProps) => {
   const [cursorHistory, setCursorHistory] = useState<number[]>([0]);
   const cursor = cursorHistory[page - 1];
 
-  const { servicesList: services } = useServices({ servicesCursor: cursor });
+  const { servicesList: services, hasNextPage, nextCursor, servicesCount } = useServices({ servicesCursor: cursor });
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
@@ -183,6 +184,16 @@ export const ServiceManagement = ({ count }: ServiceManagementProps) => {
             ))}
           </TableBody>
         </Table>
+
+        <PaginationComponent
+          cursor={nextCursor}
+          page={page}
+          setPage={setPage}
+          setCursorHistory={setCursorHistory}
+          hasNextPage={hasNextPage}
+          count={servicesCount}
+          cursorHistory={cursorHistory}
+        />
       </CardContent>
     </Card>
   );

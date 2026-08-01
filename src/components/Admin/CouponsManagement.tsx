@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import CouponForm from './ui/CouponForm';
 import { useAdminFunctionality, useCoupons } from '@/hooks/useAdminFunctionality';
 import { useTranslation } from 'react-i18next';
+import PaginationComponent from '../PaginationComponent';
 
 interface Props {
     count?: number;
@@ -30,7 +31,7 @@ const CouponsManagement = ({
     const [cursorHistory, setCursorHistory] = useState<number[]>([0]);
     const cursor = cursorHistory[page - 1];
 
-    const { couponsList: coupons } = useCoupons({
+    const { couponsList: coupons, hasNextPage, nextCursor, couponCount } = useCoupons({
         couponsCursor: cursor
     })
 
@@ -170,6 +171,15 @@ const CouponsManagement = ({
                         ))}
                     </TableBody>
                 </Table>
+                <PaginationComponent
+          cursor={nextCursor}
+          page={page}
+          setPage={setPage}
+          setCursorHistory={setCursorHistory}
+          hasNextPage={hasNextPage}
+          count={couponCount}
+          cursorHistory={cursorHistory}
+        />
             </CardContent>
         </Card>
     )

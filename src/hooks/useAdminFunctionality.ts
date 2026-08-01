@@ -81,7 +81,7 @@ interface SaveImageProps {
   serviceId: string;
 }
 
-const PAGE_SIZE = 10;
+export const PAGE_SIZE = 10;
 
 export const useIsAdmin = (): boolean => {
   const { user } = useAuth();
@@ -104,88 +104,92 @@ export const useIsAdmin = (): boolean => {
 };
 
 export const useAdminData = () => {
-  const [
-    profilesQuery,
-    servicesQuery,
-    pendingServicesQuery,
-    couponsQuery,
-  ] = useSuspenseQueries({
-    queries: [
-      //Users query
-      {
-        queryKey: ["profiles"],
-        queryFn: async () => {
-          const query = supabase.from("profiles_with_email");
+  const [profilesQuery, servicesQuery, pendingServicesQuery, couponsQuery] =
+    useSuspenseQueries({
+      queries: [
+        //Users query
+        {
+          queryKey: ["profiles"],
+          queryFn: async () => {
+            const query = supabase.from("profiles_with_email");
 
-          const { data, count: usersCount, error: numQueryError } =
-            await query.select("id, created_at", { count: "exact" });
+            const {
+              data,
+              count: usersCount,
+              error: numQueryError,
+            } = await query.select("id, created_at", { count: "exact" });
 
-          if (numQueryError) throw numQueryError;
+            if (numQueryError) throw numQueryError;
 
-          return {
-            data, 
-            usersCount
-          };
+            return {
+              data,
+              usersCount,
+            };
+          },
         },
-      },
 
-      // Published services
-      {
-        queryKey: ["services"],
-        queryFn: async () => {
-          const query = supabase
-            .from("services")
-            .select("id, user_id", { count: "exact" });
+        // Published services
+        {
+          queryKey: ["services"],
+          queryFn: async () => {
+            const query = supabase
+              .from("services")
+              .select("id, user_id", { count: "exact" });
 
-          const { data, count: servicesCount, error: numQueryError } = await query;
+            const {
+              data,
+              count: servicesCount,
+              error: numQueryError,
+            } = await query;
 
-          if (numQueryError) throw numQueryError;
+            if (numQueryError) throw numQueryError;
 
-          const { count: pubServicesCount, error: pubNumQueryError } =
-            await query.eq("status", "published");
+            const { count: pubServicesCount, error: pubNumQueryError } =
+              await query.eq("status", "published");
 
-          if (pubNumQueryError) throw pubNumQueryError;
+            if (pubNumQueryError) throw pubNumQueryError;
 
-          return {
-            data,
-            servicesCount,
-            pubServicesCount,
-          };
+            return {
+              data,
+              servicesCount,
+              pubServicesCount,
+            };
+          },
         },
-      },
 
-      //Pending services query
-      {
-        queryKey: ["pending-services"],
-        queryFn: async () => {
-          const query = supabase.from("services");
+        //Pending services query
+        {
+          queryKey: ["pending-services"],
+          queryFn: async () => {
+            const query = supabase.from("services");
 
-          const { count: pendServicesCount, error: numQueryError } = await query
-            .select("id", { count: "exact", head: true })
-            .eq("status", "pending-approval");
+            const { count: pendServicesCount, error: numQueryError } =
+              await query
+                .select("id", { count: "exact", head: true })
+                .eq("status", "pending-approval");
 
-          if (numQueryError) throw numQueryError;
+            if (numQueryError) throw numQueryError;
 
-          return pendServicesCount;
+            return pendServicesCount;
+          },
         },
-      },
 
-      //Coupons query
-      {
-        queryKey: ["coupons"],
-        queryFn: async () => {
-          const query = supabase.from("coupons");
+        //Coupons query
+        {
+          queryKey: ["coupons"],
+          queryFn: async () => {
+            const query = supabase.from("coupons");
 
-          const { count: couponsCount, error: numQueryError } =
-            await query.select("id", { count: "exact", head: true });
+            const { count: couponsCount, error: numQueryError } =
+              await query.select("id", { count: "exact", head: true });
 
-          if (numQueryError) throw numQueryError;
+            if (numQueryError) throw numQueryError;
 
-          return couponsCount;
+            return couponsCount;
+          },
         },
-      },
-    ],
-  });
+      ],
+    });
 
   const uniqueServiceProviders = servicesQuery.data.data
     .map((service) => service.user_id)
@@ -204,7 +208,7 @@ export const useAdminData = () => {
     publishedServices: servicesQuery.data.pubServicesCount,
     todaySignups: todaySignups,
     couponsCount: couponsQuery.data,
-    pendingServicesCount: pendingServicesQuery.data
+    pendingServicesCount: pendingServicesQuery.data,
   };
 
   return {
@@ -234,7 +238,10 @@ export const useUsers = ({ usersCursor }: Pagination) => {
     },
   });
 
-  const { data: rolesQuery, isLoading: rolesQueryLoading } = useSuspenseQuery({
+  const {
+    data: { roles, counts },
+    isLoading: rolesQueryLoading,
+  } = useSuspenseQuery({
     queryKey: ["user-roles"],
     staleTime: 1000 * 60 * 10,
     queryFn: async () => {
@@ -250,10 +257,8 @@ export const useUsers = ({ usersCursor }: Pagination) => {
 
   const adminSet = useMemo(
     () =>
-      new Set(
-        rolesQuery.filter((r) => r.role === "admin").map((r) => r.user_id),
-      ),
-    [rolesQuery],
+      new Set(roles.filter((r) => r.role === "admin").map((r) => r.user_id)),
+    [roles],
   );
 
   const profiles = useMemo(() => {
@@ -272,6 +277,7 @@ export const useUsers = ({ usersCursor }: Pagination) => {
     nextCursor,
     hasNextPage,
     isLoading: usersDataLoading || rolesQueryLoading,
+    numOfUsers: counts.userCount,
   };
 };
 
@@ -298,25 +304,47 @@ export const useServices = ({ servicesCursor }: Pagination) => {
             `,
           )
           .eq("status", "published")
-          .order("created_at", { ascending: false })
+          .order("service_index", { ascending: true })
           .limit(PAGE_SIZE + 1);
 
         if (servicesCursor) {
-          listQuery = listQuery.lt("created_at", servicesCursor);
+          listQuery = listQuery.gt("service_index", servicesCursor);
         }
 
         const { data, error } = await listQuery;
 
         if (error) throw error;
 
-        return {
-          servicesList: data.slice(0, PAGE_SIZE)
-        };
+        return data;
       },
     });
 
+  const { data: servicesCount, isLoading: pubServicesCountLoading } =
+    useSuspenseQuery({
+      queryKey: ["published-services-count"],
+      queryFn: async () => {
+        const { count, error } = await supabase
+          .from("services")
+          .select("id", { count: "exact", head: true })
+          .eq("status", "published");
+
+        if (error) throw error;
+
+        return count;
+      },
+    });
+
+  const hasNextPage = servicesData.length > PAGE_SIZE;
+
+  const nextCursor = hasNextPage
+    ? servicesData[PAGE_SIZE - 1].service_index
+    : null;
+
   return {
-    servicesList: servicesData.servicesList,
+    servicesList: servicesData.slice(0, PAGE_SIZE),
+    nextCursor,
+    hasNextPage,
+    servicesCount,
     servicesDataLoading,
   };
 };
@@ -342,25 +370,50 @@ export const usePendingServices = ({ pendingServicesCursor }: Pagination) => {
                 type
               )
             `,
+            { count: "exact" },
           )
           .eq("status", "pending-approval")
-          .order("created_at", { ascending: false })
+          .order("service_index", { ascending: true })
           .limit(PAGE_SIZE + 1);
 
         if (pendingServicesCursor) {
-          listQuery = listQuery.lt("created_at", pendingServicesCursor);
+          listQuery = listQuery.gt("service_index", pendingServicesCursor);
         }
 
         const { data, error } = await listQuery;
 
         if (error) throw error;
 
-        return data.slice(0, PAGE_SIZE);
+        return data;
       },
     });
 
+  const { data: pendServicesCount, isLoading: pendServicesCountLoading } =
+    useSuspenseQuery({
+      queryKey: ["pending-services-count"],
+      queryFn: async () => {
+        const { count, error } = await supabase
+          .from("services")
+          .select("id", { count: "exact", head: true })
+          .eq("status", "pending-approval");
+
+        if (error) throw error;
+
+        return count;
+      },
+    });
+
+  const hasNextPage = pendingServicesData.length > PAGE_SIZE;
+
+  const nextCursor = hasNextPage
+    ? pendingServicesData[PAGE_SIZE - 1].service_index
+    : null;
+
   return {
-    pendingServicesList: pendingServicesData,
+    pendingServicesList: pendingServicesData.slice(0, PAGE_SIZE),
+    hasNextPage,
+    nextCursor,
+    pendServicesCount,
     pendingServicesDataLoading,
   };
 };
@@ -372,25 +425,49 @@ export const useCoupons = ({ couponsCursor }: Pagination) => {
       queryFn: async () => {
         let listQuery = supabase
           .from("coupons")
-          .select("*")
-          .order("created_at", { ascending: false })
+          .select("*", { count: "exact" })
+          .order("coupon_index", { ascending: true })
           .limit(PAGE_SIZE + 1);
 
         if (couponsCursor) {
-          listQuery = listQuery.lt("created_at", couponsCursor);
+          listQuery = listQuery.gt("coupon_index", couponsCursor);
         }
 
         const { data, error } = await listQuery;
 
         if (error) throw error;
 
-        return data.slice(0, PAGE_SIZE);
+        return data;
       },
     },
   );
 
+  const { data: couponCount, isLoading: couponCountLoading } = useSuspenseQuery(
+    {
+      queryKey: ["coupon-count"],
+      queryFn: async () => {
+        const { count, error } = await supabase
+          .from("coupons")
+          .select("id", { count: "exact", head: true });
+
+        if (error) throw error;
+
+        return count;
+      },
+    },
+  );
+
+  const hasNextPage = couponsData.length > PAGE_SIZE;
+
+  const nextCursor = hasNextPage
+    ? couponsData[PAGE_SIZE - 1].coupon_index
+    : null;
+
   return {
     couponsList: couponsData,
+    hasNextPage,
+    nextCursor,
+    couponCount,
     couponsDataLoading,
   };
 };

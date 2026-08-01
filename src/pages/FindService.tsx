@@ -13,6 +13,7 @@ import { categories } from '@/components/FindService/ServiceCategories';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { useTranslation } from 'react-i18next';
+import PaginationComponent from '@/components/PaginationComponent';
 
 const FindService = () => {
   const { t } = useTranslation("services");
@@ -23,20 +24,22 @@ const FindService = () => {
 
   const [submittedSearchTerm, setSubmittedSearchTerm] = useState('');
 
-  const { data: services, isLoading, error } = usePublicServices();
+  const [page, setPage] = useState(1);
+  const [cursorHistory, setCursorHistory] = useState<number[]>([0]);
+  const cursor = cursorHistory[page - 1];
+
+  const { 
+    data: {
+    services = [],
+    hasNextPage = false,
+    nextCursor = null,
+    count = 0,
+  } = {},
+    error, 
+    isLoading 
+  } = usePublicServices({ servicesCursor: cursor });
+
   const { trackSearch } = useAnalytics();
-
-  const handleSearchSubmit = () => {
-    console.log('submitting')
-    setSubmittedSearchTerm(searchTerm);
-
-    trackSearch.mutate({
-      query: searchTerm,
-      category: selectedCategory !== 'all' ? selectedCategory : undefined,
-      location: selectedLocation !== 'all' ? selectedLocation : undefined,
-      resultsCount: filteredServices.length, // number of matches
-    });
-  }
 
   // Set initial category from URL parameters
   useEffect(() => {
@@ -90,6 +93,18 @@ const FindService = () => {
     setSelectedCategory('all');
     setSelectedLocation('all');
   };
+
+    const handleSearchSubmit = () => {
+    console.log('submitting')
+    setSubmittedSearchTerm(searchTerm);
+
+    trackSearch.mutate({
+      query: searchTerm,
+      category: selectedCategory !== 'all' ? selectedCategory : undefined,
+      location: selectedLocation !== 'all' ? selectedLocation : undefined,
+      resultsCount: filteredServices.length, // number of matches
+    });
+  }
 
   if (error) {
     return (
@@ -150,6 +165,16 @@ const FindService = () => {
           </ErrorBoundary>
         </Suspense>
       )}
+
+      <PaginationComponent 
+        cursor={nextCursor}
+        page={page}
+        setPage={setPage}
+        setCursorHistory={setCursorHistory}
+        hasNextPage={hasNextPage}
+        count={count}
+        cursorHistory={cursorHistory}
+      />
     </div>
   );
 };
