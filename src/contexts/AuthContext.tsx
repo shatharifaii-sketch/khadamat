@@ -130,6 +130,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           body: JSON.stringify({
             phone: `${phone.countryCode}${phone.number}`,
             isLogin: false,
+            fullName
           }),
         },
       );
