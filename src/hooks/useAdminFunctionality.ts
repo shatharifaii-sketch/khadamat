@@ -51,6 +51,7 @@ export interface Service {
     thumbnail_url?: string;
     type?: 'image' | 'video';
   }[];
+  with_appointments: boolean
 }
 
 interface UploadedImage {
@@ -105,7 +106,7 @@ export const useAdminData = () => {
           error 
         }, 
         error: rolesError 
-      } = await supabase.functions.invoke("get-user-roles");
+      } = await supabase.functions.invoke("get-roles");
 
       if (rolesError) throw rolesError;
 

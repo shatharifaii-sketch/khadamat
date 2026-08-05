@@ -1,0 +1,18 @@
+{
+    "more_data_needed": "البيانات غير كاملة",
+    "unexpected_error_occured": "حدث خطأ غير متوقع",
+    "provider_not_available": "مقدم الخدمة مشغول في الوقت المحدد",
+    "failed_to_check_other_reservations": "حدث خطأ اثناء التحقق من توفر مقدم الخدمة",
+    "provider_busy": "المقدم لديه موعد ثاني في الوقت المحدد",
+    "no_reservation_found": "الحجز غير موجود",
+    "today": "اليوم",
+    "month": "شهر",
+    "week": "اسبوع",
+    "day": "يوم",
+    "list": "قائمة",
+    "year": "سنة",
+    "create_reservation": {
+        "title": "احجز موعد جديد!",
+        "description": "أنشئ حجز جديد مع مستخدم آخر."
+    }
+}

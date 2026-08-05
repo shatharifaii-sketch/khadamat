@@ -1,0 +1,18 @@
+{
+    "more_data_needed": "More data needed",
+    "unexpected_error_occured": "An unexpected error occured",
+    "provider_not_available": "Service provider is not available at the selected time",
+    "failed_to_check_other_reservations": "Failed to check if provider is not busy with other reservations",
+    "provider_busy": "Service provider is busy with another reservation",
+    "no_reservation_found": "Reservation was not found",
+    "today": "today",
+    "month": "Month",
+    "week": "Week",
+    "day": "Day",
+    "list": "List",
+    "year": "Year",
+    "create_reservation": {
+        "title": "Create a new Reservation!",
+        "description": "Create a new Reservation with another user."
+    }
+}

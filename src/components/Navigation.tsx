@@ -1,20 +1,35 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Menu, LogOut, PlusCircle, Search, Info, Shield, MessageCircle } from 'lucide-react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  Menu,
+  LogOut,
+  PlusCircle,
+  Search,
+  Info,
+  Shield,
+  MessageCircle,
+  CalendarDays,
+  Badge,
+} from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
-import { useRealTimeNotifications } from '@/hooks/useRealTimeNotifications';
-import { useProfile } from '@/hooks/useProfile';
-import LanguageSwitcher from './LanguageSwitcher';
-import { Avatar, AvatarImage } from './ui/avatar';
-import { GeneratedAvatar } from './GeneratedAvatar';
-import { useIsAdmin } from '@/hooks/useAdminFunctionality';
-import { useChat } from '@/contexts/ChatContext';
-import { cn } from '@/lib/utils';
-import { useTranslation } from 'react-i18next';
+import { useRealTimeNotifications } from "@/hooks/useRealTimeNotifications";
+import { useProfile } from "@/hooks/useProfile";
+import LanguageSwitcher from "./LanguageSwitcher";
+import { Avatar, AvatarImage } from "./ui/avatar";
+import { GeneratedAvatar } from "./GeneratedAvatar";
+import { useIsAdmin } from "@/hooks/useAdminFunctionality";
+import { useChat } from "@/contexts/ChatContext";
+import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
+import { useReservations } from "@/contexts/ReservationsContext";
 
 const Navigation = () => {
   const { t } = useTranslation("navbar");
@@ -36,11 +51,16 @@ const Navigation = () => {
   const isActive = (path: string) => location.pathname === path;
 
   const handleSignOut = () => {
-    signOut().then(() => navigate('/', { replace: true }));
+    signOut().then(() => navigate("/", { replace: true }));
     setIsOpen(false);
   };
 
-  const NavLink = ({ to, children, className = "", onClick }: {
+  const NavLink = ({
+    to,
+    children,
+    className = "",
+    onClick,
+  }: {
     to: string;
     children: React.ReactNode;
     className?: string;
@@ -48,67 +68,115 @@ const Navigation = () => {
   }) => (
     <Link
       to={to}
-      className={`text-sm font-medium transition-colors hover:text-primary ${isActive(to) ? 'text-primary' : 'text-muted-foreground'
-        } ${className}`}
+      className={`text-sm font-medium transition-colors hover:text-primary ${
+        isActive(to) ? "text-primary" : "text-muted-foreground"
+      } ${className}`}
       onClick={onClick}
     >
       {children}
     </Link>
   );
 
-
   const AccountButton = ({ mobile = false }: { mobile?: boolean }) => (
-    <NavLink to="/account" onClick={mobile ? () => setIsOpen(false) : undefined} className='flex items-center gap-4 justify-start'>
-      <div className="flex items-center gap-2" dir={lang === "ar" ? "rtl" : "ltr"}>
-        {
-          profile?.profile_image_url ? (
-            <Avatar className='size-7'>
-              <AvatarImage
-                src={profile?.profile_image_url}
-              />
-            </Avatar>
-          ) : (
-            <GeneratedAvatar
-              seed={profile?.full_name}
-              variant="initials"
-              className="size-7"
-            />
-          )
-        }
-        <span>{t("account")}</span>
+    <NavLink
+      to="/account"
+      onClick={mobile ? () => setIsOpen(false) : undefined}
+      className="flex items-center gap-4 justify-start"
+    >
+      <div
+        className="flex items-center gap-2"
+        dir={lang === "ar" ? "rtl" : "ltr"}
+      >
+        {profile?.profile_image_url ? (
+          <Avatar className="size-7">
+            <AvatarImage src={profile?.profile_image_url} />
+          </Avatar>
+        ) : (
+          <GeneratedAvatar
+            seed={profile?.full_name}
+            variant="initials"
+            className="size-7"
+          />
+        )}
+        {mobile && <span>{t("account")}</span>}
       </div>
     </NavLink>
   );
 
-  const ConvosButton = ({ mobile = false }: { mobile?: boolean }) => location.pathname.startsWith('/subscription-starter') ? <></> : (
-    <NavLink to="/convos" onClick={mobile ? () => setIsOpen(false) : undefined} className={cn('flex items-center gap-4 justify-start', { 'text-primary': location.pathname === '/convos' || location.pathname.startsWith('/chat') })}>
-      <div className="flex items-center gap-2 relative">
-        <MessageCircle size={20} />
-        {unreadCount > 0 && (
-          <p className="absolute -top-2 -right-2 text-muted bg-red-500 rounded-full text-xs flex items-center justify-center size-5">{unreadCount}</p>
-        )}
-        {mobile && <span>{t("conversations")}</span>}
-      </div>
-    </NavLink>
-  );
+  const ConvosButton = ({ mobile = false }: { mobile?: boolean }) =>
+    location.pathname.startsWith("/subscription-starter") ? (
+      <></>
+    ) : (
+      <NavLink
+        to="/convos"
+        onClick={mobile ? () => setIsOpen(false) : undefined}
+        className={cn("flex items-center gap-4 justify-start", {
+          "text-primary":
+            location.pathname === "/convos" ||
+            location.pathname.startsWith("/chat"),
+        })}
+      >
+        <div className="flex items-center gap-2 relative">
+          <MessageCircle size={20} />
+          {unreadCount > 0 && (
+            <p className="absolute -top-2 -right-2 text-muted bg-red-500 rounded-full text-xs flex items-center justify-center size-5">
+              {unreadCount}
+            </p>
+          )}
+          {mobile && <span>{t("conversations")}</span>}
+        </div>
+      </NavLink>
+    );
+
+  const ReservationsButton = ({ mobile = false }: { mobile?: boolean }) => {
+    const { unseenCount } = useReservations();
+    if (!isServiceProvider) return null;
+
+    return (
+      <NavLink
+        to="/reservations-calendar"
+        className={cn("flex items-center gap-4 justify-start relative", {
+          "text-primary": location.pathname === "/reservations",
+        })}
+      >
+        {unseenCount > 0 && <Badge className="absolute size-3 text-red-500 fill-red-500 -top-1 -right-1">{unseenCount}</Badge>}
+        <div className="flex items-center gap-2">
+          <CalendarDays size={21} />
+          {mobile && <span>{t("reservations")}</span>}
+        </div>
+      </NavLink>
+    );
+  };
 
   return (
-    <nav className={cn(
-      'bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50',
-      location.pathname.startsWith('/subscription-starter') ? 'border-none' : 'border-b'
-      )}>
+    <nav
+      className={cn(
+        "bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50",
+        location.pathname.startsWith("/subscription-starter")
+          ? "border-none"
+          : "border-b",
+      )}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <img src="/application_logo_cut.png" className='h-8' alt="cut logo" />
+            <img
+              src="/application_logo_cut.png"
+              className="h-8"
+              alt="cut logo"
+            />
           </Link>
 
           {/* Desktop Navigation */}
-          <div className={cn(
-            'hidden md:flex items-center gap-5',
-            location.pathname.startsWith('/subscription-starter') && 'hidden md:hidden'
-            )} dir={lang === "ar" ? "rtl" : "ltr"}>
+          <div
+            className={cn(
+              "hidden md:flex items-center gap-5",
+              location.pathname.startsWith("/subscription-starter") &&
+                "hidden md:hidden",
+            )}
+            dir={lang === "ar" ? "rtl" : "ltr"}
+          >
             <NavLink to="/find-service">
               <div className="flex items-center gap-2">
                 <Search size={16} />
@@ -141,8 +209,11 @@ const Navigation = () => {
           <div className="hidden md:flex items-center space-x-4 space-x-reverse">
             {user ? (
               <div className="flex items-center space-x-4 space-x-reverse">
-                <AccountButton />
-                <ConvosButton />
+                <div className="flex items-center gap-6">
+                  <AccountButton />
+                  <ConvosButton />
+                  <ReservationsButton />
+                </div>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button variant="ghost" size="sm" onClick={handleSignOut}>
@@ -164,10 +235,13 @@ const Navigation = () => {
           </div>
 
           {/* Mobile menu button */}
-          <div className={cn(
-            'md:hidden',
-            location.pathname.startsWith('/subscription-starter') && 'hidden md:hidden'
-            )}>
+          <div
+            className={cn(
+              "md:hidden",
+              location.pathname.startsWith("/subscription-starter") &&
+                "hidden md:hidden",
+            )}
+          >
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="sm">
@@ -206,10 +280,15 @@ const Navigation = () => {
                   <div className="border-t pt-4 flex flex-col gap-4 items-start">
                     {user ? (
                       <div className="space-y-4">
-
                         <AccountButton mobile />
+                        <ReservationsButton mobile />
                         <ConvosButton mobile />
-                        <Button variant="ghost" size="sm" onClick={handleSignOut} className="w-full justify-start">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleSignOut}
+                          className="w-full justify-start"
+                        >
                           <LogOut size={20} className="ml-2" />
                           {t("logout")}
                         </Button>

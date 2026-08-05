@@ -118,6 +118,130 @@ export type Database = {
         }
         Relationships: []
       }
+      calendar_provider_availability: {
+        Row: {
+          created_at: string
+          date: string | null
+          from_time: string | null
+          id: number
+          provider_id: string | null
+          to_time: string | null
+        }
+        Insert: {
+          created_at?: string
+          date?: string | null
+          from_time?: string | null
+          id?: number
+          provider_id?: string | null
+          to_time?: string | null
+        }
+        Update: {
+          created_at?: string
+          date?: string | null
+          from_time?: string | null
+          id?: number
+          provider_id?: string | null
+          to_time?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendar_provider_availability_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_provider_availability_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_with_email"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      calendar_reservations: {
+        Row: {
+          client_id: string | null
+          client_seen: boolean | null
+          created_at: string
+          date: string | null
+          id: string
+          provider_id: string | null
+          provider_seen: boolean | null
+          service_id: string | null
+          status: string | null
+          time: string | null
+        }
+        Insert: {
+          client_id?: string | null
+          client_seen?: boolean | null
+          created_at?: string
+          date?: string | null
+          id?: string
+          provider_id?: string | null
+          provider_seen?: boolean | null
+          service_id?: string | null
+          status?: string | null
+          time?: string | null
+        }
+        Update: {
+          client_id?: string | null
+          client_seen?: boolean | null
+          created_at?: string
+          date?: string | null
+          id?: string
+          provider_id?: string | null
+          provider_seen?: boolean | null
+          service_id?: string | null
+          status?: string | null
+          time?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendar_reservations_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_reservations_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_with_email"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_reservations_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_reservations_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_with_email"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_reservations_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "public_services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_reservations_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contact_rate_limits: {
         Row: {
           created_at: string | null
@@ -238,31 +362,31 @@ export type Database = {
       }
       conversations: {
         Row: {
-          client_id: string
+          client_id: string | null
           created_at: string
           id: string
           last_message_at: string | null
-          provider_id: string
+          provider_id: string | null
           service_id: string | null
           status: string
           updated_at: string
         }
         Insert: {
-          client_id: string
+          client_id?: string | null
           created_at?: string
           id?: string
           last_message_at?: string | null
-          provider_id: string
+          provider_id?: string | null
           service_id?: string | null
           status?: string
           updated_at?: string
         }
         Update: {
-          client_id?: string
+          client_id?: string | null
           created_at?: string
           id?: string
           last_message_at?: string | null
-          provider_id?: string
+          provider_id?: string | null
           service_id?: string | null
           status?: string
           updated_at?: string
@@ -358,6 +482,7 @@ export type Database = {
         Row: {
           active: boolean
           code: string
+          coupon_index: number | null
           created_at: string
           description: string | null
           discount_amount: number | null
@@ -374,6 +499,7 @@ export type Database = {
         Insert: {
           active?: boolean
           code: string
+          coupon_index?: number | null
           created_at?: string
           description?: string | null
           discount_amount?: number | null
@@ -390,6 +516,7 @@ export type Database = {
         Update: {
           active?: boolean
           code?: string
+          coupon_index?: number | null
           created_at?: string
           description?: string | null
           discount_amount?: number | null
@@ -670,6 +797,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      otp_requests: {
+        Row: {
+          created_at: string | null
+          id: string
+          phone: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          phone: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          phone?: string
+        }
+        Relationships: []
       }
       otp_settings: {
         Row: {
@@ -1186,12 +1331,14 @@ export type Database = {
           phone: string
           price_range: string
           review_count: number
+          service_index: number | null
           status: string
           title: string
           updated_at: string
           user_id: string
           views: number
           whatsapp_number: string | null
+          with_appointments: boolean | null
         }
         Insert: {
           average_rating?: number
@@ -1207,12 +1354,14 @@ export type Database = {
           phone: string
           price_range: string
           review_count?: number
+          service_index?: number | null
           status?: string
           title: string
           updated_at?: string
           user_id: string
           views?: number
           whatsapp_number?: string | null
+          with_appointments?: boolean | null
         }
         Update: {
           average_rating?: number
@@ -1228,12 +1377,14 @@ export type Database = {
           phone?: string
           price_range?: string
           review_count?: number
+          service_index?: number | null
           status?: string
           title?: string
           updated_at?: string
           user_id?: string
           views?: number
           whatsapp_number?: string | null
+          with_appointments?: boolean | null
         }
         Relationships: [
           {
@@ -2047,6 +2198,24 @@ export type Database = {
           inserted_at?: string
           name?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      trigger_debug: {
+        Row: {
+          created_at: string | null
+          id: number
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: never
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: never
+          user_id?: string | null
         }
         Relationships: []
       }

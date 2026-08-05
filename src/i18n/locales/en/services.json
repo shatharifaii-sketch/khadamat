@@ -80,7 +80,8 @@
         "not_allowed_to_post": "You are not allowed to post a new service",
         "get_subscription": "Become a Member Now",
         "loading": "Loading...",
-        "uploading...": "Uploading..."
+        "uploading...": "Uploading...",
+        "with_appointments": "Open appointment reservations..."
     },
 
     "find_service": {

@@ -25,6 +25,7 @@ export interface Service {
   is_online?: boolean;
   links?: [];
   whatsapp_number?: string;
+  with_appointments: boolean;
 }
 
 export interface ServiceImageProps {
@@ -228,7 +229,8 @@ export const useServices = () => {
           email: serviceData.email,
           experience: serviceData.experience,
           updated_at: new Date().toISOString(),
-          status: 'pending-approval'
+          status: 'pending-approval',
+          with_appointments: serviceData.with_appointments
         })
         .eq('id', serviceData.id)
         .eq('user_id', user.id) // Ensure user can only update their own services

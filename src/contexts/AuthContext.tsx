@@ -9,16 +9,20 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName: string, passwordConfirm: string) => Promise<{ error: any, data: { user: User, session: Session } | { user: null, session: null } }>;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, fullName: string, passwordConfirm: string) => Promise<{ error: unknown, data: { user: User, session: Session } | { user: null, session: null } }>;
+  signIn: (email: string, password: string) => Promise<{ error: unknown }>;
   signOut: () => Promise<void>;
-  verifyOtp: (email: string, token: string) => Promise<{ error?: any, data?: any }>;
+  verifyOtp: (email: string, token: string) => Promise<{ error?: unknown, data?: unknown }>;
 }
+
+type ExtendedUser = User & {
+  is_service_provider?: boolean | null;
+};
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<ExtendedUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -50,9 +54,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, []);
 
+  useEffect(() => {
+    const checkIfUserIsProvider = async () => {
+      if ((user && session) && user?.is_service_provider == null) {
+        const { data, error } = await supabase.from("profiles").select("is_service_provider").eq("id", user.id).single();
+        if (error) {
+          console.error('Error checking if user is provider:', error);
+          toast.error('حدث خطأ أثناء التحقق من نوع المستخدم');
+          return;
+        }
+
+        setUser(prevUser => prevUser ? { ...prevUser, is_service_provider: data?.is_service_provider } : prevUser);
+      }
+    }
+
+    checkIfUserIsProvider();
+  }, [session, user]);
+
   const signUp = async (email: string, password: string, fullName: string, passwordConfirm: string) => {
     console.log('Attempting sign up for:', email);
-    const response: any = await supabase.functions.invoke('register-user', {
+    const response = await supabase.functions.invoke('register-user', {
       body: JSON.stringify({ email, password, name: fullName, passwordConfirm })
     })
 
