@@ -133,6 +133,10 @@
         "phone": "رقم الهاتف",
         "no_images": "لا يوجد صور ملحقة لهذه الخدمة",
         "images_count": "ملف {{current}} من {{count}}",
+        "with_appointments": "مواعيدك للخدمة",
+        "with_appointments_description": "تحقق من مواعيدك لهذه الخدمة أو احجز موعد جديد",
+        "make_reservation": "احجز موعد جديد",
+        "no_reservations": "لا توجد مواعيد بعد",
         "report": {
             "toast_error": "حدث خطأ أثناء إرسال الرسالة. يرجى المحاولة مرة أخرى.",
             "toast_success": "تم تقديم البلاغ بنجاح",

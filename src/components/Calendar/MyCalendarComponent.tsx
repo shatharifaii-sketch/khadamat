@@ -31,7 +31,7 @@ const MyCalendarComponent = () => {
   // const controller = useCalendarController();
   // const buttons = controller.getButtonState();
 
-  const { reservations } = useReservations();
+  const { reservations, loading } = useReservations();
 
   const [openBookingDialog, setOpenBookingDialog] = useState<boolean>(false);
   const [selectedDate, setSelectedDate] = useState<Date>();
@@ -98,10 +98,7 @@ const MyCalendarComponent = () => {
 
       <Dialog open={openBookingDialog} onOpenChange={setOpenBookingDialog}>
         <DialogContent dir={lang == "ar" ? "rtl" : "ltr"}>
-          <DialogHeader>{t("create_reservation.title")}</DialogHeader>
-          <DialogDescription>{t("create_reservation.description")}</DialogDescription>
-
-          <CreateReservationForm />
+          
         </DialogContent>
       </Dialog>
     </div>

@@ -136,6 +136,10 @@
         "phone": "Phone Number",
         "no_images": "No images attached to this service",
         "images_count": "file {{current}} of {{count}}",
+        "with_appointments": "Your Reservations with this Service",
+        "with_appointments_description": "View your Reservation with this Service or make a new one!",
+        "make_reservation": "Make a new Reservation",
+        "no_reservations": "No Reservations yet",
         "report": {
             "toast_error": "An error occurred while sending the report. Please try again.",
             "toast_success": "Report submitted successfully",

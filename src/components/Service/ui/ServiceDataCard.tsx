@@ -2,43 +2,47 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Eye } from "lucide-react";
 import ServiceImages from "./ServiceImages";
-import { PublicService, useServiceReservation } from "@/hooks/usePublicServices";
+import { useServiceReservation } from "@/hooks/usePublicServices";
 import { cn, platforms, truncateString } from "@/lib/utils";
 import { ServiceViewProps } from "../ServiceView";
-import { FaGlobe } from "react-icons/fa6";
 import { useTranslation } from "react-i18next";
 import { ServiceLink } from "@/components/PostService/ServiceLinks";
 import ReviewsComponent from "./ReviewsComponent";
-import { ReservationList } from "@/contexts/ReservationsContext";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import ReservationCard from "@/components/Calendar/ReservationsComponents/ReservationCard";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import CreateReservationForm from "@/components/Calendar/ReservationsComponents/CreateReservationForm";
 
 interface Props {
   service: ServiceViewProps;
-  userId: string
+  userId: string;
 }
 
-const ServiceDataCard = ({
-  service,
-  userId
-}: Props) => {
+const ServiceDataCard = ({ service, userId }: Props) => {
   const { t } = useTranslation("services");
   const lang = localStorage.getItem("language") || "en";
+  const isMobile = useIsMobile();
   const getPlatform = (type: string) => platforms.find((p) => p.value === type);
+  const [makingRes, setMakingRes] = useState<boolean>(false);
 
-  const {
-      latestReservation,
-      reservations,
-      availabilty
-    } = useServiceReservation(service.id, userId);
+  const { latestReservation, reservations, availabilty } =
+    useServiceReservation(service.id, userId);
 
-    console.log("RESERVATIONS DATA: ", latestReservation, reservations, availabilty);
+  console.log(
+    "RESERVATIONS DATA: ",
+    latestReservation,
+    reservations,
+    availabilty,
+  );
 
   const links = (service?.links ?? []) as ServiceLink[];
 
   return (
     <Card>
       <CardHeader>
-        <CardContent className="px-2 md:px-5">
+        <CardContent className="p-1 md:p-2">
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <h3 className="text-xl font-semibold">
@@ -62,7 +66,7 @@ const ServiceDataCard = ({
               {service?.description}
             </p>
           </div>
-          <div className="mt-5">
+          <div className="mt-5 text-start">
             <h3 className="text-xl font-semibold">
               {t("service.attachments")}
             </h3>
@@ -110,7 +114,7 @@ const ServiceDataCard = ({
                 : "flex-col md:flex-row md:items-center md:gap-8",
             )}
           >
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="flex items-start sm:items-center gap-4">
               <h3 className="text-lg font-semibold text-nowrap">
                 {t("service.price")}
               </h3>
@@ -144,7 +148,7 @@ const ServiceDataCard = ({
               orientation="vertical"
               className="h-5 mt-3 hidden md:block"
             />
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="flex items-start sm:items-center gap-4">
               <h3 className="text-lg font-semibold text-nowrap">
                 {t("service.experience")}
               </h3>
@@ -173,25 +177,76 @@ const ServiceDataCard = ({
 
           {service.with_appointments && (
             <div
-              className="border-2 rounded-md border-dashed mt-5 h-32 px-3 py-2"
+              className="border-2 rounded-md border-dashed mt-5 min-h-32 px-2 py-2"
               dir={lang == "ar" ? "rtl" : "ltr"}
             >
-              <div>
-                <h3 className="text-lg font-semibold text-start">
-                  {t("service.with_appointments")}
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  {t("service.with_appointments_description")}
-                </p>
+              <div
+                className={cn(
+                  "grid",
+                  isMobile
+                    ? "grid-cols-1"
+                    : "grid-cols-2 items-start justify-between",
+                )}
+              >
+                <div className="text-start">
+                  <h3 className="text-lg font-semibold">
+                    {t("service.with_appointments")}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {t("service.with_appointments_description")}
+                  </p>
 
-                <Button disabled={availabilty.canReserve} className="mt-3">
-                    {t("service.make_reservation")}
-                </Button>
+                  <Dialog open={makingRes} onOpenChange={setMakingRes}>
+                    <DialogTrigger asChild>
+                      <Button
+                        disabled={availabilty.canReserve}
+                        className={cn("mt-3", isMobile && "hidden")}
+                      >
+                        {t("service.make_reservation")}
+                      </Button>
+                    </DialogTrigger>
+                  </Dialog>
+                </div>
+
+                <div className="text-start">
+                  {reservations.length > 0 ? (
+                    reservations.map((res) => (
+                      <ReservationCard key={res.id} reservation={res} />
+                    ))
+                  ) : (
+                    <div className="bg-muted w-full h-32 rounded-sm border-2 border-dashed flex items-center justify-center">
+                      <p className="text-muted-foreground font-lighter">
+                        {t("service.no_reservations")}
+                      </p>
+                    </div>
+                  )}
+
+                  <Dialog open={makingRes} onOpenChange={setMakingRes}>
+                    <DialogTrigger asChild>
+                      <Button
+                        disabled={availabilty.canReserve}
+                        className={cn("mt-3", !isMobile && "hidden")}
+                      >
+                        {t("service.make_reservation")}
+                      </Button>
+                    </DialogTrigger>
+                  </Dialog>
+                </div>
               </div>
             </div>
           )}
         </CardContent>
       </CardHeader>
+
+      <Dialog open={makingRes} onOpenChange={setMakingRes}>
+        <DialogContent>
+          <CreateReservationForm
+            serviceId={service.id}
+            providerId={service.user_id}
+            userId={userId}
+          />
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };

@@ -34,7 +34,26 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { data, error } = await supabase.from("user_roles").select("user_id, role");
+    const { count: totalUsers, error: usersCountError } = await supabase.from("profiles").select("id", { count: "exact", head: true });
+
+    if (usersCountError) {
+      console.error("Error counting users: ", usersCountError);
+      return new Response(
+        JSON.stringify({
+          success: false,
+          user: null,
+          error: usersCountError,
+        }),
+        {
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+
+    const { data: roles, error } = await supabase.from("user_roles").select("user_id, role");
 
     if (error) {
       console.error("Error creating user: ", error);
@@ -53,10 +72,20 @@ Deno.serve(async (req) => {
       );
     }
 
+    const adminCount = roles.filter((r) => r.role === "admin").length;
+    const userCount = (totalUsers ?? 0) - adminCount;
+
     return new Response(
       JSON.stringify({
         success: true,
-        data,
+        data: {
+          roles,
+          counts: {
+            totalUsers,
+            adminCount,
+            userCount
+          }
+        },
         error: null
       }),
       {

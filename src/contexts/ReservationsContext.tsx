@@ -52,7 +52,7 @@ interface ProviderAvailability {
   created_at: string;
 }
 
-type ReservationForm = {
+export type ReservationForm = {
   providerId: string;
   clientId: string;
   serviceId?: string;
@@ -178,6 +178,7 @@ export const ReservationsProvider = ({
 
   const loadReservations = useCallback(async () => {
     if (!user) return;
+    setLoading(true);
 
     const { data, error } = await supabase
       .from("calendar_reservations")
@@ -207,6 +208,7 @@ export const ReservationsProvider = ({
     }
 
     setReservations(data as Reservation[]);
+    setLoading(false);
   }, [user]);
 
   const createReservation = async (reservation: ReservationForm) => {
