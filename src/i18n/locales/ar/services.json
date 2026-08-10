@@ -79,7 +79,8 @@
         "not_allowed_to_post": "غير مسموح لك بنشر خدمة جديدة",
         "get_subscription": "اشترك الان",
         "loading": "جاري التحميل...",
-        "uploading...": "جاري رفع الصور..."
+        "uploading...": "جاري رفع الصور...",
+        "service_email_note": "هذا البريد متاح لأي مستخدم على الموقع!"
     },
     "find_service": {
         "find_the_right_service": "ابحث عن الخدمة المناسبة",

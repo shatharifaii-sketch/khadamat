@@ -15,6 +15,7 @@ export interface UserProfile {
   experience_years?: number;
   profile_image_url?: string;
   is_service_provider?: boolean;
+  created_at?: string;
 }
 
 export const useProfile = () => {
@@ -181,23 +182,23 @@ export const usePublisherProfile = (userId: string) => {
     queryKey: ['publisher-profile', userId],
     queryFn: async () => {
       const { data: profile, error } = await supabase
-        .from('profiles_with_email')
-        .select('*')
+        .from('profiles')
+        .select('full_name, phone, bio, location, experience_years, created_at, profile_image_url, is_service_provider')
         .eq('id', userId)
         .maybeSingle();
 
       if (error) throw error;
-      return profile;
+      return profile as UserProfile;
     }
   });
 
   const { data: getServices } = useSuspenseQuery({
-    queryKey: ['publisher-services', getProfile.id],
+    queryKey: ['publisher-services', userId],
     queryFn: async () => {
       const { data: services, error } = await supabase
         .from('services')
         .select('*')
-        .eq('user_id', getProfile.id);
+        .eq('user_id', userId);
 
       if (error) throw error;
       return services;
