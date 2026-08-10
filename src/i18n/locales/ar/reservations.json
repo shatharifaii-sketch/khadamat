@@ -14,6 +14,14 @@
     "year": "سنة",
     "create_reservation": {
         "title": "احجز موعد جديد!",
-        "description": "أنشئ حجز جديد مع مستخدم آخر."
+        "description": "أنشئ حجز جديد مع مستخدم آخر.",
+        "pick_date": "اختر تاريخ",
+        "date_field_description": "التاريخ يجب أن يكون بعد اليوم",
+        "pick_start_time": "بداية الموعد",
+        "start_time_field_description": "اختر الوقت المناسب لبدء الموعد",
+        "pick_end_time": "نهاية الموعد",
+        "end_time_field_description": "اختر الوقت المتوقع لنهاية الموعد",
+        "reset": "إعادة تسجيل",
+        "submit": "تأكيد الحجز"
     }
 }

@@ -14,6 +14,14 @@
     "year": "Year",
     "create_reservation": {
         "title": "Create a new Reservation!",
-        "description": "Create a new Reservation with another user."
+        "description": "Create a new Reservation with another user.",
+        "pick_date": "Pick a date",
+        "date_field_description": "The date must be at least in the next day",
+        "pick_start_time": "Starts at",
+        "start_time_field": "Pick a convenient time to start the appointment",
+        "pick_end_time": "Ends at",
+        "end_time_field_description": "Pick a time to end the appointment",
+        "reset": "Reset Fields",
+        "submit": "Submit"
     }
 }

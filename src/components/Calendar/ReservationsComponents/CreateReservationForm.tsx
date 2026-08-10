@@ -34,7 +34,8 @@ const CreateReservationForm = ({ serviceId, providerId, userId }: Props) => {
     resolver: zodResolver(createFormSchema),
     defaultValues: {
       date: "",
-      time: "",
+      start_time: "",
+      end_time: "",
       clientId: userId,
       providerId: providerId,
       serviceId: serviceId,
@@ -60,7 +61,7 @@ const CreateReservationForm = ({ serviceId, providerId, userId }: Props) => {
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor="form-rhf-date">
-                    {t("pick_date")}
+                    {t("create_reservation.pick_date")}
                   </FieldLabel>
                   <ReservationDatePicker
                     value={field.value}
@@ -78,12 +79,12 @@ const CreateReservationForm = ({ serviceId, providerId, userId }: Props) => {
               )}
             />
             <Controller
-              name="time"
+              name="start_time"
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor="form-rhf-time">
-                    {t("pick_time")}
+                    {t("create_reservation.pick_start_time")}
                   </FieldLabel>
 
                   <ReservationTimePicker
@@ -92,7 +93,31 @@ const CreateReservationForm = ({ serviceId, providerId, userId }: Props) => {
                   />
 
                   <FieldDescription>
-                    {t("create_reservation.time_field_description")}
+                    {t("create_reservation.start_time_field_description")}
+                  </FieldDescription>
+
+                  {fieldState.error && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+            <Controller
+              name="end_time"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="form-rhf-time">
+                    {t("create_reservation.pick_end_time")}
+                  </FieldLabel>
+
+                  <ReservationTimePicker
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+
+                  <FieldDescription>
+                    {t("create_reservation.end_time_field_description")}
                   </FieldDescription>
 
                   {fieldState.error && (

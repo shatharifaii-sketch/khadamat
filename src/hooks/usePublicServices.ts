@@ -141,7 +141,7 @@ export const useServiceReservation = (id: string, userId: string) => {
         .eq("id", id)
         .eq("client_id", userId)
         .order("date", { ascending: false })
-        .order("time", { ascending: false });
+        .order("start_time", { ascending: false });
 
       if (error) throw error;
 

@@ -1,4 +1,11 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useAuth } from "./AuthContext";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,7 +31,8 @@ export interface Reservation {
   status: string | null;
   provider_seen: boolean | null;
   client_seen: boolean | null;
-  time: string;
+  start_time: string;
+  end_time: string;
 }
 
 export interface ReservationList {
@@ -37,18 +45,35 @@ export interface ReservationList {
   status: string | null;
   provider_seen: boolean | null;
   client_seen: boolean | null;
-  time: string;
+  start_time: string;
+  end_time: string;
 }
 
 interface ProviderAvailability {
   id: string;
   from_time: string;
   to_time: string;
-  date: string;
+  from_date: string;
+  to_date: string;
   provider: {
     id: string;
     full_name: string;
   };
+  created_at: string;
+  service: {
+    id: string;
+    title: string;
+  };
+}
+
+interface ProviderAvailabilityList {
+  id: string;
+  from_time: string;
+  to_time: string;
+  from_date: string;
+  to_date: string;
+  provider_id: string;
+  service_id: string;
   created_at: string;
 }
 
@@ -57,7 +82,8 @@ export type ReservationForm = {
   clientId: string;
   serviceId?: string;
   date: string;
-  time: string;
+  start_time: string;
+  end_time: string;
 };
 
 interface ReservationContextType {
@@ -93,72 +119,6 @@ interface ReservationContextType {
   }) => Promise<{ success: boolean; error: string | null }>;
 
   refresh(): Promise<void>;
-}
-
-async function checkProviderAvailability({
-  providerId,
-  date,
-  time,
-  lang,
-}: {
-  providerId: string;
-  date: string;
-  time: string;
-  lang: string;
-}) {
-  if (!providerId || !date || !time) {
-    return {
-      success: false,
-      error: "more_data_needed",
-    };
-  }
-
-  const { data, error } = await supabase
-    .from("calendar_provider_availability")
-    .select("from_time, to_time")
-    .eq("provider_id", providerId)
-    .eq("date", date);
-
-  if (error)
-    return {
-      success: false,
-      error: "unexpected_error_occured",
-    };
-
-  const requested = toMinutes(time);
-
-  const available = data.some((slot) => {
-    const from = toMinutes(slot.from_time!);
-    const to = toMinutes(slot.to_time!);
-
-    return requested >= from && requested < to;
-  });
-
-  if (!available) {
-    return {
-      success: false,
-      error: "provider_not_available",
-    };
-  }
-
-  const { data: otherReservations, error: otherError } = await supabase
-    .from("calendar_reservations")
-    .select("id")
-    .eq("provider_id", providerId)
-    .eq("date", date)
-    .eq("time", time)
-    .in("status", ["pending", "accepted"]);
-
-  if (otherError)
-    return { success: false, error: "failed_to_check_other_reservations" };
-
-  if (otherReservations.length > 0)
-    return { success: false, error: "provider_busy" };
-
-  return {
-    success: true,
-    error: null,
-  };
 }
 
 const ReservationsContext = createContext<ReservationContextType | null>(null);
@@ -218,16 +178,27 @@ export const ReservationsProvider = ({
       return { success: false, error };
     }
 
-    const checkProvider = await checkProviderAvailability({
-      providerId: reservation.providerId,
-      date: reservation.date,
-      time: reservation.time,
-      lang,
-    });
+    const { data: checkProvider, error: checkError } =
+      await supabase.functions.invoke("check-provider-availability", {
+        body: JSON.stringify({
+          providerId: reservation.providerId,
+          serviceId: reservation.serviceId,
+          start_time: reservation.start_time,
+          end_time: reservation.end_time,
+          date: reservation.date,
+        }),
+      });
+
+    if (checkError) {
+      console.error("error occurred", checkError);
+      toast.error(t("unexpected_error_occured"));
+
+      return { success: false, error: "unexpected_error_occured" };
+    }
 
     if (!checkProvider.success && checkProvider.error) {
-      console.error(checkProvider.error);
-      toast.error(t(checkProvider.error));
+      console.error("error occurred", checkProvider.error);
+      toast.error(t(checkProvider.message ?? "unexpected_error_occured"));
 
       return { success: false, error: checkProvider.error };
     }
@@ -237,6 +208,8 @@ export const ReservationsProvider = ({
       provider_id: reservation.providerId,
       service_id: reservation.serviceId,
       date: reservation.date,
+      start_time: reservation.start_time,
+      end_time: reservation.end_time,
       status: "pending",
       provider_seen: false,
       client_seen: true,
@@ -260,16 +233,27 @@ export const ReservationsProvider = ({
       return { success: false, error };
     }
 
-    const checkProvider = await checkProviderAvailability({
-      providerId: reservation.providerId,
-      date: reservation.date,
-      time: reservation.time,
-      lang,
-    });
+    const { data: checkProvider, error: checkError } =
+      await supabase.functions.invoke("check-provider-availability", {
+        body: JSON.stringify({
+          providerId: reservation.providerId,
+          serviceId: reservation.serviceId,
+          start_time: reservation.start_time,
+          end_time: reservation.end_time,
+          date: reservation.date,
+        }),
+      });
+
+    if (checkError) {
+      console.error("error occurred", checkError);
+      toast.error(t("unexpected_error_occured"));
+
+      return { success: false, error: "unexpected_error_occured" };
+    }
 
     if (!checkProvider.success && checkProvider.error) {
-      console.error(checkProvider.error);
-      toast.error(t(checkProvider.error));
+      console.error("error occurred", checkProvider.error);
+      toast.error(t(checkProvider.message ?? "unexpected_error_occured"));
 
       return { success: false, error: checkProvider.error };
     }
@@ -281,6 +265,8 @@ export const ReservationsProvider = ({
         provider_id: reservation.providerId,
         service_id: reservation.serviceId,
         date: reservation.date,
+        start_time: reservation.start_time,
+        end_time: reservation.end_time,
         status: "pending",
         provider_seen: false,
         client_seen: true,
@@ -422,8 +408,8 @@ export const ReservationsProvider = ({
   }, [reservations, user]);
 
   useEffect(() => {
-  loadReservations();
-}, [loadReservations]);
+    loadReservations();
+  }, [loadReservations]);
 
   useEffect(() => {
     if (!user) return;

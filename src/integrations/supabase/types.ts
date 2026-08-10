@@ -121,26 +121,32 @@ export type Database = {
       calendar_provider_availability: {
         Row: {
           created_at: string
-          date: string | null
+          from_date: string | null
           from_time: string | null
-          id: number
+          id: string
           provider_id: string | null
+          service_id: string | null
+          to_date: string | null
           to_time: string | null
         }
         Insert: {
           created_at?: string
-          date?: string | null
+          from_date?: string | null
           from_time?: string | null
-          id?: number
+          id?: string
           provider_id?: string | null
+          service_id?: string | null
+          to_date?: string | null
           to_time?: string | null
         }
         Update: {
           created_at?: string
-          date?: string | null
+          from_date?: string | null
           from_time?: string | null
-          id?: number
+          id?: string
           provider_id?: string | null
+          service_id?: string | null
+          to_date?: string | null
           to_time?: string | null
         }
         Relationships: [
@@ -158,6 +164,20 @@ export type Database = {
             referencedRelation: "profiles_with_email"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "calendar_provider_availability_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "public_services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_provider_availability_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
         ]
       }
       calendar_reservations: {
@@ -166,36 +186,39 @@ export type Database = {
           client_seen: boolean | null
           created_at: string
           date: string | null
+          end_time: string | null
           id: string
           provider_id: string | null
           provider_seen: boolean | null
           service_id: string | null
+          start_time: string | null
           status: string | null
-          time: string | null
         }
         Insert: {
           client_id?: string | null
           client_seen?: boolean | null
           created_at?: string
           date?: string | null
+          end_time?: string | null
           id?: string
           provider_id?: string | null
           provider_seen?: boolean | null
           service_id?: string | null
+          start_time?: string | null
           status?: string | null
-          time?: string | null
         }
         Update: {
           client_id?: string | null
           client_seen?: boolean | null
           created_at?: string
           date?: string | null
+          end_time?: string | null
           id?: string
           provider_id?: string | null
           provider_seen?: boolean | null
           service_id?: string | null
+          start_time?: string | null
           status?: string | null
-          time?: string | null
         }
         Relationships: [
           {

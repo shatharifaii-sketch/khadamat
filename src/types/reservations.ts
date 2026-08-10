@@ -7,25 +7,35 @@ export const createFormSchema: z.ZodType<ReservationForm> = z
     clientId: z.string().min(1),
     serviceId: z.string().optional(),
     date: z.iso.date(),
-    time: z.iso.time(),
+    start_time: z.iso.time(),
+    end_time: z.iso.time()
   })
-.superRefine(({ date, time }, ctx) => {
-    const reservationDateTime = new Date(`${date}T${time}`);
+.superRefine(({ date, start_time, end_time }, ctx) => {
+    const reservationStart = new Date(`${date}T${start_time}`);
+    const reservationEnd = new Date(`${date}T${end_time}`);
+
+    if (reservationEnd <= reservationStart) {
+      ctx.addIssue({
+        code: "custom",
+        message: "invalid_times",
+        path: ["end_time"]
+      });
+    }
 
     const minimumDateTime = new Date();
-    minimumDateTime.setDate(minimumDateTime.getDate() + 1);
+    minimumDateTime.setHours(minimumDateTime.getHours() + 24);
 
-    if (reservationDateTime < minimumDateTime) {
+    if (reservationStart < minimumDateTime) {
       ctx.addIssue({
         code: "custom",
-        message: "Reservation must be at least one day in the future",
-        path: ["date"],
+        message: "reservation_too_soon",
+        path: ["date"]
       });
 
       ctx.addIssue({
         code: "custom",
-        message: "Reservation must be at least one day in the future",
-        path: ["time"],
-      });
+        message: "reservation_too_soon",
+        path: ["start_time"]
+      })
     }
   });
