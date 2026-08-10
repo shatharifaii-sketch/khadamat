@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -37,6 +36,8 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import { useWebsiteAnalytics } from "./hooks/useWebsiteAnalytics";
 import ExtraPaymentSuccess from "./pages/payments/ExtraPaymentSuccess";
+import ReservationsCalendar from "./pages/ReservationsCalendar";
+import { ReservationsProvider } from "./contexts/ReservationsContext";
 
 const queryClient = new QueryClient();
 
@@ -46,57 +47,80 @@ function App() {
       <AuthProvider>
         <LanguageProvider>
           <TooltipProvider>
-
             <BrowserRouter>
               <ChatProvider>
-                <ScrollToTop />
-                <Toaster />
-                <PendingServiceHandler />
-                <Routes>
-                  
-                  <Route path="/" element={<UserLayout />}>
-                    <Route path="" element={<Index />} />
-                    <Route path="post-service" element={<PostService />} />
-                    <Route path="completed-payment" element={<CompletedPayment />} />
-                    <Route path="find-service" element={<FindService />} />
-                    <Route path="find-service/:id" element={<ServicePage />} />
-                    <Route path="about" element={<About />} />
-                    <Route path="contact" element={<Contact />} />
-                    <Route path="profile/:id" element={<UserProfilePage />} />
-                    <Route path="chat/:id/:client_id/:service_id?/:provider_id" element={<ChatPage />} />
-                    <Route path="convos" element={<ConversationsPage />} />
-                    <Route path="payment" element={<Payment />} />
-                    {/* <Route path="subscription-starter/:tier_id/:cycle" element={<SubscriptionStarter />} /> */}
-                    <Route path="checkout" element={<Checkout />} />
-                    <Route path="subscription-plans" element={<SubscriptionPlans />} />
-                    <Route path="faq" element={<FAQ />} />
-                    <Route path="account" element={<Account />} />
-                  </Route>
+                <ReservationsProvider>
+                  <ScrollToTop />
+                  <Toaster />
+                  <PendingServiceHandler />
+                  <Routes>
+                    <Route path="/" element={<UserLayout />}>
+                      <Route path="" element={<Index />} />
+                      <Route path="post-service" element={<PostService />} />
+                      <Route
+                        path="completed-payment"
+                        element={<CompletedPayment />}
+                      />
+                      <Route path="find-service" element={<FindService />} />
+                      <Route
+                        path="find-service/:id"
+                        element={<ServicePage />}
+                      />
+                      <Route path="about" element={<About />} />
+                      <Route path="contact" element={<Contact />} />
+                      <Route path="profile/:id" element={<UserProfilePage />} />
+                      <Route
+                        path="chat/:id/:client_id/:service_id?/:provider_id"
+                        element={<ChatPage />}
+                      />
+                      <Route path="convos" element={<ConversationsPage />} />
+                      <Route path="payment" element={<Payment />} />
+                      {/* <Route path="subscription-starter/:tier_id/:cycle" element={<SubscriptionStarter />} /> */}
+                      <Route path="checkout" element={<Checkout />} />
+                      <Route
+                        path="subscription-plans"
+                        element={<SubscriptionPlans />}
+                      />
+                      <Route path="faq" element={<FAQ />} />
+                      <Route path="account" element={<Account />} />
+                      <Route
+                        path="reservations-calendar"
+                        element={<ReservationsCalendar />}
+                      />
+                    </Route>
 
-                  <Route path="auth" element={<Auth />} />
-                  <Route path="forgot-password" element={<ForgotPassword />} />
-                  <Route path="reset-password" element={<ResetPassword />} />
+                    <Route path="auth" element={<Auth />} />
+                    <Route
+                      path="forgot-password"
+                      element={<ForgotPassword />}
+                    />
+                    <Route path="reset-password" element={<ResetPassword />} />
 
+                    <Route path="admin" element={<AdminDashboard />}>
+                      <Route path="" element={<Admin />} />
+                    </Route>
 
-                  <Route path="admin" element={<AdminDashboard />}>
-                    <Route path="" element={<Admin />} />
-                  </Route>
+                    <Route
+                      path="/confirm-email"
+                      element={<CodeVerification />}
+                    />
 
-                  <Route path="/confirm-email" element={<CodeVerification />} />
+                    <Route
+                      path="payment-success"
+                      element={<PaymentSuccess />}
+                    />
+                    <Route
+                      path="extra-payment-success"
+                      element={<ExtraPaymentSuccess />}
+                    />
+                    <Route path="payment-failed" element={<PaymentFailed />} />
 
-
-                  <Route path="payment-success" element={<PaymentSuccess /> } />
-                  <Route path="extra-payment-success" element={<ExtraPaymentSuccess /> } />
-                  <Route path="payment-failed" element={<PaymentFailed /> } />
-
-
-                  <Route path="*" element={<NotFound />} />
-
-                </Routes>
-                <Footer />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                  <Footer />
+                </ReservationsProvider>
               </ChatProvider>
             </BrowserRouter>
-
           </TooltipProvider>
         </LanguageProvider>
       </AuthProvider>

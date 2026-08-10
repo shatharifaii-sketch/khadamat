@@ -1,0 +1,27 @@
+{
+    "page_title": "المواعيد و الحجوزات",
+    "more_data_needed": "البيانات غير كاملة",
+    "unexpected_error_occured": "حدث خطأ غير متوقع",
+    "provider_not_available": "مقدم الخدمة مشغول في الوقت المحدد",
+    "failed_to_check_other_reservations": "حدث خطأ اثناء التحقق من توفر مقدم الخدمة",
+    "provider_busy": "المقدم لديه موعد ثاني في الوقت المحدد",
+    "no_reservation_found": "الحجز غير موجود",
+    "today": "اليوم",
+    "month": "شهر",
+    "week": "اسبوع",
+    "day": "يوم",
+    "list": "قائمة",
+    "year": "سنة",
+    "create_reservation": {
+        "title": "احجز موعد جديد!",
+        "description": "أنشئ حجز جديد مع مستخدم آخر.",
+        "pick_date": "اختر تاريخ",
+        "date_field_description": "التاريخ يجب أن يكون بعد اليوم",
+        "pick_start_time": "بداية الموعد",
+        "start_time_field_description": "اختر الوقت المناسب لبدء الموعد",
+        "pick_end_time": "نهاية الموعد",
+        "end_time_field_description": "اختر الوقت المتوقع لنهاية الموعد",
+        "reset": "إعادة تسجيل",
+        "submit": "تأكيد الحجز"
+    }
+}

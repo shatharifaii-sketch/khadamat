@@ -23,6 +23,7 @@ export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
     // If we're editing, update the service
     if (isEditMode && serviceToEdit) {
       try {
+        console.log("FORMDATA: ", formData)
         await updateService.mutateAsync({
           id: serviceToEdit.id,
           title: formData.title,
@@ -38,7 +39,8 @@ export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
           whatsapp_number: formatWhatsappNumber({
             countryCode: formData.whatsapp_number.countryCode,
             number: formData.whatsapp_number.number
-          })
+          }),
+          with_appointments: formData.with_appointments
         });
 
         if (formData.media && formData.media.length > 0) {
@@ -68,6 +70,7 @@ export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
     }
 
     try {
+      console.log("FORMDATA: ", formData)
       const result = await createService.mutateAsync({
         title: formData.title,
         category: formData.category,
@@ -82,7 +85,8 @@ export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
         whatsapp_number: formatWhatsappNumber({
           countryCode: formData.whatsapp_number.countryCode,
           number: formData.whatsapp_number.number
-        })
+        }),
+        with_appointments: formData.with_appointments
       });
 
       //TODO: Handle image uploads here if necessary

@@ -180,7 +180,8 @@
                 "attachments": "الملحقات",
                 "accept_title": "إقبل نشر الخدمة",
                 "accept_button": "نشر الخدمة",
-                "offline_fallback": "اونلاين"
+                "offline_fallback": "اونلاين",
+                "with_appointments": "حجز مواعيد"
             }
         },
         "user_management": {

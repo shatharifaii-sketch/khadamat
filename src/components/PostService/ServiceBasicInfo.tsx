@@ -33,6 +33,8 @@ const ServiceBasicInfo = ({
   descriptionError
 }: ServiceBasicInfoProps) => {
   const { t } = useTranslation("services");
+  const lang = localStorage.getItem("language") || "ar";
+
   return (
     <>
       {/* Service Title */}
@@ -48,7 +50,7 @@ const ServiceBasicInfo = ({
       />
 
       {/* Category */}
-      <div className="space-y-2">
+      <div className="space-y-2" dir={lang == "ar" ? "rtl" : "ltr"}>
         <label className="text-sm font-semibold text-foreground">
           {t("post_service.category")} *
         </label>

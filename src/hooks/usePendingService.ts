@@ -18,6 +18,7 @@ export interface PendingServiceData {
     number: string;
   };
   media: { id: string; name: string; url: string; thumbnail?: string, type?: string }[];
+  with_appointments: boolean;
 }
 
 export const PENDING_SERVICE_KEY = 'pending_service_data';

@@ -12,40 +12,41 @@ import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-
 const ServicePage = () => {
   const { t } = useTranslation("services");
   const isMobile = useIsMobile();
   const { id: serviceId } = useParams<{ id: string }>();
 
   if (!serviceId) {
-    throw new Error('Service ID not found');
-  };
+    throw new Error("Service ID not found");
+  }
 
   return (
-    <div className={cn(
-      isMobile 
-        ? 'max-w-4xl mx-auto py-5 px-4 space-y-5'
-        : 'max-w-4xl mx-auto py-12 px-4 space-y-10'
-      )}>
+    <div
+      className={cn(
+        isMobile
+          ? "max-w-4xl mx-auto py-5 px-4 space-y-3"
+          : "max-w-4xl mx-auto pt-5 pb-8 px-4 space-y-6",
+      )}
+    >
       <div className="flex items-center justify-center">
-        <h1 className="md:text-2xl font-bold text-xl">{t("service.top_title")}</h1>
+        <h1 className="md:text-2xl font-bold text-xl">
+          {t("service.top_title")}
+        </h1>
       </div>
       <Suspense fallback={<ServiceLoading />}>
         <ErrorBoundary fallback={<ServiceQueryError />}>
           <ServiceViewWrapper serviceId={serviceId} />
         </ErrorBoundary>
       </Suspense>
-      <div>
-        <Separator />
-        <Suspense fallback={<LoadingReviews />}>
-          <ErrorBoundary fallback={<ReviewQueryError />}>
-            <Reviews serviceId={serviceId} />
-          </ErrorBoundary>
-        </Suspense>
-      </div>
+      <Separator />
+      <Suspense fallback={<LoadingReviews />}>
+        <ErrorBoundary fallback={<ReviewQueryError />}>
+          <Reviews serviceId={serviceId} />
+        </ErrorBoundary>
+      </Suspense>
     </div>
-  )
-}
+  );
+};
 
-export default ServicePage
+export default ServicePage;
