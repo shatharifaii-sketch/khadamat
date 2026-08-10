@@ -80,6 +80,7 @@
         "get_subscription": "اشترك الان",
         "loading": "جاري التحميل...",
         "uploading...": "جاري رفع الصور...",
+        "service_email_note": "هذا البريد متاح لأي مستخدم على الموقع!"
         "with_appointments": "افتح حجز المواعيد للخدمة..."
     },
     "find_service": {

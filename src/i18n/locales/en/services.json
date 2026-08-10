@@ -81,6 +81,7 @@
         "get_subscription": "Become a Member Now",
         "loading": "Loading...",
         "uploading...": "Uploading...",
+        "service_email_note": "This email is available for anyone to see!"
         "with_appointments": "Open appointment reservations..."
     },
 
