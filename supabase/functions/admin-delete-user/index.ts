@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { id } = await req.json();
+    const { id, is_admin } = await req.json();
 
     if (!id) {
       return new Response(
@@ -44,6 +44,22 @@ Deno.serve(async (req) => {
         }),
         {
           status: 400,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+
+    if (!is_admin) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          user: null,
+          error: "unauthorized",
+        }),
+        {
           headers: {
             ...corsHeaders,
             "Content-Type": "application/json",

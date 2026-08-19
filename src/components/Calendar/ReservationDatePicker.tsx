@@ -10,6 +10,8 @@ interface ReservationDatePickerProps {
   value?: string;
   onChange: (value: string) => void;
   disabled?: (date: Date) => boolean;
+
+  weekDays?: number[]
 }
 
 const ReservationDatePicker = ({
@@ -35,7 +37,7 @@ const ReservationDatePicker = ({
           {selectedDate ? (
             format(selectedDate, "PPP")
           ) : (
-            <span>Pick a date</span>
+            <span>MM dd, YYYY</span>
           )}
         </Button>
       </PopoverTrigger>

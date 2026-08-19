@@ -26,7 +26,8 @@ export const useServiceFormState = (serviceToEdit?: Service | null) => {
       number: '',
     },
     media: [],
-    with_appointments: false
+    with_appointments: false,
+    availability: []
   });
 
   // Load service data for editing or pending service data
@@ -50,7 +51,7 @@ export const useServiceFormState = (serviceToEdit?: Service | null) => {
           number: digits.slice(digits.length - 9),
         },
         media: [],
-        with_appointments: serviceToEdit.with_appointments
+        with_appointments: serviceToEdit.with_appointments,
       });
 
     } else if (pendingService && !isEditMode) {

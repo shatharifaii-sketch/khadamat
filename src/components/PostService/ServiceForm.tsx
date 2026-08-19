@@ -81,6 +81,8 @@ const ServiceForm = ({ serviceToEdit }: ServiceFormProps) => {
               onChange={(value) =>
                 handleInputChange("with_appointments", value)
               }
+              availability={formData.availability}
+              onAvailabilityChange={(value) => handleInputChange("availability", value)}
             />
           </div>
 

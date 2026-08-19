@@ -80,7 +80,7 @@
         "get_subscription": "اشترك الان",
         "loading": "جاري التحميل...",
         "uploading...": "جاري رفع الصور...",
-        "service_email_note": "هذا البريد متاح لأي مستخدم على الموقع!"
+        "service_email_note": "هذا البريد متاح لأي مستخدم على الموقع!",
         "with_appointments": "افتح حجز المواعيد للخدمة..."
     },
     "find_service": {
@@ -128,7 +128,7 @@
         "online": "خدمة رقمية اونلاين",
         "location": "مكان الخدمة",
         "experience": "الخبرة",
-        "provider_info": "معلومات مقدم الخدمة",
+        "contact_info": "معلومات التواصل",
         "provider_name": "الاسم الشخصي",
         "email": "البريد الالكتروني",
         "phone": "رقم الهاتف",

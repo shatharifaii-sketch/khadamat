@@ -12,16 +12,35 @@
     "day": "يوم",
     "list": "قائمة",
     "year": "سنة",
+    "days": {
+        "sunday": "الأحد",
+        "monday": "الاثنين",
+        "tuesday": "الثلاثاء",
+        "wednesday": "الأربعاء",
+        "thursday": "الخميس",
+        "friday": "الجمعة",
+        "saturday": "السبت"
+    },
     "create_reservation": {
         "title": "احجز موعد جديد!",
         "description": "أنشئ حجز جديد مع مستخدم آخر.",
         "pick_date": "اختر تاريخ",
         "date_field_description": "التاريخ يجب أن يكون بعد اليوم",
         "pick_start_time": "بداية الموعد",
-        "start_time_field_description": "اختر الوقت المناسب لبدء الموعد",
+        "start_time_field_description": " اختر الوقت المناسب لبدء الموعد",
         "pick_end_time": "نهاية الموعد",
-        "end_time_field_description": "اختر الوقت المتوقع لنهاية الموعد",
+        "end_time_field_description": "اختر الوقت المتوقع لنهاية الموعد  على الاقل ساعة كاملة بعد البدء",
         "reset": "إعادة تسجيل",
-        "submit": "تأكيد الحجز"
+        "submit": "تأكيد الحجز",
+        "24_format": "24h",
+        "12_format": "12h",
+        "pick_time": "اختر وقت"
+    },
+    "availability_form": {
+        "title": "حدد أوقات العمل",
+        "desc": "يمكنك تحديد أوقات عملك خلال الاسبوع للخدمة و تحديد إن كان المستخدم بيقدر يحجز موعد",
+        "with_appointments": "افتح حجز المواعيد للخدمة هذه",
+        "days": "قائمة أيام العمل",
+        "reset": "إعادة تسجيل"
     }
 }

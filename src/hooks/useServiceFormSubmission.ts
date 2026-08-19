@@ -7,12 +7,14 @@ import { toast } from 'sonner';
 import { Service } from './useAdminFunctionality';
 import { formatWhatsappNumber } from '@/utils/formValidation';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
   const navigate = useNavigate();
-  const { createService, updateService, isCreating, isUpdating, saveImages } = useServices();
+  const { createService, updateService, isCreating, isUpdating, saveImages, setProviderAvailability, isError: errorSettingProviderAvailability } = useServices();
   const { canPostService } = useSubscription();
   const { savePendingService, clearPendingService } = usePendingService();
+  const { user } = useAuth();
   
   const isEditMode = !!serviceToEdit;
 
@@ -70,7 +72,8 @@ export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
     }
 
     try {
-      console.log("FORMDATA: ", formData)
+      console.log("FORMDATA: ", formData);
+
       const result = await createService.mutateAsync({
         title: formData.title,
         category: formData.category,
@@ -87,6 +90,12 @@ export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
           number: formData.whatsapp_number.number
         }),
         with_appointments: formData.with_appointments
+      });
+
+      const res = await setProviderAvailability({
+        availability: formData.availability,
+        userId: user?.id,
+        serviceId: result.id
       });
 
       //TODO: Handle image uploads here if necessary

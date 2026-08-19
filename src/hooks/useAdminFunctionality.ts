@@ -51,7 +51,7 @@ export interface Service {
     thumbnail_url?: string;
     type?: 'image' | 'video';
   }[];
-  with_appointments: boolean
+  with_appointments: boolean;
 }
 
 interface UploadedImage {
@@ -100,13 +100,15 @@ export const useAdminData = () => {
       if (usersError) throw usersError;
 
       const { 
-        data: { 
-          success, 
-          data: roles, 
-          error 
+        data: {
+          success,
+          data: roles,
+          error
         }, 
         error: rolesError 
-      } = await supabase.functions.invoke("get-roles");
+      } = await supabase.functions.invoke("get-user-roles");
+
+      console.log("DATA: ", roles);
 
       if (rolesError) throw rolesError;
 
@@ -120,8 +122,6 @@ export const useAdminData = () => {
         ...profile,
         is_admin: adminSet.has(profile.id),
       }));
-
-      console.log(profilesWithAdminFlag);
 
       const { data: services, error: servicesError } = await supabase.from('services')
         .select(`

@@ -81,7 +81,7 @@
         "get_subscription": "Become a Member Now",
         "loading": "Loading...",
         "uploading...": "Uploading...",
-        "service_email_note": "This email is available for anyone to see!"
+        "service_email_note": "This email is available for anyone to see!",
         "with_appointments": "Open appointment reservations..."
     },
 
@@ -131,7 +131,7 @@
         "online": "Online Service",
         "location": "Service Location",
         "experience": "Experience",
-        "provider_info": "Provider Information",
+        "contact_info": "Contact Details",
         "provider_name": "Name",
         "email": "Email",
         "phone": "Phone Number",

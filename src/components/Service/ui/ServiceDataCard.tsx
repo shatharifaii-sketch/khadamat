@@ -160,7 +160,7 @@ const ServiceDataCard = ({ service, userId }: Props) => {
           <Separator />
           <div className="space-y-3" dir={lang === "ar" ? "rtl" : "ltr"}>
             <h3 className="text-xl font-semibold mt-4 text-start">
-              {t("service.provider_info")}
+              {t("service.contact_info")}
             </h3>
             <div className="space-y-2 text-muted-foreground text-start ">
               <p>
@@ -184,7 +184,7 @@ const ServiceDataCard = ({ service, userId }: Props) => {
                 className={cn(
                   "grid",
                   isMobile
-                    ? "grid-cols-1"
+                    ? "grid-cols-1 gap-3"
                     : "grid-cols-2 items-start justify-between",
                 )}
               >
@@ -225,7 +225,7 @@ const ServiceDataCard = ({ service, userId }: Props) => {
                     <DialogTrigger asChild>
                       <Button
                         disabled={availabilty.canReserve}
-                        className={cn("mt-3", !isMobile && "hidden")}
+                        className={cn("mt-3 w-full", !isMobile && "hidden")}
                       >
                         {t("service.make_reservation")}
                       </Button>

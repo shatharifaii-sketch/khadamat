@@ -3,18 +3,27 @@ import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
 import { Clock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface ReservationTimePickerProps {
     value?: string;
     onChange: (value: string) => void;
     disabled?: boolean;
+    timeFormat: string;
+
+    timeMargins?: {
+        from_time: string;
+        to_time: string;
+    }
 }
 
 const ReservationTimePicker = ({
     value,
     onChange,
-    disabled = false
+    disabled = false,
+    timeFormat
 }: ReservationTimePickerProps) => {
+    const { t } = useTranslation("reservations");
     const [open, setOpen] = useState<boolean>(false);
 
     const displayValue = value?.slice(0, 5) || "";
@@ -22,6 +31,22 @@ const ReservationTimePicker = ({
     const handleTimeChange = (time: string) => {
         onChange(`${time}:00`);
         setOpen(false);
+    }
+
+    const formatTime = (time: string) => {
+        if (!time) return "";
+
+        const [hourString, minute] = time.split(":");
+        const hour = Number(hourString);
+
+        if (timeFormat === "24h") {
+            return `${hourString}:${minute}`;
+        }
+
+        const period = hour >= 12 ? "pm" : "am";
+        const displayHour = hour % 12 || 12;
+
+        return `${displayHour}:${minute} ${period}`;
     }
 
     const timeOptions = useMemo(() => {
@@ -53,7 +78,7 @@ const ReservationTimePicker = ({
             >
                 <Clock className="mr-2 h-4 w-4" />
 
-                {displayValue || "Pick a time"}
+                {displayValue || t("create_reservation.pick_time")}
             </Button>
         </PopoverTrigger>
 
@@ -66,8 +91,9 @@ const ReservationTimePicker = ({
                         variant={displayValue === time ? "secondary" : "ghost"}
                         className='w-full justify-start font-normal'
                         onClick={() => handleTimeChange(time)}
+                        dir="ltr"
                     >
-                        {time}
+                        {formatTime(time)}
                     </Button>
                 ))}
             </div>

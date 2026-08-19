@@ -9,6 +9,7 @@ import { useImageUpload } from './useImageUpload';
 import { ServiceFormData } from '@/types/service';
 import { ServiceLink } from '@/components/PostService/ServiceLinks';
 import { useTranslation } from 'react-i18next';
+import { AvailabilityType } from '@/contexts/ReservationsContext';
 
 export interface Service {
   id?: string;
@@ -35,6 +36,39 @@ export interface ServiceImageProps {
   name: string;
   thumbnail_url?: string;
   type?: string;
+}
+
+async function setAvailability({ availability, serviceId, userId }: { availability: AvailabilityType[], serviceId: string, userId: string }): Promise<{ success: boolean, errors: string[] }> {
+  if (!availability || availability.length == 0) return;
+  let errors: string[];
+
+  for (const av of availability) {
+    console.log("availability: ", av)
+    const { error } = await supabase.from("calendar_provider_availability").insert({
+      to_time: av.toTime,
+      from_time: av.fromTime,
+      day_of_week: av.dayOfWeek,
+      provider_id: userId,
+      service_id: serviceId
+    });
+
+    if (error) {
+      const errorMessage = `data of ${av.dayOfWeek} faced an error`
+      console.error(errorMessage, error);
+      
+      errors.push(errorMessage);
+
+      throw {
+        success: false,
+        errors
+      }
+    }
+  }
+
+  return {
+    success: true,
+    errors
+  }
 }
 
 export const useServices = () => {
@@ -282,13 +316,35 @@ export const useServices = () => {
     enabled: !!user?.id
   });
 
+  const {
+    mutate: setProviderAvailability,
+    isPending,
+    isError
+  } = useMutation({
+    mutationKey: ["set-availability"],
+    mutationFn: setAvailability,
+    onSuccess: ({ success, errors }) => {
+      if (errors.length > 0) {
+        toast.error(t("error_setting_availability"));
+        return;
+      }
+
+      toast.success(t("availability_set"));
+    },
+    onError: (error) => {
+      console.log(error);
+    }
+  })
+
   return {
     createService,
     updateService,
     getUserServices,
     saveImages,
     isCreating: createService.isPending,
-    isUpdating: updateService.isPending
+    isUpdating: updateService.isPending,
+    setProviderAvailability,
+    isError
   };
 };
 

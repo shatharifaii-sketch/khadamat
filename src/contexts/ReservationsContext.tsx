@@ -12,6 +12,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { toMinutes } from "@/lib/utils";
 import { toast } from "sonner";
 
+export type AvailabilityType = {
+  dayOfWeek: number;
+  fromTime: string;
+  toTime: string;
+}
+
 export interface Reservation {
   id: string;
   date: string | null;

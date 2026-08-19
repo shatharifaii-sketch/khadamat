@@ -4,7 +4,7 @@
 
 // Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 
 const corsHeaders = {
@@ -13,9 +13,12 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const supabase = createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+const supabaseAdmin = createClient(
+  supabaseUrl,
+  supabaseServiceRoleKey
 );
 
 Deno.serve(async (req) => {
@@ -34,7 +37,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { data, error } = await supabase.from("user_roles").select("user_id, role");
+    const { data, error } = await supabaseAdmin.from("user_roles").select("user_id, role");
 
     if (error) {
       console.error("Error creating user: ", error);
@@ -42,7 +45,7 @@ Deno.serve(async (req) => {
         JSON.stringify({
           success: false,
           user: null,
-          error: error,
+          error: "Database error",
         }),
         {
           headers: {

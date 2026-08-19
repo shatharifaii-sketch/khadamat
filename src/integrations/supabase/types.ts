@@ -121,32 +121,29 @@ export type Database = {
       calendar_provider_availability: {
         Row: {
           created_at: string
-          from_date: string | null
+          day_of_week: number | null
           from_time: string | null
           id: string
           provider_id: string | null
           service_id: string | null
-          to_date: string | null
           to_time: string | null
         }
         Insert: {
           created_at?: string
-          from_date?: string | null
+          day_of_week?: number | null
           from_time?: string | null
           id?: string
           provider_id?: string | null
           service_id?: string | null
-          to_date?: string | null
           to_time?: string | null
         }
         Update: {
           created_at?: string
-          from_date?: string | null
+          day_of_week?: number | null
           from_time?: string | null
           id?: string
           provider_id?: string | null
           service_id?: string | null
-          to_date?: string | null
           to_time?: string | null
         }
         Relationships: [
