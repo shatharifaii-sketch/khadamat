@@ -16,7 +16,7 @@ export type AvailabilityType = {
   dayOfWeek: number;
   fromTime: string;
   toTime: string;
-}
+};
 
 export interface Reservation {
   id: string;
@@ -86,10 +86,10 @@ interface ProviderAvailabilityList {
 export type ReservationForm = {
   providerId: string;
   clientId: string;
-  serviceId?: string;
-  date: string;
-  start_time: string;
-  end_time: string;
+  serviceId: string;
+  date?: string;
+  start_time?: string;
+  end_time?: string;
 };
 
 interface ReservationContextType {
@@ -137,7 +137,7 @@ export const ReservationsProvider = ({
   const { t } = useTranslation("reservations");
   const lang = localStorage.getItem("language") || "en";
 
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const [reservations, setReservations] = useState<Reservation[]>([]);
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -186,13 +186,16 @@ export const ReservationsProvider = ({
 
     const { data: checkProvider, error: checkError } =
       await supabase.functions.invoke("check-provider-availability", {
-        body: JSON.stringify({
+        body: {
           providerId: reservation.providerId,
           serviceId: reservation.serviceId,
           start_time: reservation.start_time,
           end_time: reservation.end_time,
           date: reservation.date,
-        }),
+        },
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`
+        },
       });
 
     if (checkError) {
@@ -459,4 +462,4 @@ export const ReservationsProvider = ({
   );
 };
 
-export const useReservations = () => useContext(ReservationsContext);
+export const useReservationsContext = () => useContext(ReservationsContext);

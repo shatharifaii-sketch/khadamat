@@ -10,8 +10,7 @@ type ProviderAvailability = {
   id: string;
   from_time: string;
   to_time: string;
-  from_date: string;
-  to_date: string;
+  day_of_week: number;
   provider_id: string;
   service_id: string;
   created_at: string;
@@ -52,7 +51,7 @@ const toMinutes = (time: string) => {
 // Use publishable for Client-facing, key-validated endpoints
 // Use secret for Server-to-server, internal calls
 export default {
-  fetch: withSupabase({ auth: ["user"] }, async (req: Request, ctx) => {
+  fetch: withSupabase({ auth: ["publishable"] }, async (req: Request, ctx) => {
     const { supabase } = ctx;
 
     try {
@@ -70,12 +69,15 @@ export default {
         );
       }
 
-      const requestedStart = new Date(`${date}T${start_time}`);
-      const requestedEnd = new Date(`${date}T${end_time}`);
+      const requestedDate = new Date(`${date}T00:00:00`);
+      const requestedDayOfWeek = requestedDate.getDay();
+
+      const requestedStart = toMinutes(start_time);
+      const requestedEnd = toMinutes(end_time);
 
       if (
-        Number.isNaN(requestedStart.getTime()) ||
-        Number.isNaN(requestedEnd.getTime())
+        Number.isNaN(requestedStart) ||
+        Number.isNaN(requestedEnd)
       ) {
         return Response.json(
           {
@@ -118,27 +120,16 @@ export default {
       }
 
       const available = availability.some((slot: ProviderAvailability) => {
-        const availabilityStart = new Date(slot.from_date);
-        const availabilityEnd = new Date(slot.to_date);
-
-        const dateRangeMatches =
-          requestedStart >= availabilityStart &&
-          requestedEnd <= availabilityEnd;
-
-        if (!dateRangeMatches) {
+        if (slot.day_of_week !== requestedDayOfWeek) {
           return false;
         }
-
-        const requestedStartMinutes = toMinutes(start_time);
-        const requestedEndMinutes = toMinutes(end_time);
 
         const availableFromMinutes = toMinutes(slot.from_time);
         const availableToMinutes = toMinutes(slot.to_time);
 
         return (
-          requestedStartMinutes >= availableFromMinutes &&
-          requestedEndMinutes <= availableToMinutes
-        );
+          requestedStart >= availableFromMinutes && requestedEnd <= availableToMinutes
+        )
       });
 
       if (!available) {
@@ -169,9 +160,9 @@ export default {
         );
       }
 
-      const hasConflict = reservations.som((reservation: Reservation) => {
-        const existingStart = new Date(reservation.start_time);
-        const existingEnd = new Date(reservation.end_time);
+      const hasConflict = reservations.some((reservation: Reservation) => {
+        const existingStart = toMinutes(reservation.start_time);
+        const existingEnd = toMinutes(reservation.end_time);
 
         return requestedStart < existingEnd && requestedEnd > existingStart;
       });

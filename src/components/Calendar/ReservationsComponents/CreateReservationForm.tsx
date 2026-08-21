@@ -21,16 +21,19 @@ import ReservationTimePicker from "../ReservationTimePicker";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
+import { cn, formatTime } from "@/lib/utils";
 import useReservations from "@/hooks/useReservations";
+import { useReservationsContext } from "@/contexts/ReservationsContext";
+import { toast } from "sonner";
 
 interface Props {
   serviceId: string;
   providerId: string;
   userId: string;
+  onSuccess: () => void;
 }
 
-const CreateReservationForm = ({ serviceId, providerId, userId }: Props) => {
+const CreateReservationForm = ({ serviceId, providerId, userId, onSuccess }: Props) => {
   const { t } = useTranslation("reservations");
 
   const [pending, setPending] = useState<boolean>(false);
@@ -38,7 +41,21 @@ const CreateReservationForm = ({ serviceId, providerId, userId }: Props) => {
 
   const { availabilityData } = useReservations({ serviceId, providerId });
 
-  console.log(availabilityData)
+  const { createReservation } = useReservationsContext();
+
+  const availableWeekDays = [
+    ...new Set(
+      availabilityData?.data?.map((availability) => availability.day_of_week) ??
+        [],
+    ),
+  ];
+
+  const availabilityMargins = availabilityData?.data?.[0]
+    ? {
+        fromTime: availabilityData.data[0].from_time,
+        toTime: availabilityData.data[0].to_time,
+      }
+    : undefined;
 
   const form = useForm<z.infer<typeof createFormSchema>>({
     resolver: zodResolver(createFormSchema),
@@ -52,8 +69,28 @@ const CreateReservationForm = ({ serviceId, providerId, userId }: Props) => {
     },
   });
 
-  const onSubmit = (data: z.infer<typeof createFormSchema>) => {
-    console.log("RES DATA: ", data);
+  const [date, fromTime, toTime] = form.watch([
+    "date",
+    "start_time",
+    "end_time",
+  ]);
+
+  const isSubmitDisabled = !date || !fromTime || !toTime || pending;
+
+  const onSubmit = async (data: z.infer<typeof createFormSchema>) => {
+    console.log("VALID:", data);
+
+    const { success, error } = await createReservation(data);
+
+    if (!success || error) {
+      console.log(error)
+      // toast(t("error_occured"), {
+      //   description: error ? t(error) : "unknown_error"
+      // })
+      return;
+    }
+
+    onSuccess?.();
   };
 
   return (
@@ -66,7 +103,12 @@ const CreateReservationForm = ({ serviceId, providerId, userId }: Props) => {
       </DialogHeader>
 
       <div>
-        <form id="reservation-form" onSubmit={form.handleSubmit(onSubmit)}>
+        <form
+          id="reservation-form"
+          onSubmit={form.handleSubmit(onSubmit, (errors) => {
+            console.log("FORM VALIDATION ERRORS:", errors);
+          })}
+        >
           <FieldGroup>
             <Controller
               name="date"
@@ -79,6 +121,7 @@ const CreateReservationForm = ({ serviceId, providerId, userId }: Props) => {
                   <ReservationDatePicker
                     value={field.value}
                     onChange={field.onChange}
+                    weekDays={availableWeekDays}
                   />
 
                   <FieldDescription>
@@ -140,12 +183,22 @@ const CreateReservationForm = ({ serviceId, providerId, userId }: Props) => {
                       value={field.value}
                       onChange={field.onChange}
                       timeFormat={timeFormat}
+                      timeMargins={availabilityMargins}
                     />
 
                     <FieldDescription
                       className={cn(fieldState.error ? "" : "mb-4")}
                     >
-                      {t("create_reservation.start_time_field_description")}
+                      {t("create_reservation.start_time_field_description", {
+                        fromTime: formatTime(
+                          availabilityData?.data?.[0]?.from_time ?? "",
+                          timeFormat,
+                        ),
+                        toTime: formatTime(
+                          availabilityData?.data?.[0]?.to_time ?? "",
+                          timeFormat,
+                        ),
+                      })}
                     </FieldDescription>
 
                     {fieldState.error && (
@@ -167,6 +220,7 @@ const CreateReservationForm = ({ serviceId, providerId, userId }: Props) => {
                       value={field.value}
                       onChange={field.onChange}
                       timeFormat={timeFormat}
+                      timeMargins={availabilityMargins}
                     />
 
                     <FieldDescription
@@ -192,7 +246,9 @@ const CreateReservationForm = ({ serviceId, providerId, userId }: Props) => {
             >
               {t("create_reservation.reset")}
             </Button>
-            <Button type="submit">{t("create_reservation.submit")}</Button>
+            <Button type="submit" disabled={isSubmitDisabled}>
+              {t("create_reservation.submit")}
+            </Button>
           </Field>
         </form>
       </div>

@@ -488,7 +488,7 @@ entrypoint = "./functions/get-roles/index.ts"
 
 [functions.check-provider-availability]
 enabled = true
-verify_jwt = false
+verify_jwt = true
 import_map = "./functions/check-provider-availability/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx

@@ -29,7 +29,7 @@ import { useIsAdmin } from "@/hooks/useAdminFunctionality";
 import { useChat } from "@/contexts/ChatContext";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
-import { useReservations } from "@/contexts/ReservationsContext";
+import { useReservationsContext } from "@/contexts/ReservationsContext";
 
 const Navigation = () => {
   const { t } = useTranslation("navbar");
@@ -129,7 +129,7 @@ const Navigation = () => {
     );
 
   const ReservationsButton = ({ mobile = false }: { mobile?: boolean }) => {
-    const { unseenCount } = useReservations();
+    const { unseenCount } = useReservationsContext();
     if (!isServiceProvider) return null;
 
     return (

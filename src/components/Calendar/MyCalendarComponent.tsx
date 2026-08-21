@@ -8,11 +8,10 @@ import enLocale from "@fullcalendar/react/locales/en-gb";
 import "@fullcalendar/react/skeleton.css"; // ALWAYS NEED SKELETON
 import "@fullcalendar/react/themes/forma/theme.css"; // YOUR THEME
 import "@fullcalendar/react/themes/forma/palettes/purple.css"; // YOUR THEME'S PALETTE
-import { useReservations } from "@/contexts/ReservationsContext";
+import { useReservationsContext } from "@/contexts/ReservationsContext";
 import { useMemo, useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader } from "../ui/dialog";
+import { Dialog, DialogContent } from "../ui/dialog";
 import { useTranslation } from "react-i18next";
-import CreateReservationForm from "./ReservationsComponents/CreateReservationForm";
 
 function renderEventContent(eventInfo: EventDisplayInfo) {
   return (
@@ -31,7 +30,7 @@ const MyCalendarComponent = () => {
   // const controller = useCalendarController();
   // const buttons = controller.getButtonState();
 
-  const { reservations, loading } = useReservations();
+  const { reservations, loading } = useReservationsContext();
 
   const [openBookingDialog, setOpenBookingDialog] = useState<boolean>(false);
   const [selectedDate, setSelectedDate] = useState<Date>();
@@ -49,8 +48,8 @@ const MyCalendarComponent = () => {
     return reservations.map((reservation) => ({
       id: reservation.id,
       title: reservation.service?.title ?? "Reservation",
-      start: `${reservation.date}T${reservation.time}`,
-      end: `${reservation.date}T${addHour(reservation.time)}`,
+      start: `${reservation.date}T${reservation.start_time}`,
+      end: `${reservation.date}T${addHour(reservation.end_time)}`,
       extendedProps: reservation,
       color: 
         reservation.status === "pending"

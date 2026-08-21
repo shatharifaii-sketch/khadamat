@@ -135,10 +135,24 @@ export const useServiceReservation = (id: string, userId: string) => {
   const { data } = useSuspenseQuery({
     queryKey: ["service-reservation"],
     queryFn: async () => {
+      if (!id || !userId) {
+        console.log(id, userId);
+        return {
+          latestReservation: null,
+          reservations: [],
+          availability: {
+            canReserve: false,
+            reason: "no_ids",
+            reservation: null,
+            
+          }
+        };
+      }
+
       const { data, error } = await supabase
         .from("calendar_reservations")
         .select("*")
-        .eq("id", id)
+        .eq("service_id", id)
         .eq("client_id", userId)
         .order("date", { ascending: false })
         .order("start_time", { ascending: false });
@@ -148,7 +162,7 @@ export const useServiceReservation = (id: string, userId: string) => {
       return {
         latestReservation: data[0] as ReservationList ?? null,
         reservations: data,
-        availabilty: getReservationAvailability(data)
+        availability: getReservationAvailability(data)
       };
     },
   });

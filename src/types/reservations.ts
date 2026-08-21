@@ -1,20 +1,45 @@
 import { ReservationForm } from "@/contexts/ReservationsContext";
 import * as z from "zod";
 
-export const createFormSchema: z.ZodType<ReservationForm> = z
+const requiredDate = z
+  .string()
+  .min(1, "date_required")
+  .pipe(z.iso.date());
+
+const requiredTime = z
+  .string()
+  .min(1, "time_required")
+  .pipe(z.iso.time());
+
+export const createFormSchema = z
   .object({
     providerId: z.string().min(1),
     clientId: z.string().min(1),
-    serviceId: z.string().optional(),
-    date: z.iso.date(),
-    start_time: z.iso.time(),
-    end_time: z.iso.time(),
+    serviceId: z.string().min(1),
+
+    date: requiredDate,
+
+    start_time: requiredTime,
+
+    end_time: requiredTime,
   })
   .superRefine(({ date, start_time, end_time }, ctx) => {
+    if (!date || !start_time || !end_time) {
+      return;
+    }
+
     const reservationStart = new Date(`${date}T${start_time}`);
     const reservationEnd = new Date(`${date}T${end_time}`);
 
-    const durationMs = reservationEnd.getTime() - reservationStart.getTime();
+    if (
+      Number.isNaN(reservationStart)
+      || Number.isNaN(reservationStart)
+    ) {
+      return;
+    }
+
+    const durationMs =
+      reservationEnd.getTime() - reservationStart.getTime();
 
     if (durationMs < 60 * 60 * 1000) {
       ctx.addIssue({

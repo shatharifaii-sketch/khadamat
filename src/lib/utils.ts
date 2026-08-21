@@ -153,3 +153,19 @@ export function getReservationAvailability(reservations: ReservationList[]) {
     reservation: null
   }
 }
+
+export function formatTime(time: string, timeFormat: string) {
+  if (!time) return "";
+
+  const [hourString, minute] = time.slice(0, 5).split(":");
+  const hour = Number(hourString);
+
+  if (timeFormat === "24h") {
+    return `${hourString}:${minute}`;
+  }
+
+  const period = hour >= 12 ? "PM" : "AM";
+  const displayHour = hour % 12 || 12;
+
+  return `${displayHour}:${minute} ${period}`;
+}

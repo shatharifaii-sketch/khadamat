@@ -8,7 +8,7 @@ interface Props {
 }
 
 export const ServiceViewWrapper = ({ serviceId }: Props) => {
-  const { user } = useAuth();
+  const { user } = useAuth();  
   const {
     service
   } = useServiceData(serviceId, user?.id);

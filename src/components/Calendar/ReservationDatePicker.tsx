@@ -5,21 +5,48 @@ import { cn } from "@/lib/utils";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { Calendar } from "../ui/calendar";
+import { arSA, enUS } from "react-day-picker/locale";
 
 interface ReservationDatePickerProps {
   value?: string;
   onChange: (value: string) => void;
-  disabled?: (date: Date) => boolean;
-
-  weekDays?: number[]
+  weekDays?: number[];
 }
 
 const ReservationDatePicker = ({
   value,
   onChange,
-  disabled,
+  weekDays = [],
 }: ReservationDatePickerProps) => {
+  const lang = localStorage.getItem("language") || "en";
+
   const selectedDate = value ? new Date(`${value}T00:00:00`) : undefined;
+
+  const disabled = (date: Date) => {
+    const dayOfWeek = date.getDay();
+
+    // Provider doesn't work this day
+    if (!weekDays.includes(dayOfWeek)) {
+      return true;
+    }
+
+    const today = new Date();
+
+    today.setHours(0, 0, 0, 0);
+
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const selectedDate = new Date(date);
+    selectedDate.setHours(0, 0, 0, 0);
+
+    // Today and past dates are disabled
+    if (selectedDate < tomorrow) {
+      return true;
+    }
+
+    return false;
+  };
 
   return (
     <Popover>
@@ -43,16 +70,24 @@ const ReservationDatePicker = ({
       </PopoverTrigger>
 
       <PopoverContent className="w-auto p-0">
-          <Calendar 
-            mode="single"
-            selected={selectedDate}
-            onSelect={(date) => {
-                if (!date) return;
+        <Calendar
+          mode="single"
+          selected={selectedDate}
+          onSelect={(date) => {
+            if (!date) return;
 
-                onChange(format(date, "yyyy-MM-dd"));
-            }}
-            disabled={disabled}
-          />
+            onChange(format(date, "yyyy-MM-dd"));
+          }}
+          disabled={disabled}
+          className="rounded-lg border"
+          captionLayout="label"
+          locale={
+            lang == "en" ? enUS : arSA
+          }
+          dir={
+            lang == "en" ? "ltr" : "rtl"
+          }
+        />
       </PopoverContent>
     </Popover>
   );

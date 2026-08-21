@@ -1,5 +1,7 @@
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Reservation, ReservationList } from '@/contexts/ReservationsContext'
 import React from 'react'
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   reservation: Reservation | ReservationList;
@@ -8,8 +10,16 @@ interface Props {
 const ReservationCard = ({
   reservation
 }: Props) => {
+  const { t } = useTranslation("reservations");
+
   return (
-    <div>ReservationCard</div>
+    <Card className='h-full'>
+      <CardContent>
+        <CardHeader>
+          
+        </CardHeader>
+      </CardContent>
+    </Card>
   )
 }
 
