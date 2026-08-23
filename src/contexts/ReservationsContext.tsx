@@ -418,7 +418,7 @@ export const ReservationsProvider = ({
 
   useEffect(() => {
     loadReservations();
-  }, [loadReservations]);
+  }, [loadReservations, user]);
 
   useEffect(() => {
     if (!user) return;

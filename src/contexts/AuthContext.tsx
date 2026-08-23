@@ -26,6 +26,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
+  console.log(user)
+
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -57,7 +59,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const checkIfUserIsProvider = async () => {
       if ((user && session) && user?.is_service_provider == null) {
-        const { data, error } = await supabase.from("profiles").select("is_service_provider").eq("id", user.id).single();
+        const { data, error } = await supabase.from("profiles").select("is_service_provider").eq("id", user?.id).maybeSingle();
         if (error) {
           console.error('Error checking if user is provider:', error);
           toast.error('حدث خطأ أثناء التحقق من نوع المستخدم');

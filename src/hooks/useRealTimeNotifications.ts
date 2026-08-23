@@ -26,6 +26,10 @@ export const useRealTimeNotifications = () => {
     if (!user) return;
 
     console.log('🔔 Setting up real-time notifications for user:', user.id);
+    console.log("EFFECT RUN", {
+    userId: user.id,
+    timestamp: new Date().toISOString(),
+  });
 
     // Main notifications channel
     const notificationsChannel = supabase
