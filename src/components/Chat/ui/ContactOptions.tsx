@@ -1,22 +1,32 @@
-import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Mail, Phone, Copy, MessageCirclePlus, ArrowLeftToLine } from 'lucide-react';
-import { toast } from 'sonner';
-import { useAnalyticsTracking } from '@/hooks/useAnalyticsTracking';
-import { cn, isMobile } from '@/lib/utils';
-import { useConversations } from '@/hooks/useConversations';
+import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Mail,
+  Phone,
+  Copy,
+  MessageCirclePlus,
+  ArrowLeftToLine,
+} from "lucide-react";
+import { toast } from "sonner";
+import { useAnalyticsTracking } from "@/hooks/useAnalyticsTracking";
+import { cn, isMobile } from "@/lib/utils";
+import { useConversations } from "@/hooks/useConversations";
 
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { FaWhatsapp } from 'react-icons/fa6';
-import { useTranslation } from 'react-i18next';
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { FaWhatsapp } from "react-icons/fa6";
+import { useTranslation } from "react-i18next";
 
 interface ContactOptionsProps {
   serviceId?: string;
   providerId: string;
   serviceName?: string;
   providerName: string;
-  email: string;
+  email?: string;
   phone?: string;
   className?: string;
   isConvo?: boolean;
@@ -42,7 +52,7 @@ const ContactOptions = ({
   setConvoId,
   userId,
   publisherId,
-  whatsappNumber
+  whatsappNumber,
 }: ContactOptionsProps) => {
   const { t } = useTranslation("services");
   const { trackServiceAction } = useAnalyticsTracking();
@@ -53,12 +63,16 @@ const ContactOptions = ({
     if (startConversationSuccess) {
       setIsConvo(true);
     }
-  }, [setIsConvo, startConversationSuccess])
+  }, [setIsConvo, startConversationSuccess]);
 
   const handleEmailContact = () => {
-    console.log('📧 Opening email client for service:', serviceName);
-    const subject = encodeURIComponent(`${t("find_service.card.inquiry")}: ${serviceName}`);
-    const body = encodeURIComponent(t("find_service.card.inquiry_body", { serviceName }));
+    console.log("📧 Opening email client for service:", serviceName);
+    const subject = encodeURIComponent(
+      `${t("find_service.card.inquiry")}: ${serviceName}`,
+    );
+    const body = encodeURIComponent(
+      t("find_service.card.inquiry_body", { serviceName }),
+    );
     window.open(`mailto:${email}?subject=${subject}&body=${body}`);
     toast.success(t("find_service.card.inquiry_success_toast"));
 
@@ -66,7 +80,7 @@ const ContactOptions = ({
       // Track email contact action
       trackServiceAction.mutate({
         serviceId,
-        actionType: 'email_click'
+        actionType: "email_click",
       });
     }
   };
@@ -74,19 +88,23 @@ const ContactOptions = ({
   const handleWhatsappContact = () => {
     if (!whatsappNumber) return;
 
-    console.log('📧 Opening whatsapp client for service:', serviceName, whatsappNumber);
+    console.log(
+      "📧 Opening whatsapp client for service:",
+      serviceName,
+      whatsappNumber,
+    );
 
     const encodedMessage = encodeURIComponent(
-      t("find_service.card.whatsapp_contact_message", { serviceName })
+      t("find_service.card.whatsapp_contact_message", { serviceName }),
     );
 
     const url = isMobile
       ? `https://wa.me/${whatsappNumber}?text=${encodedMessage}`
       : `https://web.whatsapp.com/send?phone=${whatsappNumber}&text=${encodedMessage}`;
 
-    window.open(url, '_blank');
+    window.open(url, "_blank");
     toast.success(t("find_service.card.whatsapp_contact_success_toast"));
-  }
+  };
 
   const handleCopyEmail = () => {
     navigator.clipboard.writeText(email);
@@ -96,7 +114,7 @@ const ContactOptions = ({
       // Track email contact action
       trackServiceAction.mutate({
         serviceId,
-        actionType: 'contact_click'
+        actionType: "contact_click",
       });
     }
   };
@@ -109,7 +127,7 @@ const ContactOptions = ({
       // Track phone contact action
       trackServiceAction.mutate({
         serviceId,
-        actionType: 'phone_click'
+        actionType: "phone_click",
       });
     }
   };
@@ -123,7 +141,7 @@ const ContactOptions = ({
         // Track phone contact action
         trackServiceAction.mutate({
           serviceId,
-          actionType: 'contact_click'
+          actionType: "contact_click",
         });
       }
     }
@@ -140,31 +158,36 @@ const ContactOptions = ({
         action: {
           label: t("find_service.card.login"),
           onClick: () => {
-            navigate('/auth');
-          }
-        }
+            navigate("/auth");
+          },
+        },
       });
       return;
     }
-    startConversation.mutateAsync({
-      serviceId, providerId, providerName
-    },
-    ).then((data) => {
-      if (!data) return;
-      console.log(data)
+    startConversation
+      .mutateAsync({
+        serviceId,
+        providerId,
+        providerName,
+      })
+      .then((data) => {
+        if (!data) return;
+        console.log(data);
 
-      setIsConvo(true);
-      setConvoId(data.id);
-      navigate(`/chat/${data.id}/${userId}${serviceId ? `/${serviceId}` : ''}/${publisherId}`);
-    });
+        setIsConvo(true);
+        setConvoId(data.id);
+        navigate(
+          `/chat/${data.id}/${userId}${serviceId ? `/${serviceId}` : ""}/${publisherId}`,
+        );
+      });
 
     if (serviceId) {
       trackServiceAction.mutate({
         serviceId: serviceId,
-        actionType: 'chat_start'
-      })
+        actionType: "chat_start",
+      });
     }
-  }
+  };
 
   return (
     <Popover>
@@ -204,24 +227,26 @@ const ContactOptions = ({
               </Button>
             </div>
 
-            <div className="flex gap-1">
-              <Button
-                variant="ghost"
-                className="flex-1 justify-start gap-2"
-                onClick={handleEmailContact}
-              >
-                <Mail size={16} />
-                {t("find_service.card.email_contact")}
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleCopyEmail}
-                title="نسخ البريد الإلكتروني"
-              >
-                <Copy size={16} />
-              </Button>
-            </div>
+            {email && (
+              <div className="flex gap-1">
+                <Button
+                  variant="ghost"
+                  className="flex-1 justify-start gap-2"
+                  onClick={handleEmailContact}
+                >
+                  <Mail size={16} />
+                  {t("find_service.card.email_contact")}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleCopyEmail}
+                  title="نسخ البريد الإلكتروني"
+                >
+                  <Copy size={16} />
+                </Button>
+              </div>
+            )}
 
             {phone && (
               <div className="flex gap-1">

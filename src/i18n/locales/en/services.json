@@ -80,7 +80,8 @@
         "not_allowed_to_post": "You are not allowed to post a new service",
         "get_subscription": "Become a Member Now",
         "loading": "Loading...",
-        "uploading...": "Uploading..."
+        "uploading...": "Uploading...",
+        "service_email_note": "This email is available for anyone to see!"
     },
 
     "find_service": {

@@ -1,6 +1,5 @@
-
-import FormField from '@/components/ui/form-field';
-import { useTranslation } from 'react-i18next';
+import FormField from "@/components/ui/form-field";
+import { useTranslation } from "react-i18next";
 
 interface ServiceContactProps {
   phone: string;
@@ -21,7 +20,7 @@ const ServiceContact = ({
   onPhoneBlur,
   onEmailBlur,
   phoneError,
-  emailError
+  emailError,
 }: ServiceContactProps) => {
   const { t } = useTranslation("services");
   return (
@@ -37,18 +36,21 @@ const ServiceContact = ({
         error={phoneError}
         required
       />
-      
-      <FormField
-        label={t("post_service.email")}
-        id="email"
-        type="email"
-        placeholder="info@khedemtak.com"
-        value={email}
-        onChange={onEmailChange}
-        onBlur={onEmailBlur}
-        error={emailError}
-        required
-      />
+
+      <div>
+        <FormField
+          label={t("post_service.email")}
+          id="email"
+          type="email"
+          placeholder="info@khedemtak.com"
+          value={email}
+          onChange={onEmailChange}
+          onBlur={onEmailBlur}
+          error={emailError}
+          required
+        />
+        <p className="text-sm text-muted-foreground">{t("post_service.service_email_note")}</p>
+      </div>
     </div>
   );
 };

@@ -6,9 +6,10 @@ import ContactOptions from '../Chat/ui/ContactOptions';
 import ReportDrawer from '../ReportDrawer';
 import { useAuth } from '@/contexts/AuthContext';
 import { validateWhatsappPhone } from '@/lib/utils';
+import { UserProfile } from '@/hooks/useProfile';
 
 interface Props {
-  profile: Tables<'profiles_with_email'>;
+  profile: UserProfile;
   services: Tables<'services'>[];
 }
 
@@ -20,11 +21,12 @@ const ProfileView = ({
   const [isConvo, setIsConvo] = useState<boolean>(false);
   const [convoId, setConvoId] = useState<string>(null);
 
+  const validWA = validateWhatsappPhone(profile.phone);
+
   return (
     <div>
       <ProfileHeader
         image={profile.profile_image_url}
-        email={profile.email}
         name={profile.full_name}
         phone={profile.phone}
       />
@@ -42,9 +44,8 @@ const ProfileView = ({
           isConvo={isConvo}
           setConvoId={setConvoId}
           setIsConvo={setIsConvo}
-          email={profile.email}
           phone={profile.phone}
-          whatsappNumber={validateWhatsappPhone(profile.phone).formatted}
+          whatsappNumber={validWA.valid ? validWA.formatted : null}
         />
         <ReportDrawer
           itemId={profile?.id}
