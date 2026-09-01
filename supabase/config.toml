@@ -424,7 +424,7 @@ entrypoint = "./functions/delete-user-profile/index.ts"
 
 [functions.get-roles]
 enabled = true
-verify_jwt = false
+verify_jwt = true
 import_map = "./functions/get-roles/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
@@ -446,7 +446,7 @@ entrypoint = "./functions/check-provider-availability/index.ts"
 
 [functions.fetch-user-roles]
 enabled = true
-verify_jwt = false
+verify_jwt = true
 import_map = "./functions/fetch-user-roles/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
@@ -457,7 +457,7 @@ entrypoint = "./functions/fetch-user-roles/index.ts"
 
 [functions.create-reservation]
 enabled = true
-verify_jwt = false
+verify_jwt = true
 import_map = "./functions/create-reservation/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
@@ -468,7 +468,7 @@ entrypoint = "./functions/create-reservation/index.ts"
 
 [functions.accept-reservation]
 enabled = true
-verify_jwt = false
+verify_jwt = true
 import_map = "./functions/accept-reservation/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
@@ -479,7 +479,7 @@ entrypoint = "./functions/accept-reservation/index.ts"
 
 [functions.reject-reservation]
 enabled = true
-verify_jwt = false
+verify_jwt = true
 import_map = "./functions/reject-reservation/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
@@ -490,7 +490,7 @@ entrypoint = "./functions/reject-reservation/index.ts"
 
 [functions.delete-reservation]
 enabled = true
-verify_jwt = false
+verify_jwt = true
 import_map = "./functions/delete-reservation/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx

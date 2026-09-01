@@ -71,6 +71,36 @@ async function setAvailability({ availability, serviceId, userId }: { availabili
   }
 }
 
+async function handleSaveService({
+  serviceId,
+  userId
+}: { serviceId: string, userId: string }): Promise<{ success: boolean, error: string }> {
+  if (!serviceId || !userId) {
+    return {
+      success: false,
+      error: "more_data_required"
+    };
+  }
+
+  const { error } = await supabase.from("saved_services").insert({
+    service_id: serviceId,
+    user_id: userId
+  });
+
+  if (error) {
+    console.log(error);
+    return {
+      success: false,
+      error: "error_saving"
+    }
+  }
+
+  return {
+    success: true,
+    error: ""
+  }
+}
+
 export const useServices = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -333,6 +363,23 @@ export const useServices = () => {
     },
     onError: (error) => {
       console.log(error);
+    }
+  });
+
+  const {
+    mutate: saveService,
+    isPending: isSavingService,
+    isError: isSavingServiceError
+  } = useMutation({
+    mutationKey: ["save-service"],
+    mutationFn: handleSaveService,
+    onSuccess: ({ success, error }) => {
+      if (error) {
+        toast.error(t(error))
+        return;
+      }
+
+      toast.success(t("service_saved"))
     }
   })
 

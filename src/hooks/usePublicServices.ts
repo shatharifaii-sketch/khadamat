@@ -161,7 +161,7 @@ export const useServiceReservation = (id: string, userId: string) => {
 
       return {
         latestReservation: data[0] as ReservationList ?? null,
-        reservations: data,
+        reservations: data as ReservationList[],
         availability: getReservationAvailability(data)
       };
     },

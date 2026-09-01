@@ -1,13 +1,13 @@
-import FullCalendar, { DateClickInfo, EventClickInfo, EventDisplayInfo, useCalendarController } from "@fullcalendar/react";
+import { DateClickInfo, EventClickInfo, EventDisplayInfo } from "@fullcalendar/react";
 import { EventCalendar } from "../event-calendar";
-import themePlugin from "@fullcalendar/react/themes/forma"; // YOUR THEME
+import themePlugin from "@fullcalendar/react/themes/forma";
 import dayGridPlugin from "@fullcalendar/react/daygrid";
 import arLocale from "@fullcalendar/react/locales/ar";
 import enLocale from "@fullcalendar/react/locales/en-gb";
 
-import "@fullcalendar/react/skeleton.css"; // ALWAYS NEED SKELETON
-import "@fullcalendar/react/themes/forma/theme.css"; // YOUR THEME
-import "@fullcalendar/react/themes/forma/palettes/purple.css"; // YOUR THEME'S PALETTE
+import "@fullcalendar/react/skeleton.css";
+import "@fullcalendar/react/themes/forma/theme.css";
+import "@fullcalendar/react/themes/forma/palettes/purple.css";
 import { Reservation, useReservationsContext } from "@/contexts/ReservationsContext";
 import { useMemo, useState } from "react";
 import { Dialog, DialogContent } from "../ui/dialog";
@@ -16,6 +16,7 @@ import { truncateString } from "@/lib/utils";
 import { CircleCheck, CircleX, Clock8 } from "lucide-react";
 import DateDialog from "./ReservationsComponents/DateDialog";
 import ReservationEvent from "./ReservationsComponents/ReservationEvent";
+import { toast } from "sonner";
 
 function renderEventContent(eventInfo: EventDisplayInfo) {
   return (
@@ -27,9 +28,9 @@ function renderEventContent(eventInfo: EventDisplayInfo) {
           <Clock8 size={14} className="text-muted-foreground" />
         ) : 
         eventInfo.event.extendedProps.status == "accepted" ? (
-          <CircleCheck />
+          <CircleCheck size={14} className="text-green-600" />
         ) : (
-          <CircleX />
+          <CircleX size={14} className="text-destructive" />
         )}
       </span>
     </div>
@@ -44,7 +45,14 @@ const MyCalendarComponent = () => {
   // const controller = useCalendarController();
   // const buttons = controller.getButtonState();
 
-  const { reservations, loading } = useReservationsContext();
+  const {
+    reservations,
+    loading,
+    acceptReservation,
+    declineReservation,
+    cancelReservation,
+    markSeen
+  } = useReservationsContext();
 
   const [openDateDialog, setOpenDateDialog] = useState<boolean>(false);
   const [selectedDate, setSelectedDate] = useState<Date>();
@@ -92,7 +100,15 @@ const MyCalendarComponent = () => {
     const reservation = info.event.extendedProps;
     setSelectedRes(reservations.find(r => r.id == reservation.id));
     setOpenEventDialog(true);
-
+    
+    try {
+      markSeen({
+        reservationId: reservation?.id
+      })
+    } catch (error) {
+      console.log(error);
+      toast.error(t("error_marking_seen"))
+    }
   }
 
   return (
@@ -123,6 +139,8 @@ const MyCalendarComponent = () => {
           <DateDialog
             date={selectedDate}
             reservations={dateReservations}
+            acceptReservation={acceptReservation}
+            declineReservation={declineReservation}
           />
         </DialogContent>
       </Dialog>
@@ -130,7 +148,10 @@ const MyCalendarComponent = () => {
       <Dialog open={openEventDialog} onOpenChange={setOpenEventDialog}>
         <DialogContent dir={lang == "ar" ? "rtl" : "ltr"}>
           <ReservationEvent
+            acceptReservation={acceptReservation}
             reservation={selectedRes}
+            declineReservation={declineReservation}
+            deleteReservation={cancelReservation}
           />
         </DialogContent>
       </Dialog>

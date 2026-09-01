@@ -25,6 +25,7 @@ export interface Reservation {
   client: {
     id: string;
     full_name: string;
+    phone: string;
   } | null;
   provider: {
     id: string;
@@ -153,7 +154,8 @@ export const ReservationsProvider = ({
             *,
             client:profiles!calendar_reservations_client_id_fkey(
             id,
-            full_name
+            full_name,
+            phone
         ),
         provider:profiles!calendar_reservations_provider_id_fkey(
         id,
@@ -372,6 +374,7 @@ export const ReservationsProvider = ({
   };
 
   const markSeen = async ({ reservationId }: { reservationId: string }) => {
+    console.log(reservationId)
     if (!reservationId || !user?.id) {
       const error = "no_reservation_found";
       toast.error(error);

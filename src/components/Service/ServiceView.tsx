@@ -1,17 +1,20 @@
-import ServiceHeader from './ui/ServiceHeader'
-import ServiceDataCard from './ui/ServiceDataCard'
-import ContactOptions from '../Chat/ui/ContactOptions';
-import { PublicService, useServiceReservation } from '@/hooks/usePublicServices';
-import { Link, NavLink } from 'react-router-dom';
-import { Button } from '../ui/button';
-import { MessageCircle } from 'lucide-react';
-import ReportDrawer from '../ReportDrawer';
-import { Conversation } from '@/hooks/useConversations';
-import { ServiceLink } from '../PostService/ServiceLinks';
-import { Json } from '@/integrations/supabase/types';
-import { useTranslation } from 'react-i18next';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { ReservationList } from '@/contexts/ReservationsContext';
+import ServiceHeader from "./ui/ServiceHeader";
+import ServiceDataCard from "./ui/ServiceDataCard";
+import ContactOptions from "../Chat/ui/ContactOptions";
+import {
+  PublicService,
+  useServiceReservation,
+} from "@/hooks/usePublicServices";
+import { Link, NavLink } from "react-router-dom";
+import { Button } from "../ui/button";
+import { Bookmark, MessageCircle } from "lucide-react";
+import ReportDrawer from "../ReportDrawer";
+import { Conversation } from "@/hooks/useConversations";
+import { ServiceLink } from "../PostService/ServiceLinks";
+import { Json } from "@/integrations/supabase/types";
+import { useTranslation } from "react-i18next";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { ReservationList } from "@/contexts/ReservationsContext";
 
 export interface ServiceViewProps {
   id: string;
@@ -49,21 +52,24 @@ interface Props {
   setIsConvo: (isConvo: boolean) => void;
   userId: string;
 }
-const ServiceView = ({ 
-  service, 
+const ServiceView = ({
+  service,
   conversation,
   isConvo,
   convoId,
   setConvoId,
   setIsConvo,
-  userId
+  userId,
 }: Props) => {
   const isMobile = useIsMobile();
   const { t } = useTranslation("services");
   const lang = localStorage.getItem("language") || "en";
 
   return (
-    <div className='flex flex-col gap-2 md:gap-4' dir={lang === "ar" ? "rtl" : "ltr"}>
+    <div
+      className="flex flex-col gap-2 md:gap-4"
+      dir={lang === "ar" ? "rtl" : "ltr"}
+    >
       <ServiceHeader
         title={service?.title}
         category={service?.category}
@@ -72,32 +78,27 @@ const ServiceView = ({
         publisherImage={service?.publisher.profile_image_url}
         updatedAt={service?.updated_at}
       />
-      <ServiceDataCard
-        service={service}
-        userId={userId}
-      />
+      <ServiceDataCard service={service} userId={userId} />
 
       <div className="flex gap-2 pt-2 items-center justify-center">
         {isConvo && (
           <NavLink
-            to={`/chat/${
-              convoId
-            }/${userId}/${
+            to={`/chat/${convoId}/${userId}/${
               service.id
             }/${service.publisher.id}`}
           >
-            <Button variant='ghost' className='shadow border'>
+            <Button variant="ghost" className="shadow border">
               <MessageCircle />
               {t("find_service.service.conversation")}
             </Button>
           </NavLink>
         )}
         <ContactOptions
-          className='w-3/4'
+          className="w-3/4"
           serviceId={service?.id}
           providerId={service.publisher.id}
           serviceName={service?.title}
-          providerName={service?.publisher.full_name || 'مقدم الخدمة'}
+          providerName={service?.publisher.full_name || "مقدم الخدمة"}
           email={service?.email}
           phone={service?.phone}
           isConvo={isConvo}
@@ -108,16 +109,18 @@ const ServiceView = ({
           publisherId={service?.publisher.id}
           whatsappNumber={service?.whatsapp_number}
         />
+        <Button variant="secondary">
+          <Bookmark fill={"transparent"} />
+          {t("save_service")}
+        </Button>
         <ReportDrawer
           itemId={service?.id}
-          itemType='service'
+          itemType="service"
           itemLabel={service?.title}
         />
       </div>
-
-      
     </div>
-  )
-}
+  );
+};
 
-export default ServiceView
+export default ServiceView;

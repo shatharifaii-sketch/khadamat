@@ -11,6 +11,7 @@ import ServiceQueryError from "@/components/ErrorViews/ServiceQueryError";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 
 const ServicePage = () => {
   const { t } = useTranslation("services");
@@ -29,10 +30,21 @@ const ServicePage = () => {
           : "max-w-4xl mx-auto pt-5 pb-8 px-4 space-y-6",
       )}
     >
-      <div className="flex items-center justify-center">
-        <h1 className="md:text-2xl font-bold text-xl">
+      <div className="flex items-center justify-start">
+        {/* <h1 className="md:text-2xl font-bold text-xl">
           {t("service.top_title")}
-        </h1>
+        </h1> */}
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/">{t("home")}</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/">{t("home")}</BreadcrumbLink>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
       </div>
       <Suspense fallback={<ServiceLoading />}>
         <ErrorBoundary fallback={<ServiceQueryError />}>

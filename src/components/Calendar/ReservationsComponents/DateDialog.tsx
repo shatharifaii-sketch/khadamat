@@ -13,16 +13,60 @@ import { formatDate } from "@fullcalendar/react";
 import { CircleCheck, CircleX, Dot } from "lucide-react";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 interface Props {
   date: Date;
   reservations: Reservation[];
+  acceptReservation: ({ reservationId }: { reservationId: string }) => Promise<{
+    success: boolean;
+    error: string;
+  }>;
+  declineReservation: ({
+    reservationId
+  }: {
+    reservationId: string;
+  }) => Promise<{
+    success: boolean;
+    error: string;
+  }>;
 }
 
-const DateDialog = ({ date, reservations }: Props) => {
+const DateDialog = ({
+  date, 
+  reservations,
+  acceptReservation,
+  declineReservation
+}: Props) => {
   const { t } = useTranslation("reservations");
   const lang = localStorage.getItem("language") || "en";
   const [timeFormat, setTimeFormat] = useState<TimeFormat>("12h");
+
+  const acceptRes = (reservationId: string) => {
+    try {
+      acceptReservation({
+        reservationId: reservationId,
+      }).then((data) => {
+        if (data.success) toast.success(t("reservation_accepted"));
+      });
+    } catch (error) {
+      console.log(error);
+      toast.error(t("error_accepting"));
+    }
+  };
+
+  const rejectRes = (reservationId: string) => {
+    try {
+      declineReservation({
+        reservationId: reservationId,
+      }).then((data) => {
+        if (data.success) toast.success(t("reservation_rejected"));
+      });
+    } catch (error) {
+      console.log(error);
+      toast.error(t("error_rejecting"));
+    }
+  };
 
   return (
     <>
@@ -34,8 +78,8 @@ const DateDialog = ({ date, reservations }: Props) => {
           className="text-start flex flex-col gap-3"
           dir={lang == "ar" ? "rtl" : "ltr"}
         >
-          <div className="grid grid-cols-2">
-            <h2>
+          <div className="grid grid-cols-3 items-center">
+            <h2 className="col-span-2">
               {formatDate(date, {
                 month: "long",
                 year: "numeric",
@@ -84,9 +128,9 @@ const DateDialog = ({ date, reservations }: Props) => {
           {reservations.map((res, index) => (
             <div
               key={res.id}
-              className="flex items-center justify-between p-2 rounded-md bg-neutral-200"
+              className="flex items-center justify-between p-2 rounded-md bg-neutral-200 h-auto"
             >
-              <div>
+              <div className="mr-2 z-10 fixed">
                 <p className="flex items-center">
                   {truncateString(res.service.title, 15)}
                   <Dot />
@@ -94,21 +138,28 @@ const DateDialog = ({ date, reservations }: Props) => {
                     {truncateString(res.client.full_name, 15)}
                   </span>
                   <Dot />
-                  <span className="text-sm text-muted-foreground">{formatTime(res.start_time, timeFormat)}</span>
+                  <span className="text-sm text-muted-foreground">
+                    {formatTime(res.start_time, timeFormat)}
+                  </span>
                   <Dot />
-                  <span className="text-sm text-muted-foreground">{formatTime(res.end_time, timeFormat)}</span>
+                  <span className="text-sm text-muted-foreground">
+                    {formatTime(res.end_time, timeFormat)}
+                  </span>
                 </p>
               </div>
 
-              <div className="flex gap-1">
+              <div className="flex gap-1 justify-end w-full relative z-40">
                 <Button
+                  onClick={() => acceptRes(res.id)}
                   variant="default"
-                  className="bg-green-600 hover:bg-green-500"
+                  className="bg-green-600 hover:bg-green-500 group min-w-12 flex items-center justify-center sticky z-50 transition-transform overflow-hidden"
                 >
-                  <CircleCheck size={18} />
+                  <span className="opacity-0 group-hover:opacity-100 -mr-24 group-hover:mr-0 transition-all duration-300 text-green-600 group-hover:text-muted">{t("event.accept")}</span>
+                  <CircleCheck size={18} className="ml-2" />
                 </Button>
-                <Button variant="destructive" className="">
-                  <CircleX size={18} />
+                <Button onClick={() => rejectRes(res.id)} variant="destructive" className="min-w-12 flex group items-center justify-center sticky z-50 overflow-hidden">
+                  <span className="opacity-0 group-hover:opacity-100 -mr-24 group-hover:mr-0  transition-all duration-300 text-destructive group-hover:text-muted">{t("event.reject")}</span>
+                  <CircleX size={18} className="ml-2" />
                 </Button>
               </div>
             </div>
