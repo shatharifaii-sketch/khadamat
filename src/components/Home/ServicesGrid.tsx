@@ -16,35 +16,6 @@ interface ServicesGridProps {
 const ServicesGrid = ({ categoriesWithServices, isLoading }: ServicesGridProps) => {
   const { t } = useTranslation("home");
   const lang = localStorage.getItem("language") || "en";
-  // // Icon mapping for different service categories
-  // const categoryIcons: Record<string, any> = {
-  //   'photography': Camera,
-  //   'digital-marketing': TrendingUp,
-  //   'web-development': Code,
-  //   'graphic-design': Palette,
-  //   'plumbing': Wrench,
-  //   'transportation': Truck,
-  //   'music': Music,
-  //   'tailoring': Shirt,
-  //   'printing': Printer,
-  //   'nanny': Baby,
-  //   'other': MoreHorizontal,
-  // };
-
-  // // Arabic translations for categories
-  // const categoryTranslations: Record<string, string> = {
-  //   'photography': 'التصوير الفوتوغرافي',
-  //   'digital-marketing': 'التسويق الرقمي',
-  //   'web-development': 'تطوير المواقع',
-  //   'graphic-design': 'التصميم الجرافيكي',
-  //   'plumbing': 'السباكة',
-  //   'transportation': 'النقل والشحن',
-  //   'music': 'الموسيقى',
-  //   'tailoring': 'التطريز',
-  //   'printing': 'خدمات الطباعة',
-  //   'nanny': 'مربية أطفال',
-  //   'other': 'أخرى',
-  // };
 
   if (isLoading) {
     return (
@@ -98,10 +69,10 @@ const ServicesGrid = ({ categoriesWithServices, isLoading }: ServicesGridProps) 
   }
 
   return (
-    <section className="py-20 px-4">
+    <section className="py-10 md:py-20 px-4">
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+        <div className="text-center mb-8 md:mb-12">
+          <h2 className="text-xl md:text-4xl font-bold text-foreground mb-4">
             {t("services.title")}
           </h2>
           <p className="text-xl text-muted-foreground">
@@ -109,7 +80,7 @@ const ServicesGrid = ({ categoriesWithServices, isLoading }: ServicesGridProps) 
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6">
           {categoriesWithServices.map((service, index) => {
             const Icon = categories.find(cat => cat.value === service.category)?.icon || MoreHorizontal;
             const displayName = categories.find(cat => cat.value === service.category)?.label || service.category;

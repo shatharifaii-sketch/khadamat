@@ -93,7 +93,6 @@ const UploadProfileImage = ({ userImage, userName, userId }: Props) => {
                             className="size-48 border-2 border-primary"
                         />
                     )}
-
                     {image && userPhoto === image.url && (
                         <Button
                             className="w-full mt-2"

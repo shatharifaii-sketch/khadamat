@@ -65,13 +65,13 @@ const About = () => {
   const isNewPlatform = !isLoading && (homeStats?.serviceProvidersCount || 0) < 10 && (homeStats?.publishedServicesCount || 0) < 20;
 
   return (
-      <div className="max-w-6xl mx-auto py-12 px-4" dir={lang === "ar" ? "rtl" : "ltr"}>
+      <div className="max-w-6xl mx-auto py-5 md:py-12 px-4" dir={lang === "ar" ? "rtl" : "ltr"}>
         {/* Hero Section */}
-        <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
+        <div className="text-center mb-10 md:mb-16">
+          <h1 className="text-2xl md:text-5xl font-bold text-foreground mb-6">
             {t("about.hero.title")}
           </h1>
-          <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-lg md:text-2xl text-muted-foreground max-w-3xl mx-auto">
             {t("about.hero.description")}
           </p>
         </div>
@@ -80,13 +80,13 @@ const About = () => {
         <div className="grid md:grid-cols-2 gap-8 mb-16">
           <Card className="bg-primary/5 border-primary/20">
             <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-2xl">
+              <CardTitle className="flex items-center gap-3 text-xl md:text-2xl">
                 <Target className="text-primary" size={32} />
                 {t("about.mission.title")}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-xl-large text-muted-foreground text-start">
+              <p className="text-lg-large md:text-xl-large text-muted-foreground text-start">
                 {t("about.mission.description")}
               </p>
             </CardContent>
@@ -94,13 +94,13 @@ const About = () => {
 
           <Card className="bg-secondary/50">
             <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-2xl">
+              <CardTitle className="flex items-center gap-3 text-xl md:text-2xl">
                 <Heart className="text-primary" size={32} />
                 {t("about.vision.title")}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-xl-large text-muted-foreground text-start">
+              <p className="text-lg-large md:text-xl-large text-muted-foreground text-start">
                 {t("about.vision.description")}
               </p>
             </CardContent>
@@ -135,10 +135,10 @@ const About = () => {
 
         {/* Features */}
         <div className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-12">
+          <h2 className="text-xl md:text-3xl font-bold text-center mb-8 md:mb-12">
             {t("about.features.title")}
           </h2>
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-3 md:gap-8">
             {features.map((feature, index) => {
               const Icon = feature.icon;
               return (

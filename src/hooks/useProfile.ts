@@ -36,6 +36,7 @@ export const useProfile = () => {
         .single();
 
       if (error) throw error;
+
       return data;
     },
     enabled: !!user
@@ -47,12 +48,28 @@ export const useProfile = () => {
 
       const { data, error } = await supabase
         .from('profiles')
-        .update(profileData)
+        .update({
+          full_name: profileData.full_name,
+          bio: profileData.bio,
+          location: profileData.location,
+          experience_years: profileData.experience_years
+        })
         .eq('id', user.id)
         .select()
         .single();
 
       if (error) throw error;
+
+      const { data: updatePhoneData, error: updatePhoneError } = await supabase.auth.updateUser({
+        phone: profileData.phone
+      });
+
+      if (updatePhoneError) throw updatePhoneError;
+
+      if (user.phone != profileData.phone) {
+        return { ...data, updatingPhone: true }
+      }
+
       return data;
     },
     onSuccess: () => {

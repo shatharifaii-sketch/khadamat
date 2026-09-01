@@ -14,16 +14,18 @@ import { useTranslation } from "react-i18next";
 
 interface Props {
     isEdit?: boolean;
-    serviceProviders: UserProfile[];
+    serviceProviders?: UserProfile[];
     service?: Service;
     closeForm: () => void
 }
 
-const ServiceForm = ({ isEdit, serviceProviders, service, closeForm }: Props) => {
+const ServiceForm = ({ isEdit, service, closeForm }: Props) => {
     const { t } = useTranslation("admin");
     const lang = localStorage.getItem("language") || "en";
 
     const { createService, updateService, createServiceSuccess, updateServiceSuccess } = useAdminFunctionality();
+
+    const serviceProviders = [];
 
     const [formData, setFormData] = useState(service ?? {
         title: '',

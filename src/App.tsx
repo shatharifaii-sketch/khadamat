@@ -37,6 +37,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import { useWebsiteAnalytics } from "./hooks/useWebsiteAnalytics";
 import ExtraPaymentSuccess from "./pages/payments/ExtraPaymentSuccess";
+import PhoneOTPVerification from "./pages/verify/PhoneOTPVerification";
 
 const queryClient = new QueryClient();
 
@@ -83,6 +84,7 @@ function App() {
                   </Route>
 
                   <Route path="/confirm-email" element={<CodeVerification />} />
+                  <Route path="/verify-phone" element={<PhoneOTPVerification />} />
 
 
                   <Route path="payment-success" element={<PaymentSuccess /> } />
