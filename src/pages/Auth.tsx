@@ -68,10 +68,10 @@ const Auth = () => {
       return;
     }
 
-    if (usePhone && (!phone.countryCode || !phone.number)) {
-      toast.error(t("required_fields_error"));
-      return;
-    }
+    // if (usePhone && (!phone.countryCode || !phone.number)) {
+    //   toast.error(t("required_fields_error"));
+    //   return;
+    // }
 
     if (!isLogin && !fullName) {
       toast.error(t("full_name_error"));
@@ -83,10 +83,10 @@ const Auth = () => {
     try {
       if (isLogin) {
         const { error } = await signIn(
-          usePhone ? null : email,
+          email, // usePhone ? null : email,
           password,
-          usePhone ? phone : null,
-          usePhone ? "phone" : "email",
+          null, // usePhone ? phone : null,
+          "email" // usePhone ? "phone" : "email",
         );
 
         if (error) {
@@ -136,12 +136,12 @@ const Auth = () => {
         }
       } else {
         const { data, error } = await signUp(
-          usePhone ? null : email,
+          email, // usePhone ? null : email,
           password,
           fullName,
           passwordConfirm,
-          usePhone ? phone : null,
-          usePhone ? "phone" : "email",
+          null, // usePhone ? phone : null,
+          "email" // usePhone ? "phone" : "email",
         );
         if (!error) {
           if (!usePhone) {
@@ -252,16 +252,21 @@ const Auth = () => {
           <div className="flex flex-col justify-center items-center mb-2">
             <div className="flex justify-between items-center p-1 gap-2 border rounded-full w-fit mx-auto bg-muted/70 overflow-hidden">
               <div
-                onClick={() => setUsePhone((prev) => !prev)}
+                onClick={() => {
+                  // setUsePhone(true)
+                  toast(t("phone_login_disabled"), {
+                    description: t("phone_login_description"),
+                  });
+                }}
                 className={cn(
-                  "p-2 rounded-full flex items-center justify-center w-1/2 hover:cursor-pointer transition-all",
+                  "p-2 rounded-full flex items-center justify-center w-1/2 hover:cursor-pointer transition-all opacity-35",
                   usePhone ? "bg-white text-primary shadow-md" : "",
                 )}
               >
                 <Phone />
               </div>
               <div
-                onClick={() => setUsePhone((prev) => !prev)}
+                onClick={() => setUsePhone(false)}
                 className={cn(
                   "p-2 rounded-full flex items-center justify-center w-1/2 hover:cursor-pointer transition-all",
                   !usePhone ? "bg-white text-primary shadow-md" : "",

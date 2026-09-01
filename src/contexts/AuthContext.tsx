@@ -38,6 +38,7 @@ interface AuthContextType {
     token: string,
     password: string,
   ) => Promise<{ error?: unknown; data?: User }>;
+  tryPhoneSignIn: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -111,11 +112,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     fullName: string,
     passwordConfirm: string,
     phone: { countryCode: string; number: string } | null,
-    method: string,
+    method: string = "email",
   ) => {
     const res = await checkUser({
-      phone: `${phone.countryCode}${phone.number}`,
-      email,
+      phone: method == "phone" ? `${phone.countryCode}${phone.number}` : null,
+      email: method == "phone" ? null : email,
       method,
     });
 
@@ -124,6 +125,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     if (method == "phone") {
+      return {};
       const { data, error } = await supabase.functions.invoke(
         "handle-phone-otp",
         {
@@ -177,7 +179,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       countryCode: string;
       number: string;
     } | null,
-    method: string,
+    method: string = "email",
   ) => {
     const res = await checkUser({
       phone: method == "phone" ? `${phone.countryCode}${phone.number}` : null,
@@ -190,6 +192,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     if (method == "phone") {
+      return {};
       const { data, error } = await supabase.functions.invoke(
         "handle-phone-otp",
         {
@@ -259,6 +262,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(false);
     });
     console.log("Sign out successful");
+  };
+
+  const tryPhoneSignIn = async () => {
+    const { error: activityError } = await supabase
+      .from("user_activity")
+      .insert({
+        activity_type: "try_phone_login",
+        user_id: null,
+        details: { page: "auth" },
+      });
+
+    if (activityError) {
+      console.error("Error tracking user tries:", activityError);
+      throw new Error("Error tracking user tries");
+    }
+
+    return;
   };
 
   const verifyOtp = async (email: string, token: string) => {
@@ -357,6 +377,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     verifyOtp,
     verifyPhoneOtp,
     resendOtp,
+    tryPhoneSignIn
   };
 
   return (

@@ -15,61 +15,65 @@ export default {
   fetch: withSupabase({ auth: ["publishable", "secret"] }, async (req, ctx) => {
     const { supabaseAdmin } = ctx;
 
-    try {
-      const { phone, isLogin, fullName } = await req.json();
+    return new Response("Hello from Functions!", {
+      headers: { "Content-Type": "text/plain" },
+    });
 
-      const { data: recentRequest } = await supabaseAdmin
-        .from("otp_requests")
-        .select("created_at")
-        .eq("phone", phone)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .single();
+    // try {
+    //   const { phone, isLogin, fullName } = await req.json();
 
-      if (
-        recentRequest &&
-        Date.now() - new Date(recentRequest.created_at).getTime() < 60000
-      ) {
-        return Response.json({
-          success: false,
-          error: "Too many requests. Please wait a minute before trying again.",
-        });
-      }
+    //   const { data: recentRequest } = await supabaseAdmin
+    //     .from("otp_requests")
+    //     .select("created_at")
+    //     .eq("phone", phone)
+    //     .order("created_at", { ascending: false })
+    //     .limit(1)
+    //     .single();
 
-      const { data, error } = await supabaseAdmin.auth.signInWithOtp({
-        phone,
-        options: {
-          shouldCreateUser: !isLogin,
-          channel: "sms",
-          data: {
-            full_name: isLogin ? undefined : fullName,
-          },
-        },
-      });
+    //   if (
+    //     recentRequest &&
+    //     Date.now() - new Date(recentRequest.created_at).getTime() < 60000
+    //   ) {
+    //     return Response.json({
+    //       success: false,
+    //       error: "Too many requests. Please wait a minute before trying again.",
+    //     });
+    //   }
 
-      if (error) {
-        console.error("Error sending OTP: ", error);
-        return Response.json({
-          success: false,
-          error: error instanceof Error ? error.message : "An unknown error occurred",
-        });
-      }
+    //   const { data, error } = await supabaseAdmin.auth.signInWithOtp({
+    //     phone,
+    //     options: {
+    //       shouldCreateUser: !isLogin,
+    //       channel: "sms",
+    //       data: {
+    //         full_name: isLogin ? undefined : fullName,
+    //       },
+    //     },
+    //   });
 
-      await supabaseAdmin.from("otp_requests").insert({
-        phone,
-      });
+    //   if (error) {
+    //     console.error("Error sending OTP: ", error);
+    //     return Response.json({
+    //       success: false,
+    //       error: error instanceof Error ? error.message : "An unknown error occurred",
+    //     });
+    //   }
 
-      return Response.json({
-        success: true,
-        data,
-      });
-    } catch (error) {
-      console.log("ERROR: ", error);
-      return Response.json({
-        success: false,
-        error: error instanceof Error ? error.message : "An unknown error occurred",
-      });
-    }
+    //   await supabaseAdmin.from("otp_requests").insert({
+    //     phone,
+    //   });
+
+    //   return Response.json({
+    //     success: true,
+    //     data,
+    //   });
+    // } catch (error) {
+    //   console.log("ERROR: ", error);
+    //   return Response.json({
+    //     success: false,
+    //     error: error instanceof Error ? error.message : "An unknown error occurred",
+    //   });
+    // }
   }),
 };
 

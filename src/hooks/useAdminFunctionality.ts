@@ -247,7 +247,7 @@ export const useUsers = ({ usersCursor }: Pagination) => {
     queryFn: async () => {
       const {
         data: { data, error },
-      } = await supabase.functions.invoke("get-user-roles");
+      } = await supabase.functions.invoke("get-roles");
 
       if (error) throw error;
 
