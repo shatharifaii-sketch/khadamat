@@ -134,5 +134,8 @@
     "delete_profile": "Delete Profile",
     "delete_profile_title": "Are you sure you want to delete your profile?",
     "delete_profile_description": "This will delete all your data including published services, subscriptions, and messages. This action cannot be undone.",
-    "delete": "Confirm Deletion"
+    "delete": "Confirm Deletion",
+    "verify_phone": {
+        "code": "Code"
+    }
 }

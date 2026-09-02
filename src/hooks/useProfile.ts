@@ -52,7 +52,8 @@ export const useProfile = () => {
           full_name: profileData.full_name,
           bio: profileData.bio,
           location: profileData.location,
-          experience_years: profileData.experience_years
+          experience_years: profileData.experience_years,
+          phone: profileData.phone
         })
         .eq('id', user.id)
         .select()
@@ -60,15 +61,15 @@ export const useProfile = () => {
 
       if (error) throw error;
 
-      const { data: updatePhoneData, error: updatePhoneError } = await supabase.auth.updateUser({
-        phone: profileData.phone
-      });
+      // const { data: updatePhoneData, error: updatePhoneError } = await supabase.auth.updateUser({
+      //   phone: profileData.phone
+      // });
 
-      if (updatePhoneError) throw updatePhoneError;
+      // if (updatePhoneError) throw updatePhoneError;
 
-      if (user.phone != profileData.phone) {
-        return { ...data, updatingPhone: true }
-      }
+      // if (user.phone != profileData.phone) {
+      //   return { ...data, updatingPhone: true }
+      // }
 
       return data;
     },
