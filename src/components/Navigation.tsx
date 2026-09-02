@@ -14,8 +14,11 @@ import { GeneratedAvatar } from './GeneratedAvatar';
 import { useIsAdmin } from '@/hooks/useAdminFunctionality';
 import { useChat } from '@/contexts/ChatContext';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 const Navigation = () => {
+  const { t } = useTranslation("navbar");
+  const lang = localStorage.getItem("language") || "en";
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -56,7 +59,7 @@ const Navigation = () => {
 
   const AccountButton = ({ mobile = false }: { mobile?: boolean }) => (
     <NavLink to="/account" onClick={mobile ? () => setIsOpen(false) : undefined} className='flex items-center gap-4 justify-start'>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2" dir={lang === "ar" ? "rtl" : "ltr"}>
         {
           profile?.profile_image_url ? (
             <Avatar className='size-7'>
@@ -72,57 +75,63 @@ const Navigation = () => {
             />
           )
         }
-        <span>حسابي</span>
+        <span>{t("account")}</span>
       </div>
     </NavLink>
   );
 
-  const ConvosButton = ({ mobile = false }: { mobile?: boolean }) => (
+  const ConvosButton = ({ mobile = false }: { mobile?: boolean }) => location.pathname.startsWith('/subscription-starter') ? <></> : (
     <NavLink to="/convos" onClick={mobile ? () => setIsOpen(false) : undefined} className={cn('flex items-center gap-4 justify-start', { 'text-primary': location.pathname === '/convos' || location.pathname.startsWith('/chat') })}>
       <div className="flex items-center gap-2 relative">
         <MessageCircle size={20} />
         {unreadCount > 0 && (
           <p className="absolute -top-2 -right-2 text-muted bg-red-500 rounded-full text-xs flex items-center justify-center size-5">{unreadCount}</p>
         )}
-        {mobile && <span>المحادثات</span>}
+        {mobile && <span>{t("conversations")}</span>}
       </div>
     </NavLink>
   );
 
   return (
-    <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+    <nav className={cn(
+      'bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50',
+      location.pathname.startsWith('/subscription-starter') ? 'border-none' : 'border-b'
+      )}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <span className="text-xl font-bold text-primary">خدمتك</span>
+            <img src="/application_logo_cut.png" className='h-8' alt="cut logo" />
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8 space-x-reverse">
+          <div className={cn(
+            'hidden md:flex items-center gap-5',
+            location.pathname.startsWith('/subscription-starter') && 'hidden md:hidden'
+            )} dir={lang === "ar" ? "rtl" : "ltr"}>
             <NavLink to="/find-service">
               <div className="flex items-center gap-2">
                 <Search size={16} />
-                البحث عن خدمة
+                {t("find_service")}
               </div>
             </NavLink>
             <NavLink to="/post-service">
               <div className="flex items-center gap-2">
                 <PlusCircle size={16} />
-                أضف خدمة
+                {t("add_service")}
               </div>
             </NavLink>
             <NavLink to="/about">
               <div className="flex items-center gap-2">
                 <Info size={16} />
-                من نحن
+                {t("about")}
               </div>
             </NavLink>
             {admin && (
               <NavLink to="/admin">
                 <div className="flex items-center gap-2">
                   <Shield size={16} />
-                  لوحة الإدارة
+                  {t("admin_panel")}
                 </div>
               </NavLink>
             )}
@@ -141,13 +150,13 @@ const Navigation = () => {
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>تسجيل الخروج</p>
+                    <p>{t("logout")}</p>
                   </TooltipContent>
                 </Tooltip>
               </div>
             ) : (
               <Link to="/auth">
-                <Button>تسجيل الدخول</Button>
+                <Button>{t("login")}</Button>
               </Link>
             )}
 
@@ -155,7 +164,10 @@ const Navigation = () => {
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden">
+          <div className={cn(
+            'md:hidden',
+            location.pathname.startsWith('/subscription-starter') && 'hidden md:hidden'
+            )}>
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="sm">
@@ -167,31 +179,31 @@ const Navigation = () => {
                   <NavLink to="/find-service" onClick={() => setIsOpen(false)}>
                     <div className="flex items-center gap-2 text-lg">
                       <Search size={20} />
-                      البحث عن خدمة
+                      {t("find_service")}
                     </div>
                   </NavLink>
                   <NavLink to="/post-service" onClick={() => setIsOpen(false)}>
                     <div className="flex items-center gap-2 text-lg">
                       <PlusCircle size={20} />
-                      أضف خدمة
+                      {t("add_service")}
                     </div>
                   </NavLink>
                   <NavLink to="/about" onClick={() => setIsOpen(false)}>
                     <div className="flex items-center gap-2 text-lg">
                       <Info size={20} />
-                      من نحن
+                      {t("about")}
                     </div>
                   </NavLink>
                   {admin && (
                     <NavLink to="/admin" onClick={() => setIsOpen(false)}>
                       <div className="flex items-center gap-2 text-lg">
                         <Shield size={20} />
-                        لوحة الإدارة
+                        {t("admin_panel")}
                       </div>
                     </NavLink>
                   )}
 
-                  <div className="border-t pt-4">
+                  <div className="border-t pt-4 flex flex-col gap-4 items-start">
                     {user ? (
                       <div className="space-y-4">
 
@@ -199,14 +211,15 @@ const Navigation = () => {
                         <ConvosButton mobile />
                         <Button variant="ghost" size="sm" onClick={handleSignOut} className="w-full justify-start">
                           <LogOut size={20} className="ml-2" />
-                          تسجيل الخروج
+                          {t("logout")}
                         </Button>
                       </div>
                     ) : (
                       <Link to="/auth" onClick={() => setIsOpen(false)}>
-                        <Button className="w-full">تسجيل الدخول</Button>
+                        <Button className="w-full">{t("login")}</Button>
                       </Link>
                     )}
+                    <LanguageSwitcher />
                   </div>
                 </div>
               </SheetContent>

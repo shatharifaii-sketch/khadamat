@@ -5,14 +5,38 @@
 // Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import Stripe from "npm:stripe";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const stripe = new Stripe(Deno.env.get("STRIPE_TEST_SEC_KEY")!);
+
+const stripe = new Stripe(Deno.env.get("VITE_STRIPE_LIVE_SEC_KEY")!);
+const supabase = createClient(
+  Deno.env.get("SUPABASE_URL")!,
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+);
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
+
+async function getCustomerIdFromDB(user_id: string) {
+  const { data: { stripe_customer_id, full_name }, error: customerError } = await supabase.from("profiles").select("*").eq("id", user_id).maybeSingle();
+
+  if (customerError) {
+    console.log(customerError);
+
+    return {
+      customerId: null,
+      name: null
+    };
+  }
+
+  return {
+    custoemrId: stripe_customer_id,
+    name: full_name
+  }
+}
 
 Deno.serve(async (req: Request) => {
   // Handle CORS preflight
@@ -33,11 +57,63 @@ Deno.serve(async (req: Request) => {
   try {
     const { priceId, userId, email, subscriptionTierId } = await req.json();
 
-    console.log(priceId);
+    if (!email || email.length < 3) {
+      return new Response(
+      JSON.stringify({
+        success: false,
+        error: "no_email",
+      }),
+      {
+        status: 200,
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    }
+
+    let { customerId, name } = await getCustomerIdFromDB(userId);
+
+    if (!name) {
+      return new Response(
+      JSON.stringify({
+        success: false,
+        error: "no_name",
+      }),
+      {
+        status: 200,
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    }
+
+    if (!customerId) {
+      const customer = await stripe.customers.create({
+        name,
+        email,
+        metadata: {
+          userId
+        }
+      });
+      
+      customerId = customer.id;
+
+      const { error } = await supabase.from("profiles").update({
+        stripe_customer_id: customerId
+      }).eq("id", userId);
+
+      if (error) {
+        console.log(error);
+      }
+    }
 
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
-      customer_email: email,
+      customer: customerId,
       line_items: [
         {
           price: priceId,
@@ -46,8 +122,8 @@ Deno.serve(async (req: Request) => {
       ],
       allow_promotion_codes: true,
       success_url:
-        "http://localhost:8080/payment-success?session_id={CHECKOUT_SESSION_ID}",
-      cancel_url: "http://localhost:8080/payment-failed",
+        Deno.env.get("STRIPE_SUCCESS_URL_LIVE"), //"http://localhost:8080/payment-success?session_id={CHECKOUT_SESSION_ID}",
+      cancel_url: Deno.env.get("STRIPE_FAIL_URL_LIVE"),
       client_reference_id: userId,
       metadata: {
         user_id: userId,
@@ -61,7 +137,8 @@ Deno.serve(async (req: Request) => {
           email: email,
           subscription_tier_id: subscriptionTierId
         }
-      }
+      },
+      payment_method_collection: "if_required"
     });
 
     return new Response(

@@ -50,16 +50,16 @@ export const useHomeStats = () => {
       
       // Get count of service providers by counting distinct users with published services
       const { data: serviceProviders, error: providersError } = await supabase
-        .from('services')
-        .select('user_id')
-        .eq('status', 'published');
+        .from('profiles')
+        .select('id')
+        .eq('is_service_provider', true);
 
       if (providersError) {
         console.error('Error fetching service providers count:', providersError);
       }
 
       // Count unique service providers
-      const uniqueProviders = new Set(serviceProviders?.map(s => s.user_id) || []);
+      const uniqueProviders = new Set(serviceProviders?.map(s => s.id) || []);
       const serviceProvidersCount = uniqueProviders.size;
 
       // Get count of published services
@@ -99,7 +99,6 @@ export const useHomeStats = () => {
         categoriesWithServices
       };
 
-      console.log('Home stats fetched:', stats);
       return stats;
     },
     staleTime: 60000, // 1 minute

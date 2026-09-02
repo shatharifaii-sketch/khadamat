@@ -1,11 +1,19 @@
 import { supabase } from "@/integrations/supabase/client";
-import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  useSuspenseQueries,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabaseAdmin } from "@/integrations/supabase/adminClient";
 import { User } from "@/components/Admin/ui/UserForm";
-import { Tables } from "@/integrations/supabase/types";
-import { json } from "react-router-dom";
+import { Json, Tables } from "@/integrations/supabase/types";
 import { toast } from "sonner";
+import { ServiceLink } from "@/components/PostService/ServiceLinks";
+import { useEmail } from "./useEmail";
+import { useTranslation } from "react-i18next";
+import { useMemo, useState } from "react";
 
 interface UserProfile {
   id: string;
@@ -34,15 +42,32 @@ export interface Service {
   created_at: string;
   updated_at: string;
   user_id: string;
+  is_online?: boolean;
+  links: [] | ServiceLink[] | Json;
+  whatsapp_number?:
+    | {
+        countryCode: string;
+        number: string;
+      }
+    | string;
   publisher: {
     full_name: string;
   };
-  service_images: {
+  service_media: {
     id: string;
-    image_name: string;
-    image_url: string;
-  }[]
+    name: string;
+    url: string;
+    thumbnail_url?: string;
+    type?: "image" | "video";
+  }[];
 }
+
+type Pagination = {
+  usersCursor?: number | null;
+  servicesCursor?: number | null;
+  pendingServicesCursor?: number | null;
+  couponsCursor?: number | null;
+};
 
 interface UploadedImage {
   id: string;
@@ -56,115 +81,401 @@ interface SaveImageProps {
   serviceId: string;
 }
 
+export const PAGE_SIZE = 10;
+
 export const useIsAdmin = (): boolean => {
   const { user } = useAuth();
-  
+
   const { data, error } = useQuery({
-    queryKey: ['is-admin'],
+    queryKey: ["is-admin"],
     queryFn: async () => {
       if (!user) return false;
-      const { data, error } = await supabase.rpc('is_admin', { uid: user?.id });
+      const { data, error } = await supabase.rpc("is_admin", { uid: user?.id });
 
       if (error) throw error;
       return data;
     },
-    enabled: !!user
-  })
+    enabled: !!user,
+  });
 
   if (error) throw error;
 
   return data ?? false;
-}
+};
 
 export const useAdminData = () => {
-  const admin = useIsAdmin();
+  const [profilesQuery, servicesQuery, pendingServicesQuery, couponsQuery] =
+    useSuspenseQueries({
+      queries: [
+        //Users query
+        {
+          queryKey: ["profiles"],
+          queryFn: async () => {
+            const query = supabase.from("profiles_with_email");
 
-  if (!admin) return null;
+            const {
+              data,
+              count: usersCount,
+              error: numQueryError,
+            } = await query.select("id, created_at", { count: "exact" });
 
-  const { data: adminData } = useSuspenseQuery({
-    queryKey: ['admin-data'],
-    queryFn: async () => {
-      const { data: profiles, error: usersError } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
+            if (numQueryError) throw numQueryError;
 
-      if (usersError) throw usersError;
+            return {
+              data,
+              usersCount,
+            };
+          },
+        },
 
-      const { data: services, error: servicesError } = await supabase.from('services')
-        .select(`
-        *,
-        publisher:fk_services_user_id (
-          full_name
-        ),
-        service_images (
-        id,
-      image_name,
-      image_url
-        )`)
-        .neq('status', 'pending-approval')
-        .order('created_at', { ascending: false });
+        // Published services
+        {
+          queryKey: ["services"],
+          queryFn: async () => {
+            const query = supabase
+              .from("services")
+              .select("id, user_id", { count: "exact" });
 
-      if (servicesError) throw servicesError;
+            const {
+              data,
+              count: servicesCount,
+              error: numQueryError,
+            } = await query;
 
-      const { data: pendingServices, error: pendingServicesError } = await supabase.from('services')
-        .select(`
-        *,
-        publisher:fk_services_user_id (
-          full_name
-        ),
-        service_images (
-        id,
-      image_name,
-      image_url
-        )`)
-        .eq('status', 'pending-approval')
-        .order('created_at', { ascending: false });
+            if (numQueryError) throw numQueryError;
 
-      if (pendingServicesError) throw pendingServicesError;
+            const { count: pubServicesCount, error: pubNumQueryError } =
+              await query.eq("status", "published");
 
+            if (pubNumQueryError) throw pubNumQueryError;
 
-      const { data: coupons, error: couponsError } = await supabase.from('coupons').select('*').order('created_at', { ascending: false });
+            return {
+              data,
+              servicesCount,
+              pubServicesCount,
+            };
+          },
+        },
 
-      if (couponsError) throw couponsError;
+        //Pending services query
+        {
+          queryKey: ["pending-services"],
+          queryFn: async () => {
+            const query = supabase.from("services");
 
-      // Calculate accurate metrics
-      const uniqueServiceProviders = services.map(service => service.user_id).filter((value, index, self) => self.indexOf(value) === index).length;
+            const { count: pendServicesCount, error: numQueryError } =
+              await query
+                .select("id", { count: "exact", head: true })
+                .eq("status", "pending-approval");
 
-      const todayStart = new Date();
-      todayStart.setHours(0, 0, 0, 0);
+            if (numQueryError) throw numQueryError;
 
-      const todaySignups = profiles.filter(user =>
-        new Date(user.created_at) >= todayStart
-      ).length;
+            return pendServicesCount;
+          },
+        },
 
-      const stats = {
-        totalUsers: profiles.length,
-        serviceProviders: uniqueServiceProviders,
-        totalServices: services.length,
-        publishedServices: services.filter(s => s.status === 'published').length,
-        todaySignups: todaySignups
-      };
+        //Coupons query
+        {
+          queryKey: ["coupons"],
+          queryFn: async () => {
+            const query = supabase.from("coupons");
 
+            const { count: couponsCount, error: numQueryError } =
+              await query.select("id", { count: "exact", head: true });
 
-      return {
-        profiles,
-        services,
-        stats,
-        coupons,
-        pendingServices: pendingServices,
-      };
-    }
-  });
+            if (numQueryError) throw numQueryError;
+
+            return couponsCount;
+          },
+        },
+      ],
+    });
+
+  const uniqueServiceProviders = servicesQuery.data.data
+    .map((service) => service.user_id)
+    .filter((value, index, self) => self.indexOf(value) === index).length;
+
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  const todaySignups = profilesQuery.data.data.filter(
+    (user) => new Date(user.created_at) >= todayStart,
+  ).length;
+
+  const stats = {
+    totalUsers: profilesQuery.data.usersCount,
+    serviceProviders: uniqueServiceProviders,
+    totalServices: servicesQuery.data.servicesCount,
+    publishedServices: servicesQuery.data.pubServicesCount,
+    todaySignups: todaySignups,
+    couponsCount: couponsQuery.data,
+    pendingServicesCount: pendingServicesQuery.data,
+  };
 
   return {
-    adminData
+    stats,
   };
-}
+};
+
+export const useUsers = ({ usersCursor }: Pagination) => {
+  const { data: usersData, isLoading: usersDataLoading } = useSuspenseQuery({
+    queryKey: ["admin-users-data", usersCursor],
+    queryFn: async () => {
+      let listQuery = supabase
+        .from("profiles_with_email")
+        .select("*")
+        .order("user_index", { ascending: true })
+        .limit(PAGE_SIZE + 1);
+
+      if (usersCursor !== null) {
+        listQuery = listQuery.gt("user_index", usersCursor);
+      }
+
+      const { data, error } = await listQuery;
+
+      if (error) throw error;
+
+      return data;
+    },
+  });
+
+  const {
+    data: { roles, counts },
+    isLoading: rolesQueryLoading,
+  } = useSuspenseQuery({
+    queryKey: ["user-roles"],
+    staleTime: 1000 * 60 * 10,
+    queryFn: async () => {
+      const {
+        data: { data, error },
+      } = await supabase.functions.invoke("get-roles");
+
+      if (error) throw error;
+
+      return data;
+    },
+  });
+
+  const adminSet = useMemo(
+    () =>
+      new Set(roles.filter((r) => r.role === "admin").map((r) => r.user_id)),
+    [roles],
+  );
+
+  const profiles = useMemo(() => {
+    return usersData.map((profile) => ({
+      ...profile,
+      is_admin: adminSet.has(profile.id),
+    }));
+  }, [usersData, adminSet]);
+
+  const hasNextPage = usersData.length > PAGE_SIZE;
+
+  const nextCursor = hasNextPage ? usersData[PAGE_SIZE - 1].user_index : null;
+
+  return {
+    usersList: profiles.slice(0, PAGE_SIZE),
+    nextCursor,
+    hasNextPage,
+    isLoading: usersDataLoading || rolesQueryLoading,
+    numOfUsers: counts.userCount,
+  };
+};
+
+export const useServices = ({ servicesCursor }: Pagination) => {
+  const { data: servicesData, isLoading: servicesDataLoading } =
+    useSuspenseQuery({
+      queryKey: ["admin-services-data", servicesCursor],
+      queryFn: async () => {
+        let listQuery = supabase
+          .from("services")
+          .select(
+            `
+              *,
+              publisher:fk_services_user_id (
+                full_name
+              ),
+              service_media (
+                id,
+                name,
+                url,
+                thumbnail_url,
+                type
+              )
+            `,
+          )
+          .eq("status", "published")
+          .order("service_index", { ascending: true })
+          .limit(PAGE_SIZE + 1);
+
+        if (servicesCursor) {
+          listQuery = listQuery.gt("service_index", servicesCursor);
+        }
+
+        const { data, error } = await listQuery;
+
+        if (error) throw error;
+
+        return data;
+      },
+    });
+
+  const { data: servicesCount, isLoading: pubServicesCountLoading } =
+    useSuspenseQuery({
+      queryKey: ["published-services-count"],
+      queryFn: async () => {
+        const { count, error } = await supabase
+          .from("services")
+          .select("id", { count: "exact", head: true })
+          .eq("status", "published");
+
+        if (error) throw error;
+
+        return count;
+      },
+    });
+
+  const hasNextPage = servicesData.length > PAGE_SIZE;
+
+  const nextCursor = hasNextPage
+    ? servicesData[PAGE_SIZE - 1].service_index
+    : null;
+
+  return {
+    servicesList: servicesData.slice(0, PAGE_SIZE),
+    nextCursor,
+    hasNextPage,
+    servicesCount,
+    servicesDataLoading,
+  };
+};
+
+export const usePendingServices = ({ pendingServicesCursor }: Pagination) => {
+  const { data: pendingServicesData, isLoading: pendingServicesDataLoading } =
+    useSuspenseQuery({
+      queryKey: ["admin-pending-services-data", pendingServicesCursor],
+      queryFn: async () => {
+        let listQuery = supabase
+          .from("services")
+          .select(
+            `
+              *,
+              publisher:fk_services_user_id (
+                full_name
+              ),
+              service_media (
+                id,
+                name,
+                url,
+                thumbnail_url,
+                type
+              )
+            `,
+            { count: "exact" },
+          )
+          .eq("status", "pending-approval")
+          .order("service_index", { ascending: true })
+          .limit(PAGE_SIZE + 1);
+
+        if (pendingServicesCursor) {
+          listQuery = listQuery.gt("service_index", pendingServicesCursor);
+        }
+
+        const { data, error } = await listQuery;
+
+        if (error) throw error;
+
+        return data;
+      },
+    });
+
+  const { data: pendServicesCount, isLoading: pendServicesCountLoading } =
+    useSuspenseQuery({
+      queryKey: ["pending-services-count"],
+      queryFn: async () => {
+        const { count, error } = await supabase
+          .from("services")
+          .select("id", { count: "exact", head: true })
+          .eq("status", "pending-approval");
+
+        if (error) throw error;
+
+        return count;
+      },
+    });
+
+  const hasNextPage = pendingServicesData.length > PAGE_SIZE;
+
+  const nextCursor = hasNextPage
+    ? pendingServicesData[PAGE_SIZE - 1].service_index
+    : null;
+
+  return {
+    pendingServicesList: pendingServicesData.slice(0, PAGE_SIZE),
+    hasNextPage,
+    nextCursor,
+    pendServicesCount,
+    pendingServicesDataLoading,
+  };
+};
+
+export const useCoupons = ({ couponsCursor }: Pagination) => {
+  const { data: couponsData, isLoading: couponsDataLoading } = useSuspenseQuery(
+    {
+      queryKey: ["admin-coupons-data", couponsCursor],
+      queryFn: async () => {
+        let listQuery = supabase
+          .from("coupons")
+          .select("*", { count: "exact" })
+          .order("coupon_index", { ascending: true })
+          .limit(PAGE_SIZE + 1);
+
+        if (couponsCursor) {
+          listQuery = listQuery.gt("coupon_index", couponsCursor);
+        }
+
+        const { data, error } = await listQuery;
+
+        if (error) throw error;
+
+        return data;
+      },
+    },
+  );
+
+  const { data: couponCount, isLoading: couponCountLoading } = useSuspenseQuery(
+    {
+      queryKey: ["coupon-count"],
+      queryFn: async () => {
+        const { count, error } = await supabase
+          .from("coupons")
+          .select("id", { count: "exact", head: true });
+
+        if (error) throw error;
+
+        return count;
+      },
+    },
+  );
+
+  const hasNextPage = couponsData.length > PAGE_SIZE;
+
+  const nextCursor = hasNextPage
+    ? couponsData[PAGE_SIZE - 1].coupon_index
+    : null;
+
+  return {
+    couponsList: couponsData,
+    hasNextPage,
+    nextCursor,
+    couponCount,
+    couponsDataLoading,
+  };
+};
 
 export const useAdminFunctionality = () => {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const { t } = useTranslation("responses");
+  const { sendPasswordUpdateEmail } = useEmail();
 
   // Admin check - in a real app, you'd check this from the database
   const admin = useIsAdmin();
@@ -176,36 +487,52 @@ export const useAdminFunctionality = () => {
         throw new Error("Only admins can create users");
       }
 
-      console.log('Creating user...');
+      console.log("Creating user...");
 
-      const { data: user, error: userError } = await supabaseAdmin.auth.admin.createUser({
-        email: formData.email,
-        password: formData.password,
-        phone: formData.phone,
-      })
+      const {
+        data: { success, user, error: userError },
+        error,
+      } = await supabase.functions.invoke("admin-create-user", {
+        body: {
+          email: formData.email,
+          password: formData.password,
+          phone: formData.phone,
+          is_admin: formData.is_admin,
+        },
+      });
 
-      if (userError) throw userError;
+      if (userError || error) {
+        toast.error(
+          userError.code === "email_exists"
+            ? t("email_exists_error")
+            : t("user_creation_error"),
+        );
+        throw userError ?? error;
+      }
 
-      const { data: profile, error: profileError } = await supabase.from('profiles')
+      await sendPasswordUpdateEmail.mutateAsync({ email: formData.email! });
+
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
         .update({
           full_name: formData.full_name,
           phone: formData.phone,
           location: formData.location,
-          bio: formData.bio ?? '',
+          bio: formData.bio ?? "",
           experience_years: formData.experience_years ?? 0,
           is_service_provider: formData.is_service_provider ?? false,
-          profile_image_url: '',
+          profile_image_url: "",
         })
-        .eq('id', user.user?.id);
+        .eq("id", user.user?.id);
 
       if (profileError) throw profileError;
 
       return;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-data'] });
-    }
-  })
+      queryClient.invalidateQueries({ queryKey: ["admin-data"] });
+    },
+  });
 
   const deleteUser = useMutation({
     mutationFn: async (id: string) => {
@@ -213,55 +540,53 @@ export const useAdminFunctionality = () => {
         throw new Error("Only admins can delete users");
       }
 
-      const { error } = await supabase
-        .from('profiles')
-        .delete()
-        .eq('id', id);
+      const { error } = await supabase.functions.invoke("admin-delete-user", {
+        body: {
+          id,
+        },
+      });
 
       if (error) throw error;
-
-      const { error: deleteUserError } = await supabaseAdmin.auth.admin.deleteUser(id);
-
-      if (deleteUserError) throw deleteUserError;
 
       return;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-data'] });
-    }
-  })
+      queryClient.invalidateQueries({ queryKey: ["admin-data"] });
+    },
+  });
 
   const setupRealTimeSubscriptions = () => {
     // Real-time subscription for new users
     const profilesChannel = supabase
-      .channel('profiles-realtime')
-      .on('postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'profiles' },
+      .channel("profiles-realtime")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "profiles" },
         (payload) => {
-          console.log('New user registered:', payload.new);
-          toast("مستخدم جديد",{
-            description: `انضم ${payload.new.full_name || 'مستخدم جديد'} للموقع`,
+          console.log("New user registered:", payload.new);
+          toast(t("new_user"), {
+            description: `انضم ${payload.new.full_name || t("new_user")} للموقع`,
           });
-          queryClient.invalidateQueries({ queryKey: ['admin-data'] });
-        }
+          queryClient.invalidateQueries({ queryKey: ["admin-data"] });
+        },
       )
       .subscribe();
 
     // Real-time subscription for new services
     const servicesChannel = supabase
-      .channel('services-realtime')
-      .on('postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'services' },
+      .channel("services-realtime")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "services" },
         (payload) => {
-          console.log('New service posted:', payload.new);
-          toast("خدمة جديدة", {
-            description: `تم إضافة خدمة جديدة: ${payload.new.title}`,
+          console.log("New service posted:", payload.new);
+          toast(t("new_service"), {
+            description: `${t("new_service_added")}: ${payload.new.title}`,
           });
-          queryClient.invalidateQueries({ queryKey: ['admin-data'] });
-        }
+          queryClient.invalidateQueries({ queryKey: ["admin-data"] });
+        },
       )
       .subscribe();
-
 
     return () => {
       supabase.removeChannel(profilesChannel);
@@ -272,40 +597,60 @@ export const useAdminFunctionality = () => {
   const updateUser = useMutation({
     mutationFn: async (formData: Partial<User>) => {
       if (!admin) {
-        throw new Error("Only admins can delete users");
+        throw new Error("Only admins can update users");
       }
 
-      if ((formData.email || formData.password)) {
-        if (formData.email) {
-          const { error } = await supabaseAdmin.auth.admin.updateUserById(formData.id!, { email: formData.email });
-          if (error) throw error;
+      if (formData.email || formData.password || formData.phone) {
+        const { data, error } = await supabase.functions.invoke(
+          "admin-update-user",
+          {
+            body: {
+              id: formData.id,
+              email: formData.email,
+              password: formData.password,
+              phone: formData.phone,
+              is_admin: formData.is_admin,
+            },
+          },
+        );
+
+        if (error || !data?.success) {
+          toast.error(
+            data?.error?.code === "email_exists"
+              ? t("email_exists_error")
+              : t("user_creation_error"),
+          );
+
+          throw error || data?.error;
         }
-        if (formData.password) {
-          const { error } = await supabaseAdmin.auth.admin.updateUserById(formData.id!, { password: formData.password });
-          if (error) throw error;
+
+        if (formData.email && formData.password) {
+          await sendPasswordUpdateEmail.mutateAsync({ email: formData.email });
         }
       }
 
-      const { error } = await supabase
-        .from('profiles')
+      const { data, error } = await supabase
+        .from("profiles")
         .update({
           full_name: formData.full_name,
           phone: formData.phone,
           location: formData.location,
           bio: formData.bio,
           is_service_provider: formData.is_service_provider,
-          experience_years: formData.experience_years
+          experience_years: formData.experience_years,
         })
-        .eq('id', formData.id);
+        .eq("id", formData.id)
+        .select("id")
+        .maybeSingle();
 
       if (error) throw error;
 
       return;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-data'] });
-    }
-  })
+      queryClient.invalidateQueries({ queryKey: ["admin-data"] });
+    },
+  });
 
   const deleteService = useMutation({
     mutationFn: async (id: string) => {
@@ -313,19 +658,16 @@ export const useAdminFunctionality = () => {
         throw new Error("Only admins can delete users");
       }
 
-      const { error } = await supabase
-        .from('services')
-        .delete()
-        .eq('id', id);
+      const { error } = await supabase.from("services").delete().eq("id", id);
 
       if (error) throw error;
 
       return;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-data'] });
-    }
-  })
+      queryClient.invalidateQueries({ queryKey: ["admin-data"] });
+    },
+  });
 
   const createService = useMutation({
     mutationFn: async (formData: Partial<Service>) => {
@@ -334,7 +676,7 @@ export const useAdminFunctionality = () => {
       }
 
       const { data, error: serviceError } = await supabase
-        .from('services')
+        .from("services")
         .insert({
           title: formData.title,
           category: formData.category,
@@ -346,21 +688,24 @@ export const useAdminFunctionality = () => {
           experience: formData.experience,
           status: formData.status,
           user_id: formData.user_id,
+          is_online: formData.is_online,
+          links: formData.links as [],
+          whatsapp_number: String(formData.whatsapp_number),
         })
-        .select('*')
+        .select("*")
         .single();
-
 
       if (serviceError) throw serviceError;
 
-      if (formData.service_images) {
-        for (const image of formData.service_images) {
+      if (formData.service_media) {
+        for (const image of formData.service_media) {
           const { error: imageError } = await supabase
-            .from('service_images')
+            .from("service_media")
             .insert({
               service_id: data?.id,
-              image_url: image.image_url,
-              image_name: image.image_name,
+              url: image.url,
+              name: image.name,
+              thumbnail_url: image.thumbnail_url,
             });
 
           if (imageError) throw imageError;
@@ -370,9 +715,9 @@ export const useAdminFunctionality = () => {
       return;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-data'] });
-    }
-  })
+      queryClient.invalidateQueries({ queryKey: ["admin-data"] });
+    },
+  });
 
   const updateService = useMutation({
     mutationFn: async (formData: Partial<Service>) => {
@@ -381,7 +726,7 @@ export const useAdminFunctionality = () => {
       }
 
       const { data, error } = await supabase
-        .from('services')
+        .from("services")
         .update({
           title: formData.title,
           category: formData.category,
@@ -391,20 +736,24 @@ export const useAdminFunctionality = () => {
           phone: formData.phone,
           email: formData.email,
           experience: formData.experience,
-          status: formData.status
+          status: formData.status,
+          is_online: formData.is_online,
+          links: formData.links as [],
+          whatsapp_number: String(formData.whatsapp_number),
         })
-        .eq('id', formData.id)
-        .select('*')
+        .eq("id", formData.id)
+        .select("*")
         .single();
 
-      if (formData.service_images) {
-        for (const image of formData.service_images) {
+      if (formData.service_media) {
+        for (const image of formData.service_media) {
           const { error: imageError } = await supabase
-            .from('service_images')
+            .from("service_media")
             .insert({
               service_id: data?.id,
-              image_url: image.image_url,
-              image_name: image.image_name,
+              url: image.url,
+              name: image.name,
+              thumbnail_url: image.thumbnail_url,
             });
 
           if (imageError) throw imageError;
@@ -416,97 +765,101 @@ export const useAdminFunctionality = () => {
       return;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-data'] });
-    }
-  })
+      queryClient.invalidateQueries({ queryKey: ["admin-data"] });
+    },
+  });
 
   const acceptServicePost = useMutation({
-    mutationKey: ['accept-service-post'],
+    mutationKey: ["accept-service-post"],
     mutationFn: async (serviceId: string) => {
       const { error } = await supabase
-        .from('services')
-        .update({ status: 'published' })
-        .eq('id', serviceId);
+        .from("services")
+        .update({ status: "published" })
+        .eq("id", serviceId);
 
       if (error) {
-        console.error('Error accepting service post:', error);
+        console.error("Error accepting service post:", error);
         return { success: false, error: error.message };
-      };
+      }
 
       return { success: true };
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-data'] });
-      toast.success('تم تحديث الخدمة بنجاح!');
+      queryClient.invalidateQueries({ queryKey: ["admin-data"] });
+      toast.success(t("service_approved"));
     },
-    onError: (error: any) => {
-      console.error('Error updating service:', error);
-      toast.error(error.message || 'حدث خطأ في تحديث الخدمة');
-    }
-  })
+    onError: (error: Error) => {
+      console.error("Error updating service:", error);
+      toast.error(error.message || t("service_update_error"));
+    },
+  });
 
   const createCoupon = useMutation({
-    mutationKey: ['create-coupon'],
-    mutationFn: async (formData: Partial<Tables<'coupons'>>) => {
-      const { data: couponData, error: couponError } = await supabase.functions.invoke('create-coupons-with-stripe', {
-        body: JSON.stringify({ formData })
-      });
+    mutationKey: ["create-coupon"],
+    mutationFn: async (formData: Partial<Tables<"coupons">>) => {
+      const { data: couponData, error: couponError } =
+        await supabase.functions.invoke("create-coupons-with-stripe", {
+          body: JSON.stringify({ formData }),
+        });
 
       if (couponError) {
-        console.log('Error creating coupon:', couponError);
+        console.log("Error creating coupon:", couponError);
         throw couponError;
-      };
+      }
 
       const { data, error } = await supabase
-        .from('coupons')
+        .from("coupons")
         .insert({
-          code: formData.code.trim().toUpperCase() || '',
-          type: formData.type || 'fixed',
+          code: formData.code.trim().toUpperCase() || "",
+          type: formData.type || "fixed",
           discount_amount: formData.discount_amount || 0,
           discount_percentage: formData.discount_percentage || null,
           usage_limit: formData.usage_limit || null,
           used_count: 0,
-          description: formData.description || '',
+          description: formData.description || "",
           expires_at: formData.expires_at || null,
           stripe_coupon_id: couponData.coupon.id,
-          stripe_promo_id: couponData.promotionCode.id
+          stripe_promo_id: couponData.promotionCode.id,
         })
         .select()
         .single();
 
       if (error) {
-        console.error('Error creating coupon:', error);
+        console.error("Error creating coupon:", error);
         throw error;
       }
 
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-data'] });
+      queryClient.invalidateQueries({ queryKey: ["admin-data"] });
     },
     onError: (error) => {
-      console.error('Mutation error:', error);
-    }
-  })
+      console.error("Mutation error:", error);
+    },
+  });
 
   const deleteCoupon = useMutation({
     mutationFn: async (couponId: string) => {
-      const { error } = await supabase.from('coupons').delete().eq('id', couponId);
+      const { error } = await supabase
+        .from("coupons")
+        .delete()
+        .eq("id", couponId);
 
       if (error) {
-        console.error('Error deleting coupon:', error);
+        console.error("Error deleting coupon:", error);
         throw error;
       }
 
-      return json({ success: true });
+      return { success: true };
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-data'] });
+      queryClient.invalidateQueries({ queryKey: ["admin-data"] });
     },
     onError: (error) => {
-      console.error('Mutation error:', error);
-    }
-  })
+      console.error("Mutation error:", error);
+    },
+  });
 
   return {
     deleteUser,
@@ -525,6 +878,6 @@ export const useAdminFunctionality = () => {
     deleteCoupon,
     createCoupon,
     createCouponSuccess: createCoupon.isSuccess,
-    acceptServicePost
+    acceptServicePost,
   };
-}
+};

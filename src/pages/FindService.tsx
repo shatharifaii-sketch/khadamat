@@ -12,8 +12,11 @@ import LoadingGrid from '@/components/FindService/LoadingGrid';
 import { categories } from '@/components/FindService/ServiceCategories';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import { useTranslation } from 'react-i18next';
+import PaginationComponent from '@/components/PaginationComponent';
 
 const FindService = () => {
+  const { t } = useTranslation("services");
   const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -21,20 +24,22 @@ const FindService = () => {
 
   const [submittedSearchTerm, setSubmittedSearchTerm] = useState('');
 
-  const { data: services, isLoading, error } = usePublicServices();
+  const [page, setPage] = useState(1);
+  const [cursorHistory, setCursorHistory] = useState<number[]>([0]);
+  const cursor = cursorHistory[page - 1];
+
+  const { 
+    data: {
+    services = [],
+    hasNextPage = false,
+    nextCursor = null,
+    count = 0,
+  } = {},
+    error, 
+    isLoading 
+  } = usePublicServices({ servicesCursor: cursor });
+
   const { trackSearch } = useAnalytics();
-
-  const handleSearchSubmit = () => {
-    console.log('submitting')
-    setSubmittedSearchTerm(searchTerm);
-
-    trackSearch.mutate({
-      query: searchTerm,
-      category: selectedCategory !== 'all' ? selectedCategory : undefined,
-      location: selectedLocation !== 'all' ? selectedLocation : undefined,
-      resultsCount: filteredServices.length, // number of matches
-    });
-  }
 
   // Set initial category from URL parameters
   useEffect(() => {
@@ -47,42 +52,40 @@ const FindService = () => {
   const filteredServices = useMemo(() => {
     if (!services) return [];
 
-    const filtered = services.filter(service => {
-      // Enhanced search that includes category labels and handles bilingual search
-      const matchesSearch = searchTerm === '' || (() => {
-        const searchLower = searchTerm.toLowerCase();
-
-        // Find category label for current service
-        const categoryData = categories.find(cat => cat.value === service.category);
-        const categoryLabel = categoryData?.label || '';
-
-        // Search in title, description, category value, and category label
-        return service.title.toLowerCase().includes(searchLower) ||
-          service.description.toLowerCase().includes(searchLower) ||
-          service.category.toLowerCase().includes(searchLower) ||
-          categoryLabel.includes(searchTerm) || // Arabic search
-          // Handle common English terms for categories
-          (searchLower === 'photography' && service.category === 'photography') ||
-          (searchLower === 'plumbing' && service.category === 'plumbing') ||
-          (searchLower === 'marketing' && service.category === 'digital-marketing') ||
-          (searchLower === 'design' && service.category === 'graphic-design') ||
-          (searchLower === 'development' && service.category === 'web-development') ||
-          (searchLower === 'printing' && service.category === 'printing') ||
-          (searchLower === 'nanny' && service.category === 'nanny') ||
-          (searchLower === 'dj' && service.category === 'dj') ||
-          (searchLower === 'hauling' && service.category === 'hauling');
-      })();
-
-      const matchesCategory = selectedCategory === 'all' || service.category === selectedCategory;
-
-      const matchesLocation = selectedLocation === 'all' ||
-        service.location.toLowerCase().includes(selectedLocation.toLowerCase());
-
-      return matchesSearch && matchesCategory && matchesLocation;
-    });
-
-    return filtered;
-  }, [services, selectedCategory, selectedLocation, submittedSearchTerm]);
+    return services.filter(service => {
+          // Enhanced search that includes category labels and handles bilingual search
+          const matchesSearch = searchTerm === '' || (() => {
+            const searchLower = searchTerm.toLowerCase();
+    
+            // Find category label for current service
+            const categoryData = categories.find(cat => cat.value === service.category);
+            const categoryLabel = categoryData?.label || '';
+    
+            // Search in title, description, category value, and category label
+            return service.title.toLowerCase().includes(searchLower) ||
+              service.description.toLowerCase().includes(searchLower) ||
+              service.category.toLowerCase().includes(searchLower) ||
+              categoryLabel.includes(searchTerm) || // Arabic search
+              // Handle common English terms for categories
+              (searchLower === 'photography' && service.category === 'photography') ||
+              (searchLower === 'plumbing' && service.category === 'plumbing') ||
+              (searchLower === 'marketing' && service.category === 'digital-marketing') ||
+              (searchLower === 'design' && service.category === 'graphic-design') ||
+              (searchLower === 'development' && service.category === 'web-development') ||
+              (searchLower === 'printing' && service.category === 'printing') ||
+              (searchLower === 'nanny' && service.category === 'nanny') ||
+              (searchLower === 'dj' && service.category === 'dj') ||
+              (searchLower === 'hauling' && service.category === 'hauling');
+          })();
+    
+          const matchesCategory = selectedCategory === 'all' || service.category === selectedCategory;
+    
+          const matchesLocation = selectedLocation === 'all' ||
+            service.location.toLowerCase().includes(selectedLocation.toLowerCase());
+    
+          return matchesSearch && matchesCategory && matchesLocation;
+        });
+  }, [services, searchTerm, selectedCategory, selectedLocation]);
 
   const clearFilters = () => {
     setSearchTerm('');
@@ -91,14 +94,28 @@ const FindService = () => {
     setSelectedLocation('all');
   };
 
+    const handleSearchSubmit = () => {
+    console.log('submitting')
+    setSubmittedSearchTerm(searchTerm);
+
+    trackSearch.mutate({
+      query: searchTerm,
+      category: selectedCategory !== 'all' ? selectedCategory : undefined,
+      location: selectedLocation !== 'all' ? selectedLocation : undefined,
+      resultsCount: filteredServices.length, // number of matches
+    });
+  }
+
   if (error) {
     return (
       <div className="max-w-6xl mx-auto py-12 px-4">
         <Alert className="max-w-2xl mx-auto">
           <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>خطأ في تحميل الخدمات</AlertTitle>
+          <AlertTitle>
+            {t("find_service.error_loading_services")}
+          </AlertTitle>
           <AlertDescription>
-            حدث خطأ أثناء تحميل الخدمات. يرجى المحاولة مرة أخرى لاحقاً.
+            {t("find_service.error_loading_services_description")}
           </AlertDescription>
         </Alert>
       </div>
@@ -106,14 +123,14 @@ const FindService = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <div className="max-w-7xl mx-auto py-4 md:py-8 px-2 md:px-4 sm:px-6 lg:px-8">
       {/* Header */}
-      <div className="text-center mb-8">
-        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
-          ابحث عن الخدمة المناسبة
+      <div className="text-center mb-8 px-4">
+        <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-foreground mb-1">
+          {t("find_service.find_the_right_service")}
         </h1>
-        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-          اكتشف أفضل الخدمات المهنية في منطقتك واحصل على أفضل العروض
+        <p className="text-md md:text-xl text-muted-foreground max-w-2xl mx-auto">
+          {t("find_service.discover_top_services")}
         </p>
       </div>
 
@@ -148,6 +165,16 @@ const FindService = () => {
           </ErrorBoundary>
         </Suspense>
       )}
+
+      <PaginationComponent 
+        cursor={nextCursor}
+        page={page}
+        setPage={setPage}
+        setCursorHistory={setCursorHistory}
+        hasNextPage={hasNextPage}
+        count={count}
+        cursorHistory={cursorHistory}
+      />
     </div>
   );
 };

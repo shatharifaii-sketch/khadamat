@@ -3,6 +3,8 @@ import { useQuery, useMutation, useQueryClient, useSuspenseQuery } from '@tansta
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
 export interface UserProfile {
   id: string;
@@ -13,17 +15,20 @@ export interface UserProfile {
   experience_years?: number;
   profile_image_url?: string;
   is_service_provider?: boolean;
+  created_at?: string;
 }
 
 export const useProfile = () => {
   const { user } = useAuth();
+  const { t } = useTranslation("responses");
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const getProfile = useQuery({
     queryKey: ['profile', user?.id],
     queryFn: async () => {
       if (!user) return null;
-      
+
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -31,6 +36,7 @@ export const useProfile = () => {
         .single();
 
       if (error) throw error;
+
       return data;
     },
     enabled: !!user
@@ -39,24 +45,139 @@ export const useProfile = () => {
   const updateProfile = useMutation({
     mutationFn: async (profileData: Partial<UserProfile>) => {
       if (!user) throw new Error('User must be authenticated');
-      
+
       const { data, error } = await supabase
         .from('profiles')
-        .update(profileData)
+        .update({
+          full_name: profileData.full_name,
+          bio: profileData.bio,
+          location: profileData.location,
+          experience_years: profileData.experience_years,
+          phone: profileData.phone
+        })
         .eq('id', user.id)
         .select()
         .single();
 
       if (error) throw error;
+
+      // const { data: updatePhoneData, error: updatePhoneError } = await supabase.auth.updateUser({
+      //   phone: profileData.phone
+      // });
+
+      // if (updatePhoneError) throw updatePhoneError;
+
+      // if (user.phone != profileData.phone) {
+      //   return { ...data, updatingPhone: true }
+      // }
+
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['profile'] });
-      toast.success('تم تحديث الملف الشخصي بنجاح!');
+      toast.success(t("profile_updated_successfully"));
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      console.error('Error updating profile:', error);
+      toast.error(t("profile_update_failed"));
+    }
+  });
+
+  const {
+    mutateAsync: deleteProfile,
+    isPending: isDeleting,
+    isError: isDeleteError,
+    error: deleteError
+  } = useMutation({
+    mutationKey: ['delete-profile'],
+    mutationFn: async () => {
+      if (!user) throw new Error('User must be authenticated');
+
+      const { data, error } = await supabase.functions.invoke('delete-user-profile', {
+        method: 'POST',
+        body: JSON.stringify({ user_id: user.id })
+      });
+
+      if (error) {
+        throw new Error(t(error.message));
+      }
+
+      if (!data.success && data.error) {
+        throw new Error(t(data.error));
+      }
+
+      await supabase.auth.signOut();
+
+      return navigate('/', { replace: true });
+    },
+    onError: (error: unknown) => {
+      console.error('Error deleting profile:', error);
+      toast.error(t("profile_delete_failed"));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+      toast.success(t("profile_deleted_successfully"));
+    }
+  })
+
+  const confirmEmail = useMutation({
+    mutationFn: async ({ otp, email, user_id }: { otp: string; email: string; user_id: string; }) => {
+      if (!user) throw new Error('User must be authenticated');
+
+      const { error } = await supabase.auth.verifyOtp({
+        email,
+        token: otp,
+        type: 'email_change'
+      });
+
+      if (error) {
+        toast.error(error.code === "otp_expired" ? t("otp_expired") : t("unknown_validation_error"));
+        console.error('Error verifying OTP:', error);
+        return { error };
+      }
+
+      toast.success('تم التحقق من البريد الألكتروني');
+
+      const response = await supabase.functions.invoke('confirm-new-email', { body: JSON.stringify({ email, user_id }) });
+
+      if (!response.data.success) {
+        toast.error(t("unknown_validation_error"));
+        console.error('Error verifying OTP:', response.data.error);
+        return { error: response.data.error };
+      }
+
+      return 'OTP verified successfully';
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+      window.location.reload();
+    },
+    onError: (error: unknown) => {
       console.error('Error updating profile:', error);
       toast.error('حدث خطأ في تحديث الملف الشخصي');
+    }
+  });
+
+  const changePassword = useMutation({
+    mutationFn: async (password: string) => {
+      if (!user) throw new Error('User must be authenticated');
+
+      const { data, error } = await supabase.auth.updateUser({
+        password
+      });
+
+      if (error) {
+        console.error('Error changing password:', error);
+        throw error;
+      }
+
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+      toast.success(t("password_updated_successfully"));
+
+      navigate('/', { replace: true });
     }
   });
 
@@ -64,7 +185,13 @@ export const useProfile = () => {
     profile: getProfile.data,
     updateProfile,
     isLoading: getProfile.isLoading,
-    isUpdating: updateProfile.isPending
+    isUpdating: updateProfile.isPending,
+    confirmEmail,
+    changePassword,
+    deleteProfile,
+    isDeleting,
+    isDeleteError,
+    deleteError
   };
 };
 
@@ -73,37 +200,26 @@ export const usePublisherProfile = (userId: string) => {
     queryKey: ['publisher-profile', userId],
     queryFn: async () => {
       const { data: profile, error } = await supabase
-        .from('profiles_with_email')
-        .select('*')
+        .from('profiles')
+        .select('full_name, phone, bio, location, experience_years, created_at, profile_image_url, is_service_provider')
         .eq('id', userId)
         .maybeSingle();
-      
-        console.log('Publisher profile:', profile);
 
       if (error) throw error;
-      return profile;
+      return profile as UserProfile;
     }
   });
 
-  if (!getProfile) return { profile: null, services: null };
-
   const { data: getServices } = useSuspenseQuery({
-    queryKey: ['publisher-services', getProfile.id],
+    queryKey: ['publisher-services', userId],
     queryFn: async () => {
       const { data: services, error } = await supabase
         .from('services')
         .select('*')
-        .eq('user_id', getProfile.id);
-      
+        .eq('user_id', userId);
+
       if (error) throw error;
       return services;
-    }
-  })
-
-  const sendReport = useMutation({
-    mutationKey: ['send-report'],
-    mutationFn: async (reportData: { reported_user_id: string; description: string; }) => {
-      
     }
   })
 

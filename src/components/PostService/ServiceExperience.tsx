@@ -1,6 +1,7 @@
 
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { useTranslation } from 'react-i18next';
 
 interface ServiceExperienceProps {
   experience: string;
@@ -8,12 +9,13 @@ interface ServiceExperienceProps {
 }
 
 const ServiceExperience = ({ experience, onExperienceChange }: ServiceExperienceProps) => {
+  const { t } = useTranslation("services");
   return (
     <div className="space-y-2">
-      <Label htmlFor="experience" className="text-large font-semibold">سنوات الخبرة</Label>
+      <Label htmlFor="experience" className="text-large font-semibold">{t("post_service.experience")}</Label>
       <Input
         id="experience"
-        placeholder="مثال: 5 سنوات"
+        placeholder={t("post_service.experience_placeholder")}
         value={experience}
         onChange={(e) => onExperienceChange(e.target.value)}
         className="text-large"

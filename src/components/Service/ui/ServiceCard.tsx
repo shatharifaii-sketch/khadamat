@@ -9,6 +9,7 @@ import { categories } from '@/components/FindService/ServiceCategories';
 import type { PublicService } from '@/hooks/usePublicServices';
 import { truncateString } from '@/lib/utils';
 import { NavLink, useNavigate } from 'react-router-dom';
+import ReviewsComponent from './ReviewsComponent';
 
 interface EnhancedServiceCardProps {
   service: PublicService;
@@ -80,6 +81,7 @@ const ServiceCard = ({ service }: EnhancedServiceCardProps) => {
               <span>{service.views}</span>
               <Eye className="h-3 w-3" />
             </div>
+            <ReviewsComponent avg_rating={service.average_rating} review_count={service.review_count} />
           </div>
         </div>
       </CardContent>
