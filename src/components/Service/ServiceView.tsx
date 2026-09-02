@@ -1,7 +1,7 @@
 import ServiceHeader from './ui/ServiceHeader'
 import ServiceDataCard from './ui/ServiceDataCard'
 import ContactOptions from '../Chat/ui/ContactOptions';
-import { PublicService } from '@/hooks/usePublicServices';
+import { PublicService, useServiceReservation } from '@/hooks/usePublicServices';
 import { Link, NavLink } from 'react-router-dom';
 import { Button } from '../ui/button';
 import { MessageCircle } from 'lucide-react';
@@ -11,6 +11,7 @@ import { ServiceLink } from '../PostService/ServiceLinks';
 import { Json } from '@/integrations/supabase/types';
 import { useTranslation } from 'react-i18next';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { ReservationList } from '@/contexts/ReservationsContext';
 
 export interface ServiceViewProps {
   id: string;
@@ -36,6 +37,7 @@ export interface ServiceViewProps {
   };
   average_rating: number;
   review_count: number;
+  with_appointments: boolean;
 }
 
 interface Props {
@@ -59,6 +61,7 @@ const ServiceView = ({
   const isMobile = useIsMobile();
   const { t } = useTranslation("services");
   const lang = localStorage.getItem("language") || "en";
+
   return (
     <div className='flex flex-col gap-2 md:gap-4' dir={lang === "ar" ? "rtl" : "ltr"}>
       <ServiceHeader
@@ -71,6 +74,7 @@ const ServiceView = ({
       />
       <ServiceDataCard
         service={service}
+        userId={userId}
       />
 
       <div className="flex gap-2 pt-2 items-center justify-center">

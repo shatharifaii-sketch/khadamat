@@ -40,4 +40,5 @@ export interface ServiceFormData {
     thumbnail?: string;
     type?: string;
   }[];
+  with_appointments: boolean;
 }

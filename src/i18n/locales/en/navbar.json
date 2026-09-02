@@ -6,5 +6,6 @@
     "logout": "Logout",
     "account": "Account",
     "conversations": "Conversations",
-    "admin_panel": "Admin Panel"
+    "admin_panel": "Admin Panel",
+    "reservations": "Reservations"
 }

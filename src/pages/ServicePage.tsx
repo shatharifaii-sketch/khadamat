@@ -12,15 +12,14 @@ import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-
 const ServicePage = () => {
   const { t } = useTranslation("services");
   const isMobile = useIsMobile();
   const { id: serviceId } = useParams<{ id: string }>();
 
   if (!serviceId) {
-    throw new Error('Service ID not found');
-  };
+    throw new Error("Service ID not found");
+  }
 
   return (
     <div className={cn(
@@ -36,16 +35,14 @@ const ServicePage = () => {
           <ServiceViewWrapper serviceId={serviceId} />
         </ErrorBoundary>
       </Suspense>
-      <div>
-        <Separator />
-        <Suspense fallback={<LoadingReviews />}>
-          <ErrorBoundary fallback={<ReviewQueryError />}>
-            <Reviews serviceId={serviceId} />
-          </ErrorBoundary>
-        </Suspense>
-      </div>
+      <Separator />
+      <Suspense fallback={<LoadingReviews />}>
+        <ErrorBoundary fallback={<ReviewQueryError />}>
+          <Reviews serviceId={serviceId} />
+        </ErrorBoundary>
+      </Suspense>
     </div>
-  )
-}
+  );
+};
 
-export default ServicePage
+export default ServicePage;

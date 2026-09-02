@@ -41,6 +41,10 @@ interface AuthContextType {
   tryPhoneSignIn: () => Promise<void>;
 }
 
+type ExtendedUser = User & {
+  is_service_provider?: boolean | null;
+};
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 async function checkUser({
@@ -73,7 +77,7 @@ async function checkUser({
 }
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<ExtendedUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const lang = localStorage.getItem("language") || "en";

@@ -26,6 +26,7 @@ export const useServiceFormState = (serviceToEdit?: Service | null) => {
       number: '',
     },
     media: [],
+    with_appointments: false
   });
 
   // Load service data for editing or pending service data
@@ -49,6 +50,7 @@ export const useServiceFormState = (serviceToEdit?: Service | null) => {
           number: digits.slice(digits.length - 9),
         },
         media: [],
+        with_appointments: serviceToEdit.with_appointments
       });
 
     } else if (pendingService && !isEditMode) {
@@ -64,15 +66,8 @@ export const useServiceFormState = (serviceToEdit?: Service | null) => {
     }
   }, [user.email, isEditMode, formData.email]);
 
-  const handleInputChange = (
-    field: string, value: string |
-      { id: string; name: string; url: string; thumbnail_url?: string, type?: string }[] |
-      boolean |
-      ServiceLink[] |
-    {
-      countryCode: string;
-      number: string;
-    }
+  const handleInputChange = <K extends keyof ServiceFormData> (
+    field: K, value: ServiceFormData[K] | ServiceLink[]
   ) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };

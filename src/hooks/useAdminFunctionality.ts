@@ -60,6 +60,7 @@ export interface Service {
     thumbnail_url?: string;
     type?: "image" | "video";
   }[];
+  with_appointments: boolean
 }
 
 type Pagination = {
