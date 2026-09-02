@@ -111,11 +111,7 @@ const PostService = () => {
   }
 
   return (
-    <div>
-      <div
-        className="max-w-4xl mx-auto py-12 px-4"
-        dir={lang === "ar" ? "rtl" : "ltr"}
-      >
+      <div className="max-w-4xl mx-auto py-6 md:py-12 px-2 md:px-4" dir={lang === "ar" ? "rtl" : "ltr"}>
         <PostServiceHeader isEditMode={isEditMode}>
           {isEditMode && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">

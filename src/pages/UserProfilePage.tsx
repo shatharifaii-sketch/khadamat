@@ -24,7 +24,7 @@ const UserProfilePage = () => {
   }
 
   return (
-    <div className='max-w-4xl mx-auto py-12 px-4 space-y-10'>
+    <div className='max-w-4xl mx-auto py-4 md:py-12 px-4 space-y-10'>
             <Suspense fallback={<ProfileLoading />}>
             <ErrorBoundary fallback={<UserProfileQueryError />}>
                 <ProfileViewWrapper userId={userId} />

@@ -56,10 +56,20 @@ Deno.serve(async (req) => {
       );
     }
 
+    const adminCount = roles.filter((r) => r.role === "admin").length;
+    const userCount = (totalUsers ?? 0) - adminCount;
+
     return new Response(
       JSON.stringify({
         success: true,
-        data,
+        data: {
+          roles,
+          counts: {
+            totalUsers,
+            adminCount,
+            userCount
+          }
+        },
         error: null
       }),
       {

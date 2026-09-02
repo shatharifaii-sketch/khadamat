@@ -37,7 +37,11 @@ export interface PublicService {
   with_appointments: boolean;
 }
 
-export const usePublicServices = () => {
+export const usePublicServices = ({
+  servicesCursor,
+}: {
+  servicesCursor?: number | null;
+}) => {
   const queryClient = useQueryClient();
 
   // Set up real-time subscription
@@ -70,9 +74,9 @@ export const usePublicServices = () => {
   }, [queryClient]);
 
   return useQuery({
-    queryKey: ["public-services"],
+    queryKey: ["public-services", servicesCursor],
     queryFn: async () => {
-      const { data: services, error } = await supabase
+      let listQuery = supabase
         .from("services")
         .select(
           `
@@ -84,14 +88,53 @@ export const usePublicServices = () => {
     )
   `,
         )
+        .eq("status", "published")
+        .order("service_index", { ascending: true })
+        .limit(PAGE_SIZE + 1);
+
+      const { count, error: countError } = await supabase
+        .from("services")
+        .select("id", { count: "exact", head: true })
         .eq("status", "published");
+
+      if (countError) {
+        console.error("Error fetching public services count:", countError);
+        return {
+          services: [],
+          hasNextPage: false,
+          nextCursor: null,
+          count: 0,
+        };
+      }
+
+      if (servicesCursor) {
+        listQuery = listQuery.gt("service_index", servicesCursor);
+      }
+
+      const { data: services, error } = await listQuery;
 
       if (error) {
         console.error("Error fetching public services:", error);
-        return [];
+        return {
+          services: [],
+          hasNextPage: false,
+          nextCursor: null,
+          count: 0,
+        };
       }
 
-      return services;
+      const hasNextPage = services.length > PAGE_SIZE;
+
+      const nextCursor = hasNextPage
+        ? services[PAGE_SIZE - 1].service_index
+        : null;
+
+      return {
+        services: services.slice(0, PAGE_SIZE),
+        hasNextPage,
+        nextCursor,
+        count: count ?? 0,
+      };
     },
     retry: 1,
     staleTime: 30000, // 30 seconds

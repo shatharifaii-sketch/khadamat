@@ -46,10 +46,10 @@ const EnhancedSearchFilters = ({
   ];
 
   return (
-    <div className="space-y-4 mb-8">
+    <div className="space-y-4 mb-3 md:mb-8">
       {/* Main search bar */}
       <Card>
-        <CardContent className="p-4">
+        <CardContent className="p-2 md:p-4">
           <div className="flex gap-3">
             <div className="relative flex-1">
               <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
@@ -62,7 +62,7 @@ const EnhancedSearchFilters = ({
                     handleSearchSubmit?.();
                   }
                 }}
-                className="pr-10 text-right text-lg"
+                className="pr-10 text-right text-lg h-full"
               />
               {searchTerm && (
                 <Button

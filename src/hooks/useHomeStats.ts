@@ -99,7 +99,6 @@ export const useHomeStats = () => {
         categoriesWithServices
       };
 
-      console.log('Home stats fetched:', stats);
       return stats;
     },
     staleTime: 60000, // 1 minute

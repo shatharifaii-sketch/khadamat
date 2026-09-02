@@ -36,6 +36,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import { useWebsiteAnalytics } from "./hooks/useWebsiteAnalytics";
 import ExtraPaymentSuccess from "./pages/payments/ExtraPaymentSuccess";
+import PhoneOTPVerification from "./pages/verify/PhoneOTPVerification";
 import ReservationsCalendar from "./pages/ReservationsCalendar";
 import { ReservationsProvider } from "./contexts/ReservationsContext";
 
@@ -96,6 +97,8 @@ function App() {
                     />
                     <Route path="reset-password" element={<ResetPassword />} />
 
+                  <Route path="/confirm-email" element={<CodeVerification />} />
+                  <Route path="/verify-phone" element={<PhoneOTPVerification />} />
                     <Route path="admin" element={<AdminDashboard />}>
                       <Route path="" element={<Admin />} />
                     </Route>
