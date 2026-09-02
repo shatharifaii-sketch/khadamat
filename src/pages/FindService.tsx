@@ -1,49 +1,48 @@
-
-import { useState, useMemo, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertTriangle } from 'lucide-react';
-import Navigation from '@/components/Navigation';
-import { usePublicServices } from '@/hooks/usePublicServices';
-import EnhancedSearchFilters from '@/components/FindService/EnhancedSearchFilters';
-import EnhancedServiceCard from '@/components/FindService/EnhancedServiceCard';
-import EmptyState from '@/components/FindService/EmptyState';
-import LoadingGrid from '@/components/FindService/LoadingGrid';
-import { categories } from '@/components/FindService/ServiceCategories';
-import { useAnalytics } from '@/hooks/useAnalytics';
-import ErrorBoundary from '@/components/ErrorBoundary';
-import { useTranslation } from 'react-i18next';
-import PaginationComponent from '@/components/PaginationComponent';
+import { useState, useMemo, useEffect, Suspense } from "react";
+import { useSearchParams } from "react-router-dom";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
+import Navigation from "@/components/Navigation";
+import { usePublicServices } from "@/hooks/usePublicServices";
+import EnhancedSearchFilters from "@/components/FindService/EnhancedSearchFilters";
+import EnhancedServiceCard from "@/components/FindService/EnhancedServiceCard";
+import EmptyState from "@/components/FindService/EmptyState";
+import LoadingGrid from "@/components/FindService/LoadingGrid";
+import { categories } from "@/components/FindService/ServiceCategories";
+import { useAnalytics } from "@/hooks/useAnalytics";
+import ErrorBoundary from "@/components/ErrorBoundary";
+import { useTranslation } from "react-i18next";
+import PaginationComponent from "@/components/PaginationComponent";
 
 const FindService = () => {
   const { t } = useTranslation("services");
   const [searchParams] = useSearchParams();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [selectedLocation, setSelectedLocation] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedLocation, setSelectedLocation] = useState<string>("all");
 
-  const [submittedSearchTerm, setSubmittedSearchTerm] = useState('');
+  const [submittedSearchTerm, setSubmittedSearchTerm] = useState("");
 
   const [page, setPage] = useState(1);
   const [cursorHistory, setCursorHistory] = useState<number[]>([0]);
   const cursor = cursorHistory[page - 1];
 
-  const { 
+  const {
     data: {
-    services = [],
-    hasNextPage = false,
-    nextCursor = null,
-    count = 0,
-  } = {},
-    error, 
-    isLoading 
+      services = [],
+      hasNextPage = false,
+      nextCursor = null,
+      count = 0,
+    } = {},
+    error,
+    isLoading,
   } = usePublicServices({ servicesCursor: cursor });
 
   const { trackSearch } = useAnalytics();
 
   // Set initial category from URL parameters
   useEffect(() => {
-    const categoryFromUrl = searchParams.get('category');
+    const categoryFromUrl = searchParams.get("category");
     if (categoryFromUrl) {
       setSelectedCategory(categoryFromUrl);
     }
@@ -52,68 +51,78 @@ const FindService = () => {
   const filteredServices = useMemo(() => {
     if (!services) return [];
 
-    return services.filter(service => {
-          // Enhanced search that includes category labels and handles bilingual search
-          const matchesSearch = searchTerm === '' || (() => {
-            const searchLower = searchTerm.toLowerCase();
-    
-            // Find category label for current service
-            const categoryData = categories.find(cat => cat.value === service.category);
-            const categoryLabel = categoryData?.label || '';
-    
-            // Search in title, description, category value, and category label
-            return service.title.toLowerCase().includes(searchLower) ||
-              service.description.toLowerCase().includes(searchLower) ||
-              service.category.toLowerCase().includes(searchLower) ||
-              categoryLabel.includes(searchTerm) || // Arabic search
-              // Handle common English terms for categories
-              (searchLower === 'photography' && service.category === 'photography') ||
-              (searchLower === 'plumbing' && service.category === 'plumbing') ||
-              (searchLower === 'marketing' && service.category === 'digital-marketing') ||
-              (searchLower === 'design' && service.category === 'graphic-design') ||
-              (searchLower === 'development' && service.category === 'web-development') ||
-              (searchLower === 'printing' && service.category === 'printing') ||
-              (searchLower === 'nanny' && service.category === 'nanny') ||
-              (searchLower === 'dj' && service.category === 'dj') ||
-              (searchLower === 'hauling' && service.category === 'hauling');
-          })();
-    
-          const matchesCategory = selectedCategory === 'all' || service.category === selectedCategory;
-    
-          const matchesLocation = selectedLocation === 'all' ||
-            service.location.toLowerCase().includes(selectedLocation.toLowerCase());
-    
-          return matchesSearch && matchesCategory && matchesLocation;
-        });
+    return services.filter((service) => {
+      // Enhanced search that includes category labels and handles bilingual search
+      const matchesSearch =
+        searchTerm === "" ||
+        (() => {
+          const searchLower = searchTerm.toLowerCase();
+
+          // Find category label for current service
+          const categoryData = categories.find(
+            (cat) => cat.value === service.category,
+          );
+          const categoryLabel = categoryData?.label || "";
+
+          // Search in title, description, category value, and category label
+          return (
+            service.title.toLowerCase().includes(searchLower) ||
+            service.description.toLowerCase().includes(searchLower) ||
+            service.category.toLowerCase().includes(searchLower) ||
+            categoryLabel.includes(searchTerm) || // Arabic search
+            // Handle common English terms for categories
+            (searchLower === "photography" &&
+              service.category === "photography") ||
+            (searchLower === "plumbing" && service.category === "plumbing") ||
+            (searchLower === "marketing" &&
+              service.category === "digital-marketing") ||
+            (searchLower === "design" &&
+              service.category === "graphic-design") ||
+            (searchLower === "development" &&
+              service.category === "web-development") ||
+            (searchLower === "printing" && service.category === "printing") ||
+            (searchLower === "nanny" && service.category === "nanny") ||
+            (searchLower === "dj" && service.category === "dj") ||
+            (searchLower === "hauling" && service.category === "hauling")
+          );
+        })();
+
+      const matchesCategory =
+        selectedCategory === "all" || service.category === selectedCategory;
+
+      const matchesLocation =
+        selectedLocation === "all" ||
+        service.location.toLowerCase().includes(selectedLocation.toLowerCase());
+
+      return matchesSearch && matchesCategory && matchesLocation;
+    });
   }, [services, searchTerm, selectedCategory, selectedLocation]);
 
   const clearFilters = () => {
-    setSearchTerm('');
-    setSubmittedSearchTerm('');
-    setSelectedCategory('all');
-    setSelectedLocation('all');
+    setSearchTerm("");
+    setSubmittedSearchTerm("");
+    setSelectedCategory("all");
+    setSelectedLocation("all");
   };
 
-    const handleSearchSubmit = () => {
-    console.log('submitting')
+  const handleSearchSubmit = () => {
+    console.log("submitting");
     setSubmittedSearchTerm(searchTerm);
 
     trackSearch.mutate({
       query: searchTerm,
-      category: selectedCategory !== 'all' ? selectedCategory : undefined,
-      location: selectedLocation !== 'all' ? selectedLocation : undefined,
+      category: selectedCategory !== "all" ? selectedCategory : undefined,
+      location: selectedLocation !== "all" ? selectedLocation : undefined,
       resultsCount: filteredServices.length, // number of matches
     });
-  }
+  };
 
   if (error) {
     return (
       <div className="max-w-6xl mx-auto py-12 px-4">
         <Alert className="max-w-2xl mx-auto">
           <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>
-            {t("find_service.error_loading_services")}
-          </AlertTitle>
+          <AlertTitle>{t("find_service.error_loading_services")}</AlertTitle>
           <AlertDescription>
             {t("find_service.error_loading_services_description")}
           </AlertDescription>
@@ -166,7 +175,7 @@ const FindService = () => {
         </Suspense>
       )}
 
-      <PaginationComponent 
+      <PaginationComponent
         cursor={nextCursor}
         page={page}
         setPage={setPage}

@@ -31,7 +31,7 @@ const Index = () => {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative py-20 px-2 md:px-4 text-center bg-gradient-to-br from-accent/30 to-primary/10">
+      <section className="relative pt-20 pb-14 px-2 md:px-4 text-center bg-gradient-to-br from-accent/30 to-primary/10">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
             {t("hero.title")}
@@ -71,7 +71,7 @@ const Index = () => {
       />
 
       {/* How it Works */}
-      <section className="py-10 md:py-20 px-4 bg-muted/50">
+      <section className="py-7 md:py-14 px-4 bg-muted/50">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12" dir={lang === "ar" ? "rtl" : "ltr"}>
             <h2 className="text-xl md:text-4xl font-bold text-foreground mb-4">
@@ -175,7 +175,7 @@ const Index = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-8 md:py-20 px-1 md:px-4 bg-primary text-primary-foreground" dir={lang === "ar" ? "rtl" : "ltr"}>
+      <section className="py-8 md:py-14 px-1 md:px-4 bg-primary text-primary-foreground" dir={lang === "ar" ? "rtl" : "ltr"}>
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-2xl md:text-4xl font-bold mb-3 md:mb-6">
             {t("cta.title")}

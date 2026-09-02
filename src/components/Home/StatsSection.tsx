@@ -1,4 +1,3 @@
-
 import { Users, Briefcase, TrendingUp } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import StatCard from './components/StatCard';
@@ -46,7 +45,7 @@ const StatsSection = ({ serviceProvidersCount, publishedServicesCount, isLoading
   const showEncouragingMessage = serviceProvidersCount < 10 && publishedServicesCount < 20;
 
   return (
-    <section className="py-16 px-4 bg-card">
+    <section className="pb-16 px-4 bg-primary/10">
       <div className="max-w-6xl mx-auto">
         {showEncouragingMessage && (
           <div className="text-center mb-8">
@@ -60,7 +59,7 @@ const StatsSection = ({ serviceProvidersCount, publishedServicesCount, isLoading
           </div>
         )}
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2">
           {stats.map((stat, index) => (
             <StatCard 
               key={index}

@@ -128,7 +128,6 @@ const PostService = () => {
 
         <ServiceForm serviceToEdit={isEditMode ? service : null} />
       </div>
-    </div>
   );
 };
 

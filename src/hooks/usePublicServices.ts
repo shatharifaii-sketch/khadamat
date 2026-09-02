@@ -5,7 +5,7 @@ import {
 } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Service } from "./useAdminFunctionality";
+import { PAGE_SIZE, Service } from "./useAdminFunctionality";
 import { ServiceLink } from "@/components/PostService/ServiceLinks";
 import { Reservation, ReservationList } from "@/contexts/ReservationsContext";
 import { getReservationAvailability } from "@/lib/utils";

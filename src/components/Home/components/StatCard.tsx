@@ -19,7 +19,7 @@ const StatCard = ({
 
   return (
     <div ref={ref} className="text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4">
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-full mb-4">
             <Icon className="w-10 h-10 text-primary" />
         </div>
 

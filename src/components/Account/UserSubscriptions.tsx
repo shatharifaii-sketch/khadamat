@@ -1,7 +1,7 @@
 import { Subscription, useSubscription } from '@/hooks/useSubscription';
 import { act, Suspense, useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
-import { Clock, Star, TrendingUp } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Clock, Star, TrendingUp } from 'lucide-react';
 import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
 import { Button } from '../ui/button';
@@ -280,24 +280,31 @@ const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
                 <Label className='text-lg'>{t("subscriptions.past_subscriptions")}</Label>
                 {
                     inactiveSubscriptions && inactiveSubscriptions.length > 0 ? (
-                        <div className='grid grid-cols-2 w-full gap-3 overflow-y-auto max-h-[300px] border p-2 rounded-md bg-muted'>
+                        <div className='grid grid-cols-1 md:grid-cols-2 w-full gap-3 overflow-y-auto max-h-[300px] border p-2 rounded-md bg-muted'>
                             {
                                 inactiveSubscriptions.map((subscription: Subscription) => (
                                     <Card key={subscription.id} className='col-span-1'>
                                         <CardHeader className='flex flex-row items-start justify-between w-[300px]'>
-                                            <div className='text-lg font-bold'>
+                                            <div className='text-lg font-bold text-start text-ellipsis overflow-hidden whitespace-nowrap'>
                                                 {subscription.subscription_tier.title}
-                                                <p className='text-muted-foreground text-sm'>{(subscription.billing_cycle === "Monthly" || subscription.billing_cycle === "monthly") ? "شهري" : "سنوي"}</p>
+                                                <p className='text-muted-foreground text-sm'>{(subscription.billing_cycle === "Monthly" || subscription.billing_cycle === "monthly") ? t("subscriptions.monthly") : t("subscriptions.yearly")}</p>
                                             </div>
                                             <Badge>
-                                                {subscription.status === 'active' ? 'جاري' : 'متوقف'}
+                                                {subscription.status === 'active' ? t("subscriptions.active") : t("subscriptions.inactive")}
                                             </Badge>
                                         </CardHeader>
                                         <CardContent>
-                                            <div>
-                                                <p className='text-sm'>تاريخ الاشتراك: <span>{new Date(subscription.created_at).toLocaleDateString('ar')}</span></p>
-                                                <p>تاريخ الدفع السابق: <span>{new Date(subscription.last_payment_date).toLocaleDateString('ar')}</span></p>
-                                                <p>تاريخ ايقاف الاشتراك: <span>{new Date(subscription.subscription_ended_at).toLocaleDateString('ar')}</span></p>
+                                            <div dir={lang === "ar" ? "rtl" : "ltr"} className='flex flex-col gap-2 text-sm text-start'>
+                                                <p className='flex items-center gap-2 justify-start'>
+                                                    {new Date(subscription.created_at).toLocaleDateString(lang)}
+                                                    {lang === "ar" ? (
+                                                        <ArrowLeft className='h-4 w-4 text-primary' />
+                                                    ) : (
+                                                        <ArrowRight className='h-4 w-4 text-primary' />
+                                                    )}
+                                                    {new Date(subscription.subscription_ended_at).toLocaleDateString(lang)}
+                                                </p>
+                                                <p>{t("subscriptions.last_payment_date")} <span>{new Date(subscription.last_payment_date).toLocaleDateString(lang)}</span></p>
                                             </div>
                                         </CardContent>
                                     </Card>
