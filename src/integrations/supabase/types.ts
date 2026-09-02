@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.4"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
@@ -121,32 +121,29 @@ export type Database = {
       calendar_provider_availability: {
         Row: {
           created_at: string
-          from_date: string | null
+          day_of_week: number | null
           from_time: string | null
           id: string
           provider_id: string | null
           service_id: string | null
-          to_date: string | null
           to_time: string | null
         }
         Insert: {
           created_at?: string
-          from_date?: string | null
+          day_of_week?: number | null
           from_time?: string | null
           id?: string
           provider_id?: string | null
           service_id?: string | null
-          to_date?: string | null
           to_time?: string | null
         }
         Update: {
           created_at?: string
-          from_date?: string | null
+          day_of_week?: number | null
           from_time?: string | null
           id?: string
           provider_id?: string | null
           service_id?: string | null
-          to_date?: string | null
           to_time?: string | null
         }
         Relationships: [
@@ -1105,6 +1102,56 @@ export type Database = {
           report_message?: string
         }
         Relationships: []
+      }
+      saved_services: {
+        Row: {
+          created_at: string
+          id: string
+          service_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          service_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          service_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_services_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "public_services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saved_services_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saved_services_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saved_services_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_with_email"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       search_analytics: {
         Row: {
@@ -2649,7 +2696,7 @@ export type Database = {
       }
     }
     Enums: {
-      activity_type: "login" | "logout"
+      activity_type: "login" | "logout" | "new_activity" | "try_phone_login"
       app_role: "admin" | "moderator" | "user"
       coupon_type:
         | "first_month_free"
@@ -2783,7 +2830,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      activity_type: ["login", "logout"],
+      activity_type: ["login", "logout", "new_activity", "try_phone_login"],
       app_role: ["admin", "moderator", "user"],
       coupon_type: [
         "first_month_free",

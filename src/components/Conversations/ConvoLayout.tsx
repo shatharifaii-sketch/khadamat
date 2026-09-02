@@ -12,9 +12,9 @@ const ConvoLayout = ({ children }: Props) => {
     const lang = localStorage.getItem("language") || "en";
 
     return (
-        <div className='flex gap-5 justify-center items-center my-5 text-start' dir={lang === "ar" ? "rtl" : "ltr"}>
+        <div className='flex gap-5 justify-center items-center my-3 md:my-5 mx-1 text-start' dir={lang === "ar" ? "rtl" : "ltr"}>
             <Card className='w-full shadow-none md:w-3/5 md:shadow-sm flex flex-col gap-5'>
-                <CardHeader className='text-2xl font-semibold'>
+                <CardHeader className='text-2xl font-semibold py-3'>
                     {t("convos_title")}
                 </CardHeader>
                 <Separator />

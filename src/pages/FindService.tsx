@@ -13,6 +13,7 @@ import { categories } from '@/components/FindService/ServiceCategories';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { useTranslation } from 'react-i18next';
+import PaginationComponent from '@/components/PaginationComponent';
 
 const FindService = () => {
   const { t } = useTranslation("services");
@@ -23,20 +24,22 @@ const FindService = () => {
 
   const [submittedSearchTerm, setSubmittedSearchTerm] = useState('');
 
-  const { data: services, isLoading, error } = usePublicServices();
+  const [page, setPage] = useState(1);
+  const [cursorHistory, setCursorHistory] = useState<number[]>([0]);
+  const cursor = cursorHistory[page - 1];
+
+  const { 
+    data: {
+    services = [],
+    hasNextPage = false,
+    nextCursor = null,
+    count = 0,
+  } = {},
+    error, 
+    isLoading 
+  } = usePublicServices({ servicesCursor: cursor });
+
   const { trackSearch } = useAnalytics();
-
-  const handleSearchSubmit = () => {
-    console.log('submitting')
-    setSubmittedSearchTerm(searchTerm);
-
-    trackSearch.mutate({
-      query: searchTerm,
-      category: selectedCategory !== 'all' ? selectedCategory : undefined,
-      location: selectedLocation !== 'all' ? selectedLocation : undefined,
-      resultsCount: filteredServices.length, // number of matches
-    });
-  }
 
   // Set initial category from URL parameters
   useEffect(() => {
@@ -91,6 +94,18 @@ const FindService = () => {
     setSelectedLocation('all');
   };
 
+    const handleSearchSubmit = () => {
+    console.log('submitting')
+    setSubmittedSearchTerm(searchTerm);
+
+    trackSearch.mutate({
+      query: searchTerm,
+      category: selectedCategory !== 'all' ? selectedCategory : undefined,
+      location: selectedLocation !== 'all' ? selectedLocation : undefined,
+      resultsCount: filteredServices.length, // number of matches
+    });
+  }
+
   if (error) {
     return (
       <div className="max-w-6xl mx-auto py-12 px-4">
@@ -108,13 +123,13 @@ const FindService = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <div className="max-w-7xl mx-auto py-4 md:py-8 px-2 md:px-4 sm:px-6 lg:px-8">
       {/* Header */}
-      <div className="text-center mb-8">
-        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
+      <div className="text-center mb-8 px-4">
+        <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-foreground mb-1">
           {t("find_service.find_the_right_service")}
         </h1>
-        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+        <p className="text-md md:text-xl text-muted-foreground max-w-2xl mx-auto">
           {t("find_service.discover_top_services")}
         </p>
       </div>
@@ -150,6 +165,16 @@ const FindService = () => {
           </ErrorBoundary>
         </Suspense>
       )}
+
+      <PaginationComponent 
+        cursor={nextCursor}
+        page={page}
+        setPage={setPage}
+        setCursorHistory={setCursorHistory}
+        hasNextPage={hasNextPage}
+        count={count}
+        cursorHistory={cursorHistory}
+      />
     </div>
   );
 };

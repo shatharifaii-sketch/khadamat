@@ -61,7 +61,7 @@ const ServiceFormSubmit = ({ isCreating, canPostService: editMode, isEditMode = 
               ? t("post_service.publish_service") 
               : !allowed && sub 
                 ? t("post_service.get_extra_service")
-                : !sub ? t("post_service.get_subscription") : t("post_service.not_allowed_to_post"))
+                : sub ? t("post_service.not_allowed_to_post") : t("post_service.get_subscription"))
         }
       </Button>
 
@@ -70,7 +70,7 @@ const ServiceFormSubmit = ({ isCreating, canPostService: editMode, isEditMode = 
         open={openSubscribeModal}
         onOpenChange={setOpenSubscribeModal}
       >
-        <DrawerContent className=' transition-all rounded-none'>
+        <DrawerContent className=' transition-all rounded-none h-5/6 overflow-y-auto pb-10'>
           <DialogTitle></DialogTitle>
           <Suspense fallback={<div>Loading...</div>}>
             <ErrorBoundary fallback={<div>Something went wrong</div>}>

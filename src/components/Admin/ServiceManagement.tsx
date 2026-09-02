@@ -6,13 +6,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Plus, Edit, Trash2, Eye } from 'lucide-react';
-import { Service, useAdminFunctionality } from '@/hooks/useAdminFunctionality';
+import { Service, useAdminFunctionality, useServices } from '@/hooks/useAdminFunctionality';
 import ServiceForm from './ui/ServiceForm';
 import { NavLink } from 'react-router-dom';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { SelectLabel } from '@radix-ui/react-select';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import PaginationComponent from '../PaginationComponent';
 
 
 export interface UserProfile {
@@ -22,24 +23,26 @@ export interface UserProfile {
 }
 
 interface ServiceManagementProps {
-  services: Service[];
-  users: UserProfile[];
-  onServiceUpdated: () => void;
+  count?: number
 }
 
 type SortOption = "name-ar" | "name-en" | "date-asc" | "date-desc";
 
-export const ServiceManagement = ({ services, users, onServiceUpdated }: ServiceManagementProps) => {
+export const ServiceManagement = ({ count }: ServiceManagementProps) => {
   const { t } = useTranslation("admin");
   const lang = localStorage.getItem("language") || "en";
+
+  const [page, setPage] = useState(1);
+  const [cursorHistory, setCursorHistory] = useState<number[]>([0]);
+  const cursor = cursorHistory[page - 1];
+
+  const { servicesList: services, hasNextPage, nextCursor, servicesCount } = useServices({ servicesCursor: cursor });
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [sortOption, setSortOption] = useState<SortOption>('date-desc');
 
   const { deleteService } = useAdminFunctionality();
-
-  const serviceProviders = users.filter(user => user.is_service_provider);
 
   const sortedServices = useMemo(() => {
     if (!services) return [];
@@ -63,9 +66,9 @@ export const ServiceManagement = ({ services, users, onServiceUpdated }: Service
       toast(t("table.service_management.toasts.deleted_title"), {
         description: t("table.service_management.toasts.deleted_description"),
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(t("table.service_management.toasts.error_title"), {
-        description: error.message || t("table.service_management.toasts.error_description"),
+        description: error instanceof Error ? error.message : t("table.service_management.toasts.error_description"),
       });
     }
   };
@@ -86,7 +89,7 @@ export const ServiceManagement = ({ services, users, onServiceUpdated }: Service
               <DialogHeader>
                 <DialogTitle>{t("table.service_management.create_service_title")}</DialogTitle>
               </DialogHeader>
-              <ServiceForm serviceProviders={serviceProviders} closeForm={() => setIsCreateModalOpen(false)} />
+              <ServiceForm closeForm={() => setIsCreateModalOpen(false)} />
             </DialogContent>
           </Dialog>
         </div>
@@ -149,7 +152,7 @@ export const ServiceManagement = ({ services, users, onServiceUpdated }: Service
                         <DialogHeader>
                           <DialogTitle>{t("table.service_management.edit_service")}</DialogTitle>
                         </DialogHeader>
-                        <ServiceForm isEdit={true} serviceProviders={serviceProviders} service={editingService} closeForm={() => setEditingService(null)} />
+                        <ServiceForm isEdit={true} service={editingService} closeForm={() => setEditingService(null)} />
                       </DialogContent>
                     </Dialog>
 
@@ -181,6 +184,16 @@ export const ServiceManagement = ({ services, users, onServiceUpdated }: Service
             ))}
           </TableBody>
         </Table>
+
+        <PaginationComponent
+          cursor={nextCursor}
+          page={page}
+          setPage={setPage}
+          setCursorHistory={setCursorHistory}
+          hasNextPage={hasNextPage}
+          count={servicesCount}
+          cursorHistory={cursorHistory}
+        />
       </CardContent>
     </Card>
   );

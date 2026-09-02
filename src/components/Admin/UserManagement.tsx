@@ -6,12 +6,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
-import { UserPlus, Edit, Trash2, Eye } from 'lucide-react';
-import { useAdminFunctionality } from '@/hooks/useAdminFunctionality';
+import { UserPlus, Edit, Trash2, Eye, ShieldUser } from 'lucide-react';
+import { useAdminFunctionality, useUsers } from '@/hooks/useAdminFunctionality';
 import { NavLink } from 'react-router-dom';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select';
 import UserForm from './ui/UserForm';
 import { useTranslation } from 'react-i18next';
+import PaginationComponent from '../PaginationComponent';
 
 export interface UserProfile {
   id: string;
@@ -29,14 +30,22 @@ export interface UserProfile {
 }
 
 interface UserManagementProps {
-  users: UserProfile[];
+  count?: number;
 }
 
 type SortOption = "name-ar" | "name-en" | "date-asc" | "date-desc";
 
-export const UserManagement = ({ users }: UserManagementProps) => {
+export const UserManagement = ({
+  count
+}: UserManagementProps) => {
   const { t } = useTranslation("admin");
   const lang = localStorage.getItem("language") || "en";
+
+  const [page, setPage] = useState(1);
+  const [cursorHistory, setCursorHistory] = useState<(number | null)[]>([null]);
+  const cursor = cursorHistory[page - 1];
+
+  const { usersList: users, nextCursor, hasNextPage, numOfUsers } = useUsers({ usersCursor: cursor })
   
   const { toast } = useToast();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -72,10 +81,10 @@ export const UserManagement = ({ users }: UserManagementProps) => {
   const handleDeleteUser = async (userId: string) => {
     try {
       deleteUser.mutate(userId);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: t("table.user_management.toasts.error_title"),
-        description: error.message || t("table.user_management.toasts.error_description"),
+        description: error instanceof Error ? error.message : t("table.user_management.toasts.error_description"),
         variant: "destructive",
       });
     }
@@ -148,8 +157,8 @@ export const UserManagement = ({ users }: UserManagementProps) => {
             {sortedUsers.map((user) => (
               <TableRow key={user.id}>
                 <TableCell className="font-medium">
-                  <NavLink to={user.id ? `/profile/${user.id}` : '#'}>
-                    {user.full_name || t("table.user_management.empty.name")}
+                  <NavLink className="flex justify-end items-center gap-2" to={user.id ? `/profile/${user.id}` : '#'}>
+                    {user.full_name || t("table.user_management.empty.name")} {user.is_admin && <div className="w-2 h-2 bg-primary rounded-full" />}
                   </NavLink>
                 </TableCell>
                 <TableCell>{user.phone || '-'}</TableCell>
@@ -166,7 +175,7 @@ export const UserManagement = ({ users }: UserManagementProps) => {
                   <div className="flex gap-2">
                     <Button variant='link' size='sm' className='outline-primary outline outline-1'>
                       <NavLink to={`/profile/${user.id}`} className='flex items-center justify-center'>
-                        <Eye className="size-4" />
+                        {user.is_admin ? <ShieldUser className="size-4" /> : <Eye className="size-4" />}
                       </NavLink>
                     </Button>
 
@@ -214,6 +223,15 @@ export const UserManagement = ({ users }: UserManagementProps) => {
             ))}
           </TableBody>
         </Table>
+        <PaginationComponent
+          cursor={nextCursor}
+          page={page}
+          setPage={setPage}
+          cursorHistory={cursorHistory}
+          setCursorHistory={setCursorHistory}
+          hasNextPage={hasNextPage}
+          count={numOfUsers}
+        />
       </CardContent>
     </Card>
   );

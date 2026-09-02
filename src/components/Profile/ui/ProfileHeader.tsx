@@ -14,7 +14,7 @@ const ProfileHeader = ({
 }: Props) => {
     return (
         <div>
-            <div className='flex flex-col items-center justify-center w-3/4 mx-auto'>
+            <div className='flex md:flex-col py-5 md:py-0 items-center justify-center w-3/4 mx-auto gap-5 md:mb-2'>
                 {image ? (
                     <Avatar className="size-32">
                         <AvatarImage
@@ -28,7 +28,7 @@ const ProfileHeader = ({
                         className="size-32"
                     />
                 )}
-                <div className="flex flex-col items-center gap-2 mb-4">
+                <div className="flex flex-col items-start md:items-center justify-center gap-2">
                     <h2 className="text-3xl">{name}</h2>
                     <p className="text-muted-foreground">{phone || '--'}</p>
                 </div>

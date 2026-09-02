@@ -1,4 +1,4 @@
-import { Service, useAdminFunctionality } from '@/hooks/useAdminFunctionality';
+import { Service, useAdminFunctionality, usePendingServices } from '@/hooks/useAdminFunctionality';
 import React, { useMemo, useState } from 'react'
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
@@ -13,17 +13,23 @@ import ServiceForm from './ui/ServiceForm';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 import PendingServiceData from './ui/PendingServiceData';
 import { useTranslation } from 'react-i18next';
+import PaginationComponent from '../PaginationComponent';
 
 interface Props {
-  services: Service[];
-  onServiceUpdated: () => void
+  count?: number
 }
 
 type SortOption = "name-ar" | "name-en" | "date-asc" | "date-desc";
 
-const PendingServicesManagement = ({ services }: Props) => {
+const PendingServicesManagement = ({ count }: Props) => {
   const { t } = useTranslation("admin");
   const lang = localStorage.getItem("language") || "en";
+
+  const [page, setPage] = useState(1);
+  const [cursorHistory, setCursorHistory] = useState<number[]>([0]);
+  const cursor = cursorHistory[page - 1];
+
+  const { pendingServicesList: services, hasNextPage, nextCursor, pendServicesCount } = usePendingServices({ pendingServicesCursor: cursor }) 
 
   const [serviceToAccept, setServiceToAccept] = useState<Service | null>(null);
   const [sortOption, setSortOption] = useState<SortOption>('date-desc');
@@ -52,9 +58,9 @@ const PendingServicesManagement = ({ services }: Props) => {
       toast(t("table.pending_services_management.toasts.deleted_title"), {
         description: t("table.pending_services_management.toasts.deleted_description"),
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(t("table.pending_services_management.toasts.error_title"), {
-        description: error.message || t("table.pending_services_management.toasts.error_description"),
+        description: error instanceof Error ? error.message : t("table.pending_services_management.toasts.error_description"),
       });
     }
   };
@@ -161,6 +167,15 @@ const PendingServicesManagement = ({ services }: Props) => {
             )}
           </TableBody>
         </Table>
+        <PaginationComponent
+          cursor={nextCursor}
+          page={page}
+          setPage={setPage}
+          setCursorHistory={setCursorHistory}
+          hasNextPage={hasNextPage}
+          count={pendServicesCount}
+          cursorHistory={cursorHistory}
+        />
       </CardContent>
     </Card>
   );

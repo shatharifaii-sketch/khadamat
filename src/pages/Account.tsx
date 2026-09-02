@@ -1,15 +1,8 @@
 
-import { useState, useEffect, useRef, Suspense } from 'react';
+import { useEffect, useRef, Suspense } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { User, TrendingUp, Calendar, Loader2, Pen, Plus } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { locations } from '@/components/FindService/ServiceCategories';
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
@@ -30,16 +23,14 @@ import ChangeEmailComponent from '@/components/Account/ChangeEmailComponent';
 import ChangePasswordComponent from '@/components/Account/ChangePasswordComponent';
 import { useTranslation } from 'react-i18next';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { validateWhatsappPhone } from '@/lib/utils';
 import DeleteProfileComponent from '@/components/Account/DeleteProfileComponent';
+import UpdateUserDetails from '@/components/Account/UpdateUserDetails';
 
 const Account = () => {
   const { t } = useTranslation("account");
   const lang = localStorage.getItem("language") || "en";
   const location = useLocation();
   const servicePending = location.state?.servicePending as boolean ?? false;
-  const [isNumberValid, setIsNumberValid] = useState(true);
-
 
   useEffect(() => {
     if (servicePending) {
@@ -57,85 +48,9 @@ const Account = () => {
 
   const cardRef = useRef<HTMLDivElement>(null);
 
-  const [formData, setFormData] = useState({
-    full_name: '',
-    bio: '',
-    location: '',
-    phone: '',
-    experience_years: 0
-  });
-
-  const [isUpdating, setIsUpdating] = useState(false);
-
   // Get services and subscription data
   const { data: services = [], isLoading: servicesLoading } = getUserServices;
   const { data: subscription } = getUserSubscription;
-
-  useEffect(() => {
-    if (profile) {
-      setFormData({
-        full_name: profile.full_name || '',
-        bio: profile.bio || '',
-        location: profile.location || '',
-        phone: profile.phone || '',
-        experience_years: profile.experience_years || 0
-      });
-    }
-  }, [profile]);
-
-  useEffect(() => {
-    if (profile) {
-      const phoneValidation = validateWhatsappPhone(profile.phone);
-
-      if (!phoneValidation.valid) {
-        setIsNumberValid(false);
-      } else {
-        setIsNumberValid(true);
-      }
-    }
-  }, [profile]);
-
-  const handleInputChange = (field: string, value: string | number) => {
-    if (field === 'phone' && typeof value === 'string') {
-      const phoneValidation = validateWhatsappPhone(value);
-
-      console.log('PHONE VALIDATION: ', phoneValidation);
-
-      if (!phoneValidation.valid) {
-        setIsNumberValid(false);
-      } else {
-        setIsNumberValid(true);
-      }
-    }
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsUpdating(true);
-
-    setIsNumberValid(true);
-
-    const phoneValidation = validateWhatsappPhone(formData.phone);
-
-    if (!phoneValidation.valid) {
-      setIsNumberValid(false);
-    }
-
-    const payload = {
-      ...formData,
-      phone: phoneValidation.formatted
-    }
-
-    try {
-      await updateProfile.mutateAsync(payload);
-      toast.success('تم تحديث الملف الشخصي بنجاح');
-    } catch (error) {
-      toast.error('فشل في تحديث الملف الشخصي');
-    } finally {
-      setIsUpdating(false);
-    }
-  };
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -175,7 +90,6 @@ const Account = () => {
     <div className="max-w-4xl mx-auto py-12 px-4">
       <div className="text-center mb-8">
         <div>
-
           <MainUserDetails user={profile} />
         </div>
         <Button
@@ -336,96 +250,12 @@ const Account = () => {
           </CardHeader>
           <CardContent>
             <UploadProfileImage userId={profile?.id} userName={profile?.full_name} userImage={profile?.profile_image_url} />
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2 text-start">
-                  <Label htmlFor="full_name">{t("full_name")}</Label>
-                  <Input
-                    id="full_name"
-                    value={formData.full_name}
-                    onChange={(e) => handleInputChange('full_name', e.target.value)}
-                    placeholder={t("full_name")}
-                  />
-                </div>
-
-                <div className="space-y-2 text-start">
-                  <Label htmlFor="phone">{t("phone")}</Label>
-                  <Input
-                    id="phone"
-                    value={formData.phone}
-                    onChange={(e) => handleInputChange('phone', e.target.value)}
-                    placeholder={t("phone")}
-                  />
-                  {!isNumberValid && <p className="text-red-500 text-sm">{t("not_whatsapp_valid")}</p>}
-                </div>
-              </div>
-
-              <div className="space-y-2 text-start">
-                <Label htmlFor="location">{t("location")}</Label>
-                <Select
-                  value={formData.location}
-                  onValueChange={(value) => handleInputChange('location', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("select_location")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {locations.map((location) => (
-                      <SelectItem key={location} value={location}>
-                        {t(location)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2 text-start">
-                <Label htmlFor="bio">{t("bio")}</Label>
-                <Textarea
-                  id="bio"
-                  value={formData.bio}
-                  onChange={(e) => handleInputChange('bio', e.target.value)}
-                  placeholder={t("bio_placeholder")}
-                  rows={3}
-                />
-              </div>
-
-              {isServiceProvider && (
-                <>
-                  <Separator />
-                  <div className="space-y-4 text-start">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Badge variant="secondary">{t("service_provider")}</Badge>
-                        <span className="text-sm text-muted-foreground">
-                          {t("service_provider_description")}
-                        </span>
-                      </div>
-                      <Label htmlFor="experience_years">{t("experience_years")}</Label>
-                      <Input
-                        id="experience_years"
-                        type="number"
-                        min="0"
-                        value={formData.experience_years}
-                        onChange={(e) => handleInputChange('experience_years', parseInt(e.target.value) || 0)}
-                        placeholder={t("experience_years_placeholder")}
-                      />
-                    </div>
-                  </div>
-                </>
-              )}
-
-              <Button type="submit" disabled={isUpdating}>
-                {isUpdating ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {t("saving_changes")}
-                  </>
-                ) : (
-                  t("save_changes")
-                )}
-              </Button>
-            </form>
+            <UpdateUserDetails
+              isServiceProvider={isServiceProvider}
+              profile={profile}
+              rawPhone={profile?.phone}
+              updateProfile={updateProfile}
+            />
           </CardContent>
         </Card>
       </div>

@@ -48,7 +48,7 @@ const ReviewDialog = ({
                 rating: review.rating
             })
         }
-    }, [editing])
+    }, [editing, review.id, review.rating, review.review_body])
 
     const handleSubmitUpdatedData = () => {
         //TODO: when the data is updated, show the updated details immediately without closing the dialog
@@ -80,9 +80,9 @@ const ReviewDialog = ({
 
     return (
         <>
-            <DialogTitle className='text-lg font-bold text-start pr-10 flex items-center gap-2'>
-                <span>{t("service.reviews.dialog.title")}</span>
-                <span>{localReview.service.title}</span>
+            <DialogTitle className='text-md md:text-lg font-bold text-start pr-10 flex md:flex-row flex-col gap-2'>
+                <span className='text-sm md:text-lg'>{t("service.reviews.dialog.title")}</span>
+                <span className='text-lg md:text-xl'>{localReview.service.title}</span>
             </DialogTitle>
             <Separator />
             <DialogHeader className='flex justify-between items-center flex-row'>
