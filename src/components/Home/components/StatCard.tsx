@@ -20,14 +20,14 @@ const StatCard = ({
   return (
     <div ref={ref} className="text-center">
         <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4">
-            <Icon className="w-10 h-10 text-primary" />
+            <Icon className="size-8 md:size-10 text-primary" />
         </div>
 
-        <div className="text-3xl font-bold mb-2">
+        <div className="text-2xl md:text-3xl font-bold mb-2">
             {value === 0 ? t("stats.soon") : count}
         </div>
 
-        <div className="text-lg text-muted-foreground">
+        <div className="text-md md:text-lg text-muted-foreground">
             {label}
         </div>
     </div>
