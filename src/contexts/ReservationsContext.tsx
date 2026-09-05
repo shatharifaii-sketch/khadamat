@@ -217,19 +217,14 @@ export const ReservationsProvider = ({
       return { success: false, error: checkProvider.error };
     }
 
-    const { error } = await supabase.from("calendar_reservations").insert({
-      client_id: reservation.clientId,
-      provider_id: reservation.providerId,
-      service_id: reservation.serviceId,
-      date: reservation.date,
-      start_time: reservation.start_time,
-      end_time: reservation.end_time,
-      status: "pending",
-      provider_seen: false,
-      client_seen: true,
-    });
+    const { data, error } = await supabase.functions.invoke("create-reservation", {
+      body: reservation,
+      headers: {
+        Authorization: `Bearer ${session?.access_token}`
+      },
+    })
 
-    if (error) {
+    if (error || !data.success) {
       console.error("Error creating reservation: ", error);
       throw error;
     }

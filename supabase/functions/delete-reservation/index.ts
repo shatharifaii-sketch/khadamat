@@ -5,32 +5,144 @@
 // Setup type definitions for built-in Supabase Runtime APIs
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { withSupabase } from "@supabase/server";
+import { Resend } from "npm:resend@latest";
 
-console.log("Hello from Functions!");
+const resend = new Resend(Deno.env.get("RESEND_API_KEY")!);
+
+async function getData(supabase: any, reservationId: string) {
+  const { data: reservationData, error: reservationError } = await supabase
+    .from("reservations")
+    .select("providerId, clientId, serviceId, date, start_time, end_time")
+    .eq("id", reservationId)
+    .maybeSingle();
+  
+  if (reservationError) {
+    console.error("Error fetching reservation data: ", reservationError);
+    return {
+      reservationData: null,
+      providerData: null,
+      clientData: null,
+      serviceData: null,
+    };
+  }
+
+  const { data: providerData, error: providerError } = await supabase
+    .from("profiles_with_email")
+    .select("email, name")
+    .eq("id", reservationData.providerId)
+    .maybeSingle();
+  
+  if (providerError) {
+    console.error("Error fetching provider data: ", providerError);
+    return {
+      reservationData,
+      providerData: null,
+      clientData: null,
+      serviceData: null,
+    };
+  }
+
+  const { data: clientData, error: clientError } = await supabase
+    .from("profiles_with_email")
+    .select("email, name")
+    .eq("id", reservationData.clientId)
+    .maybeSingle();
+  
+  if (clientError) {
+    console.error("Error fetching client data: ", clientError);
+    return {
+      reservationData,
+      providerData,
+      clientData: null,
+      serviceData: null,
+    };
+  }
+
+  const { data: serviceData, error: serviceError } = await supabase
+    .from("services")
+    .select("title")
+    .eq("id", reservationData.serviceId)
+    .maybeSingle();
+  
+  if (serviceError) {
+    console.error("Error fetching service data: ", serviceError);
+    return {
+      reservationData,
+      providerData,
+      clientData,
+      serviceData: null,
+    };
+  }
+
+  return { reservationData, providerData, clientData, serviceData };
+}
 
 // This endpoint uses 'publishable' | 'secret' access, apiKey is required.
 // Use publishable for Client-facing, key-validated endpoints
 // Use secret for Server-to-server, internal calls
 export default {
   fetch: withSupabase({ auth: ["publishable", "secret"] }, async (req, ctx) => {
-    // Called by another service with a secret key
-    // ctx.supabaseAdmin bypasses RLS — use for privileged operations
-    /*
-    if (ctx.authMode === "secret") {
-      const { user_id } = await req.json();
-      const { data } = await ctx.supabaseAdmin.auth.admin.getUserById(user_id);
+    const { supabase } = ctx;
+
+    try {
+      const { reservationId } = await req.json();
+
+      const { reservationData, providerData, clientData, serviceData } = await getData(supabase, reservationId);
+
+      if (!reservationData || !providerData || !clientData || !serviceData) {
+        return Response.json({
+          success: false,
+          error: "reservation_data_not_found",
+        });
+      }
+
+      const { error } = await supabase
+        .from("reservations")
+        .delete()
+        .eq("id", reservationId);
+      
+      if (error) {
+        console.error("Error deleting reservation: ", error);
+        return Response.json({
+          success: false,
+          error: "reservation_not_found",
+        });
+      }
+
+      const { error: resendError } = await resend.emails.send({
+        from: "Appointment Deleted <support@mail.khedemtak.com>",
+        to: providerData.email,
+        template: {
+          id: "appointment-deleted",
+          variables: {
+            name: clientData.name,
+            provider_name: providerData.name,
+            service_title: serviceData.title,
+            reservation_date: reservationData.date,
+            start_time: reservationData.start_time,
+            end_time: reservationData.end_time
+          },
+        },
+      });
+
+      if (resendError) {
+        console.error("Error sending email: ", resendError);
+        return Response.json({
+          success: false,
+          error: "email_not_sent",
+        });
+      }
 
       return Response.json({
-        email: data?.user?.email,
+        success: true,
+        error: null,
+      });
+    } catch (error) {
+      return Response.json({
+        success: false,
+        error: "unexpected_error_occured",
       });
     }
-    */
-
-    const { name } = await req.json();
-
-    return Response.json({
-      message: `Hello ${name}!`,
-    });
   }),
 };
 
