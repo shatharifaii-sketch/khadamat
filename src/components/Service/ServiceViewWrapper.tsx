@@ -10,7 +10,8 @@ interface Props {
 export const ServiceViewWrapper = ({ serviceId }: Props) => {
   const { user } = useAuth();  
   const {
-    service
+    service,
+    isSaved
   } = useServiceData(serviceId, user?.id);
 
   const [isConvo, setIsConvo] = useState<boolean>(false);
@@ -18,6 +19,7 @@ export const ServiceViewWrapper = ({ serviceId }: Props) => {
 
   return <ServiceView 
   service={service} 
+  isSaved={isSaved}
   convoId={convoId}
   isConvo={isConvo}
   setConvoId={setConvoId}

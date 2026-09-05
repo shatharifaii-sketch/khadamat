@@ -2,7 +2,7 @@
 import { useEffect, useRef, Suspense } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { User, TrendingUp, Calendar, Loader2, Pen, Plus } from 'lucide-react';
+import { User, TrendingUp, Calendar, Loader2, Pen, Plus, Bookmark } from 'lucide-react';
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
@@ -143,7 +143,7 @@ const Account = () => {
         </div>
 
         {/* My Published Services Section */}
-        <div id="my-services">
+        <div id="my-services" className="space-y-2">
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -189,6 +189,15 @@ const Account = () => {
                 </div>
               )}
             </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-sm text-wrap md:text-xl">
+                <Bookmark fill="fill" />
+                {t("saved_services")}
+              </CardTitle>
+            </CardHeader>
           </Card>
         </div>
 

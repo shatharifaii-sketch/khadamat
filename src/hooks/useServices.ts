@@ -73,8 +73,9 @@ async function setAvailability({ availability, serviceId, userId }: { availabili
 
 async function handleSaveService({
   serviceId,
-  userId
-}: { serviceId: string, userId: string }): Promise<{ success: boolean, error: string }> {
+  userId,
+  isSaved
+}: { serviceId: string, userId: string, isSaved: boolean }): Promise<{ success: boolean, error: string, serviceId?: string }> {
   if (!serviceId || !userId) {
     return {
       success: false,
@@ -82,22 +83,36 @@ async function handleSaveService({
     };
   }
 
-  const { error } = await supabase.from("saved_services").insert({
-    service_id: serviceId,
-    user_id: userId
-  });
+  const query = supabase.from("saved_services")
 
-  if (error) {
-    console.log(error);
-    return {
-      success: false,
-      error: "error_saving"
+  if (isSaved) {
+    const { error } = await query.delete().eq("service_id", serviceId).eq("user_id", userId);
+
+    if (error) {
+      console.error('Error unsaving service:', error);
+      return {
+        success: false,
+        error: "error_unsaving_service",
+        serviceId: undefined
+      }
+    }
+  } else {
+    const { error } = await query.insert({ service_id: serviceId, user_id: userId });
+
+    if (error) {
+      console.error('Error saving service:', error);
+      return {
+        success: false,
+        error: "error_saving_service",
+        serviceId: undefined
+      }
     }
   }
 
   return {
     success: true,
-    error: ""
+    error: "",
+    serviceId: serviceId
   }
 }
 
@@ -369,17 +384,19 @@ export const useServices = () => {
   const {
     mutate: saveService,
     isPending: isSavingService,
-    isError: isSavingServiceError
+    isError: isSavingServiceError,
+    isSuccess: isSavingServiceSuccess
   } = useMutation({
     mutationKey: ["save-service"],
     mutationFn: handleSaveService,
-    onSuccess: ({ success, error }) => {
+    onSuccess: ({ success, error, serviceId }) => {
       if (error) {
         toast.error(t(error))
         return;
       }
 
-      toast.success(t("service_saved"))
+      queryClient.invalidateQueries({ queryKey: ['saved-services', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['is-service-saved', serviceId, user?.id] });
     }
   })
 
@@ -391,7 +408,11 @@ export const useServices = () => {
     isCreating: createService.isPending,
     isUpdating: updateService.isPending,
     setProviderAvailability,
-    isError
+    isError,
+    saveService,
+    isSavingService,
+    isSavingServiceError,
+    isSavingServiceSuccess
   };
 };
 

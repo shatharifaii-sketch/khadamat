@@ -1,8 +1,6 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import {
-  Eye,
-} from "lucide-react";
+import { Eye } from "lucide-react";
 import ServiceImages from "./ServiceImages";
 import { useServiceReservation } from "@/hooks/usePublicServices";
 import { cn, platforms, truncateString } from "@/lib/utils";
@@ -38,7 +36,7 @@ const ServiceDataCard = ({ service, userId }: Props) => {
       <CardHeader>
         <CardContent className="p-1 md:p-2">
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between" dir={lang === "ar" ? "rtl" : "ltr"}>
               <h3 className="text-xl font-semibold">
                 {t("service.description")}
               </h3>
@@ -116,6 +114,20 @@ const ServiceDataCard = ({ service, userId }: Props) => {
                 {service?.price_range}
               </h2>
             </div>
+
+            <Separator
+              orientation="vertical"
+              className="h-5 mt-3 hidden md:block"
+            />
+            <div className="flex items-start sm:items-center gap-4">
+              <h3 className="text-lg font-semibold text-nowrap">
+                {t("service.experience")}
+              </h3>
+              <h2 className="text-xl font-semibold text-primary text-nowrap">
+                {service?.experience}
+              </h2>
+            </div>
+
             <Separator
               orientation="vertical"
               className="h-5 mt-3 hidden md:block"
@@ -138,18 +150,6 @@ const ServiceDataCard = ({ service, userId }: Props) => {
                 </>
               )}
             </div>
-            <Separator
-              orientation="vertical"
-              className="h-5 mt-3 hidden md:block"
-            />
-            <div className="flex items-start sm:items-center gap-4">
-              <h3 className="text-lg font-semibold text-nowrap">
-                {t("service.experience")}
-              </h3>
-              <h2 className="text-xl font-semibold text-primary text-nowrap">
-                {service?.experience}
-              </h2>
-            </div>
           </div>
           <Separator />
           <div className="space-y-3" dir={lang === "ar" ? "rtl" : "ltr"}>
@@ -170,7 +170,7 @@ const ServiceDataCard = ({ service, userId }: Props) => {
           </div>
 
           {service.with_appointments && (
-            <ServiceReservations 
+            <ServiceReservations
               reservations={reservations}
               latestReservation={latestReservation}
               canReserve={availability.canReserve}

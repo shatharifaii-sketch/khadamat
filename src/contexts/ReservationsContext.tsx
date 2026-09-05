@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { toMinutes } from "@/lib/utils";
 import { toast } from "sonner";
+import { useServices } from "@/hooks/useServices";
 
 export type AvailabilityType = {
   dayOfWeek: number;
@@ -138,6 +139,8 @@ export const ReservationsProvider = ({
   const { t } = useTranslation("reservations");
   const lang = localStorage.getItem("language") || "en";
 
+  const { saveService } = useServices();
+
   const { user, session } = useAuth();
   const [reservations, setReservations] = useState<Reservation[]>([]);
 
@@ -230,6 +233,8 @@ export const ReservationsProvider = ({
       console.error("Error creating reservation: ", error);
       throw error;
     }
+
+    saveService({ serviceId: reservation.serviceId, userId: reservation.clientId, isSaved: true });
 
     return { success: true, error: null };
   };

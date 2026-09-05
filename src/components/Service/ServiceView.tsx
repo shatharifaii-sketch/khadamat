@@ -15,6 +15,7 @@ import { Json } from "@/integrations/supabase/types";
 import { useTranslation } from "react-i18next";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ReservationList } from "@/contexts/ReservationsContext";
+import { useServices } from "@/hooks/useServices";
 
 export interface ServiceViewProps {
   id: string;
@@ -51,6 +52,7 @@ interface Props {
   setConvoId: (id: string | null) => void;
   setIsConvo: (isConvo: boolean) => void;
   userId: string;
+  isSaved: boolean;
 }
 const ServiceView = ({
   service,
@@ -60,10 +62,18 @@ const ServiceView = ({
   setConvoId,
   setIsConvo,
   userId,
+  isSaved,
 }: Props) => {
   const isMobile = useIsMobile();
   const { t } = useTranslation("services");
   const lang = localStorage.getItem("language") || "en";
+
+  const {
+    saveService,
+    isSavingService,
+    isSavingServiceError,
+    isSavingServiceSuccess,
+  } = useServices();
 
   return (
     <div
@@ -109,9 +119,23 @@ const ServiceView = ({
           publisherId={service?.publisher.id}
           whatsappNumber={service?.whatsapp_number}
         />
-        <Button variant="secondary">
-          <Bookmark fill={"transparent"} />
-          {t("save_service")}
+        <Button
+          variant="secondary"
+          onClick={() =>
+            saveService({
+              serviceId: service.id,
+              userId: userId,
+              isSaved
+            })
+          }
+          disabled={isSavingService}
+        >
+          <Bookmark fill={isSaved ? "fill" : "transparent"} />
+          {isSaved
+            ? t("saved")
+            : isMobile
+                ? t("save")
+                : t("save_service")}
         </Button>
         <ReportDrawer
           itemId={service?.id}

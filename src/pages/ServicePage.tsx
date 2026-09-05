@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { Suspense, useEffect } from "react";
+import { Suspense } from "react";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { ServiceViewWrapper } from "@/components/Service/ServiceViewWrapper";
 import ServiceLoading from "@/components/Service/ServiceLoading";
@@ -12,9 +12,11 @@ import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import { DotIcon } from "lucide-react";
 
 const ServicePage = () => {
   const { t } = useTranslation("services");
+  const lang = localStorage.getItem("language") || "en";
   const isMobile = useIsMobile();
   const { id: serviceId } = useParams<{ id: string }>();
 
@@ -30,19 +32,28 @@ const ServicePage = () => {
           : "max-w-4xl mx-auto pt-5 pb-8 px-4 space-y-6",
       )}
     >
-      <div className="flex items-center justify-start">
+      <div className="flex items-center justify-start text-start" dir={lang === "ar" ? "rtl" : "ltr"}>
         {/* <h1 className="md:text-2xl font-bold text-xl">
           {t("service.top_title")}
         </h1> */}
-        <Breadcrumb>
+        <Breadcrumb className="bg-transparent" dir={lang === "ar" ? "rtl" : "ltr"}>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/">{t("home")}</BreadcrumbLink>
+              <BreadcrumbLink href="/" className="text-center flex items-center justify-center">
+                {t("home")}
+              </BreadcrumbLink>
             </BreadcrumbItem>
-            <BreadcrumbSeparator />
+            <BreadcrumbSeparator>
+          <DotIcon />
+        </BreadcrumbSeparator>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/">{t("home")}</BreadcrumbLink>
+              <BreadcrumbLink href="/find-service" className="flex items-center justify-center">
+                {t("find_services")}
+              </BreadcrumbLink>
             </BreadcrumbItem>
+            <BreadcrumbSeparator>
+          <DotIcon />
+        </BreadcrumbSeparator>
           </BreadcrumbList>
         </Breadcrumb>
       </div>

@@ -22,7 +22,11 @@
     "تدريس خصوصي": "Private Tutoring",
     "ترجمة": "Translation",
     "غير ذلك": "Other",
-
+    "save_service": "Save Service",
+    "save": "Save",
+    "saved": "Saved",
+    "find_services": "Find Services",
+    "home": "Home",
     "post_service": {
         "edit_service_title": "Edit Service",
         "editing_service": "You are editing the service:",

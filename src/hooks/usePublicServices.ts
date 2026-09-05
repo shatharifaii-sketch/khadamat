@@ -171,7 +171,28 @@ export const useServiceData = (id: string, userId: string) => {
     },
   });
 
-  return data;
+  const { data: isSaved } = useQuery({
+    queryKey: ["is-service-saved", id, userId],
+    queryFn: async () => {
+      const { data: isSaved, error: isSavedError } = await supabase
+        .from("saved_services")
+        .select("*")
+        .eq("service_id", id)
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (isSavedError) throw isSavedError;
+
+      console.log("isSaved data:", isSaved);
+
+      return !!isSaved;
+    }
+  })
+
+  return {
+    service: data?.service,
+    isSaved: isSaved ?? false
+  };
 };
 
 export const useServiceReservation = (id: string, userId: string) => {

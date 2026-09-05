@@ -28,7 +28,7 @@ const ServiceReservations = ({
   providerId,
   userId,
 }: Props) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation("reservations");
   const lang = localStorage.getItem("language") || "en";
 
   const [selectedRes, setSelectedRes] = useState<ReservationList | null>(
@@ -63,9 +63,6 @@ const ServiceReservations = ({
           <h3 className="text-lg font-semibold">
             {t("service.with_appointments")}
           </h3>
-          <p className="text-sm text-muted-foreground">
-            {t("service.with_appointments_description")}
-          </p>
 
           <Dialog open={makingRes} onOpenChange={setMakingRes}>
             <DialogTrigger asChild>

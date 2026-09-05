@@ -27,9 +27,9 @@
         "pick_date": "اختر تاريخ",
         "date_field_description": "التاريخ يجب أن يكون بعد اليوم",
         "pick_start_time": "بداية الموعد",
-        "start_time_field_description": " اختر الوقت المناسب لبدء الموعد, مقدم الخدمة متوفر بين {{fromTime}} و {{toTime}}",
+        "start_time_field_description": "مقدم الخدمة متاح بين {{fromTime}} و {{toTime}} ",
         "pick_end_time": "نهاية الموعد",
-        "end_time_field_description": "اختر الوقت المتوقع لنهاية الموعد  على الاقل ساعة كاملة بعد البدء",
+        "end_time_field_description": "على الاقل ساعة كاملة بعد البدء",
         "reset": "إعادة تسجيل",
         "submit": "تأكيد الحجز",
         "24_format": "24h",
@@ -42,5 +42,9 @@
         "with_appointments": "افتح حجز المواعيد للخدمة هذه",
         "days": "قائمة أيام العمل",
         "reset": "إعادة تسجيل"
+    },
+    "service": {
+        "with_appointments": "الخدمة متاحة للحجز",
+        "make_reservation": "احجز موعد"
     }
 }
