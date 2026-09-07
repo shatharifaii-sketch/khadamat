@@ -7,12 +7,34 @@ import "@supabase/functions-js/edge-runtime.d.ts";
 import { withSupabase } from "@supabase/server";
 import { Resend } from "npm:resend@latest";
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
 const resend = new Resend(Deno.env.get("RESEND_API_KEY")!);
+
+function formatTime(time: string, timeFormat: string = "12h") {
+  if (!time) return "";
+
+  const [hourString, minute] = time.slice(0, 5).split(":");
+  const hour = Number(hourString);
+
+  if (timeFormat === "24h") {
+    return `${hourString}:${minute}`;
+  }
+
+  const period = hour >= 12 ? "PM" : "AM";
+  const displayHour = hour % 12 || 12;
+
+  return `${displayHour}:${minute} ${period}`;
+}
 
 async function getData(supabase: any, reservationId: string) {
   const { data: reservationData, error: reservationError } = await supabase
-    .from("reservations")
-    .select("providerId, clientId, serviceId, date, start_time, end_time")
+    .from("calendar_reservations")
+    .select("provider_id, client_id, service_id, date, start_time, end_time")
     .eq("id", reservationId)
     .maybeSingle();
   
@@ -28,8 +50,8 @@ async function getData(supabase: any, reservationId: string) {
 
   const { data: providerData, error: providerError } = await supabase
     .from("profiles_with_email")
-    .select("email, name")
-    .eq("id", reservationData.providerId)
+    .select("email, full_name")
+    .eq("id", reservationData.provider_id)
     .maybeSingle();
   
   if (providerError) {
@@ -44,8 +66,8 @@ async function getData(supabase: any, reservationId: string) {
 
   const { data: clientData, error: clientError } = await supabase
     .from("profiles_with_email")
-    .select("email, name")
-    .eq("id", reservationData.clientId)
+    .select("email, full_name")
+    .eq("id", reservationData.client_id)
     .maybeSingle();
   
   if (clientError) {
@@ -61,7 +83,7 @@ async function getData(supabase: any, reservationId: string) {
   const { data: serviceData, error: serviceError } = await supabase
     .from("services")
     .select("title")
-    .eq("id", reservationData.serviceId)
+    .eq("id", reservationData.service_id)
     .maybeSingle();
   
   if (serviceError) {
@@ -81,7 +103,21 @@ async function getData(supabase: any, reservationId: string) {
 // Use publishable for Client-facing, key-validated endpoints
 // Use secret for Server-to-server, internal calls
 export default {
-  fetch: withSupabase({ auth: ["publishable", "secret"] }, async (req, ctx) => {
+  fetch: withSupabase({ auth: ["user", "secret"] }, async (req, ctx) => {
+    if (req.method === "OPTIONS") {
+    return new Response("ok", {
+      status: 200,
+      headers: corsHeaders,
+    });
+  }
+
+  if (req.method !== "POST") {
+    return new Response("Method Not Allowed", {
+      status: 405,
+      headers: corsHeaders,
+    });
+  }
+
     const { supabase } = ctx;
 
     try {
@@ -111,16 +147,16 @@ export default {
 
       const { error: resendError } = await resend.emails.send({
         from: "Appointment Deleted <support@mail.khedemtak.com>",
-        to: providerData.email,
+        to: clientData.email,
         template: {
           id: "appointment-deleted",
           variables: {
-            name: clientData.name,
-            provider_name: providerData.name,
+            name: clientData.full_name,
+            provider_name: providerData.full_name,
             service_title: serviceData.title,
             reservation_date: reservationData.date,
-            start_time: reservationData.start_time,
-            end_time: reservationData.end_time
+            start_time: formatTime(reservationData.start_time),
+            end_time: formatTime(reservationData.end_time)
           },
         },
       });

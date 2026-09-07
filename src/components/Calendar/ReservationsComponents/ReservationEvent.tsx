@@ -95,13 +95,12 @@ const ReservationEvent = ({
     <>
       <DialogHeader>
         <DialogTitle>{t("event.title")}</DialogTitle>
-        <DialogDescription>{t("event.description")}</DialogDescription>
       </DialogHeader>
       <div className="flex flex-col">
         <div className="grid grid-cols-2 gap-3">
-          <h2>
-            {reservation.service.title}
-            <Badge variant={badgeVariant}>{t(reservation.status)}</Badge>
+          <h2 className="space-x-2">
+            <span>{reservation.service.title}</span>
+            <Badge variant={badgeVariant}>{t(`event.${reservation.status}`)}</Badge>
           </h2>
           <div
             className="flex shrink-0 items-center gap-2 mb-2 w-full"

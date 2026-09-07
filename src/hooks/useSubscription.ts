@@ -130,7 +130,7 @@ notes
           )`)
         .eq('user_id', user.id)
         .eq('status', 'active')
-        .single();
+        .maybeSingle();
 
       if (error && error.code !== 'PGRST116') {
         console.error('Error fetching subscription:', error);
@@ -164,7 +164,7 @@ notes
           )`)
         .eq('user_id', user.id)
         .eq('status', 'active')
-        .single();
+        .maybeSingle();
 
       if (activeSubscriptionError && activeSubscriptionError.code !== 'PGRST116') {
         console.error('Error fetching subscription:', activeSubscriptionError);

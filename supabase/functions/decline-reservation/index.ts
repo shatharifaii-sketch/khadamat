@@ -106,7 +106,6 @@ async function getData(supabase: any, reservationId: string) {
 export default {
   fetch: withSupabase({ auth: ["user", "secret"] }, async (req, ctx) => {
     if (req.method === "OPTIONS") {
-      console.log("OPTIONS request received");
       return new Response("ok", {
         status: 200,
         headers: corsHeaders,
@@ -123,7 +122,7 @@ export default {
     const { supabase } = ctx;
 
     try {
-      const { reservationId } = await req.json();
+      const { reservationId, message } = await req.json();
 
       const { reservationData, providerData, clientData, serviceData } =
         await getData(supabase, reservationId);
@@ -135,7 +134,7 @@ export default {
         });
       }
 
-      if (reservationData.status !== "accepted") {
+      if (reservationData.status === "accepted") {
         return Response.json(
           {
             success: false,
@@ -148,28 +147,11 @@ export default {
         );
       }
 
-      const reservationStart = new Date(
-        `${reservationData.date}T${reservationData.start_time}`,
-      );
-
-      if (reservationStart <= new Date()) {
+      if (reservationData.status !== "pending") {
         return Response.json(
           {
             success: false,
-            error: "reservation_passed",
-          },
-          {
-            status: 400,
-            headers: corsHeaders,
-          },
-        );
-      }
-
-      if (reservationData.status === "cancel_requested") {
-        return Response.json(
-          {
-            success: false,
-            error: "cancellation_already_requested",
+            error: "reservation_cannot_be_cancelled",
           },
           {
             status: 400,
@@ -179,54 +161,54 @@ export default {
       }
 
       const { error } = await supabase
-        .from("calendar_reservations")
-        .update({ status: "cancel_requested" })
+        .from("reservations")
+        .update({
+          status: "declined",
+        })
         .eq("id", reservationId);
 
       if (error) {
-        console.error("Error updating reservation status: ", error);
+        console.error("Error declining reservation: ", error);
         return Response.json({
           success: false,
-          error: "failed_to_update_reservation",
+          error: "reservation_not_found",
         });
       }
 
       const { error: resendError } = await resend.emails.send({
-        from: "Client Request <support@mail.khedemtak.com>",
-        to: providerData.email,
+        from: "Appointment Declined <support@mail.khedemtak.com>",
+        to: clientData.email,
         template: {
-          id: "appointment-delete-request",
+          id: "appointment-declined",
           variables: {
-            name: providerData.full_name,
-            client_name: clientData.full_name,
+            name: clientData.full_name,
+            provider_name: providerData.full_name,
             service_title: serviceData.title,
             reservation_date: reservationData.date,
             start_time: formatTime(reservationData.start_time),
             end_time: formatTime(reservationData.end_time),
-            calendar_url: "https://khadamat.com/reservations-calendar",
+            message:
+              message || "The provider has declined your appointment request.",
           },
         },
       });
 
       if (resendError) {
         console.error("Error sending email: ", resendError);
-        return {
+        return Response.json({
           success: false,
-          error: resendError,
-        };
+          error: "email_not_sent",
+        });
       }
 
-      return Response.json(
-        {
-          success: true,
-          error: null,
-        },
-        { headers: corsHeaders },
-      );
+      return Response.json({
+        success: true,
+        error: null,
+      });
     } catch (error) {
       return Response.json({
         success: false,
-        error: "invalid_request",
+        error: "unexpected_error_occured",
       });
     }
   }),
@@ -237,7 +219,7 @@ export default {
   1. Run `supabase start` (see: https://supabase.com/docs/reference/cli/supabase-start)
   2. Make an HTTP request:
 
-  curl -i --location --request POST 'http://127.0.0.1:54321/functions/v1/cancel-reservation-request' \
+  curl -i --location --request POST 'http://127.0.0.1:54321/functions/v1/decline-reservation' \
     --header 'apiKey: sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH' \
     --data '{"name":"Functions"}'
 

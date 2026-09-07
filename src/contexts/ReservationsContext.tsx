@@ -115,6 +115,11 @@ interface ReservationContextType {
   }: {
     reservationId: string;
   }) => Promise<{ success: boolean; error: string | null }>;
+  requestCancelReservation: ({
+    reservationId,
+  }: {
+    reservationId: string;
+  }) => Promise<{ success: boolean; error: string | null }>;
   cancelReservation: ({
     reservationId,
   }: {
@@ -199,7 +204,7 @@ export const ReservationsProvider = ({
           date: reservation.date,
         },
         headers: {
-          Authorization: `Bearer ${session?.access_token}`
+          Authorization: `Bearer ${session?.access_token}`,
         },
       });
 
@@ -217,19 +222,26 @@ export const ReservationsProvider = ({
       return { success: false, error: checkProvider.error };
     }
 
-    const { data, error } = await supabase.functions.invoke("create-reservation", {
-      body: reservation,
-      headers: {
-        Authorization: `Bearer ${session?.access_token}`
+    const { data, error } = await supabase.functions.invoke(
+      "create-reservation",
+      {
+        body: reservation,
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
       },
-    })
+    );
 
     if (error || !data.success) {
       console.error("Error creating reservation: ", error);
       throw error;
     }
 
-    saveService({ serviceId: reservation.serviceId, userId: reservation.clientId, isSaved: true });
+    saveService({
+      serviceId: reservation.serviceId,
+      userId: reservation.clientId,
+      isSaved: true,
+    });
 
     return { success: true, error: null };
   };
@@ -303,17 +315,28 @@ export const ReservationsProvider = ({
       return { success: false, error };
     }
 
-    const { error } = await supabase
-      .from("calendar_reservations")
-      .update({
-        status: "accepted",
-      })
-      .eq("id", reservationId);
+    const { data, error } = await supabase.functions.invoke(
+      "accept-reservation",
+      {
+        body: { reservationId },
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+      },
+    );
 
     if (error) {
-      console.error(error);
+      console.error("error occurred", error);
       toast.error(t("unexpected_error_occured"));
-      throw error;
+
+      return { success: false, error: "unexpected_error_occured" };
+    }
+
+    if (!data.success && data.error) {
+      console.error("error occurred", data.error);
+      toast.error(t(data.message ?? "unexpected_error_occured"));
+
+      return { success: false, error: data.error };
     }
 
     return { success: true, error: null };
@@ -330,17 +353,28 @@ export const ReservationsProvider = ({
       return { success: false, error };
     }
 
-    const { error } = await supabase
-      .from("calendar_reservations")
-      .update({
-        status: "declined",
-      })
-      .eq("id", reservationId);
+    const { data, error } = await supabase.functions.invoke(
+      "decline-reservation",
+      {
+        body: { reservationId },
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+      },
+    );
 
     if (error) {
-      console.error(error);
+      console.error("error occurred", error);
       toast.error(t("unexpected_error_occured"));
-      throw error;
+
+      return { success: false, error: "unexpected_error_occured" };
+    }
+
+    if (!data.success && data.error) {
+      console.error("error occurred", data.error);
+      toast.error(t(data.message ?? "unexpected_error_occured"));
+
+      return { success: false, error: data.error };
     }
 
     return { success: true, error: null };
@@ -357,24 +391,79 @@ export const ReservationsProvider = ({
       return { success: false, error };
     }
 
-    const { error } = await supabase
-      .from("calendar_reservations")
-      .update({
-        status: "cancelled",
-      })
-      .eq("id", reservationId);
+    const { data, error } = await supabase.functions.invoke(
+      "delete-reservation",
+      {
+        body: { reservationId },
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+      },
+    );
 
     if (error) {
-      console.error(error);
+      console.error("error occurred", error);
       toast.error(t("unexpected_error_occured"));
-      throw error;
+
+      return { success: false, error: "unexpected_error_occured" };
+    }
+
+    if (!data.success && data.error) {
+      console.error("error occurred", data.error);
+      toast.error(t(data.message ?? "unexpected_error_occured"));
+
+      return { success: false, error: data.error };
+    }
+
+    return { success: true, error: null };
+  };
+
+  const requestCancelReservation = async ({
+    reservationId,
+  }: {
+    reservationId: string;
+  }) => {
+    if (!reservationId) {
+      const error = "no_reservation_found";
+      toast.error(error);
+      return { success: false, error };
+    }
+
+    const { data, error } = await supabase.functions.invoke(
+      "cancel-reservation-request",
+      {
+        body: { reservationId },
+      },
+    );
+
+    if (error) {
+      console.error({
+        message: error.message,
+
+        context: error.context,
+
+        status: error.context?.status,
+
+        errorCode: error.context?.headers?.get("sb-error-code"),
+      });
+
+      toast.error(t("unexpected_error_occured"));
+
+      return { success: false, error: "unexpected_error_occured" };
+    }
+
+    if (!data.success && data.error) {
+      console.error("error occurred", data.error);
+      toast.error(t(data.message ?? "unexpected_error_occured"));
+
+      return { success: false, error: data.error };
     }
 
     return { success: true, error: null };
   };
 
   const markSeen = async ({ reservationId }: { reservationId: string }) => {
-    console.log(reservationId)
+    console.log(reservationId);
     if (!reservationId || !user?.id) {
       const error = "no_reservation_found";
       toast.error(error);
@@ -457,6 +546,7 @@ export const ReservationsProvider = ({
         declineReservation,
         acceptReservation,
         cancelReservation,
+        requestCancelReservation,
         markSeen,
       }}
     >

@@ -112,7 +112,7 @@ const MyCalendarComponent = () => {
   }
 
   return (
-    <div className="border rounded-md">
+    <div className="lg:col-span-2">
       {/* <div className='toolbar'>
         <button
           onClick={() => controller.today()}
@@ -131,7 +131,7 @@ const MyCalendarComponent = () => {
         eventClick={handleEventClick}
         eventContent={renderEventContent}
         nowIndicator
-        className="border-none outline-none"
+        className=""
       />
 
       <Dialog open={openDateDialog} onOpenChange={setOpenDateDialog}>

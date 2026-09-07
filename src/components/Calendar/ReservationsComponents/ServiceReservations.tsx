@@ -86,7 +86,6 @@ const ServiceReservations = ({
                   : "grid-cols-3 grid-rows-2",
               )}
             >
-              {selectedRes && (
                 <div
                   className={cn(
                     "",
@@ -98,7 +97,7 @@ const ServiceReservations = ({
                     reservation={selectedRes}
                   />
                 </div>
-              )}
+              
 
               <div
                 className={cn(

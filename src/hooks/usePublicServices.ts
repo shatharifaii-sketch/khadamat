@@ -223,8 +223,10 @@ export const useServiceReservation = (id: string, userId: string) => {
 
       if (error) throw error;
 
+      console.log("Fetched reservations data:", data);
+
       return {
-        latestReservation: data[0] as ReservationList ?? null,
+        latestReservation: data[0] as ReservationList,
         reservations: data as ReservationList[],
         availability: getReservationAvailability(data)
       };

@@ -1,10 +1,10 @@
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 interface Props {
   providerId: string;
-  serviceId: string;
+  serviceId?: string;
 }
 
 type fetchAvailabilityType = {
@@ -24,10 +24,27 @@ type AvailabilityResponse = {
   data: ProviderAvailability[] | null;
 };
 
+export type ReservationsService = {
+  id: string;
+  title: string;
+  price_range: string;
+  location: string;
+  is_online: boolean;
+  availability: {
+    day_of_week: number;
+    from_time: string;
+    to_time: string;  
+  }[];
+}
+
 type ReservationsHookReturnType = {
   availabilityData: AvailabilityResponse | undefined;
   isAvailabilityDataError: boolean;
   isAvailabilityLoading: boolean;
+
+  reservationsServices: ReservationsService[];
+  isReservationsServicesError: boolean;
+  isReservationsServicesLoading: boolean;
 };
 
 async function getProviderAvailability({
@@ -81,10 +98,50 @@ const useReservations = ({
     enabled: !!(serviceId && providerId),
   });
 
+  const {
+    data: reservationsServices,
+    isError: isReservationsServicesError,
+    isFetching: isReservationsServicesLoading,
+  } = useSuspenseQuery({
+    queryKey: ["service-reservations", providerId],
+    queryFn: async () => {
+      if (!providerId) {
+        return [] as ReservationsService[];
+      }
+
+      const { data, error } = await supabase
+      .from("services")
+      .select(`
+        id,
+          title,
+          price_range,
+          location,
+          is_online,
+          availability: calendar_provider_availability (
+            day_of_week,
+            from_time,
+            to_time
+          )
+        `)
+        .eq("user_id", providerId);
+
+      if (error) {
+        console.error("Error fetching reservations services: ", error);
+        return [];
+      }
+
+      return data as ReservationsService[];
+    },
+  });
+
   return {
     availabilityData,
     isAvailabilityDataError,
     isAvailabilityLoading,
+
+    reservationsServices,
+    isReservationsServicesError,
+    isReservationsServicesLoading
   };
 };
 

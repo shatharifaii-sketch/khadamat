@@ -16,12 +16,34 @@ type Reservation = {
   end_time?: string;
 };
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
 const resend = new Resend(Deno.env.get("RESEND_API_KEY")!);
+
+function formatTime(time: string, timeFormat: string = "12h") {
+  if (!time) return "";
+
+  const [hourString, minute] = time.slice(0, 5).split(":");
+  const hour = Number(hourString);
+
+  if (timeFormat === "24h") {
+    return `${hourString}:${minute}`;
+  }
+
+  const period = hour >= 12 ? "PM" : "AM";
+  const displayHour = hour % 12 || 12;
+
+  return `${displayHour}:${minute} ${period}`;
+}
 
 async function getData(supabase: any, reservation: Reservation) {
   const { data: providerData, error: providerError } = await supabase
     .from("profiles_with_email")
-    .select("email, name")
+    .select("email, full_name")
     .eq("id", reservation.providerId)
     .maybeSingle();
 
@@ -36,7 +58,7 @@ async function getData(supabase: any, reservation: Reservation) {
 
   const { data: clientData, error: clientError } = await supabase
     .from("profiles_with_email")
-    .select("email, name")
+    .select("email, full_name")
     .eq("id", reservation.clientId)
     .maybeSingle();
 
@@ -71,11 +93,27 @@ async function getData(supabase: any, reservation: Reservation) {
 // Use publishable for Client-facing, key-validated endpoints
 // Use secret for Server-to-server, internal calls
 export default {
-  fetch: withSupabase({ auth: ["publishable", "secret"] }, async (req, ctx) => {
+  fetch: withSupabase({ auth: ["user", "secret"] }, async (req, ctx) => {
+    if (req.method === "OPTIONS") {
+    return new Response("ok", {
+      status: 200,
+      headers: corsHeaders,
+    });
+  }
+
+  if (req.method !== "POST") {
+    return new Response("Method Not Allowed", {
+      status: 405,
+      headers: corsHeaders,
+    });
+  }
+
     const { supabase } = ctx;
 
     try {
       const reservation: Reservation = await req.json();
+
+      console.log(reservation);
 
       const { providerData, clientData, serviceData } = await getData(
         supabase,
@@ -89,7 +127,7 @@ export default {
         });
       }
 
-      const { error } = await supabase.from("calendar_reservations").insert({
+      const { data, error } = await supabase.from("calendar_reservations").insert({
         client_id: reservation.clientId,
         provider_id: reservation.providerId,
         service_id: reservation.serviceId,
@@ -99,7 +137,7 @@ export default {
         status: "pending",
         provider_seen: false,
         client_seen: true,
-      });
+      }).select("*").maybeSingle();
 
       if (error) {
         console.error("Error creating reservation: ", error);
@@ -110,14 +148,14 @@ export default {
         from: "New Appointment <support@mail.khedemtak.com>",
         to: providerData.email,
         template: {
-          id: "new_appointment",
+          id: "new-appointment",
           variables: {
             name: providerData.name,
             client_name: clientData.name,
             service_title: serviceData.title,
             reservation_date: reservation.date,
-            start_time: reservation.start_time,
-            end_time: reservation.end_time,
+            start_time: formatTime(data.start_time),
+            end_time: formatTime(data.end_time),
             calendar_url: "https://khadamat.com/reservations-calendar",
           },
         },

@@ -1,4 +1,19 @@
 {
+    "رام الله": "Ramallah",
+    "القدس": "Jerusalem",
+    "بيت لحم": "Bethlehem",
+    "الخليل": "Hebron",
+    "نابلس": "Nablus",
+    "جنين": "Jenin",
+    "طولكرم": "Tulkarm",
+    "قلقيلية": "Qalqilya",
+    "سلفيت": "Salfit",
+    "أريحا": "Jericho",
+    "طوباس": "Tubas",
+    "غزة": "Gaza",
+    "رفح": "Rafah",
+    "خان يونس": "Khan Younis",
+    "دير البلح": "Deir al-Balah",
     "page_title": "Reservations and Appointments",
     "more_data_needed": "More data needed",
     "unexpected_error_occured": "An unexpected error occured",
@@ -45,6 +60,21 @@
     },
     "service": {
         "with_appointments": "Service is available for reservations",
-        "make_reservation": "Make Reservation"
+        "make_reservation": "Make Reservation",
+        "request_cancel": "Request Cancel"
+    },
+    "event": {
+        "reject": "Reject",
+        "accept": "Accept",
+        "delete": "Delete",
+        "client": "Client Name",
+        "phone": "Phone Number",
+        "date": "Date",
+        "start_time": "Start Time",
+        "end_time": "End Time",
+        "title": "Reservation Details",
+        "cancel_requested": "Cancel Requested",
+        "declined": "Declined",
+        "accepted": "Accepted"
     }
 }

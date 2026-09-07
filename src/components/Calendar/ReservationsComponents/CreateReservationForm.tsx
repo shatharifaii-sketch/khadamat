@@ -78,9 +78,8 @@ const CreateReservationForm = ({ serviceId, providerId, userId, onSuccess }: Pro
   const isSubmitDisabled = !date || !fromTime || !toTime || pending;
 
   const onSubmit = async (data: z.infer<typeof createFormSchema>) => {
-    console.log("VALID:", data);
-
     const { success, error } = await createReservation(data);
+    setPending(true);
 
     if (!success || error) {
       console.log(error)
@@ -90,6 +89,7 @@ const CreateReservationForm = ({ serviceId, providerId, userId, onSuccess }: Pro
       return;
     }
 
+    setPending(false)
     onSuccess?.();
   };
 
@@ -246,7 +246,7 @@ const CreateReservationForm = ({ serviceId, providerId, userId, onSuccess }: Pro
             >
               {t("create_reservation.reset")}
             </Button>
-            <Button type="submit" disabled={isSubmitDisabled}>
+            <Button type="submit" disabled={isSubmitDisabled || form.formState.isSubmitting}>
               {t("create_reservation.submit")}
             </Button>
           </Field>

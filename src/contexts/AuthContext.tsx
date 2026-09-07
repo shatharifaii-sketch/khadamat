@@ -100,6 +100,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
       console.log("Initial session:", session?.user?.id);
       setSession(session);
+      // const [, payload] = session!.access_token.split('.');
+      // const claims = JSON.parse(atob(payload));
+      // console.log({
+      //   alg: JSON.parse(atob(session!.access_token.split('.')[0])).alg,
+      //   kid: claims.kid,
+      //   issuer: claims.iss,
+      //   expiresAt: claims.exp
+      // })
       setUser(session?.user ?? null);
       setLoading(false);
     });

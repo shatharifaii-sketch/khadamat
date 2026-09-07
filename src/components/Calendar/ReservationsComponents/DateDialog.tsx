@@ -155,11 +155,11 @@ const DateDialog = ({
                   className="bg-green-600 hover:bg-green-500 group min-w-12 flex items-center justify-center sticky z-50 transition-transform overflow-hidden"
                 >
                   <span className="opacity-0 group-hover:opacity-100 -mr-24 group-hover:mr-0 transition-all duration-300 text-green-600 group-hover:text-muted">{t("event.accept")}</span>
-                  <CircleCheck size={18} className="ml-2" />
+                  <CircleCheck size={18} />
                 </Button>
                 <Button onClick={() => rejectRes(res.id)} variant="destructive" className="min-w-12 flex group items-center justify-center sticky z-50 overflow-hidden">
                   <span className="opacity-0 group-hover:opacity-100 -mr-24 group-hover:mr-0  transition-all duration-300 text-destructive group-hover:text-muted">{t("event.reject")}</span>
-                  <CircleX size={18} className="ml-2" />
+                  <CircleX size={18} />
                 </Button>
               </div>
             </div>
