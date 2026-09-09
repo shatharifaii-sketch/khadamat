@@ -10,9 +10,17 @@ interface Props {
   onChange: (value: AvailabilityType | null) => void;
 
   availability?: AvailabilityType;
+  error?: {
+    fromTime?: {
+        message?: string;
+    };
+    toTime?: {
+        message?: string;
+    }
+  }
 }
 
-const DaySlot = ({ day, availability, onChange }: Props) => {
+const DaySlot = ({ day, availability, onChange, error }: Props) => {
   const { t } = useTranslation("reservations");
 
   const enabled = !!availability;
@@ -45,7 +53,7 @@ const DaySlot = ({ day, availability, onChange }: Props) => {
 
         {enabled && availability && (
             <div className="grid grid-cols-2 gap-3">
-                <div>
+                <div className="col-span-1">
                     <Label>
                         {t("availability_form.from")}
                     </Label>
@@ -58,9 +66,15 @@ const DaySlot = ({ day, availability, onChange }: Props) => {
                         })}
                         timeFormat="24h"
                     />
+
+                    {error?.fromTime?.message && (
+                        <p className="text-xs text-destructive text-wrap">
+                            {t(`availability_form.errors.${error.fromTime.message}`)}
+                        </p>
+                    )}
                 </div>
 
-                <div>
+                <div className="col-span-1">
                     <Label>
                         {t("availability_form.to")}
                     </Label>
@@ -73,6 +87,12 @@ const DaySlot = ({ day, availability, onChange }: Props) => {
                         })}
                         timeFormat="24h"
                     />
+
+                    {error?.toTime?.message && (
+                        <p className="text-xs text-destructive text-wrap">
+                            {t(`availability_form.errors.${error.toTime.message}`)}
+                        </p>
+                    )}
                 </div>
             </div>
         )}

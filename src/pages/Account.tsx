@@ -40,6 +40,7 @@ import { useTranslation } from "react-i18next";
 import { useIsMobile } from "@/hooks/use-mobile";
 import DeleteProfileComponent from "@/components/Account/DeleteProfileComponent";
 import UpdateUserDetails from "@/components/Account/UpdateUserDetails";
+import SavedServices from "@/components/Account/SavedServices";
 
 const Account = () => {
   const { t } = useTranslation("account");
@@ -261,6 +262,9 @@ const Account = () => {
                 {t("saved_services")}
               </CardTitle>
             </CardHeader>
+            <CardContent>
+              <SavedServices userId={user?.id} />
+            </CardContent>
           </Card>
         </div>
 

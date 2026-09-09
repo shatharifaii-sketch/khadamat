@@ -43,7 +43,6 @@ async function setAvailability({ availability, serviceId, userId }: { availabili
   let errors: string[];
 
   for (const av of availability) {
-    console.log("availability: ", av)
     const { error } = await supabase.from("calendar_provider_availability").insert({
       to_time: av.toTime,
       from_time: av.fromTime,
@@ -343,7 +342,6 @@ export const useServices = () => {
     queryKey: ['user-services', user?.id],
     queryFn: async () => {
 
-      console.log('Fetching user services for:', user.id);
       const { data, error } = await supabase
         .from('services')
         .select('*')

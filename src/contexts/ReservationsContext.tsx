@@ -394,10 +394,7 @@ export const ReservationsProvider = ({
     const { data, error } = await supabase.functions.invoke(
       "delete-reservation",
       {
-        body: { reservationId },
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`,
-        },
+        body: { reservationId }
       },
     );
 
@@ -414,6 +411,8 @@ export const ReservationsProvider = ({
 
       return { success: false, error: data.error };
     }
+
+    loadReservations();
 
     return { success: true, error: null };
   };

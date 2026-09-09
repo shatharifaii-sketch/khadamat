@@ -57,7 +57,6 @@ const UpdateUserDetails = ({
   profile,
   isServiceProvider,
 }: Props) => {
-  console.log(rawPhone, profile, updateProfile, isServiceProvider);
   const { t } = useTranslation("account");
   const [isUpdating, setIsUpdating] = useState(false);
   const [usePhone, setUsePhone] = useState(false);

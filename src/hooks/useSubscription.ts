@@ -171,8 +171,6 @@ notes
         throw activeSubscriptionError;
       }
 
-      console.log('Active subscription:', activeSubscription);
-
       const { data: inactiveSubscriptions, error: inactiveSubscriptionsError } = await supabase
         .from('subscriptions')
         .select(`*, 

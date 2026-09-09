@@ -27,6 +27,7 @@
     "day": "يوم",
     "list": "قائمة",
     "year": "سنة",
+    "reservation_deleted": "تم حذف الموعد بنجاح",
     "days": {
         "sunday": "الأحد",
         "monday": "الاثنين",
@@ -56,12 +57,24 @@
         "desc": "يمكنك تحديد أوقات عملك خلال الاسبوع للخدمة و تحديد إن كان المستخدم بيقدر يحجز موعد",
         "with_appointments": "افتح حجز المواعيد للخدمة هذه",
         "days": "قائمة أيام العمل",
-        "reset": "إعادة تسجيل"
+        "reset": "إعادة تسجيل",
+        "from": "بداية الموعد",
+        "to": "نهاية الموعد",
+        "save": "احفظ التغييرات",
+        "errors": {
+            "Invalid ISO time": "خطأ غير متوقع",
+            "end_time_must_be_after_start_time": "نهاية الموعد لازم تكون بعد البداية"
+        }
     },
     "service": {
         "with_appointments": "الخدمة متاحة للحجز",
         "make_reservation": "احجز موعد",
-        "request_cancel": "طلب إلغاء"
+        "request_cancel": "طلب إلغاء",
+        "cancel": "الغاء الموعد",
+        "card": {
+            "online": "خدمة رقمية اونلاين",
+            "update_availability": "حدث أوقات العمل"
+        }
     },
     "event": {
         "reject": "رفض",
@@ -75,6 +88,15 @@
         "title": "تفاصيل الموعد",
         "cancel_requested": "طلب الغاء",
         "declined": "مرفوض",
-        "accepted": "مقبول"
+        "accepted": "مقبول",
+        "pending": "منتظر"
+    },
+    "services": {
+        "title": "خدمات للحجز",
+        "description": "اتطلع على معلومات الخدمات و أوقات العمل"
+    },
+    "date": {
+        "title": "تفاصيل اليوم",
+        "description": "تفقد المواعيد المسجلة"
     }
 }

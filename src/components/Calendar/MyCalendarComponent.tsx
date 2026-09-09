@@ -152,6 +152,7 @@ const MyCalendarComponent = () => {
             reservation={selectedRes}
             declineReservation={declineReservation}
             deleteReservation={cancelReservation}
+            onSuccess={() => setOpenEventDialog(false)}
           />
         </DialogContent>
       </Dialog>

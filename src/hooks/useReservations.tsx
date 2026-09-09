@@ -1,6 +1,9 @@
+import { AvailabilityType } from "@/contexts/ReservationsContext";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { ProviderAvailabilityFormValues } from "@/types/reservations";
+import { useMutation, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
+import z from "zod";
 
 interface Props {
   providerId: string;
@@ -8,9 +11,9 @@ interface Props {
 }
 
 type fetchAvailabilityType = {
-    providerId: string;
-    serviceId: string
-}
+  providerId: string;
+  serviceId: string;
+};
 
 type ProviderAvailability = {
   from_time: string;
@@ -30,12 +33,9 @@ export type ReservationsService = {
   price_range: string;
   location: string;
   is_online: boolean;
-  availability: {
-    day_of_week: number;
-    from_time: string;
-    to_time: string;  
-  }[];
-}
+  with_appointments: boolean;
+  availability: AvailabilityType[];
+};
 
 type ReservationsHookReturnType = {
   availabilityData: AvailabilityResponse | undefined;
@@ -45,6 +45,11 @@ type ReservationsHookReturnType = {
   reservationsServices: ReservationsService[];
   isReservationsServicesError: boolean;
   isReservationsServicesLoading: boolean;
+
+  updateAvailability: (availability: ProviderAvailabilityFormValues) => void;
+  isUpdatingAvailability: boolean;
+  isUpdatingAvailabilityError: boolean;
+  isUpdatingAvailabilitySuccess: boolean;
 };
 
 async function getProviderAvailability({
@@ -94,7 +99,7 @@ const useReservations = ({
     isFetching: isAvailabilityLoading,
   } = useQuery({
     queryKey: ["service-provider-availability", providerId, serviceId],
-    queryFn: () => getProviderAvailability({providerId, serviceId}),
+    queryFn: () => getProviderAvailability({ providerId, serviceId }),
     enabled: !!(serviceId && providerId),
   });
 
@@ -110,20 +115,24 @@ const useReservations = ({
       }
 
       const { data, error } = await supabase
-      .from("services")
-      .select(`
+        .from("services")
+        .select(
+          `
         id,
           title,
           price_range,
           location,
           is_online,
+          with_appointments,
           availability: calendar_provider_availability (
-            day_of_week,
-            from_time,
-            to_time
+            dayOfWeek:day_of_week,
+            fromTime:from_time,
+            toTime:to_time
           )
-        `)
-        .eq("user_id", providerId);
+        `,
+        )
+        .eq("user_id", providerId)
+        .eq("with_appointments", true);
 
       if (error) {
         console.error("Error fetching reservations services: ", error);
@@ -134,6 +143,45 @@ const useReservations = ({
     },
   });
 
+  const {
+    mutate: updateAvailability,
+    isPending: isUpdatingAvailability,
+    isError: isUpdatingAvailabilityError,
+    isSuccess: isUpdatingAvailabilitySuccess,
+  } = useMutation({
+    mutationFn: async (values: ProviderAvailabilityFormValues) => {
+      if (!values || !serviceId || !providerId) return { success: false, error: "invalid_request" };
+
+      const rows = values.availability.map((av) => ({
+      provider_id: providerId,
+      service_id: serviceId,
+      day_of_week: av.dayOfWeek,
+      from_time: av.fromTime,
+      to_time: av.toTime,
+    }));
+
+      const { error } = await supabase
+        .from("calendar_provider_availability")
+        .upsert(rows, {
+          onConflict: "provider_id,service_id,day_of_week"
+        });
+      
+      if (error) {
+        console.error("Error updating availability: ", error);
+
+        throw {
+          success: false,
+          error: error.message
+        }
+      }
+
+      return {
+        success: true,
+        error: null
+      }
+    },
+  });
+
   return {
     availabilityData,
     isAvailabilityDataError,
@@ -141,7 +189,12 @@ const useReservations = ({
 
     reservationsServices,
     isReservationsServicesError,
-    isReservationsServicesLoading
+    isReservationsServicesLoading,
+
+    updateAvailability,
+    isUpdatingAvailability,
+    isUpdatingAvailabilityError,
+    isUpdatingAvailabilitySuccess
   };
 };
 

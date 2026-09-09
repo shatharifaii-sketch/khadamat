@@ -34,10 +34,6 @@ const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
 
     const { activeSubscription, inactiveSubscriptions, extraProductsCount } = getUserSubscriptions.data;
 
-    console.log('activeSubscription: ', activeSubscription);
-    console.log('inactiveSubscriptions: ', inactiveSubscriptions);
-    console.log('extraProductsCount: ', extraProductsCount);
-
     const isPayable = activeSubscription ? new Date() > new Date(activeSubscription.next_payment_date) && !activeSubscription.is_in_trial : false;
 
     const handleDeactivate = async () => {

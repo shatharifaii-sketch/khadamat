@@ -1,7 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -32,6 +31,7 @@ interface Props {
     success: boolean;
     error: string;
   }>;
+  onSuccess: () => void;
 }
 
 const ReservationEvent = ({
@@ -39,6 +39,7 @@ const ReservationEvent = ({
   acceptReservation,
   declineReservation,
   deleteReservation,
+  onSuccess
 }: Props) => {
   const { t } = useTranslation("reservations");
   const [timeFormat, setTimeFormat] = useState<TimeFormat>("12h");
@@ -84,6 +85,7 @@ const ReservationEvent = ({
         reservationId: reservation.id,
       }).then((data) => {
         if (data.success) toast.success(t("reservation_deleted"));
+        onSuccess();
       });
     } catch (error) {
       console.log(error);

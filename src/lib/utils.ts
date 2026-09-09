@@ -169,3 +169,7 @@ export function formatTime(time: string, timeFormat: string) {
 
   return `${displayHour}:${minute} ${period}`;
 }
+
+export const normalizeTime = (time: string) => {
+  return time.slice(0, 5);
+};

@@ -32,7 +32,7 @@ const ReservationTimePicker = ({
   const toTime = timeMargins ? toMinutes(timeMargins.toTime) : 24 * 60;
 
   const handleTimeChange = (time: string) => {
-    onChange(`${time}:00`);
+    onChange(time);
     setOpen(false);
   };
 

@@ -1,6 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
 import useReservations from "@/hooks/useReservations";
-import React from "react";
 import { useTranslation } from "react-i18next";
 import ResServiceCard from "./ReservationsComponents/ResServiceCard";
 
@@ -18,8 +17,6 @@ const ReservationsServices = () => {
     providerId: user?.id,
   });
 
-  console.log(reservationsServices);
-
   return (
     <div
       className="text-start flex flex-col gap-3 w-full"
@@ -32,9 +29,9 @@ const ReservationsServices = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 w-full">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full">
         {reservationsServices.map((rs) => (
-          <ResServiceCard key={rs.id} service={rs} />
+          <ResServiceCard key={rs.id} service={rs} userId={user?.id} />
         ))}
       </div>
     </div>

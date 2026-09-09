@@ -79,7 +79,7 @@ const DateDialog = ({
           dir={lang == "ar" ? "rtl" : "ltr"}
         >
           <div className="grid grid-cols-3 items-center">
-            <h2 className="col-span-2">
+            <h2 className="col-span-2 text-sm md:text-md">
               {formatDate(date, {
                 month: "long",
                 year: "numeric",

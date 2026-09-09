@@ -27,6 +27,7 @@
     "day": "Day",
     "list": "List",
     "year": "Year",
+    "reservation_deleted": "Reservation Deleted Successfully",
     "days": {
         "sunday": "Sunday",
         "monday": "Monday",
@@ -56,12 +57,24 @@
         "desc": "Create a working schedule for this Service and you can let the Client create reservations through the website",
         "with_appointments": "Open Client Reservations",
         "days": "Days List",
-        "reset": "Reset Form Fields"
+        "reset": "Reset Form Fields",
+        "from": "Start at",
+        "to": "End at",
+        "save": "Save Changes",
+        "errors": {
+            "Invalid ISO time": "Unexpected Error",
+            "end_time_must_be_after_start_time": "End time must be after start time"
+        }
     },
     "service": {
         "with_appointments": "Service is available for reservations",
         "make_reservation": "Make Reservation",
-        "request_cancel": "Request Cancel"
+        "request_cancel": "Request Cancel",
+        "cancel": "Cancel Reservations",
+        "card": {
+            "online": "Online Service",
+            "update_availability": "Update Availability"
+        }
     },
     "event": {
         "reject": "Reject",
@@ -75,6 +88,15 @@
         "title": "Reservation Details",
         "cancel_requested": "Cancel Requested",
         "declined": "Declined",
-        "accepted": "Accepted"
+        "accepted": "Accepted",
+        "pending": "Pending"
+    },
+    "services": {
+        "title": "Services available for reservations",
+        "description": "View service details and update your time of availability"
+    },
+    "date": {
+        "title": "Day info",
+        "description": "View created appointments"
     }
 }

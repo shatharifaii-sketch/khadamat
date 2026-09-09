@@ -9,12 +9,20 @@ import { AvailabilityType } from "@/contexts/ReservationsContext";
 import { useTranslation } from "react-i18next";
 import DaySlot from "./DaySlot";
 import { Button } from "@/components/ui/button";
+import { FieldErrors } from "react-hook-form";
+import { ProviderAvailabilityFormValues } from "@/types/reservations";
 
 interface Props {
   check: boolean;
   onChange: (value: boolean) => void;
-  availability?: AvailabilityType[];
+  availability: AvailabilityType[];
   onAvailabilityChange?: (value: AvailabilityType[]) => void;
+  updating?: boolean;
+  serviceId?: string;
+
+  errors?: FieldErrors<ProviderAvailabilityFormValues>;
+  isSubmitting?: boolean;
+  isDirty?: boolean;
 }
 
 const weekDays = [
@@ -32,6 +40,11 @@ const ProviderAvailbilityForm = ({
   onChange,
   availability,
   onAvailabilityChange,
+  updating,
+  serviceId,
+  errors,
+  isSubmitting,
+  isDirty = false
 }: Props) => {
   const { t } = useTranslation("reservations");
   const lang = localStorage.getItem("language") || "en";
@@ -96,10 +109,14 @@ const ProviderAvailbilityForm = ({
           <Label>{t("availability_form.days")}</Label>
 
           <div className="mt-2 rounded-md bg-muted p-2 flex flex-col gap-2">
-            {weekDays.map((day) => {
-              const dayAvailability = availability.find(
+            {weekDays.map((day, index) => {
+              const availabilityIndex = availability.findIndex(
                 (item) => item.dayOfWeek === day.value,
               );
+
+              const dayAvailability = availabilityIndex !== -1 ? availability[availabilityIndex] : undefined
+
+              const dayError = availabilityIndex !== -1 ? errors?.availability?.[availabilityIndex] : undefined
 
               return (
                 <DaySlot
@@ -107,6 +124,7 @@ const ProviderAvailbilityForm = ({
                   day={day}
                   availability={dayAvailability}
                   onChange={(value) => handleDayChange(day.value, value)}
+                  error={dayError}
                 />
               );
             })}
@@ -115,9 +133,18 @@ const ProviderAvailbilityForm = ({
       </div>
 
       <div className="flex gap-3">
-        <Button className="flex-1" type="button" variant="ghost">
+        <Button className="flex-1" type="button" variant="ghost" onClick={handleReset}>
           {t("availability_form.reset")}
         </Button>
+        {updating && (
+          <Button
+            className="flex-1"
+            type="submit"
+            disabled={isSubmitting || !isDirty}
+          >
+            {t("availability_form.save")}
+          </Button>
+        )}
       </div>
     </>
   );

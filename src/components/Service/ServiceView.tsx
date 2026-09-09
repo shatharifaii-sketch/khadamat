@@ -16,6 +16,8 @@ import { useTranslation } from "react-i18next";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ReservationList } from "@/contexts/ReservationsContext";
 import { useServices } from "@/hooks/useServices";
+import { Suspense } from "react";
+import ErrorBoundary from "../ErrorBoundary";
 
 export interface ServiceViewProps {
   id: string;
@@ -88,7 +90,11 @@ const ServiceView = ({
         publisherImage={service?.publisher.profile_image_url}
         updatedAt={service?.updated_at}
       />
-      <ServiceDataCard service={service} userId={userId} />
+      <Suspense fallback={""}>
+        <ErrorBoundary>
+          <ServiceDataCard service={service} userId={userId} />
+        </ErrorBoundary>
+      </Suspense>
 
       <div className="flex gap-2 pt-2 items-center justify-center">
         {isConvo && (

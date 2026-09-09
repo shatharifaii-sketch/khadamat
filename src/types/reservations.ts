@@ -104,3 +104,12 @@ export const providerAvailabilitySchema = z
   });
 
 export type ProviderAvailability = z.infer<typeof providerAvailabilitySchema>;
+
+export const providerAvailabilityFormSchema = z.object({
+  withAppointments: z.boolean(),
+  availability: z.array(providerAvailabilitySchema),
+});
+
+export type ProviderAvailabilityFormValues = z.infer<
+  typeof providerAvailabilityFormSchema
+>

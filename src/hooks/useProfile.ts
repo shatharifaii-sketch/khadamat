@@ -18,6 +18,20 @@ export interface UserProfile {
   created_at?: string;
 }
 
+export type SavedService = {
+  id: string,
+  user_id: string,
+  service_id: string,
+  service: {
+    id: string,
+    title: string,
+    price_range: string,
+    location: string,
+    is_online: boolean,
+    phone: string
+  }
+}
+
 export const useProfile = () => {
   const { user } = useAuth();
   const { t } = useTranslation("responses");
@@ -41,6 +55,62 @@ export const useProfile = () => {
     },
     enabled: !!user
   });
+
+  const {
+    data: savedServices
+  } = useQuery({
+    queryKey: ['saved_services', user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+
+      const { data, error } = await supabase
+        .from("saved_services")
+        .select(`
+            id,
+            user_id,
+            service_id,
+            service:saved_services_service_id_fkey(
+              id,
+              title,
+              price_range,
+              location,
+              phone,
+              is_online
+            )
+          `)
+        .eq("user_id", user?.id);
+      
+      if (error) throw error;
+
+      return data as SavedService[];
+    },
+    enabled: !!user
+  });
+
+  const removeSavedService = useMutation({
+    mutationFn: async (id: string) => {
+      if (!user || !id) {
+        return { success: false, error: "invalid_request" };
+      }
+
+      const { error } = await supabase
+        .from("saved_services")
+        .delete()
+        .eq("id", id);
+
+      if (error) {
+        return {
+          success: false,
+          error: "error_deleting"
+        }
+      }
+
+      return {
+        success: true,
+        error: null
+      }
+    }
+  })
 
   const updateProfile = useMutation({
     mutationFn: async (profileData: Partial<UserProfile>) => {
@@ -190,7 +260,10 @@ export const useProfile = () => {
     deleteProfile,
     isDeleting,
     isDeleteError,
-    deleteError
+    deleteError,
+
+    savedServices,
+    removeSavedService
   };
 };
 

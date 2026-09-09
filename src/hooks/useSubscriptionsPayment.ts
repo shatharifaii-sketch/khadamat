@@ -58,9 +58,7 @@ export const useSubscriptionsPayment = () => {
             return data as SubscriptionTransaction[];
         }
     });
-
-    console.log("getUserTransactions", getUserTransactions);
-
+    
     return {
         paymentTransactions: getUserTransactions?.data || [],
     }

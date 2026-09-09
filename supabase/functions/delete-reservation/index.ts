@@ -133,7 +133,7 @@ export default {
       }
 
       const { error } = await supabase
-        .from("reservations")
+        .from("calendar_reservations")
         .delete()
         .eq("id", reservationId);
       
@@ -174,6 +174,7 @@ export default {
         error: null,
       });
     } catch (error) {
+      console.error(error);
       return Response.json({
         success: false,
         error: "unexpected_error_occured",
