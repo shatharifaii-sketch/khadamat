@@ -68,13 +68,13 @@ const ReservationTimePicker = ({
   }, []);
 
   const disabledTimeOptions = (time: string) => {
-  const timeInMinutes = toMinutes(time);
+    const timeInMinutes = toMinutes(time);
 
-  return timeInMinutes < fromTime || timeInMinutes > toTime;
-};
+    return timeInMinutes < fromTime || timeInMinutes > toTime;
+  };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={setOpen} modal={true}>
       <PopoverTrigger asChild>
         <Button
           type="button"
@@ -85,30 +85,26 @@ const ReservationTimePicker = ({
           )}
         >
           <Clock className="mr-2 h-4 w-4" />
-
           {displayValue || t("create_reservation.pick_time")}
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent 
-      className="w-[220px] max-h-[300px] overflow-y-auto p-0" 
-      align="start"
-      onWheel={(e) => e.stopPropagation()}
-      >
-        <div className="p-1">
-          {timeOptions.map((time) => (
-            <Button
-              key={time}
-              type="button"
-              disabled={disabledTimeOptions(time)}
-              variant={displayValue === time ? "secondary" : "ghost"}
-              className={cn("w-full justify-start font-normal", disabledTimeOptions(time) ? "hidden" : "")}
-              onClick={() => handleTimeChange(time)}
-              dir="ltr"
-            >
-              {formatTime(time)}
-            </Button>
-          ))}
+      <PopoverContent className="w-[220px] p-0" align="start">
+        <div className="max-h-[300px] overflow-y-auto touch-pan-y p-1" onWheel={(e) => e.stopPropagation()}>
+          {timeOptions
+            .filter((time) => !disabledTimeOptions(time))
+            .map((time) => (
+              <Button
+                key={time}
+                type="button"
+                variant={displayValue === time ? "secondary" : "ghost"}
+                className="w-full justify-start font-normal"
+                onClick={() => handleTimeChange(time)}
+                dir="ltr"
+              >
+                {formatTime(time)}
+              </Button>
+            ))}
         </div>
       </PopoverContent>
     </Popover>

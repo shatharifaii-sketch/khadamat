@@ -25,6 +25,7 @@ import { cn, formatTime } from "@/lib/utils";
 import useReservations from "@/hooks/useReservations";
 import { useReservationsContext } from "@/contexts/ReservationsContext";
 import { toast } from "sonner";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Props {
   serviceId: string;
@@ -33,8 +34,14 @@ interface Props {
   onSuccess: () => void;
 }
 
-const CreateReservationForm = ({ serviceId, providerId, userId, onSuccess }: Props) => {
+const CreateReservationForm = ({
+  serviceId,
+  providerId,
+  userId,
+  onSuccess,
+}: Props) => {
   const { t } = useTranslation("reservations");
+  const isMobile = useIsMobile();
 
   const [pending, setPending] = useState<boolean>(false);
   const [timeFormat, setTimeFormat] = useState<TimeFormat>("12h");
@@ -82,14 +89,14 @@ const CreateReservationForm = ({ serviceId, providerId, userId, onSuccess }: Pro
     setPending(true);
 
     if (!success || error) {
-      console.log(error)
+      console.log(error);
       // toast(t("error_occured"), {
       //   description: error ? t(error) : "unknown_error"
       // })
       return;
     }
 
-    setPending(false)
+    setPending(false);
     onSuccess?.();
   };
 
@@ -102,7 +109,7 @@ const CreateReservationForm = ({ serviceId, providerId, userId, onSuccess }: Pro
         </DialogDescription>
       </DialogHeader>
 
-      <div>
+      <div className={cn("min-h-0", isMobile && "overflow-y-auto")}>
         <form
           id="reservation-form"
           onSubmit={form.handleSubmit(onSubmit, (errors) => {
@@ -157,7 +164,7 @@ const CreateReservationForm = ({ serviceId, providerId, userId, onSuccess }: Pro
                   onCheckedChange={(checked) =>
                     setTimeFormat(checked ? "24h" : "12h")
                   }
-                  className="max-w-11"
+                  className="h-6 w-11 min-h-6 min-w-11 max-h-6 max-w-11 shrink-0"
                 />
                 <FieldLabel
                   className={cn(
@@ -246,7 +253,10 @@ const CreateReservationForm = ({ serviceId, providerId, userId, onSuccess }: Pro
             >
               {t("create_reservation.reset")}
             </Button>
-            <Button type="submit" disabled={isSubmitDisabled || form.formState.isSubmitting}>
+            <Button
+              type="submit"
+              disabled={isSubmitDisabled || form.formState.isSubmitting}
+            >
               {t("create_reservation.submit")}
             </Button>
           </Field>

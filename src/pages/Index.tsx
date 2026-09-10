@@ -31,13 +31,13 @@ const Index = () => {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative pt-20 pb-14 px-2 md:px-4 text-center bg-gradient-to-br from-accent/30 to-primary/10">
+      <section className="relative pt-14 md:pt-20 pb-10 px-2 md:px-4 text-center bg-gradient-to-br from-accent/30 to-primary/10">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
+          <h1 className="text-3xl md:text-6xl font-bold text-foreground mb-2 md:mb-6">
             {t("hero.title")}
             <span className="text-primary block mt-2">{t("hero.subtitle")}</span>
           </h1>
-          <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+          <p className="text-lg md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto">
             {t("hero.description")}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -77,7 +77,7 @@ const Index = () => {
             <h2 className="text-xl md:text-4xl font-bold text-foreground mb-4">
               {t("how_it_works.title")}
             </h2>
-            <p className="text-xl text-muted-foreground">
+            <p className="text-md md:text-xl text-muted-foreground">
               {t("how_it_works.description")}
             </p>
           </div>
@@ -86,36 +86,36 @@ const Index = () => {
             {/* For Service Seekers */}
             <Card className="px-2 md:p-8">
               <CardHeader className="text-center">
-                <Search className="text-primary mx-auto mb-4 size-10 md:size-16" />
-                <CardTitle className="text-2xl mb-4">
+                <Search className="text-primary mx-auto mb-2 md:mb-4 size-8 md:size-16" />
+                <CardTitle className="text-lg md:text-2xl mb-4">
                   {t("how_it_works.for_seekers")}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div className="flex items-start gap-4" >
-                    <div className="bg-primary text-primary-foreground rounded-full min-w-8 min-h-8 flex items-center justify-center font-bold">1</div>
+                    <div className="text-sm md:text-md bg-primary text-primary-foreground rounded-full min-w-6 min-h-6 md:min-w-8 md:min-h-8 flex items-center justify-center font-bold">1</div>
                     <div>
-                      <h4 className="font-semibold text-large md:mb-1 text-start">{t("how_it_works.step_1")}</h4>
-                      <p className="text-muted-foreground text-start">
+                      <h4 className="font-semibold text-sm md:text-large md:mb-1 text-start">{t("how_it_works.step_1")}</h4>
+                      <p className="text-muted-foreground text-xs md:text-md text-start">
                         {t("how_it_works.step_1_desc")}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
-                    <div className="bg-primary text-primary-foreground rounded-full min-w-8 min-h-8 flex items-center justify-center font-bold">2</div>
+                    <div className="text-sm md:text-md bg-primary text-primary-foreground rounded-full min-w-6 min-h-6 md:min-w-8 md:min-h-8 flex items-center justify-center font-bold">2</div>
                     <div>
-                      <h4 className="font-semibold text-large md:mb-1 text-start">{t("how_it_works.step_2")}</h4>
-                      <p className="text-muted-foreground text-start">
+                      <h4 className="font-semibold text-sm md:text-large md:mb-1 text-start">{t("how_it_works.step_2")}</h4>
+                      <p className="text-muted-foreground text-xs md:text-md text-start">
                         {t("how_it_works.step_2_desc")}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
-                    <div className="bg-primary text-primary-foreground rounded-full min-w-8 min-h-8 flex items-center justify-center font-bold">3</div>
+                    <div className="text-sm md:text-md bg-primary text-primary-foreground rounded-full min-w-6 min-h-6 md:min-w-8 md:min-h-8 flex items-center justify-center font-bold">3</div>
                     <div>
-                      <h4 className="font-semibold text-large md:mb-1 text-start">{t("how_it_works.step_3")}</h4>
-                      <p className="text-muted-foreground text-start">
+                      <h4 className="font-semibold text-sm md:text-large md:mb-1 text-start">{t("how_it_works.step_3")}</h4>
+                      <p className="text-muted-foreground text-xs md:text-md text-start">
                         {t("how_it_works.step_3_desc")}
                       </p>
                     </div>
@@ -127,42 +127,42 @@ const Index = () => {
             {/* For Service Providers */}
             <Card className="px-2 md:p-8">
               <CardHeader className="text-center">
-                <Plus className="text-primary mx-auto mb-4 size-10 md:size-16" />
-                <CardTitle className="text-2xl mb-4">
+                <Plus className="text-primary mx-auto mb-2 md:mb-4 size-8 md:size-16" />
+                <CardTitle className="text-lg md:text-2xl mb-4">
                   {t("how_it_works.for_providers")}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div className="flex items-start gap-4">
-                    <div className="bg-primary text-primary-foreground rounded-full min-w-8 min-h-8 flex items-center justify-center font-bold">1</div>
+                    <div className="text-sm md:text-md bg-primary text-primary-foreground rounded-full min-w-6 min-h-6 md:min-w-8 md:min-h-8 flex items-center justify-center font-bold">1</div>
                     <div>
-                      <h4 className="font-semibold text-large md:mb-1 text-start">
+                      <h4 className="font-semibold text-sm md:text-large md:mb-1 text-start">
                         {t("how_it_works.provider_step_1")}
                       </h4>
-                      <p className="text-muted-foreground text-start">
+                      <p className="text-muted-foreground text-xs md:text-md text-start">
                         {t("how_it_works.provider_step_1_desc")}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
-                    <div className="bg-primary text-primary-foreground rounded-full min-w-8 min-h-8 flex items-center justify-center font-bold">2</div>
+                    <div className="text-sm md:text-md bg-primary text-primary-foreground rounded-full min-w-6 min-h-6 md:min-w-8 md:min-h-8 flex items-center justify-center font-bold">2</div>
                     <div>
-                      <h4 className="font-semibold text-large md:mb-1 text-start">
+                      <h4 className="font-semibold text-sm md:text-large md:mb-1 text-start">
                         {t("how_it_works.provider_step_2")}
                       </h4>
-                      <p className="text-muted-foreground text-start">
+                      <p className="text-muted-foreground text-xs md:text-md text-start">
                         {t("how_it_works.provider_step_2_desc")}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
-                    <div className="bg-primary text-primary-foreground rounded-full min-w-8 min-h-8 flex items-center justify-center font-bold">3</div>
+                    <div className="text-sm md:text-sm bg-primary text-primary-foreground rounded-full min-w-6 min-h-6 md:min-w-8 md:min-h-8 flex items-center justify-center font-bold">3</div>
                     <div>
-                      <h4 className="font-semibold text-large md:mb-1 text-start">
+                      <h4 className="font-semibold text-sm md:text-large md:mb-1 text-start">
                         {t("how_it_works.provider_step_3")}
                       </h4>
-                      <p className="text-muted-foreground text-start">
+                      <p className="text-muted-foreground text-xs md:text-md text-start">
                         {t("how_it_works.provider_step_3_desc")}
                       </p>
                     </div>

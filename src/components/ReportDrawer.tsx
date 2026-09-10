@@ -7,8 +7,10 @@ import { Textarea } from "./ui/textarea";
 import { useEmail } from "@/hooks/useEmail";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
-import { MailCheck } from "lucide-react";
+import { Flag, MailCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 interface ReportProps {
     itemId: string;
@@ -22,6 +24,9 @@ const ReportDrawer = ({
     itemLabel
 }: ReportProps) => {
     const { t } = useTranslation("services");
+    const lang = localStorage.getItem("language") || "en"
+    const isMobile = useIsMobile();
+
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -73,18 +78,35 @@ const ReportDrawer = ({
             <Drawer open={openDrawer} onOpenChange={setOpenDrawer}>
                 <DrawerTrigger asChild>
                     <Button variant="outline" className="max-w-full">
-                        {t("service.report.report_button")}
+                        <Flag />
+                        <span className={cn(isMobile ? "hidden" : "block")}>{t("service.report.report_button")}</span>
                     </Button>
                 </DrawerTrigger>
-                <DrawerContent className="px-5 flex flex-col items-center justify-center">
-                    <DrawerHeader className="">
-                        <DrawerTitle className="text-2xl text-center">{t("service.report.submit_report")}</DrawerTitle>
-                        <p className="text-center">{t("service.report.report_drawer_description", { itemType: itemType === 'service' ? 'خدمة' : 'مستخدم', itemLabel })}</p>
+                <DrawerContent className={cn(
+                    "px-5 flex flex-col items-center justify-start",
+                    isMobile ? "h-5/6" : ""
+                    )}>
+                    <DrawerHeader>
+                        <DrawerTitle className="text-lg md:text-2xl text-center">{t("service.report.submit_report")}</DrawerTitle>
+                        <p className="text-center text-xs md:text-md">
+                            {t(
+                                "service.report.report_drawer_description", 
+                                { 
+                                    itemType: 
+                                        itemType === 'service' 
+                                        ? lang == "en" ? "service" : "خدمة" 
+                                        : lang == "en" ? "user" : "مستخدم", 
+                                    itemLabel 
+                                })}
+                            </p>
                     </DrawerHeader>
-                    <DrawerDescription className="mb-5">
+                    <DrawerDescription className="mb-5 text-xs md:text-md">
                         {t("service.report.report_drawer_placeholder")}
                     </DrawerDescription>
-                    <div className="w-full md:w-1/2">
+                    <div className={cn(
+                        "w-full md:w-1/2 overflow-y-auto",
+                        isMobile ? "max-h-[250px]" : ""
+                        )}>
                         <div>
                             <Label>{t("service.report.report_drawer_name")}</Label>
                             <Input
@@ -111,13 +133,22 @@ const ReportDrawer = ({
                                 onChange={(e) => handleInputChange('report_message', e.target.value)} placeholder={t("service.report.report_drawer_input_placeholder")} rows={5} />
                         </div>
                     </div>
-                    <DrawerFooter className="w-full md:w-2/5">
+                    <DrawerFooter className={cn(
+                        "w-full md:w-2/5",
+                        isMobile ? "pb-10" : ""
+                        )}>
                         <Button
                             onClick={handleSubmit}
                             disabled={sendReportEmail.isPending}
                             className="w-full"
                         >{t("service.report.submit_button")}</Button>
-                        <Button variant="outline" className="w-full">{t("service.report.cancel_button")}</Button>
+                        <Button 
+                        variant="outline" 
+                        className="w-full"
+                        onClick={() => setOpenDrawer(false)}
+                        >
+                            {t("service.report.cancel_button")}
+                        </Button>
                     </DrawerFooter>
                 </DrawerContent>
             </Drawer>

@@ -117,41 +117,47 @@ export const toMinutes = (time: string) => {
 
 export function getReservationAvailability(reservations: ReservationList[]) {
   const pendingReservation = reservations.find(
-    (res) => res.status === "pending"
+    (res) => res.status === "pending",
   );
 
   if (pendingReservation) {
     return {
       canReserve: false,
       reason: "pending_reservation_exists",
-      reservation: pendingReservation
-    }
+      reservation: pendingReservation,
+    };
   }
 
-  const latestAcceptedReservation = reservations.filter((reservation) => reservation.status === "accepted").sort((a, b) => {
-    const dateA = new Date(`${a.date}T${a.time}`);
-    const dateB = new Date(`${b.date}T${b.time}`);
+  const acceptedReservations = reservations
+    .filter((res) => res.status === "accepted" && res.date)
+    .sort((a, b) => {
+      const dateA = new Date(`${a.date}T${a.start_time}`);
+      const dateB = new Date(`${b.date}T${b.start_time}`);
 
-    return dateB.getTime() - dateA.getTime();
-  })[0];
+      return dateB.getTime() - dateA.getTime();
+    });
+
+  const latestAcceptedReservation = acceptedReservations[0];
 
   if (latestAcceptedReservation) {
-    const hasPassed = new Date(`${latestAcceptedReservation.date}T${latestAcceptedReservation.time}`) < new Date();
+    const reservationEnd = new Date(
+      `${latestAcceptedReservation.date}T${latestAcceptedReservation.end_time}`,
+    );
 
-    if (!hasPassed) {
+    if (reservationEnd > new Date()) {
       return {
         canReserve: false,
         reason: "active_reservation",
-        reservation: latestAcceptedReservation
-      }
+        reservation: latestAcceptedReservation,
+      };
     }
   }
 
   return {
-    canReseve: true,
+    canReserve: true,
     reason: null,
-    reservation: null
-  }
+    reservation: null,
+  };
 }
 
 export function formatTime(time: string, timeFormat: string) {

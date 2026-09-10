@@ -1,5 +1,5 @@
 import { Card, CardContent, CardFooter, CardHeader } from "../ui/card";
-import { cn } from "@/lib/utils";
+import { cn, isMobile } from "@/lib/utils";
 import { Button } from "../ui/button";
 import { Switch } from "../ui/switch";
 import { useEffect, useState } from "react";
@@ -84,14 +84,14 @@ const SubscriptionCard = ({
             {t(subscription.free_trial_period_text)}
           </Badge>
         </span>
-        <span className="text-sm">
+        <span className="text-lg">
           {t("available_services")} {subscription.allowed_services}
         </span>
       </CardHeader>
       <CardContent>
         <div className="flex flex-col gap-4">
           <div>
-            <div
+            {/* <div
               className={cn(
                 "border-2 border-dashed rounded-lg p-2",
                 subscription.class_name,
@@ -121,7 +121,7 @@ const SubscriptionCard = ({
                     ),
                   )}
               </ul>
-            </div>
+            </div> */}
             <div className="mt-4">
               <Badge
                 className={cn(
@@ -149,14 +149,21 @@ const SubscriptionCard = ({
               {t("subscribe")}
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className={cn(
+            isMobile ? "-mt-10" : ""
+          )}>
             <DialogHeader>
-              <DialogTitle>{t("payment_gateway_title")}</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="text-sm md:text-md">
+                {t("payment_gateway_title")}
+              </DialogTitle>
+              <DialogDescription className="text-xs md:text-md">
                 {t("payment_gateway_description")}
               </DialogDescription>
             </DialogHeader>
-            {selectedSubscription && (
+            <div className={cn(
+              isMobile ? "max-h-[350px] overflow-y-auto" : ""
+            )}>
+              {selectedSubscription && (
               <Card
                 className={cn(
                   "col-span-1 flex flex-col justify-between",
@@ -235,7 +242,8 @@ const SubscriptionCard = ({
                 </CardContent>
               </Card>
             )}
-            <DialogFooter>
+            </div>
+            <DialogFooter className="">
               <Button
                 onClick={() =>
                   onNavigate(
@@ -337,7 +345,7 @@ const SubscriptionsModal = ({
                 >
                   {t("monthly")}
                 </span>
-                <Switch checked={yearly} onCheckedChange={setYearly} />
+                <Switch checked={yearly} onCheckedChange={setYearly} className="h-6 w-11 min-h-6 min-w-11 max-h-6 max-w-11 shrink-0" />
                 <span
                   className={cn(
                     yearly && "text-primary",

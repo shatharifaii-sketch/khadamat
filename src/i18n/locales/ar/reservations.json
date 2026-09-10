@@ -74,7 +74,8 @@
         "card": {
             "online": "خدمة رقمية اونلاين",
             "update_availability": "حدث أوقات العمل"
-        }
+        },
+        "no_reservations": "لا توجد أي حجوزات"
     },
     "event": {
         "reject": "رفض",

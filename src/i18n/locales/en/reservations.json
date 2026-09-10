@@ -74,7 +74,8 @@
         "card": {
             "online": "Online Service",
             "update_availability": "Update Availability"
-        }
+        },
+        "no_reservations": "No reservations yet"
     },
     "event": {
         "reject": "Reject",

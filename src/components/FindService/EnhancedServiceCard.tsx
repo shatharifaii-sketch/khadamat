@@ -37,10 +37,10 @@ const EnhancedServiceCard = ({ service }: EnhancedServiceCardProps) => {
 
   return (
     <Card className="group flex flex-col justify-between hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 border-0 shadow-md hover:scale-105">
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-1 md:pb-3">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 text-right">
-            <div className="flex items-center gap-2 justify-end mb-2">
+            <div className="flex items-center gap-2 justify-end md:mb-2">
               <Badge variant="secondary" className="text-xs font-medium">
                 {t(categoryLabel)}
               </Badge>
@@ -53,7 +53,7 @@ const EnhancedServiceCard = ({ service }: EnhancedServiceCardProps) => {
                 {service.title}
               </Button>
               <NavLink 
-              to={`/profile/${service.publisher?.id}`} className='text-sm text-muted-foreground flex items-center gap-2 hover:text-primary transition-colors mt-2'
+              to={`/profile/${service.publisher?.id}`} className='text-sm text-muted-foreground flex items-center gap-2 hover:text-primary transition-colors md:mt-2'
               >
               {service.publisher?.full_name}
               

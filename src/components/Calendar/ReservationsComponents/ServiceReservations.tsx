@@ -67,8 +67,12 @@ const ServiceReservations = ({
           <Dialog open={makingRes} onOpenChange={setMakingRes}>
             <DialogTrigger asChild>
               <Button
-                disabled={canReserve}
+                disabled={!canReserve}
                 className={cn("mt-3", isMobile && "hidden")}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setMakingRes(true)
+                }}
               >
                 {t("service.make_reservation")}
               </Button>
@@ -158,14 +162,16 @@ const ServiceReservations = ({
           <Dialog open={makingRes} onOpenChange={setMakingRes}>
             <DialogTrigger asChild>
               <Button
-                disabled={canReserve}
+                disabled={!canReserve}
                 className={cn("mt-3 w-full", !isMobile && "hidden")}
               >
                 {t("service.make_reservation")}
               </Button>
             </DialogTrigger>
 
-            <DialogContent>
+            <DialogContent className={cn(
+              isMobile ? "-mt-7" : ""
+            )}>
               <CreateReservationForm
                 serviceId={serviceId}
                 providerId={providerId}

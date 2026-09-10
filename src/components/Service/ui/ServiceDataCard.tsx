@@ -29,6 +29,8 @@ const ServiceDataCard = ({ service, userId }: Props) => {
   const { latestReservation, reservations, availability } =
     useServiceReservation(service.id, userId);
 
+    console.log(availability)
+
   const links = (service?.links ?? []) as ServiceLink[];
 
   return (
