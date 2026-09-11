@@ -64,7 +64,7 @@ const DaySlot = ({ day, availability, onChange, error }: Props) => {
                             ...availability,
                             fromTime: value,
                         })}
-                        timeFormat="24h"
+                        timeFormat="12h"
                     />
 
                     {error?.fromTime?.message && (

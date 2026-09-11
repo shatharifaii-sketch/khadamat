@@ -86,7 +86,8 @@
         "loading": "Loading...",
         "uploading...": "Uploading...",
         "service_email_note": "This email is available for anyone to see!",
-        "with_appointments": "Open appointment reservations..."
+        "with_appointments": "Open appointment reservations...",
+        "edit_availability": "Edit Availability in the Calendar page"
     },
 
     "find_service": {

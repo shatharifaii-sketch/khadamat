@@ -99,5 +99,6 @@
     "date": {
         "title": "Day info",
         "description": "View created appointments"
-    }
+    },
+    "reservation_accepted": "Reservation Accepted"
 }

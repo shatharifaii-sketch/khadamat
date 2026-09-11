@@ -83,8 +83,8 @@ const ReportDrawer = ({
                     </Button>
                 </DrawerTrigger>
                 <DrawerContent className={cn(
-                    "px-5 flex flex-col items-center justify-start",
-                    isMobile ? "h-5/6" : ""
+                    "flex flex-col items-center justify-start",
+                    isMobile ? "h-5/6 px-3" : "px-5"
                     )}>
                     <DrawerHeader>
                         <DrawerTitle className="text-lg md:text-2xl text-center">{t("service.report.submit_report")}</DrawerTitle>
@@ -105,7 +105,7 @@ const ReportDrawer = ({
                     </DrawerDescription>
                     <div className={cn(
                         "w-full md:w-1/2 overflow-y-auto",
-                        isMobile ? "max-h-[250px]" : ""
+                        isMobile ? "" : ""
                         )}>
                         <div>
                             <Label>{t("service.report.report_drawer_name")}</Label>

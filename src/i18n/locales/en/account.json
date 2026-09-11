@@ -139,5 +139,8 @@
     "saved_service": {
         "is_online": "Online Service",
         "remove_service": "Remove Service"
-    }
+    },
+    "check_subscription": "Check your Subscriptions",
+    "check_transactions": "Check transaction invoices",
+    "manage_account": "Manage login info"
 }

@@ -70,7 +70,7 @@ const ServiceFormSubmit = ({ isCreating, canPostService: editMode, isEditMode = 
         open={openSubscribeModal}
         onOpenChange={setOpenSubscribeModal}
       >
-        <DrawerContent className=' transition-all rounded-none h-5/6 overflow-y-auto pb-10'>
+        <DrawerContent className='transition-all rounded-none h-5/6 pb-10'>
           <DialogTitle></DialogTitle>
           <Suspense fallback={<div>Loading...</div>}>
             <ErrorBoundary fallback={<div>Something went wrong</div>}>

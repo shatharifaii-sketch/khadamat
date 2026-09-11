@@ -11,13 +11,15 @@ interface Props {
   onChange: (value: boolean) => void;
   availability?: AvailabilityType[];
   onAvailabilityChange?: (value: AvailabilityType[]) => void;
+  isServiceEditMode: boolean;
 }
 
 const AppointmentsCheck = ({
   check,
   onChange,
   availability,
-  onAvailabilityChange
+  onAvailabilityChange,
+  isServiceEditMode
 }: Props) => {
   const { t } = useTranslation("services");
   const lang = localStorage.getItem("language") || "en";
@@ -33,10 +35,11 @@ const AppointmentsCheck = ({
         type="button"
         className="flex flex-1 items-center justify-between overflow-hidden"
         onClick={() => setOpen(true)}
+        disabled={isServiceEditMode}
       >
         <div className="flex items-center gap-2">
           <CalendarDays size={21} />
-          {t("post_service.with_appointments")}
+          {isServiceEditMode ? t("post_service.edit_availability") : t("post_service.with_appointments")}
         </div>
         {availability && availability.length > 0 && <Pencil />}
       </Button>

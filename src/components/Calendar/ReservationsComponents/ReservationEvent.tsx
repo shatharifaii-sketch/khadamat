@@ -32,6 +32,7 @@ interface Props {
     error: string;
   }>;
   onSuccess: () => void;
+  refresh: () => Promise<void>;
 }
 
 const ReservationEvent = ({
@@ -39,10 +40,14 @@ const ReservationEvent = ({
   acceptReservation,
   declineReservation,
   deleteReservation,
+  refresh,
   onSuccess
 }: Props) => {
   const { t } = useTranslation("reservations");
   const [timeFormat, setTimeFormat] = useState<TimeFormat>("12h");
+  const [accepting, setAccepting] = useState(false);
+  const [rejecting, setRejecting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const badgeVariant =
     reservation.status == "pending"
@@ -53,9 +58,10 @@ const ReservationEvent = ({
           ? "outline"
           : "destructive";
 
-  const acceptRes = () => {
+  const acceptRes = async () => {
+    setAccepting(true);
     try {
-      acceptReservation({
+      await acceptReservation({
         reservationId: reservation.id,
       }).then((data) => {
         if (data.success) toast.success(t("reservation_accepted"));
@@ -63,12 +69,16 @@ const ReservationEvent = ({
     } catch (error) {
       console.log(error);
       toast.error(t("error_accepting"));
+    } finally {
+      await refresh();
+      setAccepting(false);
     }
   };
 
-  const rejectRes = () => {
+  const rejectRes = async () => {
+    setRejecting(true);
     try {
-      declineReservation({
+      await declineReservation({
         reservationId: reservation.id,
       }).then((data) => {
         if (data.success) toast.success(t("reservation_rejected"));
@@ -76,12 +86,16 @@ const ReservationEvent = ({
     } catch (error) {
       console.log(error);
       toast.error(t("error_rejecting"));
+    } finally {
+      await refresh();
+      setRejecting(false);
     }
   };
 
-  const deleteRes = () => {
+  const deleteRes = async () => {
+    setDeleting(true);
     try {
-      deleteReservation({
+      await deleteReservation({
         reservationId: reservation.id,
       }).then((data) => {
         if (data.success) toast.success(t("reservation_deleted"));
@@ -90,6 +104,9 @@ const ReservationEvent = ({
     } catch (error) {
       console.log(error);
       toast.error(t("error_deleting"));
+    } finally {
+      await refresh();
+      setDeleting(false);
     }
   };
 
@@ -162,14 +179,15 @@ const ReservationEvent = ({
             <Button
               onClick={acceptRes}
               className="bg-green-600 hover:bg-green-500"
+              disabled={reservation.status == "accepted" || accepting}
             >
               {t("event.accept")}
             </Button>
             <div className="grid grid-cols-2 gap-2">
-              <Button onClick={deleteRes} variant="ghost">
+              <Button onClick={deleteRes} variant="ghost" disabled={deleting}>
                 {t("event.delete")}
               </Button>
-              <Button onClick={rejectRes} variant="destructive">
+              <Button onClick={rejectRes} variant="destructive" disabled={reservation.status == "rejected" || rejecting}>
                 {t("event.reject")}
               </Button>
             </div>

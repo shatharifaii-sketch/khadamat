@@ -18,7 +18,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 interface Props {
-  reservation: Reservation | ReservationList;
+  reservation: ReservationList;
 }
 
 const ReservationCard = ({ reservation }: Props) => {
@@ -27,7 +27,7 @@ const ReservationCard = ({ reservation }: Props) => {
   const [requestingCancel, setRequestingCancel] = useState(false);
 
   const isMobile = useIsMobile();
-  const { requestCancelReservation } = useReservationsContext();
+  const { requestCancelReservation, cancelReservation, refresh } = useReservationsContext();
 
   const [timeFormat, setTimeFormat] = useState<TimeFormat>("12h");
 
@@ -35,10 +35,17 @@ const ReservationCard = ({ reservation }: Props) => {
     if (!reservation) return;
     setRequestingCancel(true);
     
-    const { success, error } = await requestCancelReservation({
+    const { success, error } = reservation.status == "accepted" ? await requestCancelReservation({
       reservationId: reservation.id,
-    });
+      serviceId: reservation.service_id,
+      clientId: reservation.client_id
+    }) : await cancelReservation({
+      reservationId: reservation.id,
+      serviceId: reservation.service_id,
+      clientId: reservation.client_id
+    })
     setRequestingCancel(false);
+    await refresh();
   }
 
   return (

@@ -87,7 +87,9 @@ export const useProfile = () => {
     enabled: !!user
   });
 
-  const removeSavedService = useMutation({
+  const {
+    mutate: removeSavedService
+  } = useMutation({
     mutationFn: async (id: string) => {
       if (!user || !id) {
         return { success: false, error: "invalid_request" };
@@ -109,6 +111,11 @@ export const useProfile = () => {
         success: true,
         error: null
       }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['saved_services', user?.id]
+      })
     }
   })
 

@@ -51,7 +51,8 @@ const MyCalendarComponent = () => {
     acceptReservation,
     declineReservation,
     cancelReservation,
-    markSeen
+    markSeen,
+    refresh
   } = useReservationsContext();
 
   const [openDateDialog, setOpenDateDialog] = useState<boolean>(false);
@@ -153,6 +154,7 @@ const MyCalendarComponent = () => {
             declineReservation={declineReservation}
             deleteReservation={cancelReservation}
             onSuccess={() => setOpenEventDialog(false)}
+            refresh={refresh}
           />
         </DialogContent>
       </Dialog>

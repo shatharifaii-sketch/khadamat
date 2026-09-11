@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { Suspense } from "react";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { ServiceViewWrapper } from "@/components/Service/ServiceViewWrapper";
@@ -11,7 +11,13 @@ import ServiceQueryError from "@/components/ErrorViews/ServiceQueryError";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { DotIcon } from "lucide-react";
 
 const ServicePage = () => {
@@ -32,28 +38,47 @@ const ServicePage = () => {
           : "max-w-4xl mx-auto pt-5 pb-8 px-4 space-y-6",
       )}
     >
-      <div className="flex items-center justify-start text-start" dir={lang === "ar" ? "rtl" : "ltr"}>
+      <div
+        className="flex items-center justify-start text-start"
+        dir={lang === "ar" ? "rtl" : "ltr"}
+      >
         {/* <h1 className="md:text-2xl font-bold text-xl">
           {t("service.top_title")}
         </h1> */}
-        <Breadcrumb className="bg-transparent" dir={lang === "ar" ? "rtl" : "ltr"}>
+        <Breadcrumb
+          className="bg-transparent"
+          dir={lang === "ar" ? "rtl" : "ltr"}
+        >
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/" className="text-center flex items-center justify-center">
-                {t("home")}
+              <BreadcrumbLink asChild>
+                <Link
+                  to="/"
+                  className="flex items-center justify-center text-center"
+                >
+                  {t("home")}
+                </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
+
             <BreadcrumbSeparator>
-          <DotIcon />
-        </BreadcrumbSeparator>
+              <DotIcon />
+            </BreadcrumbSeparator>
+
             <BreadcrumbItem>
-              <BreadcrumbLink href="/find-service" className="flex items-center justify-center">
-                {t("find_services")}
+              <BreadcrumbLink asChild>
+                <Link
+                  to="/find-service"
+                  className="flex items-center justify-center"
+                >
+                  {t("find_services")}
+                </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
+
             <BreadcrumbSeparator>
-          <DotIcon />
-        </BreadcrumbSeparator>
+              <DotIcon />
+            </BreadcrumbSeparator>
           </BreadcrumbList>
         </Breadcrumb>
       </div>

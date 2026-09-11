@@ -82,9 +82,18 @@ async function handleSaveService({
     };
   }
 
+  const { data, error } = await supabase.from("saved_services").select("id").eq("service_id", serviceId).eq("user_id", userId);
+
+  if (error) {
+    return {
+      success: false,
+      error: error.message
+    }
+  }
+
   const query = supabase.from("saved_services")
 
-  if (isSaved) {
+  if (data.length > 0) {
     const { error } = await query.delete().eq("service_id", serviceId).eq("user_id", userId);
 
     if (error) {

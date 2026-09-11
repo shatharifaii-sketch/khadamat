@@ -99,5 +99,6 @@
     "date": {
         "title": "تفاصيل اليوم",
         "description": "تفقد المواعيد المسجلة"
-    }
+    },
+    "reservation_accepted": "تم قبول الموعد"
 }

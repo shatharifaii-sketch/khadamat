@@ -89,6 +89,7 @@ const ServiceView = ({
         publisherName={service?.publisher.full_name}
         publisherImage={service?.publisher.profile_image_url}
         updatedAt={service?.updated_at}
+        serviceId={service?.id}
       />
       <Suspense fallback={""}>
         <ErrorBoundary>

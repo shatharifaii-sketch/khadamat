@@ -9,7 +9,8 @@ import { Resend } from "npm:resend@latest";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
@@ -37,7 +38,7 @@ async function getData(supabase: any, reservationId: string) {
     .select("provider_id, client_id, service_id, date, start_time, end_time")
     .eq("id", reservationId)
     .maybeSingle();
-  
+
   if (reservationError) {
     console.error("Error fetching reservation data: ", reservationError);
     return {
@@ -50,10 +51,10 @@ async function getData(supabase: any, reservationId: string) {
 
   const { data: providerData, error: providerError } = await supabase
     .from("profiles_with_email")
-    .select("email, full_name")
+    .select("id, email, full_name")
     .eq("id", reservationData.provider_id)
     .maybeSingle();
-  
+
   if (providerError) {
     console.error("Error fetching provider data: ", providerError);
     return {
@@ -66,10 +67,10 @@ async function getData(supabase: any, reservationId: string) {
 
   const { data: clientData, error: clientError } = await supabase
     .from("profiles_with_email")
-    .select("email, full_name")
+    .select("id, email, full_name")
     .eq("id", reservationData.client_id)
     .maybeSingle();
-  
+
   if (clientError) {
     console.error("Error fetching client data: ", clientError);
     return {
@@ -85,7 +86,7 @@ async function getData(supabase: any, reservationId: string) {
     .select("title")
     .eq("id", reservationData.service_id)
     .maybeSingle();
-  
+
   if (serviceError) {
     console.error("Error fetching service data: ", serviceError);
     return {
@@ -105,25 +106,26 @@ async function getData(supabase: any, reservationId: string) {
 export default {
   fetch: withSupabase({ auth: ["user", "secret"] }, async (req, ctx) => {
     if (req.method === "OPTIONS") {
-    return new Response("ok", {
-      status: 200,
-      headers: corsHeaders,
-    });
-  }
+      return new Response("ok", {
+        status: 200,
+        headers: corsHeaders,
+      });
+    }
 
-  if (req.method !== "POST") {
-    return new Response("Method Not Allowed", {
-      status: 405,
-      headers: corsHeaders,
-    });
-  }
+    if (req.method !== "POST") {
+      return new Response("Method Not Allowed", {
+        status: 405,
+        headers: corsHeaders,
+      });
+    }
 
-    const { supabase } = ctx;
+    const { supabase, userClaims } = ctx;
 
     try {
       const { reservationId } = await req.json();
 
-      const { reservationData, providerData, clientData, serviceData } = await getData(supabase, reservationId);
+      const { reservationData, providerData, clientData, serviceData } =
+        await getData(supabase, reservationId);
 
       if (!reservationData || !providerData || !clientData || !serviceData) {
         return Response.json({
@@ -136,7 +138,7 @@ export default {
         .from("calendar_reservations")
         .delete()
         .eq("id", reservationId);
-      
+
       if (error) {
         console.error("Error deleting reservation: ", error);
         return Response.json({
@@ -145,28 +147,30 @@ export default {
         });
       }
 
-      const { error: resendError } = await resend.emails.send({
-        from: "Appointment Deleted <support@mail.khedemtak.com>",
-        to: clientData.email,
-        template: {
-          id: "appointment-deleted",
-          variables: {
-            name: clientData.full_name,
-            provider_name: providerData.full_name,
-            service_title: serviceData.title,
-            reservation_date: reservationData.date,
-            start_time: formatTime(reservationData.start_time),
-            end_time: formatTime(reservationData.end_time)
+      if (userClaims.id == providerData.id) {
+        const { error: resendError } = await resend.emails.send({
+          from: "Appointment Deleted <support@mail.khedemtak.com>",
+          to: clientData.email,
+          template: {
+            id: "appointment-deleted",
+            variables: {
+              name: clientData.full_name,
+              provider_name: providerData.full_name,
+              service_title: serviceData.title,
+              reservation_date: reservationData.date,
+              start_time: formatTime(reservationData.start_time),
+              end_time: formatTime(reservationData.end_time),
+            },
           },
-        },
-      });
-
-      if (resendError) {
-        console.error("Error sending email: ", resendError);
-        return Response.json({
-          success: false,
-          error: "email_not_sent",
         });
+
+        if (resendError) {
+          console.error("Error sending email: ", resendError);
+          return Response.json({
+            success: false,
+            error: "email_not_sent",
+          });
+        }
       }
 
       return Response.json({

@@ -126,6 +126,7 @@ const Account = () => {
             <p>{t("edit_profile_button")}</p>
           </Button>
           <Button
+            onClick={() => scrollToSection("subscriptions")}
             variant="secondary"
             className="text-muted-foreground justify-center flex items-center gap-2 hover:text-primary mx-auto w-full"
           >
@@ -134,7 +135,7 @@ const Account = () => {
           </Button>
 
           <Button
-            onClick={scrollToEdit}
+            onClick={() => scrollToSection("transaction-history")}
             variant="secondary"
             className="text-muted-foreground justify-center flex items-center gap-2 hover:text-primary mx-auto w-full"
           >
@@ -142,6 +143,7 @@ const Account = () => {
             <p>{t("check_transactions")}</p>
           </Button>
           <Button
+            onClick={() => scrollToSection("login-data")}
             variant="secondary"
             className="text-muted-foreground justify-center flex items-center gap-2 hover:text-primary mx-auto w-full"
           >
@@ -177,7 +179,7 @@ const Account = () => {
 
           <Card
             className="cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => scrollToSection("subscription-history")}
+            onClick={() => scrollToSection("subscriptions")}
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
@@ -255,7 +257,7 @@ const Account = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card id="saved-services">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-sm text-wrap md:text-xl">
                 <Bookmark fill="fill" />
@@ -270,7 +272,7 @@ const Account = () => {
 
         {/* Subscription History Section */}
         {getUserSubscriptions.data && (
-          <div>
+          <div id="subscriptions">
             <Suspense
               fallback={
                 <>
@@ -287,7 +289,7 @@ const Account = () => {
           </div>
         )}
 
-        <div id="subscription-history">
+        <div id="transaction-history">
           <Suspense fallback={<SubscriptionsLoading />}>
             <ErrorBoundary
               fallback={<div>{t("error_loading_transactions")}</div>}
@@ -299,7 +301,7 @@ const Account = () => {
         </div>
 
         {/* Account Settings */}
-        <Card>
+        <Card id="login-data">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="h-5 w-5" />

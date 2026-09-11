@@ -83,7 +83,8 @@
         "loading": "جاري التحميل...",
         "uploading...": "جاري رفع الصور...",
         "service_email_note": "هذا البريد متاح لأي مستخدم على الموقع!",
-        "with_appointments": "افتح حجز المواعيد للخدمة..."
+        "with_appointments": "افتح حجز المواعيد للخدمة...",
+        "edit_availability": "حدث أوقات العمل في صفحة الحجوزات"
     },
     "find_service": {
         "find_the_right_service": "ابحث عن الخدمة المناسبة",

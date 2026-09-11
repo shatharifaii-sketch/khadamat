@@ -12,12 +12,17 @@ import { Bookmark, Dot } from "lucide-react";
 import { Button } from "../ui/button";
 import { Link } from "react-router-dom";
 import { truncateString } from "@/lib/utils";
+import { UseMutateFunction } from "@tanstack/react-query";
 
 interface Props {
   service: SavedService["service"];
+  remSavedService: UseMutateFunction<{
+    success: boolean;
+    error: string;
+}, Error, string, unknown>
 }
 
-const SavedServiceComponent = ({ service }: Props) => {
+const SavedServiceComponent = ({ service, remSavedService }: Props) => {
   const { t } = useTranslation("account");
   const lang = localStorage.getItem("language") || "en";
 
@@ -35,7 +40,7 @@ const SavedServiceComponent = ({ service }: Props) => {
           </CardDescription>
         </div>
 
-        <Button variant="secondary">
+        <Button variant="secondary" onClick={() => remSavedService(service.id)}>
             <Bookmark fill="fill" />
             {t("saved_service.remove_service")}
         </Button>

@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { ReservationList } from "@/contexts/ReservationsContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import ReservationCard from "./ReservationCard";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,7 +14,7 @@ import CreateReservationForm from "./CreateReservationForm";
 interface Props {
   reservations: ReservationList[];
   canReserve: boolean;
-  latestReservation: ReservationList;
+  latestReservation: ReservationList | null;
   serviceId: string;
   providerId: string;
   userId: string;
@@ -42,6 +42,28 @@ const ServiceReservations = ({
     ...reservations.slice(0, 4),
     ...Array(Math.max(0, 4 - reservations.length)).fill(null),
   ];
+
+  useEffect(() => {
+  setSelectedRes((currentSelected) => {
+    if (reservations.length === 0) {
+      return null;
+    }
+
+    if (!currentSelected) {
+      return latestReservation ?? reservations[0];
+    }
+
+    const updatedSelected = reservations.find(
+      (res) => res.id === currentSelected.id
+    );
+
+    if (updatedSelected) {
+      return updatedSelected;
+    }
+
+    return latestReservation ?? reservations[0];
+  });
+}, [reservations, latestReservation]);
 
   return (
     <div
@@ -71,7 +93,7 @@ const ServiceReservations = ({
                 className={cn("mt-3", isMobile && "hidden")}
                 onClick={(e) => {
                   e.preventDefault();
-                  setMakingRes(true)
+                  setMakingRes(true);
                 }}
               >
                 {t("service.make_reservation")}
@@ -90,18 +112,19 @@ const ServiceReservations = ({
                   : "grid-cols-3 grid-rows-2",
               )}
             >
-                <div
-                  className={cn(
-                    "",
-                    isMobile ? "col-span-1 row-span-2" : "col-span-2",
-                  )}
-                >
+              <div
+                className={cn(
+                  "",
+                  isMobile ? "col-span-1 row-span-2" : "col-span-2",
+                )}
+              >
+                {selectedRes && (
                   <ReservationCard
                     key={selectedRes.id}
                     reservation={selectedRes}
                   />
-                </div>
-              
+                )}
+              </div>
 
               <div
                 className={cn(
@@ -162,21 +185,21 @@ const ServiceReservations = ({
           <Dialog open={makingRes} onOpenChange={setMakingRes}>
             <DialogTrigger asChild>
               <Button
-                disabled={!canReserve}
+                disabled={!canReserve || userId == providerId}
                 className={cn("mt-3 w-full", !isMobile && "hidden")}
               >
                 {t("service.make_reservation")}
               </Button>
             </DialogTrigger>
 
-            <DialogContent className={cn(
-              isMobile ? "-mt-7" : ""
-            )}>
+            <DialogContent className={cn(isMobile ? "-mt-7" : "")}>
               <CreateReservationForm
                 serviceId={serviceId}
                 providerId={providerId}
                 userId={userId}
-                onSuccess={() => setMakingRes(false)}
+                onSuccess={async () => {
+                  setMakingRes(false);
+                }}
               />
             </DialogContent>
           </Dialog>

@@ -197,10 +197,9 @@ export const useServiceData = (id: string, userId: string) => {
 
 export const useServiceReservation = (id: string, userId: string) => {
   const { data } = useSuspenseQuery({
-    queryKey: ["service-reservation"],
+    queryKey: ["service-reservation", id, userId],
     queryFn: async () => {
       if (!id || !userId) {
-        console.log(id, userId);
         return {
           latestReservation: null,
           reservations: [],
@@ -222,8 +221,6 @@ export const useServiceReservation = (id: string, userId: string) => {
         .order("start_time", { ascending: false });
 
       if (error) throw error;
-
-      console.log("Fetched reservations data:", data);
 
       return {
         latestReservation: data[0] as ReservationList,

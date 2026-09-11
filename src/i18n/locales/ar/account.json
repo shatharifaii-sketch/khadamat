@@ -142,5 +142,8 @@
     "saved_service": {
         "is_online": "خدمة رقمية اونلاين",
         "remove_service": "إزالة الخدمة"
-    }
+    },
+    "check_subscription": "تفقد اشتراكاتك",
+    "check_transactions": "تفقد دفعاتك",
+    "manage_account": "معلومات تسجيل الدخول"
 }

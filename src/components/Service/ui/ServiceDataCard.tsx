@@ -12,7 +12,7 @@ import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import CreateReservationForm from "@/components/Calendar/ReservationsComponents/CreateReservationForm";
-import { ReservationList } from "@/contexts/ReservationsContext";
+import { ReservationList, useReservationsContext } from "@/contexts/ReservationsContext";
 import ServiceReservations from "@/components/Calendar/ReservationsComponents/ServiceReservations";
 
 interface Props {
@@ -28,8 +28,8 @@ const ServiceDataCard = ({ service, userId }: Props) => {
 
   const { latestReservation, reservations, availability } =
     useServiceReservation(service.id, userId);
-
-    console.log(availability)
+  
+  const { refresh } = useReservationsContext();
 
   const links = (service?.links ?? []) as ServiceLink[];
 

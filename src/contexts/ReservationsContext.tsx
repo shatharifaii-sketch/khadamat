@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toMinutes } from "@/lib/utils";
 import { toast } from "sonner";
 import { useServices } from "@/hooks/useServices";
+import { useQueryClient } from "@tanstack/react-query";
 
 export type AvailabilityType = {
   dayOfWeek: number;
@@ -117,13 +118,21 @@ interface ReservationContextType {
   }) => Promise<{ success: boolean; error: string | null }>;
   requestCancelReservation: ({
     reservationId,
+    serviceId,
+    clientId
   }: {
     reservationId: string;
+    serviceId: string;
+    clientId: string;
   }) => Promise<{ success: boolean; error: string | null }>;
   cancelReservation: ({
     reservationId,
+    serviceId,
+    clientId
   }: {
     reservationId: string;
+    serviceId: string;
+    clientId: string;
   }) => Promise<{ success: boolean; error: string | null }>;
   markSeen: ({
     reservationId,
@@ -143,6 +152,7 @@ export const ReservationsProvider = ({
 }) => {
   const { t } = useTranslation("reservations");
   const lang = localStorage.getItem("language") || "en";
+  const queryClient = useQueryClient();
 
   const { saveService } = useServices();
 
@@ -154,6 +164,8 @@ export const ReservationsProvider = ({
   const loadReservations = useCallback(async () => {
     if (!user) return;
     setLoading(true);
+
+    console.log("LOADING>>>>")
 
     const { data, error } = await supabase
       .from("calendar_reservations")
@@ -176,7 +188,8 @@ export const ReservationsProvider = ({
             `,
       )
       .or(`client_id.eq.${user.id},provider_id.eq.${user.id}`)
-      .order("date");
+      .order("date", { ascending: false })
+      .order("start_time", { ascending: false });;
 
     if (error) {
       console.error("Error fetching reservations:", error);
@@ -240,8 +253,12 @@ export const ReservationsProvider = ({
     saveService({
       serviceId: reservation.serviceId,
       userId: reservation.clientId,
-      isSaved: true,
+      isSaved: false,
     });
+
+    queryClient.invalidateQueries({
+      queryKey: ["service-reservation", reservation.serviceId, reservation.clientId]
+    })
 
     return { success: true, error: null };
   };
@@ -301,6 +318,10 @@ export const ReservationsProvider = ({
       throw error;
     }
 
+    queryClient.invalidateQueries({
+      queryKey: ["service-reservation", reservation.serviceId, reservation.clientId]
+    })
+
     return { success: true, error: null };
   };
 
@@ -338,6 +359,8 @@ export const ReservationsProvider = ({
 
       return { success: false, error: data.error };
     }
+
+    await loadReservations();
 
     return { success: true, error: null };
   };
@@ -377,13 +400,19 @@ export const ReservationsProvider = ({
       return { success: false, error: data.error };
     }
 
+    await loadReservations();
+
     return { success: true, error: null };
   };
 
   const cancelReservation = async ({
     reservationId,
+    serviceId,
+    clientId
   }: {
     reservationId: string;
+    serviceId: string;
+    clientId: string;
   }) => {
     if (!reservationId) {
       const error = "no_reservation_found";
@@ -412,15 +441,21 @@ export const ReservationsProvider = ({
       return { success: false, error: data.error };
     }
 
-    loadReservations();
+    queryClient.invalidateQueries({
+      queryKey: ["service-reservation", serviceId, clientId]
+    })
 
     return { success: true, error: null };
   };
 
   const requestCancelReservation = async ({
     reservationId,
+    serviceId,
+    clientId
   }: {
     reservationId: string;
+    serviceId: string;
+    clientId: string;
   }) => {
     if (!reservationId) {
       const error = "no_reservation_found";
@@ -457,6 +492,10 @@ export const ReservationsProvider = ({
 
       return { success: false, error: data.error };
     }
+
+    queryClient.invalidateQueries({
+      queryKey: ["service-reservation", serviceId, clientId]
+    })
 
     return { success: true, error: null };
   };
@@ -521,7 +560,7 @@ export const ReservationsProvider = ({
         {
           event: "*",
           schema: "public",
-          table: "calendar-reservations",
+          table: "calendar_reservations",
         },
         () => {
           loadReservations();
@@ -547,6 +586,7 @@ export const ReservationsProvider = ({
         cancelReservation,
         requestCancelReservation,
         markSeen,
+        refresh: loadReservations
       }}
     >
       {children}

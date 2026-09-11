@@ -35,7 +35,7 @@ function formatTime(time: string, timeFormat: string = "12h") {
 async function getData(supabase: any, reservationId: string) {
   const { data: reservationData, error: reservationError } = await supabase
     .from("calendar_reservations")
-    .select("provider_id, client_id, service_id, date, start_time, end_time")
+    .select("provider_id, client_id, service_id, date, start_time, end_time, status")
     .eq("id", reservationId)
     .maybeSingle();
 

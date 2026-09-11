@@ -150,8 +150,8 @@ export default {
         template: {
           id: "new-appointment",
           variables: {
-            name: providerData.name,
-            client_name: clientData.name,
+            name: providerData.full_name,
+            client_name: clientData.full_name,
             service_title: serviceData.title,
             reservation_date: reservation.date,
             start_time: formatTime(data.start_time),
