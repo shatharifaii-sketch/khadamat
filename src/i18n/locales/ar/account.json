@@ -145,5 +145,8 @@
     },
     "check_subscription": "تفقد اشتراكاتك",
     "check_transactions": "تفقد دفعاتك",
-    "manage_account": "معلومات تسجيل الدخول"
+    "manage_account": "معلومات تسجيل الدخول",
+    "verify_phone": {
+        "code": "الرمز"
+    }
 }

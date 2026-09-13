@@ -142,5 +142,8 @@
     },
     "check_subscription": "Check your Subscriptions",
     "check_transactions": "Check transaction invoices",
-    "manage_account": "Manage login info"
+    "manage_account": "Manage login info",
+    "verify_phone": {
+        "code": "Code"
+    }
 }
