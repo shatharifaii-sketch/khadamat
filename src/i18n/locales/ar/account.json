@@ -138,6 +138,14 @@
     "delete_profile_title": "هل أنت متأكد من حذف الملف الشخصي؟",
     "delete_profile_description": "سيتم حذف جميع بياناتك بما في ذلك الخدمات المنشورة، الاشتراكات، والرسائل. لا يمكن التراجع عن هذا الإجراء.",
     "delete": "تأكيد الحذف",
+    "saved_services": "الخدمات المحفوظة",
+    "saved_service": {
+        "is_online": "خدمة رقمية اونلاين",
+        "remove_service": "إزالة الخدمة"
+    },
+    "check_subscription": "تفقد اشتراكاتك",
+    "check_transactions": "تفقد دفعاتك",
+    "manage_account": "معلومات تسجيل الدخول",
     "verify_phone": {
         "code": "الرمز"
     }

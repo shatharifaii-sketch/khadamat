@@ -62,7 +62,7 @@ const EnhancedSearchFilters = ({
                     handleSearchSubmit?.();
                   }
                 }}
-                className="pr-10 text-right text-lg h-full"
+                className="pr-10 text-right text-md md:text-lg h-full"
               />
               {searchTerm && (
                 <Button

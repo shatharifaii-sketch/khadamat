@@ -24,5 +24,8 @@
         "num": "number of services",
         "newly_published": "new",
         "views": "views"
-    }
+    },
+    "home": "Home",
+    "find_services": "Find Service",
+    "service": "Service"
 }

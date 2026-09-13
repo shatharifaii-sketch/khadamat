@@ -54,9 +54,6 @@ const ServiceImages = ({ onMediaChange, serviceMedia }: ServicePortfolioProps) =
         }
     };
 
-    console.log("media: ", media);
-    console.log("serviceMedia: ", serviceMedia);
-
     return (
         <div className="space-y-4 flex flex-col mt-5">
 

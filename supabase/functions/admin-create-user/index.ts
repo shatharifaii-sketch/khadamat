@@ -34,7 +34,40 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { email, password, phone, is_admin } = await req.json()
+    const { email, password, phone, is_admin } = await req.json();
+
+    if (!email || !password) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          user: null,
+          error: "missing_data",
+        }),
+        {
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+    if (!is_admin) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          user: null,
+          error: "unauthorized",
+        }),
+        {
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+
+
 
     const { data: user, error: userError } = await supabase.auth.admin.createUser({
       email,

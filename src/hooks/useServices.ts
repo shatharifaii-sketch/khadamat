@@ -9,6 +9,7 @@ import { useImageUpload } from './useImageUpload';
 import { ServiceFormData } from '@/types/service';
 import { ServiceLink } from '@/components/PostService/ServiceLinks';
 import { useTranslation } from 'react-i18next';
+import { AvailabilityType } from '@/contexts/ReservationsContext';
 
 export interface Service {
   id?: string;
@@ -25,6 +26,7 @@ export interface Service {
   is_online?: boolean;
   links?: [];
   whatsapp_number?: string;
+  with_appointments: boolean;
 }
 
 export interface ServiceImageProps {
@@ -34,6 +36,92 @@ export interface ServiceImageProps {
   name: string;
   thumbnail_url?: string;
   type?: string;
+}
+
+async function setAvailability({ availability, serviceId, userId }: { availability: AvailabilityType[], serviceId: string, userId: string }): Promise<{ success: boolean, errors: string[] }> {
+  if (!availability || availability.length == 0) return;
+  let errors: string[];
+
+  for (const av of availability) {
+    const { error } = await supabase.from("calendar_provider_availability").insert({
+      to_time: av.toTime,
+      from_time: av.fromTime,
+      day_of_week: av.dayOfWeek,
+      provider_id: userId,
+      service_id: serviceId
+    });
+
+    if (error) {
+      const errorMessage = `data of ${av.dayOfWeek} faced an error`
+      console.error(errorMessage, error);
+      
+      errors.push(errorMessage);
+
+      throw {
+        success: false,
+        errors
+      }
+    }
+  }
+
+  return {
+    success: true,
+    errors
+  }
+}
+
+async function handleSaveService({
+  serviceId,
+  userId,
+  isSaved
+}: { serviceId: string, userId: string, isSaved: boolean }): Promise<{ success: boolean, error: string, serviceId?: string }> {
+  if (!serviceId || !userId) {
+    return {
+      success: false,
+      error: "more_data_required"
+    };
+  }
+
+  const { data, error } = await supabase.from("saved_services").select("id").eq("service_id", serviceId).eq("user_id", userId);
+
+  if (error) {
+    return {
+      success: false,
+      error: error.message
+    }
+  }
+
+  const query = supabase.from("saved_services")
+
+  if (data.length > 0) {
+    const { error } = await query.delete().eq("service_id", serviceId).eq("user_id", userId);
+
+    if (error) {
+      console.error('Error unsaving service:', error);
+      return {
+        success: false,
+        error: "error_unsaving_service",
+        serviceId: undefined
+      }
+    }
+  } else {
+    const { error } = await query.insert({ service_id: serviceId, user_id: userId });
+
+    if (error) {
+      console.error('Error saving service:', error);
+      return {
+        success: false,
+        error: "error_saving_service",
+        serviceId: undefined
+      }
+    }
+  }
+
+  return {
+    success: true,
+    error: "",
+    serviceId: serviceId
+  }
 }
 
 export const useServices = () => {
@@ -228,7 +316,8 @@ export const useServices = () => {
           email: serviceData.email,
           experience: serviceData.experience,
           updated_at: new Date().toISOString(),
-          status: 'pending-approval'
+          status: 'pending-approval',
+          with_appointments: serviceData.with_appointments
         })
         .eq('id', serviceData.id)
         .eq('user_id', user.id) // Ensure user can only update their own services
@@ -262,7 +351,6 @@ export const useServices = () => {
     queryKey: ['user-services', user?.id],
     queryFn: async () => {
 
-      console.log('Fetching user services for:', user.id);
       const { data, error } = await supabase
         .from('services')
         .select('*')
@@ -280,13 +368,58 @@ export const useServices = () => {
     enabled: !!user?.id
   });
 
+  const {
+    mutate: setProviderAvailability,
+    isPending,
+    isError
+  } = useMutation({
+    mutationKey: ["set-availability"],
+    mutationFn: setAvailability,
+    onSuccess: ({ success, errors }) => {
+      if (errors.length > 0) {
+        toast.error(t("error_setting_availability"));
+        return;
+      }
+
+      toast.success(t("availability_set"));
+    },
+    onError: (error) => {
+      console.log(error);
+    }
+  });
+
+  const {
+    mutate: saveService,
+    isPending: isSavingService,
+    isError: isSavingServiceError,
+    isSuccess: isSavingServiceSuccess
+  } = useMutation({
+    mutationKey: ["save-service"],
+    mutationFn: handleSaveService,
+    onSuccess: ({ success, error, serviceId }) => {
+      if (error) {
+        toast.error(t(error))
+        return;
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['saved-services', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['is-service-saved', serviceId, user?.id] });
+    }
+  })
+
   return {
     createService,
     updateService,
     getUserServices,
     saveImages,
     isCreating: createService.isPending,
-    isUpdating: updateService.isPending
+    isUpdating: updateService.isPending,
+    setProviderAvailability,
+    isError,
+    saveService,
+    isSavingService,
+    isSavingServiceError,
+    isSavingServiceSuccess
   };
 };
 

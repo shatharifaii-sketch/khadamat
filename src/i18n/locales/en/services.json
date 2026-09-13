@@ -22,7 +22,11 @@
     "تدريس خصوصي": "Private Tutoring",
     "ترجمة": "Translation",
     "غير ذلك": "Other",
-
+    "save_service": "Save Service",
+    "save": "Save",
+    "saved": "Saved",
+    "find_services": "Find Services",
+    "home": "Home",
     "post_service": {
         "edit_service_title": "Edit Service",
         "editing_service": "You are editing the service:",
@@ -81,7 +85,9 @@
         "get_subscription": "Become a Member Now",
         "loading": "Loading...",
         "uploading...": "Uploading...",
-        "service_email_note": "This email is available for anyone to see!"
+        "service_email_note": "This email is available for anyone to see!",
+        "with_appointments": "Open appointment reservations...",
+        "edit_availability": "Edit Availability in the Calendar page"
     },
 
     "find_service": {
@@ -130,12 +136,16 @@
         "online": "Online Service",
         "location": "Service Location",
         "experience": "Experience",
-        "provider_info": "Provider Information",
+        "contact_info": "Contact Details",
         "provider_name": "Name",
         "email": "Email",
         "phone": "Phone Number",
         "no_images": "No images attached to this service",
         "images_count": "file {{current}} of {{count}}",
+        "with_appointments": "Your Reservations with this Service",
+        "with_appointments_description": "View your Reservation with this Service or make a new one!",
+        "make_reservation": "Make a new Reservation",
+        "no_reservations": "No Reservations yet",
         "report": {
             "toast_error": "An error occurred while sending the report. Please try again.",
             "toast_success": "Report submitted successfully",

@@ -25,8 +25,6 @@ export const useRealTimeNotifications = () => {
   useEffect(() => {
     if (!user) return;
 
-    console.log('🔔 Setting up real-time notifications for user:', user.id);
-
     // Main notifications channel
     const notificationsChannel = supabase
       .channel(`user-notifications-${user.id}`)

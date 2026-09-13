@@ -1,36 +1,52 @@
+import { useEffect, useRef, Suspense } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  User,
+  TrendingUp,
+  Calendar,
+  Loader2,
+  Pen,
+  Plus,
+  Bookmark,
+  Star,
+  ReceiptText,
+} from "lucide-react";
 
-import { useEffect, useRef, Suspense } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { User, TrendingUp, Calendar, Loader2, Pen, Plus } from 'lucide-react';
+import { useAuth } from "@/contexts/AuthContext";
+import { useProfile } from "@/hooks/useProfile";
+import { useServices } from "@/hooks/useServices";
+import { useSubscription } from "@/hooks/useSubscription";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
-import { useAuth } from '@/contexts/AuthContext';
-import { useProfile } from '@/hooks/useProfile';
-import { useServices } from '@/hooks/useServices';
-import { useSubscription } from '@/hooks/useSubscription';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
-
-import ServiceManagementCard from '@/components/Account/ServiceManagementCard';
-import PaymentSuccessCard from '@/components/Account/PaymentSuccessCard';
-import MainUserDetails from '@/components/Account/MainUserDetails';
-import UploadProfileImage from '@/components/Account/UploadProfileImage';
-import ErrorBoundary from '@/components/ErrorBoundary';
-import SubscriptionsLoading from '@/components/Account/SubscriptionsLoading';
-import UserSubscriptions from '@/components/Account/UserSubscriptions';
-import UserTransactions from '@/components/Account/UserTransactions';
-import ChangeEmailComponent from '@/components/Account/ChangeEmailComponent';
-import ChangePasswordComponent from '@/components/Account/ChangePasswordComponent';
-import { useTranslation } from 'react-i18next';
-import { useIsMobile } from '@/hooks/use-mobile';
-import DeleteProfileComponent from '@/components/Account/DeleteProfileComponent';
-import UpdateUserDetails from '@/components/Account/UpdateUserDetails';
+import ServiceManagementCard from "@/components/Account/ServiceManagementCard";
+import PaymentSuccessCard from "@/components/Account/PaymentSuccessCard";
+import MainUserDetails from "@/components/Account/MainUserDetails";
+import UploadProfileImage from "@/components/Account/UploadProfileImage";
+import ErrorBoundary from "@/components/ErrorBoundary";
+import SubscriptionsLoading from "@/components/Account/SubscriptionsLoading";
+import UserSubscriptions from "@/components/Account/UserSubscriptions";
+import UserTransactions from "@/components/Account/UserTransactions";
+import ChangeEmailComponent from "@/components/Account/ChangeEmailComponent";
+import ChangePasswordComponent from "@/components/Account/ChangePasswordComponent";
+import { useTranslation } from "react-i18next";
+import { useIsMobile } from "@/hooks/use-mobile";
+import DeleteProfileComponent from "@/components/Account/DeleteProfileComponent";
+import UpdateUserDetails from "@/components/Account/UpdateUserDetails";
+import SavedServices from "@/components/Account/SavedServices";
 
 const Account = () => {
   const { t } = useTranslation("account");
   const lang = localStorage.getItem("language") || "en";
   const location = useLocation();
-  const servicePending = location.state?.servicePending as boolean ?? false;
+  const servicePending = (location.state?.servicePending as boolean) ?? false;
 
   useEffect(() => {
     if (servicePending) {
@@ -40,9 +56,15 @@ const Account = () => {
 
   const isMobile = useIsMobile();
   const { user, loading } = useAuth();
-  
+
   const navigate = useNavigate();
-  const { profile, updateProfile, isLoading: profileLoading, deleteProfile, isDeleting } = useProfile();
+  const {
+    profile,
+    updateProfile,
+    isLoading: profileLoading,
+    deleteProfile,
+    isDeleting,
+  } = useProfile();
   const { getUserServices } = useServices();
   const { getUserSubscription, getUserSubscriptions } = useSubscription();
 
@@ -55,7 +77,7 @@ const Account = () => {
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
 
@@ -73,18 +95,19 @@ const Account = () => {
   }
 
   if (!user) {
-    navigate('/auth');
+    navigate("/auth");
     return null;
   }
 
-  const activeServices = services?.filter(service => service.status === 'published').length || 0;
+  const activeServices =
+    services?.filter((service) => service.status === "published").length || 0;
   const isServiceProvider = activeServices > 0;
 
   const scrollToEdit = () => {
     if (cardRef.current) {
-      cardRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      cardRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
     }
-  }
+  };
 
   return (
     <div className="max-w-4xl mx-auto py-12 px-4">
@@ -92,13 +115,42 @@ const Account = () => {
         <div>
           <MainUserDetails user={profile} />
         </div>
-        <Button
-          onClick={scrollToEdit}
-          variant='ghost'
-          className="text-muted-foreground justify-center flex items-center gap-2 hover:text-primary mx-auto">
-          <Pen className='size-4' />
-          <p>{t('edit_profile_button')}</p>
-        </Button>
+
+        <div className="grid grid-cols-2 grid-rows-2 gap-2">
+          <Button
+            onClick={scrollToEdit}
+            variant="secondary"
+            className="text-muted-foreground justify-center flex items-center gap-2 hover:text-primary mx-auto w-full"
+          >
+            <Pen className="size-4" />
+            <p>{t("edit_profile_button")}</p>
+          </Button>
+          <Button
+            onClick={() => scrollToSection("subscriptions")}
+            variant="secondary"
+            className="text-muted-foreground justify-center flex items-center gap-2 hover:text-primary mx-auto w-full"
+          >
+            <Star className="size-4" />
+            <p>{t("check_subscription")}</p>
+          </Button>
+
+          <Button
+            onClick={() => scrollToSection("transaction-history")}
+            variant="secondary"
+            className="text-muted-foreground justify-center flex items-center gap-2 hover:text-primary mx-auto w-full"
+          >
+            <ReceiptText className="size-4" />
+            <p>{t("check_transactions")}</p>
+          </Button>
+          <Button
+            onClick={() => scrollToSection("login-data")}
+            variant="secondary"
+            className="text-muted-foreground justify-center flex items-center gap-2 hover:text-primary mx-auto w-full"
+          >
+            <User className="size-4" />
+            <p>{t("manage_account")}</p>
+          </Button>
+        </div>
       </div>
 
       <div className="md:grid md:gap-8 flex flex-col gap-2">
@@ -109,10 +161,12 @@ const Account = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card
             className="cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => scrollToSection('my-services')}
+            onClick={() => scrollToSection("my-services")}
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{t('my_services')}</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                {t("my_services")}
+              </CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -125,10 +179,12 @@ const Account = () => {
 
           <Card
             className="cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => scrollToSection('subscription-history')}
+            onClick={() => scrollToSection("subscriptions")}
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{t('subscription')}</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                {t("subscription")}
+              </CardTitle>
               <Calendar className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -143,7 +199,7 @@ const Account = () => {
         </div>
 
         {/* My Published Services Section */}
-        <div id="my-services">
+        <div id="my-services" className="space-y-2">
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -152,13 +208,19 @@ const Account = () => {
                     <TrendingUp className="h-5 w-5" />
                     {t("my_published_services")}
                   </CardTitle>
-                  <CardDescription className='mt-2'>
+                  <CardDescription className="mt-2">
                     {t("manage_your_services")}
                   </CardDescription>
                 </div>
-                <Link to={subscription?.status === 'active' ? "/post-service" : "#"}>
-                  <Button disabled={subscription?.status !== 'active'}>
-                    {isMobile ? <Plus className="h-4 w-4" /> : t("post_new_service")}
+                <Link
+                  to={subscription?.status === "active" ? "/post-service" : "#"}
+                >
+                  <Button disabled={subscription?.status !== "active"}>
+                    {isMobile ? (
+                      <Plus className="h-4 w-4" />
+                    ) : (
+                      t("post_new_service")
+                    )}
                   </Button>
                 </Link>
               </div>
@@ -171,42 +233,67 @@ const Account = () => {
               ) : services && services.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto bg-muted rounded-lg p-2">
                   {services.map((service) => (
-                    <ServiceManagementCard key={service.id} service={service} canPost={subscription?.status === 'active'} />
+                    <ServiceManagementCard
+                      key={service.id}
+                      service={service}
+                      canPost={subscription?.status === "active"}
+                    />
                   ))}
                 </div>
               ) : (
                 <div className="text-center py-8">
                   <TrendingUp className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium mb-2">{t("no_published_services")}</h3>
+                  <h3 className="text-lg font-medium mb-2">
+                    {t("no_published_services")}
+                  </h3>
                   <p className="text-muted-foreground mb-4">
                     {t("start_publishing_services")}
                   </p>
                   <Link to="/post-service">
-                    <Button>
-                      {t("post_new_service")}
-                    </Button>
+                    <Button>{t("post_new_service")}</Button>
                   </Link>
                 </div>
               )}
+            </CardContent>
+          </Card>
+
+          <Card id="saved-services">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-sm text-wrap md:text-xl">
+                <Bookmark fill="fill" />
+                {t("saved_services")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <SavedServices userId={user?.id} />
             </CardContent>
           </Card>
         </div>
 
         {/* Subscription History Section */}
         {getUserSubscriptions.data && (
-          <div>
-            <Suspense fallback={<>
-              <p>{t("loading_subscriptions")}</p></>}>
-              <ErrorBoundary fallback={<div>{t("error_loading_subscriptions")}</div>}>
+          <div id="subscriptions">
+            <Suspense
+              fallback={
+                <>
+                  <p>{t("loading_subscriptions")}</p>
+                </>
+              }
+            >
+              <ErrorBoundary
+                fallback={<div>{t("error_loading_subscriptions")}</div>}
+              >
                 <UserSubscriptions user={user} />
               </ErrorBoundary>
             </Suspense>
           </div>
         )}
 
-        <div id="subscription-history">
+        <div id="transaction-history">
           <Suspense fallback={<SubscriptionsLoading />}>
-            <ErrorBoundary fallback={<div>{t("error_loading_transactions")}</div>}>
+            <ErrorBoundary
+              fallback={<div>{t("error_loading_transactions")}</div>}
+            >
               {/*<SubscriptionHistoryTable /> */}
               <UserTransactions />
             </ErrorBoundary>
@@ -214,15 +301,13 @@ const Account = () => {
         </div>
 
         {/* Account Settings */}
-        <Card>
+        <Card id="login-data">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="h-5 w-5" />
               {t("account_settings")}
             </CardTitle>
-            <CardDescription>
-              {t("manage_account_info")}
-            </CardDescription>
+            <CardDescription>{t("manage_account_info")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -249,7 +334,11 @@ const Account = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <UploadProfileImage userId={profile?.id} userName={profile?.full_name} userImage={profile?.profile_image_url} />
+            <UploadProfileImage
+              userId={profile?.id}
+              userName={profile?.full_name}
+              userImage={profile?.profile_image_url}
+            />
             <UpdateUserDetails
               isServiceProvider={isServiceProvider}
               profile={profile}
@@ -260,7 +349,7 @@ const Account = () => {
         </Card>
       </div>
       <div>
-        <DeleteProfileComponent 
+        <DeleteProfileComponent
           deleteProfile={deleteProfile}
           isDeleting={isDeleting}
         />

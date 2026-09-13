@@ -180,7 +180,8 @@
                 "attachments": "Attachments",
                 "accept_title": "Approve service publishing",
                 "accept_button": "Publish service",
-                "offline_fallback": "Online"
+                "offline_fallback": "Online",
+                "with_appointments": "Reservations"
             }
         },
         "user_management": {

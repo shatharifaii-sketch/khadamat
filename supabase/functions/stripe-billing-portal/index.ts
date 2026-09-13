@@ -5,9 +5,7 @@
 // Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 import Stripe from "npm:stripe";
-import { Resend } from "npm:resend@latest";
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY")!);
 const stripe = new Stripe(Deno.env.get("VITE_STRIPE_LIVE_SEC_KEY")!);
 
 const corsHeaders = {

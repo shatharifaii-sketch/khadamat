@@ -1,5 +1,5 @@
-import { useParams } from "react-router-dom";
-import { Suspense, useEffect } from "react";
+import { Link, useParams } from "react-router-dom";
+import { Suspense } from "react";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { ServiceViewWrapper } from "@/components/Service/ServiceViewWrapper";
 import ServiceLoading from "@/components/Service/ServiceLoading";
@@ -11,41 +11,90 @@ import ServiceQueryError from "@/components/ErrorViews/ServiceQueryError";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
-
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { DotIcon } from "lucide-react";
 
 const ServicePage = () => {
   const { t } = useTranslation("services");
+  const lang = localStorage.getItem("language") || "en";
   const isMobile = useIsMobile();
   const { id: serviceId } = useParams<{ id: string }>();
 
   if (!serviceId) {
-    throw new Error('Service ID not found');
-  };
+    throw new Error("Service ID not found");
+  }
 
   return (
-    <div className={cn(
-      isMobile 
-        ? 'max-w-4xl mx-auto py-5 px-2 space-y-2'
-        : 'max-w-4xl mx-auto py-12 px-4 space-y-10'
-      )}>
-      <div className="flex items-center justify-center">
-        <h1 className="md:text-2xl text-lg text-muted-foreground font-medium">{t("service.top_title")}</h1>
+    <div
+      className={cn(
+        isMobile
+          ? "max-w-4xl mx-auto py-5 px-4 space-y-3"
+          : "max-w-4xl mx-auto pt-5 pb-8 px-4 space-y-6",
+      )}
+    >
+      <div
+        className="flex items-center justify-start text-start"
+        dir={lang === "ar" ? "rtl" : "ltr"}
+      >
+        {/* <h1 className="md:text-2xl font-bold text-xl">
+          {t("service.top_title")}
+        </h1> */}
+        <Breadcrumb
+          className="bg-transparent"
+          dir={lang === "ar" ? "rtl" : "ltr"}
+        >
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link
+                  to="/"
+                  className="flex items-center justify-center text-center"
+                >
+                  {t("home")}
+                </Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+
+            <BreadcrumbSeparator>
+              <DotIcon />
+            </BreadcrumbSeparator>
+
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link
+                  to="/find-service"
+                  className="flex items-center justify-center"
+                >
+                  {t("find_services")}
+                </Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+
+            <BreadcrumbSeparator>
+              <DotIcon />
+            </BreadcrumbSeparator>
+          </BreadcrumbList>
+        </Breadcrumb>
       </div>
       <Suspense fallback={<ServiceLoading />}>
         <ErrorBoundary fallback={<ServiceQueryError />}>
           <ServiceViewWrapper serviceId={serviceId} />
         </ErrorBoundary>
       </Suspense>
-      <div>
-        <Separator />
-        <Suspense fallback={<LoadingReviews />}>
-          <ErrorBoundary fallback={<ReviewQueryError />}>
-            <Reviews serviceId={serviceId} />
-          </ErrorBoundary>
-        </Suspense>
-      </div>
+      <Separator />
+      <Suspense fallback={<LoadingReviews />}>
+        <ErrorBoundary fallback={<ReviewQueryError />}>
+          <Reviews serviceId={serviceId} />
+        </ErrorBoundary>
+      </Suspense>
     </div>
-  )
-}
+  );
+};
 
-export default ServicePage
+export default ServicePage;

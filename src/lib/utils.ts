@@ -1,101 +1,181 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 import {
   FaInstagram,
   FaFacebook,
   FaXTwitter,
   FaYoutube,
   FaLinkedin,
-  FaTiktok
+  FaTiktok,
 } from "react-icons/fa6";
 import parsePhoneNumberFromString from "libphonenumber-js";
+import { ReservationList } from "@/contexts/ReservationsContext";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 export function truncateString(str, num) {
-    if (str.length > num) {
-        return str.slice(0, num) + "...";
-    } else {
-        return str;
-    }
+  if (str.length > num) {
+    return str.slice(0, num) + "...";
+  } else {
+    return str;
+  }
 }
 
 export function generateRandomPrefix(length: number = 20) {
-    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+  const chars =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  return Array.from(
+    { length },
+    () => chars[Math.floor(Math.random() * chars.length)],
+  ).join("");
 }
 
 export function handleFileName(fileName: string) {
-    const randomPrefix = generateRandomPrefix();
-    const newFileName = `${randomPrefix}${fileName}`;
-    const filePath = `uploads/${newFileName}`;
+  const randomPrefix = generateRandomPrefix();
+  const newFileName = `${randomPrefix}${fileName}`;
+  const filePath = `uploads/${newFileName}`;
 
-    return { newFileName, filePath };
+  return { newFileName, filePath };
 }
 
 export const platforms = [
   {
     value: "instagram",
     label: "Instagram",
-    icon: FaInstagram
+    icon: FaInstagram,
   },
   {
     value: "facebook",
     label: "Facebook",
-    icon: FaFacebook
+    icon: FaFacebook,
   },
   {
     value: "x",
     label: "X",
-    icon: FaXTwitter
+    icon: FaXTwitter,
   },
   {
     value: "youtube",
     label: "YouTube",
-    icon: FaYoutube
+    icon: FaYoutube,
   },
   {
     value: "linkedin",
     label: "LinkedIn",
-    icon: FaLinkedin
+    icon: FaLinkedin,
   },
   {
     value: "tiktok",
     label: "TikTok",
-    icon: FaTiktok
-  }
+    icon: FaTiktok,
+  },
 ];
 
 export const isMobile = /Android|iphone/i.test(navigator.userAgent);
 
 export const validateWhatsappPhone = (value: string) => {
-    if (!value) {
-      return {
-        valid: false,
-        message: 'Phone number is required',
-      };
-    }
-    const parsed = parsePhoneNumberFromString(value);
-
-    if (!parsed) {
-      return {
-        valid: false,
-        message: 'Invalid phone number',
-      };
-    }
-
-    if (!parsed.isValid()) {
-      return {
-        valid: false,
-        message: 'Invalid phone number',
-      };
-    }
-
+  if (!value) {
     return {
-      valid: true,
-      formatted: parsed.number,
-      country: parsed.country,
+      valid: false,
+      message: "Phone number is required",
     };
+  }
+  const parsed = parsePhoneNumberFromString(value);
+
+  if (!parsed) {
+    return {
+      valid: false,
+      message: "Invalid phone number",
+    };
+  }
+
+  if (!parsed.isValid()) {
+    return {
+      valid: false,
+      message: "Invalid phone number",
+    };
+  }
+
+  return {
+    valid: true,
+    formatted: parsed.number,
+    country: parsed.country,
   };
+};
+
+export const toMinutes = (time: string) => {
+  const [hours, minutes] = time.split(":").map(Number);
+
+  if (Number.isNaN(hours) || Number.isNaN(minutes)) {
+    throw new Error("Invalid time");
+  }
+
+  return hours * 60 + minutes;
+};
+
+export function getReservationAvailability(reservations: ReservationList[]) {
+  const pendingReservation = reservations.find(
+    (res) => res.status === "pending",
+  );
+
+  if (pendingReservation) {
+    return {
+      canReserve: false,
+      reason: "pending_reservation_exists",
+      reservation: pendingReservation,
+    };
+  }
+
+  const acceptedReservations = reservations
+    .filter((res) => res.status === "accepted" && res.date)
+    .sort((a, b) => {
+      const dateA = new Date(`${a.date}T${a.start_time}`);
+      const dateB = new Date(`${b.date}T${b.start_time}`);
+
+      return dateB.getTime() - dateA.getTime();
+    });
+
+  const latestAcceptedReservation = acceptedReservations[0];
+
+  if (latestAcceptedReservation) {
+    const reservationEnd = new Date(
+      `${latestAcceptedReservation.date}T${latestAcceptedReservation.end_time}`,
+    );
+
+    if (reservationEnd > new Date()) {
+      return {
+        canReserve: false,
+        reason: "active_reservation",
+        reservation: latestAcceptedReservation,
+      };
+    }
+  }
+
+  return {
+    canReserve: true,
+    reason: null,
+    reservation: null,
+  };
+}
+
+export function formatTime(time: string, timeFormat: string) {
+  if (!time) return "";
+
+  const [hourString, minute] = time.slice(0, 5).split(":");
+  const hour = Number(hourString);
+
+  if (timeFormat === "24h") {
+    return `${hourString}:${minute}`;
+  }
+
+  const period = hour >= 12 ? "PM" : "AM";
+  const displayHour = hour % 12 || 12;
+
+  return `${displayHour}:${minute} ${period}`;
+}
+
+export const normalizeTime = (time: string) => {
+  return time.slice(0, 5);
+};

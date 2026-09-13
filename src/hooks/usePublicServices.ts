@@ -7,6 +7,8 @@ import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PAGE_SIZE, Service } from "./useAdminFunctionality";
 import { ServiceLink } from "@/components/PostService/ServiceLinks";
+import { Reservation, ReservationList } from "@/contexts/ReservationsContext";
+import { getReservationAvailability } from "@/lib/utils";
 
 export interface PublicService {
   id: string;
@@ -32,6 +34,7 @@ export interface PublicService {
   };
   average_rating: number;
   review_count: number;
+  with_appointments: boolean;
 }
 
 export const usePublicServices = ({
@@ -164,6 +167,65 @@ export const useServiceData = (id: string, userId: string) => {
 
       return {
         service: serviceRes.data,
+      };
+    },
+  });
+
+  const { data: isSaved } = useQuery({
+    queryKey: ["is-service-saved", id, userId],
+    queryFn: async () => {
+      const { data: isSaved, error: isSavedError } = await supabase
+        .from("saved_services")
+        .select("*")
+        .eq("service_id", id)
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (isSavedError) throw isSavedError;
+
+      console.log("isSaved data:", isSaved);
+
+      return !!isSaved;
+    }
+  })
+
+  return {
+    service: data?.service,
+    isSaved: isSaved ?? false
+  };
+};
+
+export const useServiceReservation = (id: string, userId: string) => {
+  const { data } = useSuspenseQuery({
+    queryKey: ["service-reservation", id, userId],
+    queryFn: async () => {
+      if (!id || !userId) {
+        return {
+          latestReservation: null,
+          reservations: [],
+          availability: {
+            canReserve: false,
+            reason: "no_ids",
+            reservation: null,
+            
+          }
+        };
+      }
+
+      const { data, error } = await supabase
+        .from("calendar_reservations")
+        .select("*")
+        .eq("service_id", id)
+        .eq("client_id", userId)
+        .order("date", { ascending: false })
+        .order("start_time", { ascending: false });
+
+      if (error) throw error;
+
+      return {
+        latestReservation: data[0] as ReservationList,
+        reservations: data as ReservationList[],
+        availability: getReservationAvailability(data)
       };
     },
   });
