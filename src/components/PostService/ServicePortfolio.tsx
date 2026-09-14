@@ -4,30 +4,29 @@ import { Button } from '@/components/ui/button';
 import { Upload, X, ImageIcon } from 'lucide-react';
 import { useImageUpload } from '@/hooks/useImageUpload';
 
-interface ServicePortfolioProps {
-  onImagesChange?: (images: Array<{ id: string; image_url: string; image_name: string }>) => void;
+type MediaItem = {
+  id: string;
+  url: string;
+  name: string;
+  type: 'image' | 'video';
 }
 
-const ServicePortfolio = ({ onImagesChange }: ServicePortfolioProps) => {
-  const { images, uploading, handleFileSelect, removeImage } = useImageUpload();
+interface ServicePortfolioProps {
+  onMediaChange?: (media: MediaItem[]) => void;
+}
+
+const ServicePortfolio = ({ onMediaChange }: ServicePortfolioProps) => {
+  const { media, uploading, handleFileSelect, removeImage } = useImageUpload();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
 
   useEffect(() => {
-    if (onImagesChange) {
-      // Transform the images to match the expected interface
-      const transformedImages = images.map(img => ({
-        id: img.id,
-        image_url: img.image_url,
-        image_name: img.image_name
-      }));
-      onImagesChange(transformedImages);
-    }
-  }, [images]);
+    onMediaChange?.(media);
+  }, [media, onMediaChange]);
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    const {files} = e.dataTransfer;
+    const { files } = e.dataTransfer;
     if (files.length > 0) {
       handleFileSelect(files);
     }
@@ -38,7 +37,7 @@ const ServicePortfolio = ({ onImagesChange }: ServicePortfolioProps) => {
   };
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const {files} = e.target;
+    const { files } = e.target;
     if (files && files.length > 0) {
       handleFileSelect(files);
     }
@@ -47,7 +46,7 @@ const ServicePortfolio = ({ onImagesChange }: ServicePortfolioProps) => {
   return (
     <div className="space-y-4">
       <Label className="text-large font-semibold">صور من أعمالك السابقة (اختيارية)</Label>
-      
+
       {/* Upload Area */}
       <div
         className="border-2 border-dashed border-border rounded-lg p-8 text-center cursor-pointer hover:border-primary/50 transition-colors"
@@ -66,7 +65,7 @@ const ServicePortfolio = ({ onImagesChange }: ServicePortfolioProps) => {
         <input
           ref={fileInputRef}
           type="file"
-          accept="image/png,image/jpeg,image/jpg"
+          accept="image/png,image/jpeg,image/jpg,video/mp4,video/webm"
           multiple
           className="hidden"
           onChange={handleFileInputChange}
@@ -74,35 +73,50 @@ const ServicePortfolio = ({ onImagesChange }: ServicePortfolioProps) => {
       </div>
 
       {/* Uploaded Images Grid */}
-      {images.length > 0 && (
+      {media.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {images.map((image) => (
-            <div key={image.id} className="relative group">
+          {media.map((item) => (
+            <div key={item.id} className="relative group">
               <div className="aspect-square rounded-lg overflow-hidden border border-border">
-                <img
-                  src={image.image_url}
-                  alt={image.image_name}
-                  className="w-full h-full object-cover"
-                />
+                {item.type === "image" ? (
+                  <img
+                    src={item.url}
+                    alt={item.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <video
+                    src={item.url}
+                    className="w-full h-full object-cover"
+                    controls
+                  />
+                )}
               </div>
               <button
                 type="button"
-                onClick={() => removeImage(image.id)}
+                onClick={() => removeImage(item.id)}
                 className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
               >
                 <X size={16} />
               </button>
               <div className="absolute bottom-2 left-2 right-2 bg-black/50 text-white text-xs p-1 rounded truncate opacity-0 group-hover:opacity-100 transition-opacity">
-                {image.image_name}
+                {item.name}
               </div>
+
+              {item.type === "video" && (
+                <div className="absolute top-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                  VIDEO
+                </div>
+              )}
+
             </div>
           ))}
         </div>
       )}
 
-      {images.length > 0 && (
+      {media.length > 0 && (
         <p className="text-sm text-muted-foreground text-center">
-          تم رفع {images.length} من أصل 6 صور
+          تم رفع {media.length} من أصل 6 ملفات
         </p>
       )}
     </div>

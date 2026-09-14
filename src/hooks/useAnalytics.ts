@@ -1,6 +1,7 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 export interface SearchAnalytic {
   id: string;
@@ -79,8 +80,6 @@ export const useAnalytics = () => {
     }
   });
 
-  console.log(trackSearch);
-
   // Track service action
   const trackServiceAction = useMutation({
     mutationFn: async ({ 
@@ -132,6 +131,7 @@ export const useAnalytics = () => {
 };
 
 export const useAdminAnalytics = () => {
+  const { t } = useTranslation("responses");
   // Get search analytics
   const getSearchAnalytics = useQuery({
     queryKey: ['admin-search-analytics'],
@@ -219,7 +219,7 @@ export const useAdminAnalytics = () => {
         const serviceViewCounts = (topServicesData || []).reduce((acc: any, item: any) => {
           const serviceId = item.service_id;
           const service = Array.isArray(item.service) ? item.service[0] : item.service;
-          const title = service?.title || 'خدمة محذوفة';
+          const title = service?.title || t("unknown_service");
           if (!acc[serviceId]) {
             acc[serviceId] = { service_id: serviceId, title, views: 0 };
           }

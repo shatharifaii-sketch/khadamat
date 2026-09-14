@@ -39,7 +39,7 @@ serve(async (req: Request) => {
       type: 'signup',
       email: email,
       options: {
-        redirectTo: 'http://localhost:8080/login'
+        redirectTo: "https://khedemtak.com/login" //'http://localhost:8080/login'
       }
     })
 

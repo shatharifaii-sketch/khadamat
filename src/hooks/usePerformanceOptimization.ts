@@ -22,7 +22,7 @@ export const usePerformanceOptimization = () => {
     const measurePerformance = () => {
       // Memory usage (if available)
       if ('memory' in performance) {
-        const memory = (performance as any).memory;
+        const {memory} = performance;
         setMetrics(prev => ({
           ...prev,
           memoryUsage: memory.usedJSHeapSize / 1024 / 1024 // MB
@@ -69,9 +69,9 @@ export const usePerformanceOptimization = () => {
   }, [queryClient]);
 
   // Debounced search optimization
-  const debounce = useCallback((func: Function, delay: number) => {
-    let timeoutId: NodeJS.Timeout;
-    return (...args: any[]) => {
+  const debounce = useCallback((func: () => void, delay: number) => {
+    let timeoutId: ReturnType<typeof setTimeout>;
+    return (...args: unknown[]) => {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => func.apply(null, args), delay);
     };
@@ -99,8 +99,7 @@ export const usePerformanceOptimization = () => {
   // Bundle size optimization
   const dynamicImport = useCallback(async (modulePath: string) => {
     try {
-      const module = await import(modulePath);
-      return module;
+      return await import(modulePath);
     } catch (error) {
       console.error('Failed to load module:', modulePath, error);
       return null;

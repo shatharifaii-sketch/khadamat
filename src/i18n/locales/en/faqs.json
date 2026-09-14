@@ -1,0 +1,42 @@
+{
+    "title": "Frequently Asked Questions",
+    "description": "Answers to the most common questions about the Khedemtak platform",
+    "questions": [
+        {
+            "question": "How can I publish a new service?",
+            "answer": "You can publish a new service by clicking the 'Post Your Service' button on the homepage, then filling out the form with your service details."
+        },
+        {
+            "question": "Can I edit my service after publishing it?",
+            "answer": "Yes, you can edit your service at any time through your dashboard in the account page."
+        },
+        {
+            "question": "How can I contact service providers?",
+            "answer": "You can contact service providers through phone calls or by sending direct messages via the platform."
+        },
+        {
+            "question": "Is using the platform free?",
+            "answer": "Yes, browsing and searching for services is completely free. Subscription fees are only required for publishing services."
+        },
+        {
+            "question": "How can I search for a specific service?",
+            "answer": "You can use the search bar or browse services by category and location from the search page."
+        },
+        {
+            "question": "What payment methods are available?",
+            "answer": "We accept payments through credit cards and local bank accounts."
+        },
+        {
+            "question": "How can I report a problem?",
+            "answer": "You can contact us through the contact page or send a direct message via the platform."
+        },
+        {
+            "question": "Can I cancel my subscription?",
+            "answer": "Yes, you can cancel your subscription at any time through your account settings."
+        }
+    ],
+    "contact": {
+        "question": "Didn't find an answer to your question?",
+        "action": "Contact us for help"
+    }
+}
