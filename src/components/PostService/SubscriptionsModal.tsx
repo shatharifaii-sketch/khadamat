@@ -143,7 +143,6 @@ const SubscriptionCard = ({
           <DialogContent
   className={cn(
     "rounded-2xl",
-    isMobile ? "-mt-10" : "",
   )}
 >
   <DialogHeader className="text-center">
@@ -159,8 +158,8 @@ const SubscriptionCard = ({
   {selectedSubscription && (
     <div
       className={cn(
-        "rounded-2xl border-2 p-5",
-        selectedSubscription.class_name,
+        "rounded-2xl border-2 p-5 max-h-[400px] overflow-y-auto",
+        selectedSubscription.class_name
       )}
     >
       <div className="flex items-start justify-between gap-4">

@@ -45,7 +45,6 @@ const StatsSection = ({ serviceProvidersCount, publishedServicesCount, isLoading
   const showEncouragingMessage = serviceProvidersCount < 10 && publishedServicesCount < 20;
 
   return (
-    <section className="py-12 md:py-16 px-4 bg-card">
     <section className="pb-16 px-4 bg-primary/10">
       <div className="max-w-6xl mx-auto">
         {showEncouragingMessage && (
@@ -60,7 +59,6 @@ const StatsSection = ({ serviceProvidersCount, publishedServicesCount, isLoading
           </div>
         )}
         
-        <div className="grid grid-cols-2 gap-3 md:gap-8">
         <div className="grid grid-cols-2">
           {stats.map((stat, index) => (
             <StatCard 
