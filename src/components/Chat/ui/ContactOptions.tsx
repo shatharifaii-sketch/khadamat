@@ -172,12 +172,11 @@ const ContactOptions = ({
       })
       .then((data) => {
         if (!data) return;
-        console.log(data);
 
         setIsConvo(true);
         setConvoId(data.id);
         navigate(
-          `/chat/${data.id}/${userId}${serviceId ? `/${serviceId}` : ""}/${publisherId}`,
+          `/chat/${data.id}/${userId}${serviceId ? `/${serviceId}` : ""}/${providerId}`,
         );
       });
 

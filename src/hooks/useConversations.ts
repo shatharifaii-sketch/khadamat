@@ -215,7 +215,7 @@ export const useConversations = () => {
             const { data, error } = await supabase.from('conversations')
                 .insert([{
                     service_id: serviceId || null,
-                    client_id: user.id,
+                    client_id: user?.id,
                     provider_id: providerId,
                 }])
                 .select('id')
