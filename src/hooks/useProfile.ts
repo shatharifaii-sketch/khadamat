@@ -281,7 +281,7 @@ export const usePublisherProfile = (userId: string) => {
     queryFn: async () => {
       const { data: profile, error } = await supabase
         .from('profiles')
-        .select('full_name, phone, bio, location, experience_years, created_at, profile_image_url, is_service_provider')
+        .select('id, full_name, phone, bio, location, experience_years, created_at, profile_image_url, is_service_provider')
         .eq('id', userId)
         .maybeSingle();
 
