@@ -72,10 +72,10 @@ const ServicesGrid = ({ categoriesWithServices, isLoading }: ServicesGridProps) 
     <section className="py-10 md:py-20 px-4">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-8 md:mb-12">
-          <h2 className="text-xl md:text-4xl font-bold text-foreground mb-4">
+          <h2 className="text-xl md:text-4xl font-bold text-foreground mb-1 md:mb-4">
             {t("services.title")}
           </h2>
-          <p className="text-xl text-muted-foreground">
+          <p className="text-md md:text-xl text-muted-foreground">
             {t("services.description")}
           </p>
         </div>
@@ -89,11 +89,11 @@ const ServicesGrid = ({ categoriesWithServices, isLoading }: ServicesGridProps) 
               <Link key={index} to={`/find-service?category=${service.category}`} dir={lang === "ar" ? "rtl" : "ltr"}>
                 <Card className="hover:shadow-lg transition-shadow cursor-pointer group h-full">
                   <CardHeader className="text-center">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4 mx-auto group-hover:bg-primary/20 transition-colors">
-                      <Icon size={32} className="text-primary" />
+                    <div className="inline-flex items-center justify-center w-10 h-10 md:w-16 md:h-16 bg-primary/10 rounded-full mb-1 md:mb-4 mx-auto group-hover:bg-primary/20 transition-colors">
+                      <Icon className="size-6 md:size-8 text-primary" />
                     </div>
-                    <CardTitle className="text-xl">{t(displayName)}</CardTitle>
-                    <CardDescription className="text-large">
+                    <CardTitle className="text-sm md:text-xl">{t(displayName)}</CardTitle>
+                    <CardDescription className="text-xs md:text-large">
                       {t(service.count > 1 ? "services.service_count" : "services.service_count_single", { count: service.count })}
                     </CardDescription>
                   </CardHeader>

@@ -21,5 +21,8 @@
     "convos_title": "Conversations",
     "convos_your_message": "You",
     "convos_no_messages": "No messages",
-    "no_conversations": "No conversations"
+    "no_conversations": "No conversations",
+    "received_new_message": "Received a new message",
+    "view_message": "View Message",
+    "new_message_from": "New message from {{name}}"
 }

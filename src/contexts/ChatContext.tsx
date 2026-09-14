@@ -4,6 +4,7 @@ import { useAuth } from "./AuthContext";
 import { toast } from "sonner";
 import { useLocation } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 
 export interface Message {
     id: string;
@@ -99,20 +100,20 @@ const sendEmailNotification = async ({ message, userId }: { message: Message | a
         return { success: true, message: 'Message is not older than 2 hours' }
     }
 
-    const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-email-notification`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
-        },
+    const { data, error } = await supabase.functions.invoke('send-email-notification', {
         body: JSON.stringify({
             'message': message,
             'user_id': userId
         }),
-    })
+    });
 
-    if (!response.ok) {
-        console.error('Error sending email notification:', response);
+    if (error) {
+        console.error('Error sending email notification:', error);
+        return { success: false, error: 'Error sending email notification' }
+    }
+
+    if (!data.ok) {
+        console.error('Error sending email notification:', data);
         return { success: false, error: 'Error sending email notification' }
     }
 
@@ -135,6 +136,7 @@ const updateMessageReadAt = async ({ message, userId }: { message: Message | any
 }
 
 export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
+    const { t } = useTranslation("chat");
     const { user } = useAuth();
     const [activeConversation, setActiveConversation] = useState(null);
     const [messages, setMessages] = useState([]);
@@ -174,11 +176,11 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
         const isActiveChat = activeConversation?.id === message.conversation_id;
 
         if (message.sender_id !== user?.id && needNotifcations && !isActiveChat) {
-            toast("تم استلام رسالة جديدة", {
-                description: `رسالة جديدة من ${message.sender.full_name}`,
+            toast(t("received_new_message"), {
+                description: t("new_message_from", { name: message.sender.full_name }),
                 duration: 3000,
                 action: {
-                    label: 'عرض الرسالة',
+                    label: t("view_message"),
                     onClick: () => {
                         window.location.href = `/chat/${message.conversation_id}/${message.sender_id}/${message.file_url}/${message.sender_id}`
                     }
@@ -256,7 +258,7 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
         }
 
         loadMessages();
-    }, [activeConversation]);
+    }, [activeConversation, user?.id]);
 
     useEffect(() => {
         if (!activeConversation) return;

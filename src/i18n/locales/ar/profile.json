@@ -24,5 +24,8 @@
         "num": "عدد الخدمات",
         "newly_published": "جديد",
         "views": "مشاهدة"
-    }
+    },
+    "home": "الرئيسية",
+    "find_services": "البحث عن خدمة",
+    "service": "خدمة"
 }

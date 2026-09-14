@@ -22,6 +22,8 @@
     "تدريس خصوصي": "تدريس خصوصي",
     "ترجمة": "ترجمة",
     "غير ذلك": "غير ذلك",
+    "find_services": "البحث عن خدمة",
+    "home": "الرئيسية",
     "post_service": {
         "edit_service_title": "تعديل الخدمة",
         "editing_service": "أنت تقوم بتعديل الخدمة:",
@@ -80,7 +82,9 @@
         "get_subscription": "اشترك الان",
         "loading": "جاري التحميل...",
         "uploading...": "جاري رفع الصور...",
-        "service_email_note": "هذا البريد متاح لأي مستخدم على الموقع!"
+        "service_email_note": "هذا البريد متاح لأي مستخدم على الموقع!",
+        "with_appointments": "افتح حجز المواعيد للخدمة...",
+        "edit_availability": "حدث أوقات العمل في صفحة الحجوزات"
     },
     "find_service": {
         "find_the_right_service": "ابحث عن الخدمة المناسبة",
@@ -127,12 +131,16 @@
         "online": "خدمة رقمية اونلاين",
         "location": "مكان الخدمة",
         "experience": "الخبرة",
-        "provider_info": "معلومات مقدم الخدمة",
+        "contact_info": "معلومات التواصل",
         "provider_name": "الاسم الشخصي",
         "email": "البريد الالكتروني",
         "phone": "رقم الهاتف",
         "no_images": "لا يوجد صور ملحقة لهذه الخدمة",
         "images_count": "ملف {{current}} من {{count}}",
+        "with_appointments": "مواعيدك للخدمة",
+        "with_appointments_description": "تحقق من مواعيدك لهذه الخدمة أو احجز موعد جديد",
+        "make_reservation": "احجز موعد جديد",
+        "no_reservations": "لا توجد مواعيد بعد",
         "report": {
             "toast_error": "حدث خطأ أثناء إرسال الرسالة. يرجى المحاولة مرة أخرى.",
             "toast_success": "تم تقديم البلاغ بنجاح",
@@ -172,5 +180,8 @@
                 "create_dialog_submit": "أضف التقييم"
             }
         }
-    }
+    },
+    "save_service": "حفظ الخدمة",
+    "save": "حفظ",
+    "saved": "محفوظ"
 }

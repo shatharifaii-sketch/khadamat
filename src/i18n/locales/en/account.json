@@ -135,6 +135,14 @@
     "delete_profile_title": "Are you sure you want to delete your profile?",
     "delete_profile_description": "This will delete all your data including published services, subscriptions, and messages. This action cannot be undone.",
     "delete": "Confirm Deletion",
+    "saved_services": "Saved Service",
+    "saved_service": {
+        "is_online": "Online Service",
+        "remove_service": "Remove Service"
+    },
+    "check_subscription": "Check your Subscriptions",
+    "check_transactions": "Check transaction invoices",
+    "manage_account": "Manage login info",
     "verify_phone": {
         "code": "Code"
     }

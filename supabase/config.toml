@@ -128,7 +128,7 @@ entrypoint = "./functions/verify-stripe-checkout-session-id/index.ts"
 
 [functions.register-user]
 enabled = true
-verify_jwt = true
+verify_jwt = false
 import_map = "./functions/register-user/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
@@ -520,13 +520,112 @@ entrypoint = "./functions/handle-phone-otp/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/handle-phone-otp/*.html" ]
-[functions.get-contact-details]
+[functions.get-roles]
 enabled = true
-verify_jwt = false
-import_map = "./functions/get-contact-details/deno.json"
+verify_jwt = true
+import_map = "./functions/get-roles/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
-entrypoint = "./functions/get-contact-details/index.ts"
+entrypoint = "./functions/get-roles/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
-# static_files = [ "./functions/get-contact-details/*.html" ]
+# static_files = [ "./functions/get-roles/*.html" ]
+
+[functions.check-provider-availability]
+enabled = true
+verify_jwt = true
+import_map = "./functions/check-provider-availability/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/check-provider-availability/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/check-provider-availability/*.html" ]
+
+[functions.fetch-user-roles]
+enabled = true
+verify_jwt = true
+import_map = "./functions/fetch-user-roles/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/fetch-user-roles/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/fetch-user-roles/*.html" ]
+
+[functions.create-reservation]
+enabled = true
+verify_jwt = true
+import_map = "./functions/create-reservation/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/create-reservation/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/create-reservation/*.html" ]
+
+[functions.accept-reservation]
+enabled = true
+verify_jwt = true
+import_map = "./functions/accept-reservation/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/accept-reservation/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/accept-reservation/*.html" ]
+
+[functions.reject-reservation]
+enabled = true
+verify_jwt = true
+import_map = "./functions/reject-reservation/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/reject-reservation/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/reject-reservation/*.html" ]
+
+[functions.delete-reservation]
+enabled = true
+verify_jwt = true
+import_map = "./functions/delete-reservation/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/delete-reservation/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/delete-reservation/*.html" ]
+
+[functions.cancel-reservation-request]
+enabled = true
+verify_jwt = true
+import_map = "./functions/cancel-reservation-request/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/cancel-reservation-request/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/cancel-reservation-request/*.html" ]
+
+[functions.cancel-reservation-provider]
+enabled = true
+verify_jwt = true
+import_map = "./functions/cancel-reservation-provider/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/cancel-reservation-provider/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/cancel-reservation-provider/*.html" ]
+
+[functions.decline-reservation]
+enabled = true
+verify_jwt = false
+import_map = "./functions/decline-reservation/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/decline-reservation/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/decline-reservation/*.html" ]

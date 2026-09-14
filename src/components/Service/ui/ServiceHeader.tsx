@@ -13,6 +13,7 @@ interface Props {
   publisherName?: string;
   publisherImage?: string;
   updatedAt: string;
+  serviceId: string;
 }
 
 const ServiceHeader = ({
@@ -21,7 +22,8 @@ const ServiceHeader = ({
   publisherName,
   publisherImage,
   updatedAt,
-  publisherId
+  publisherId,
+  serviceId
 }: Props) => {
   const { user } = useAuth();
   const { t } = useTranslation("services");
@@ -40,7 +42,10 @@ const ServiceHeader = ({
         </div>
       </div>
       <NavLink
-        to={user?.id === publisherId ? '/account' : `/profile/${publisherId}`}
+        to={user?.id === publisherId 
+          ? '/account' 
+          : `/profile/${publisherId}?serviceId=${encodeURIComponent(serviceId)}`
+        }
         className='flex items-center justify-start gap-2 hover:text-primary transition-colors w-fit'>
         {publisherImage ? (
           <Avatar className='size-7'>

@@ -1,4 +1,5 @@
 import { ServiceLink } from "@/components/PostService/ServiceLinks";
+import { ProviderAvailability } from "./reservations";
 
 export interface Service {
   id: string;
@@ -40,4 +41,6 @@ export interface ServiceFormData {
     thumbnail?: string;
     type?: string;
   }[];
+  with_appointments: boolean;
+  availability?: ProviderAvailability[];
 }

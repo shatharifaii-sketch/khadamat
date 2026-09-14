@@ -1,11 +1,9 @@
-import React, {
-  Dispatch,
-  SetStateAction,
+import {
   Suspense,
   useEffect,
   useState,
 } from "react";
-import ActivityChart, { ActivityChartProps } from "./ActivityChart";
+import ActivityChart from "./ActivityChart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import {
   BadgePercent,
@@ -21,8 +19,8 @@ import { Badge } from "../ui/badge";
 import { AnalyticsSummary } from "@/types/analytics";
 import ErrorBoundary from "../ErrorBoundary";
 import { ServiceManagement } from "./ServiceManagement";
-import { UserManagement, UserProfile } from "./UserManagement";
-import { Json, Tables } from "@/integrations/supabase/types";
+import { UserManagement } from "./UserManagement";
+import { Json } from "@/integrations/supabase/types";
 import { Service } from "@/hooks/useAdminFunctionality";
 import { ServiceEditModal } from "./ServiceEditModal";
 import CouponsManagement from "./CouponsManagement";
@@ -159,9 +157,9 @@ const AdminView = ({
         </TabsContent>
         <TabsContent value="web_analytics">
           <WebLineChart
-            dailyStats={analyticsDailyStats}
-            monthlyStats={analyticsMonthlyStats}
-            yearlyStats={analyticsYearlyStats}
+            dailyStats={dailyStats}
+            monthlyStats={monthlyStats}
+            yearlyStats={yearlyStats}
           />
         </TabsContent>
       </Tabs>

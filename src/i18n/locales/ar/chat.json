@@ -21,5 +21,8 @@
     "convos_title": "المحادثات",
     "convos_your_message": "أنت",
     "convos_no_messages": "الرسائل غير موجودة",
-    "no_conversations": "لا توجد محادثات"
+    "no_conversations": "لا توجد محادثات",
+    "received_new_message": "تم استلام رسالة جديدة",
+    "view_message": "عرض الرسالة",
+    "new_message_from": "رسالة جديدة من {{name}}"
 }

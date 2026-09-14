@@ -52,6 +52,22 @@ Deno.serve(async (req) => {
       );
     }
 
+    if (!is_admin) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          user: null,
+          error: "unauthorized",
+        }),
+        {
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+
     const updates: {
       email?: string;
       password?: string;

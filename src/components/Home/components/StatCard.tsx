@@ -18,12 +18,12 @@ const StatCard = ({
     const { ref, count } = useCountUp(value);
 
   return (
-    <div ref={ref} className="text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4">
-            <Icon className="size-8 md:size-10 text-primary" />
+    <div ref={ref} className="text-center flex flex-col items-center justify-center gap-2">
+        <div className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 bg-white rounded-full">
+            <Icon className="size-7 md:size-10 text-primary" />
         </div>
 
-        <div className="text-2xl md:text-3xl font-bold mb-2">
+        <div className="text-xl md:text-3xl font-bold">
             {value === 0 ? t("stats.soon") : count}
         </div>
 
