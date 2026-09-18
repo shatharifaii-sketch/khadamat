@@ -24,5 +24,16 @@
     "no_conversations": "No conversations",
     "received_new_message": "Received a new message",
     "view_message": "View Message",
-    "new_message_from": "New message from {{name}}"
+    "new_message_from": "New message from {{name}}",
+    "create_deal": "Create Deal",
+    "create_deal_form": {
+        "title": "Create a new Deal",
+        "description": "After creating the deal, the other person will get the option to accept it",
+        "deal_price": "Price",
+        "submit_button": "Send Deal"
+    },
+    "deals": {
+        "title": "Deals",
+        "description": "All the shared deals"
+    }
 }

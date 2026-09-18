@@ -24,5 +24,16 @@
     "no_conversations": "لا توجد محادثات",
     "received_new_message": "تم استلام رسالة جديدة",
     "view_message": "عرض الرسالة",
-    "new_message_from": "رسالة جديدة من {{name}}"
+    "new_message_from": "رسالة جديدة من {{name}}",
+    "create_deal": "انشاء عرض",
+    "create_deal_form": {
+        "title": "انشاء عرض جديد",
+        "description": "بعد انشاء العرض بيحصل الشخص الثاني على خيار الموافقة",
+        "deal_price": "السعر",
+        "submit_button": "ارسال العرض"
+    },
+    "deals": {
+        "title": "العروض",
+        "description": "جميع العروض المقترحة"
+    }
 }

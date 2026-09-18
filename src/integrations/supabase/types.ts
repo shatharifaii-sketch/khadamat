@@ -382,33 +382,42 @@ export type Database = {
       }
       conversation_deals: {
         Row: {
+          client_accepted: boolean | null
           client_id: string | null
           conversation_id: string | null
           created_at: string
           created_by: string | null
           id: string
           price: number | null
+          provider_accepted: boolean | null
           provider_id: string | null
+          service_id: string | null
           status: string | null
         }
         Insert: {
+          client_accepted?: boolean | null
           client_id?: string | null
           conversation_id?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
           price?: number | null
+          provider_accepted?: boolean | null
           provider_id?: string | null
+          service_id?: string | null
           status?: string | null
         }
         Update: {
+          client_accepted?: boolean | null
           client_id?: string | null
           conversation_id?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
           price?: number | null
+          provider_accepted?: boolean | null
           provider_id?: string | null
+          service_id?: string | null
           status?: string | null
         }
         Relationships: [
@@ -445,6 +454,20 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "profiles_with_email"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversation_deals_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "public_services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversation_deals_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
             referencedColumns: ["id"]
           },
         ]
