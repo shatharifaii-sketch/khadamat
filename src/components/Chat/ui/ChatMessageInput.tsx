@@ -159,7 +159,7 @@ const ChatMessageInput = ({
               </DialogTrigger>
 
               <DialogContent>
-                <ChatDealCreateForm />
+                <ChatDealCreateForm onSuccess={() => setCreatingDeal(false)} />
               </DialogContent>
             </Dialog>
           </div>

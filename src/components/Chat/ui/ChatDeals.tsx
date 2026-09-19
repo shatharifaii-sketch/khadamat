@@ -1,39 +1,50 @@
-import { useTranslation } from "react-i18next"
-import { ChatServiceProps } from "../ChatLayout"
+import { useTranslation } from "react-i18next";
+import { ChatServiceProps } from "../ChatLayout";
 import { useChatDeals } from "@/hooks/useChatDeals";
+import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
+import DealCard from "./DealCard";
 
 interface Props {
-    service?: ChatServiceProps;
-    conversationId: string;
+  service?: ChatServiceProps;
+  conversationId: string;
 }
 
-const ChatDeals = ({
-    service,
-    conversationId
-}: Props) => {
-    const { t } = useTranslation("chat");
-    const lang = localStorage.getItem("language") || "en";
+const ChatDeals = ({ service, conversationId }: Props) => {
+  const { t } = useTranslation("chat");
+  const lang = localStorage.getItem("language") || "en";
+  const isMobile = useIsMobile();
 
-    const { deals } = useChatDeals({
-        conversationId
-    });
+  const { deals, deleteDeal, isDeletingDealSuccess } = useChatDeals({
+    conversationId,
+  });
 
-    if (!deals || deals.length == 0) {
-        return;
-    }
+  if (!deals || deals.length == 0) {
+    return;
+  }
 
   return (
-    <div className="w-full text-start" dir={lang == "en" ? "ltr" : "rtl"}>
+    <div
+      className={cn(
+        "w-full text-start flex flex-col gap-2",
+        isMobile ? "mt-5" : "mr-2",
+      )}
+      dir={lang == "en" ? "ltr" : "rtl"}
+    >
+      <div>
         <h3 className="text-lg md:text-xl">{t("deals.title")}</h3>
-        <p className="text-muted-foreground text-xs md:text-md">{t("deals.description")}</p>
+        <p className="text-muted-foreground text-xs md:text-md">
+          {t("deals.description")}
+        </p>
+      </div>
 
-        <div>
-            {deals.map((deal) => (
-                <></>
-            ))}
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-2">
+        {deals.map((deal) => (
+          <DealCard key={deal.id} deal={deal} deleteDeal={deleteDeal} isDeletingDealSuccess={isDeletingDealSuccess} />
+        ))}
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default ChatDeals
+export default ChatDeals;

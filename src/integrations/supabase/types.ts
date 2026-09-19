@@ -384,39 +384,48 @@ export type Database = {
         Row: {
           client_accepted: boolean | null
           client_id: string | null
+          client_rejected: boolean | null
           conversation_id: string | null
           created_at: string
           created_by: string | null
+          currency: string | null
           id: string
           price: number | null
           provider_accepted: boolean | null
           provider_id: string | null
+          provider_rejected: boolean | null
           service_id: string | null
           status: string | null
         }
         Insert: {
           client_accepted?: boolean | null
           client_id?: string | null
+          client_rejected?: boolean | null
           conversation_id?: string | null
           created_at?: string
           created_by?: string | null
+          currency?: string | null
           id?: string
           price?: number | null
           provider_accepted?: boolean | null
           provider_id?: string | null
+          provider_rejected?: boolean | null
           service_id?: string | null
           status?: string | null
         }
         Update: {
           client_accepted?: boolean | null
           client_id?: string | null
+          client_rejected?: boolean | null
           conversation_id?: string | null
           created_at?: string
           created_by?: string | null
+          currency?: string | null
           id?: string
           price?: number | null
           provider_accepted?: boolean | null
           provider_id?: string | null
+          provider_rejected?: boolean | null
           service_id?: string | null
           status?: string | null
         }

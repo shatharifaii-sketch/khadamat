@@ -30,10 +30,22 @@
         "title": "انشاء عرض جديد",
         "description": "بعد انشاء العرض بيحصل الشخص الثاني على خيار الموافقة",
         "deal_price": "السعر",
-        "submit_button": "ارسال العرض"
+        "submit_button": "ارسال العرض",
+        "submit_error": "حدث خطأ خلال انشاء العرض",
+        "select_label": "اختر العملة"
     },
     "deals": {
         "title": "العروض",
-        "description": "جميع العروض المقترحة"
+        "description": "جميع العروض المقترحة",
+        "deal_created": "تم إنشاء العرض",
+        "deal_deleted": "تم حذف العرض",
+        "deal": {
+            "online": "خدمة رقمية",
+            "delete": {
+                "title": "حذف العرض",
+                "delete": "تأكيد الحذف",
+                "cancel": "رجوع"
+            }
+        }
     }
 }

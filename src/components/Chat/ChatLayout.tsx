@@ -43,7 +43,7 @@ const ChatLayout = ({
   }, [serviceImages]);
 
   return (
-    <div>
+    <div className="grid grid-cols-1 gap-5 mx-auto">
       <div className="flex gap-5 justify-center items-center lg:items-start flex-col lg:flex-row">
         {service && (
           <div className="w-full min-w-[200px]">

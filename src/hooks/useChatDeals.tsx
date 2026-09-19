@@ -5,6 +5,7 @@ import { QueryClient, useMutation, useQueryClient, useSuspenseQuery } from "@tan
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { success } from "zod";
+import { fa } from "zod/v4/locales";
 
 export type ChatDeal = {
     id: string;
@@ -15,6 +16,11 @@ export type ChatDeal = {
     price: number;
     status: string;
     created_by: string;
+    currency: string;
+    client_accepted: boolean;
+    provider_accepted: boolean;
+    client_rejected: boolean;
+    provider_rejected: boolean;
     provider: {
         full_name: string;
         phone: string;
@@ -43,24 +49,46 @@ interface ChatDealsReturnType {
     createDeal: (values: CreateDealSchemaType) => void;
     isCreatingDealError: boolean;
     isCreatingDeal: boolean;
+    isCreatingDealSuccess: boolean;
+
+    deleteDeal: (dealId: string) => void;
+    isDeletingDealError: boolean;
+    isDeletingDeal: boolean;
+    isDeletingDealSuccess: boolean;
+
+    acceptDeal: (dealId: string) => void;
+    isAcceptingDeal: boolean;
+    isAcceptingDealError: boolean;
+    isAcceptingDealSuccess: boolean;
+
+    rejectDeal: (dealId: string) => void;
+    isRejectingDeal: boolean;
+    isRejectingDealError: boolean;
+    isRejectingDealSuccess: boolean;
 }
 
 async function createNewDeal(values: CreateDealSchemaType) {
-    const { error } = await supabase
-        .from("conversation_deals")
-        .insert({
-            provider_id: values.provider_id,
-            client_id: values.client_id,
-            service_id: values.service_id,
-            created_by: values.created_by,
-            conversation_id: values.conversation_id
-        });
-    
+    if (!values || !values.client_id || !values.conversation_id || !values.currency || !values.price || !values.provider_id) {
+        return { success: false, error: "missing_data" }
+    }
+
+    const { data, error } = await supabase.functions.invoke("create-deal", {
+        body: values
+    });
+
     if (error) {
-        console.error("Error creating Deal: ", error);
-        throw {
+        console.error(error);
+        return {
             success: false,
-            error
+            error: error.message
+        }
+    }
+
+    if (data.error && !data.success) {
+        console.error(data.error);
+        return {
+            success: false,
+            error: error
         }
     }
 
@@ -70,10 +98,30 @@ async function createNewDeal(values: CreateDealSchemaType) {
     }
 }
 
+async function deleteDealWithId(dealId: string) {
+    if (!dealId) return { success: false, error: "missing_data" }
+
+    const { error } = await supabase.from("conversation_deals").delete().eq("id", dealId);
+
+    if (error) {
+        console.error("Error creating Deal: ", error);
+        throw {
+            success: false,
+            error: error.message
+        }
+    }
+
+    return {
+        success: true,
+        error: null
+    }
+}
+
+
 export const useChatDeals = ({
     conversationId
 }: ChatDealsProps): ChatDealsReturnType => {
-    const { t } = useTranslation("chats");
+    const { t } = useTranslation("chat");
     const { user } = useAuth();
 
     const queryClient = useQueryClient();
@@ -96,6 +144,11 @@ export const useChatDeals = ({
                     price,
                     status,
                     created_by,
+                    currency,
+                    client_accepted,
+                    provider_accepted,
+                    client_rejected,
+                    provider_rejected,
                     provider:profiles!conversation_deals_provider_id_fkey(
                         full_name,
                         phone
@@ -127,11 +180,16 @@ export const useChatDeals = ({
         mutate: createDeal,
         isError: isCreatingDealError,
         isPending: isCreatingDeal,
+        isSuccess: isCreatingDealSuccess
     } = useMutation({
         mutationKey: ["create-deal"],
         mutationFn: createNewDeal,
-        onSuccess: () => {
-            toast.success(t("deals.deal_created"))
+        onSuccess: ({ success, error }) => {
+            if (error) {
+                toast.error(t(error))
+            } else if (success) {
+                toast.success(t("deals.deal_created"))
+            }
             queryClient.invalidateQueries({
                 queryKey: ["chat-deals", conversationId]
             })
@@ -142,6 +200,50 @@ export const useChatDeals = ({
                 queryKey: ["chat-deals", conversationId]
             })
         }
+    });
+
+    const {
+        mutate: deleteDeal,
+        isError: isDeletingDealError,
+        isPending: isDeletingDeal,
+        isSuccess: isDeletingDealSuccess
+    } = useMutation({
+        mutationKey: ["delete-deal"],
+        mutationFn: deleteDealWithId,
+        onSuccess: ({ success, error }) => {
+            if (error) {
+                toast.error(t(error))
+            } else if (success) {
+                toast.success(t("deals.deal_deleted"))
+            }
+            queryClient.invalidateQueries({
+                queryKey: ["chat-deals", conversationId]
+            })
+        }
+    });
+
+    const {
+        mutate: acceptDeal,
+        isError: isAcceptingDealError,
+        isPending: isAcceptingDeal,
+        isSuccess: isAcceptingDealSuccess
+    } = useMutation({
+        mutationKey: ["accept-deal"],
+        mutationFn: async (dealId: string) => {
+            
+        }
+    })
+
+    const {
+        mutate: rejectDeal,
+        isError: isRejectingDealError,
+        isPending: isRejectingDeal,
+        isSuccess: isRejectingDealSuccess
+    } = useMutation({
+        mutationKey: ["reject-deal"],
+        mutationFn: async (dealId: string) => {
+            
+        }
     })
 
     return {
@@ -151,6 +253,22 @@ export const useChatDeals = ({
 
         createDeal,
         isCreatingDealError,
-        isCreatingDeal
+        isCreatingDeal,
+        isCreatingDealSuccess,
+
+        deleteDeal,
+        isDeletingDealError,
+        isDeletingDeal,
+        isDeletingDealSuccess,
+
+        acceptDeal,
+        isAcceptingDeal,
+        isAcceptingDealError,
+        isAcceptingDealSuccess,
+
+        rejectDeal,
+        isRejectingDeal,
+        isRejectingDealError,
+        isRejectingDealSuccess
     }
 }
