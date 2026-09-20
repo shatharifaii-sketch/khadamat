@@ -4,9 +4,13 @@ import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
 import { Home } from 'lucide-react';
 import React, { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 const CodeVerification = () => {
+  const { t } = useTranslation("auth");
+  const lang = localStorage.getItem("language") || "en";
+
   const location = useLocation();
   const navigate = useNavigate();
   const { verifyOtp } = useAuth();
@@ -17,9 +21,16 @@ const CodeVerification = () => {
 
   useEffect(() => {
     if (code.length > 6) {
-      setError('الكود لا يتجاوز 6 أرقام');
+      setError(t("code_verification.error_too_long"));
     }
-  }, [code]);
+  }, [code, t]);
+
+  if (!state || !state.email) {
+    navigate('/', { replace: true });
+    return null;
+  }
+
+  if (code.length > 6) setCode(code.slice(0, 6));
 
   const handleVerify = async () => {
     try {
@@ -31,8 +42,8 @@ const CodeVerification = () => {
       }
 
       navigate('/', { replace: true });
-    } catch (error: any) {
-      setError(error.message);
+    } catch (error: unknown) {
+      setError(error instanceof Error ? error.message : "Unknown Error!");
     }
   };
 
@@ -45,21 +56,22 @@ const CodeVerification = () => {
             <div className="bg-primary text-primary-foreground p-2 rounded-lg">
               <Home size={24} />
             </div>
-            <span className="text-2xl font-bold text-primary">خدمتك</span>
+            <img src="/application_logo_cut.png" className='h-12' alt="cut logo" />
           </Link>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>تأكيد الحساب</CardTitle>
+            <CardTitle>{t("code_verification.title")}</CardTitle>
           </CardHeader>
           <CardContent>
             <CardDescription>
-              أدخل كود التحقق المرسل لك على بريدك الالكتروني
+              {t("code_verification.description")}
             </CardDescription>
             <Input
               type='text'
               value={code}
+              placeholder={t("code_verification.input_placeholder")}
               onChange={(e) => setCode(e.target.value)}
               className='mt-4'
             />
@@ -67,7 +79,7 @@ const CodeVerification = () => {
           </CardContent>
           <CardFooter>
             <Button onClick={handleVerify} className='flex-1'>
-              تأكيد
+              {t("code_verification.button")}
             </Button>
           </CardFooter>
         </Card>

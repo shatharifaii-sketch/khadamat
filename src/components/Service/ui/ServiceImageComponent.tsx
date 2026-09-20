@@ -4,8 +4,9 @@ import { Loader, X } from 'lucide-react';
 interface Props {
     image: {
         id: string;
-        image_url: string;
-        image_name: string;
+        url: string;
+        name: string;
+        type?: 'image' | 'video';
     }
     removeImage: (imageId: string, imageUrl?: string) => void
     className?: string
@@ -14,7 +15,7 @@ interface Props {
 }
 
 const ServiceImageComponent = ({ image, removeImage, className, imageUrl, deletingImage }: Props) => {
-    console.log('deletingImage', deletingImage);
+
     return (
         <div className="relative group">
             {deletingImage && (
@@ -24,8 +25,8 @@ const ServiceImageComponent = ({ image, removeImage, className, imageUrl, deleti
             )}
             <div className={cn("aspect-square rounded-lg overflow-hidden border border-border z-10", className)}>
                 <img
-                    src={image.image_url}
-                    alt={image.image_name}
+                    src={image.url}
+                    alt={image.name}
                     className="w-full h-full object-cover"
                 />
             </div>
@@ -36,9 +37,6 @@ const ServiceImageComponent = ({ image, removeImage, className, imageUrl, deleti
             >
                 <X size={16} />
             </button>
-            <div className="absolute bottom-2 left-2 right-2 bg-black/50 text-white text-xs p-1 rounded truncate opacity-0 group-hover:opacity-100 transition-opacity overflow-x-auto max-w-[150px] z-10">
-                {image.image_name}
-            </div>
         </div>
     )
 }

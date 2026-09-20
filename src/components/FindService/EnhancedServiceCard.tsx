@@ -11,12 +11,16 @@ import { truncateString } from '@/lib/utils';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
+import ReviewsComponent from '../Service/ui/ReviewsComponent';
 
 interface EnhancedServiceCardProps {
   service: PublicService;
 }
 
 const EnhancedServiceCard = ({ service }: EnhancedServiceCardProps) => {
+  const { t } = useTranslation("services");
+  const lang = localStorage.getItem("language") || "en";
   const { incrementView } = useServiceViews();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -33,12 +37,12 @@ const EnhancedServiceCard = ({ service }: EnhancedServiceCardProps) => {
 
   return (
     <Card className="group flex flex-col justify-between hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 border-0 shadow-md hover:scale-105">
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-1 md:pb-3">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 text-right">
-            <div className="flex items-center gap-2 justify-end mb-2">
+            <div className="flex items-center gap-2 justify-end md:mb-2">
               <Badge variant="secondary" className="text-xs font-medium">
-                {categoryLabel}
+                {t(categoryLabel)}
               </Badge>
             </div>
             <CardTitle className="text-lg leading-tight group-hover:text-primary transition-colors line-clamp-2">
@@ -49,7 +53,7 @@ const EnhancedServiceCard = ({ service }: EnhancedServiceCardProps) => {
                 {service.title}
               </Button>
               <NavLink 
-              to={`/profile/${service.publisher?.id}`} className='text-sm text-muted-foreground flex items-center gap-2 hover:text-primary transition-colors mt-2'
+              to={`/profile/${service.publisher?.id}`} className='text-sm text-muted-foreground flex items-center gap-2 hover:text-primary transition-colors md:mt-2'
               >
               {service.publisher?.full_name}
               
@@ -69,21 +73,25 @@ const EnhancedServiceCard = ({ service }: EnhancedServiceCardProps) => {
         <div className="space-y-2">
           <div className="flex items-center gap-2 justify-end">
             <span className="font-semibold text-primary">{service.price_range}</span>
-            <Badge variant="outline" className="text-xs">السعر</Badge>
+            <Badge variant="outline" className="text-xs">{t("find_service.card.price")}</Badge>
           </div>
           <div className="flex items-center gap-2 justify-end text-sm text-muted-foreground">
-            <span>{service.location}</span>
+            <span>{t(service.location)}</span>
             <MapPin className="h-4 w-4" />
           </div>
         </div>
 
         {/* Stats */}
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <div dir={lang == "ar" ? "rtl" : "ltr"} className="flex items-center justify-between text-xs text-muted-foreground">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1">
               <span>{service.views}</span>
-              <Eye className="h-3 w-3" />
+              <Eye className="size-4" />
             </div>
+            <ReviewsComponent 
+              review_count={service.review_count}
+              avg_rating={service.average_rating}
+            />
           </div>
         </div>
 

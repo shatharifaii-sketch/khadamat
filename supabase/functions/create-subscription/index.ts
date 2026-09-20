@@ -1,7 +1,9 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "npm:resend@latest";
+import Stripe from "npm:stripe";
 
+const stripe = new Stripe(Deno.env.get("STRIPE_TEST_SEC_KEY")!);
 const resend = new Resend(Deno.env.get("RESEND_API_KEY")!);
 const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -10,9 +12,31 @@ const supabase = createClient(
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "authorization, content-type",
 };
+
+function formatDate(date?: string | Date | null) {
+  if (!date) return '—';
+
+  return new Intl.DateTimeFormat('ar-EG', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  }).format(new Date(date));
+}
+
+async function getCustomerIdFromDB(user_id: string) {
+  const { data: { stripe_customer_id }, error: customerError } = await supabase.from("profiles").select("*").eq("id", user_id).maybeSingle();
+
+  if (customerError) {
+    console.log(customerError);
+
+    return null;
+  }
+
+  return stripe_customer_id
+}
 
 //helper 1: Get subscription tier details
 async function getTier(tierId: string) {
@@ -25,7 +49,7 @@ async function getTier(tierId: string) {
 
 //helper 2: Check if user already has an active subscription
 async function getExistingActiveSubscription(userId: string) {
-  const { data: existingSubscription, error: fetchError } = await supabase.from("subscriptions").select("*").eq("user_id", userId).eq('status', 'active').maybeSingle();
+  const { data: existingSubscription, error: fetchError } = await supabase.from("subscriptions_dev").select("*").eq("user_id", userId).eq('status', 'active').maybeSingle();
 
   if (fetchError) throw fetchError;
 
@@ -33,15 +57,16 @@ async function getExistingActiveSubscription(userId: string) {
 }
 
 //helper 3: Create subscription and update tier user count
-async function createSubscription(userId: string, subscriptionTier: any, billingCycle: string, used_coupon_on_start: boolean, coupon_id: string | null, trialEndsAt: Date) {
+async function createSubscription(userId: string, subscriptionTier: any, billingCycle: string, trialEndsAt: Date, customerId: string) {
   const subscriptionPeriod = new Date();
   subscriptionPeriod.setFullYear(subscriptionPeriod.getFullYear() + 1);
 
-  const { data: newSubscription, error: insertError } = await supabase.from("subscriptions").insert([
+  const { data: newSubscription, error: insertError } = await supabase.from("subscriptions_dev").insert([
     {
       user_id: userId,
-      amount: billingCycle == "Monthly" ?
-        subscriptionTier.price_monthly_value : subscriptionTier.price_yearly_value,
+      amount: billingCycle == "Monthly" 
+          ? subscriptionTier.price_monthly_value 
+          : subscriptionTier.price_yearly_value,
       billing_cycle: billingCycle,
       services_allowed: subscriptionTier.allowed_services,
       auto_renew: false,
@@ -51,14 +76,14 @@ async function createSubscription(userId: string, subscriptionTier: any, billing
       tier_id: subscriptionTier.id,
       status: "active",
       next_payment_date: trialEndsAt.toISOString(),
-      used_coupon_on_start: used_coupon_on_start || false,
-      coupon_id: coupon_id || null,
+      currency: "ils",
+      stripe_customer_id: customerId
     }
   ]).select().maybeSingle();
 
   if (insertError) throw insertError;
 
-  const { error } = await supabase.from("subscription_tiers").update(
+  const { error } = await supabase.from("subscription_tiers_dev").update(
     { users: subscriptionTier.users + 1 }
   ).eq("id", subscriptionTier.id);
 
@@ -103,31 +128,35 @@ async function sendEmail(userId: string, subscriptionTier: any, finalAmount: num
     throw fetchError
   };
 
-  const {data, error} = await resend.emails.send({
-    from: `"اهلا بك (via Khedemtak Support)" <${Deno.env.get("APP_SUPPORT_EMAIL")}>`,
-    to: user?.email,
-    template: {
-      id: "new-subscription",
-      variables: {
-        name: user?.full_name || 'مستخدم',
-        product_name: Deno.env.get("APP_NAME"),
-        help_url: Deno.env.get("APP_HELP_URL"),
-        total: finalAmount.toString(),
-        due_date: new Date(newSubscription.next_payment_date).toLocaleDateString(),
-        coupon_used: newSubscription.used_coupon_on_start ? 'نعم' : 'لا',
+  const { error: resendError } = await resend.emails.send({
+      from: "Khedemtak <support@mail.khedemtak.com>",
+      to: user?.email,
+      template: {
+        id: "subscription-created",
+        variables: {
+          name: user?.full_name ?? 'مستخدم',
+          tier: subscriptionTier.title,
+          free_trial_period: subscriptionTier.free_trial_period_text,
+          billing_cycle: subscriptionTier.billing_cycle === 'yearly' ? 'سنوي' : 'شهري',
+          subscription_date: formatDate(newSubscription.created_at),
+          due_date: formatDate(newSubscription.trial_expires_at),
+          first_payment_date: formatDate(newSubscription.trial_expires_at),
+          total: finalAmount.toString(),
+          action_link: Deno.env.get('APP_ACCOUNT_PAGE_LIVE'),
+          help_url: Deno.env.get('APP_HELP_URL_LIVE'),
+        }
       }
-    }
-  });
+    });
 
-  if (error) {
-    throw new Error(error);
+  if (resendError) {
+    throw new Error(resendError);
   }
 
   return true;
 }
 
 // Main function to handle the request
-Deno.serve(async (req) => {
+Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, {
       headers: corsHeaders,
@@ -139,8 +168,20 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const { user_id, user_email, subscription_tier_id, billing_cycle, final_amount }: { user_id: string, user_email: string, subscription_tier_id: string, billing_cycle: string, final_amount: number } = await req.json();
 
-    const { user_id, subscription_tier_id, billing_cycle, used_coupon_on_start, coupon_id, final_amount }: { user_id: string, subscription_tier_id: string, billing_cycle: string, used_coupon_on_start: boolean, coupon_id: string | null, final_amount: number } = await req.json();
+    let customerId = await getCustomerIdFromDB(user_id);
+
+    if (!customerId) {
+      const customer = await stripe.customers.create({
+        email: user_email,
+        metadata: {
+          user_id
+        }
+      });
+      
+      customerId = customer.id;
+    }
 
     const subscriptionTier = await getTier(subscription_tier_id);
 
@@ -152,16 +193,16 @@ Deno.serve(async (req) => {
     }
 
     const trialEndsAt = new Date();
-    trialEndsAt.setMonth(trialEndsAt.getMonth() + 3);
+    trialEndsAt.setMonth(trialEndsAt.getMonth() + 4);
 
-    const newSubscription = await createSubscription(user_id, subscriptionTier, billing_cycle, used_coupon_on_start, coupon_id, trialEndsAt);
+    const newSubscription = await createSubscription(user_id, subscriptionTier, billing_cycle, trialEndsAt, customerId);
 
-    if (!(await createTransaction(newSubscription, user_id, billing_cycle, trialEndsAt))) {
-      return new Response(
-        JSON.stringify({ success: false, message: "Error creating subscription transaction" }),
-        { headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }, status: 500 }
-      );
-    }
+    // if (!(await createTransaction(newSubscription, user_id, billing_cycle, trialEndsAt))) {
+    //   return new Response(
+    //     JSON.stringify({ success: false, message: "Error creating subscription transaction" }),
+    //     { headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }, status: 500 }
+    //   );
+    // }
 
     if (!(await sendEmail(user_id, subscriptionTier, final_amount, newSubscription))) {
       return new Response(
