@@ -14,30 +14,29 @@ const resend = new Resend(Deno.env.get("RESEND_API_KEY")!);
 // Use secret for Server-to-server, internal calls
 export default {
   fetch: withSupabase({ auth: ["user", "secret"] }, async (req, ctx) => {
-    const { supabase, userClaims } = ctx;
+    const { supabase } = ctx;
+
+    const { values, role } = await req.json();
 
     try {
-      const { values, role } = await req.json();
+      const { error } = await supabase.from("conversation_deals").update(values.updateData).eq("id", values.dealId);
 
-      const { error } = await supabase.from("conversation_deals").insert({
-        provider_id: values.provider_id,
-        client_id: values.client_id,
-        service_id: values.service_id,
-        created_by: userClaims.id,
-        conversation_id: values.conversation_id,
-        price: values.price,
-        currency: values.currency,
-      });
+    if (error) {
+        console.error("error updating", error.message);
+        return { success: false, error: error.message }
+    }
 
-      if (error) {
-        console.error("Error creating Deal: ", error);
+    const { data: dealData, error: dealError } = await supabase.from("conversation_deals").select("conversation_id, client_id, provider_id, service_id, price, currency").maybeSingle();
+
+    if (dealError) {
+      console.error("Error getting deal data: ", dealError);
         return {
           success: false,
-          error: error.message,
-        };
-      }
+          error: dealError.message
+        }
+    }
 
-      const { data: sendTo, error: sendToError } = await supabase.from("profiles_with_emails").select("email").eq("id", role == "client" ? values.provider_id : values.client_id).maybeSingle();
+    const { data: sendTo, error: sendToError } = await supabase.from("profiles_with_email").select("email").eq("id", role == "client" ? dealData.provider_id : dealData.client_id).maybeSingle();
 
       if (sendToError) {
         console.error("Error getting sendTo data: ", sendToError);
@@ -47,7 +46,7 @@ export default {
         }
       }
 
-      const { data: userData, error: userError } = await supabase.from("profiles_with_emails").select("full_name, email, phone").eq("id", role == "client" ? values.client_id : values.provider_id).maybeSingle();
+      const { data: userData, error: userError } = await supabase.from("profiles_with_email").select("full_name, email, phone").eq("id", role == "client" ? dealData.client_id : dealData.provider_id).maybeSingle();
 
       if (userError) {
         console.error("Error getting userData data: ", userError);
@@ -58,19 +57,19 @@ export default {
       }
 
       const conversationLink = `
-      ${Deno.env.get("APP_URL_PROD")}/chat/${values.conversation_id}/${values.client_id}/${values.service_id}/${values.provider_id}
+      ${Deno.env.get("APP_URL_PROD")}/chat/${dealData.conversation_id}/${dealData.client_id}/${dealData.service_id}/${dealData.provider_id}
       `;
 
       const { error: resendError } = await resend.emails.send({
         from: "Khedemtak <support@mail.khedemtak.com>",
         to: sendTo.email,
         template: {
-          id: "new-deal",
+          id: "deal-rejected",
           variables: {
             role: role == "client" ? "الزبون" : "مقدم الخدمة",
             name: userData.full_name,
-            phone: userData.phone,
-            deal_price: values.price,
+            phone: JSON.stringify(userData.phone),
+            deal_price: `${JSON.stringify(dealData.price)} ${dealData.currency}`,
             conversation_link: conversationLink
           }
         }
@@ -84,7 +83,7 @@ export default {
         }
       }
 
-      return Response.json({
+    return Response.json({
         success: true,
         error: null,
       });
@@ -92,8 +91,8 @@ export default {
       console.error(error);
       return Response.json({
         success: false,
-        error,
-      });
+        error
+      })
     }
   }),
 };
@@ -103,7 +102,7 @@ export default {
   1. Run `supabase start` (see: https://supabase.com/docs/reference/cli/supabase-start)
   2. Make an HTTP request:
 
-  curl -i --location --request POST 'http://127.0.0.1:54321/functions/v1/create-deal' \
+  curl -i --location --request POST 'http://127.0.0.1:54321/functions/v1/reject-deal' \
     --header 'apiKey: sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH' \
     --data '{"name":"Functions"}'
 

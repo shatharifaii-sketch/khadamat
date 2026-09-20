@@ -15,7 +15,19 @@ const ChatDeals = ({ service, conversationId }: Props) => {
   const lang = localStorage.getItem("language") || "en";
   const isMobile = useIsMobile();
 
-  const { deals, deleteDeal, isDeletingDealSuccess } = useChatDeals({
+  const {
+    deals,
+    deleteDeal,
+    isDeletingDealSuccess,
+
+    acceptDeal,
+    isAcceptingDeal,
+    isAcceptingDealSuccess,
+
+    rejectDeal,
+    isRejectingDeal,
+    isRejectingDealSuccess,
+  } = useChatDeals({
     conversationId,
   });
 
@@ -40,7 +52,18 @@ const ChatDeals = ({ service, conversationId }: Props) => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-2">
         {deals.map((deal) => (
-          <DealCard key={deal.id} deal={deal} deleteDeal={deleteDeal} isDeletingDealSuccess={isDeletingDealSuccess} />
+          <DealCard
+            key={deal.id}
+            deal={deal}
+            deleteDeal={deleteDeal}
+            isDeletingDealSuccess={isDeletingDealSuccess}
+            acceptDeal={acceptDeal}
+            isAcceptingDeal={isAcceptingDeal}
+            isAcceptingDealSuccess={isAcceptingDealSuccess}
+            rejectDeal={rejectDeal}
+            isRejectingDeal={isRejectingDeal}
+            isRejectingDealSuccess={isRejectingDealSuccess}
+          />
         ))}
       </div>
     </div>

@@ -45,7 +45,9 @@
                 "title": "Delete Offer",
                 "delete": "Confirm delete",
                 "cancel": "Cancel"
-            }
+            },
+            "accepted": "Accepted",
+            "rejected": "Rejected"
         }
     }
 }

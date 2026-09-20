@@ -27,6 +27,8 @@ interface Props {
   setAttachment: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
+// TODO: Create a drawer for deals on mobile!!!!!!
+
 const ChatLayout = ({
   service,
   conversationId,
