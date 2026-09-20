@@ -453,7 +453,7 @@ export const useServiceImages = (serviceId: string) => {
     queryKey: ['service-media'],
     queryFn: async () => {
       if (!serviceId) {
-        console.error('No service id found when trying to fetch service images');
+        console.log('No service id found when trying to fetch service images');
 
         return []
       }

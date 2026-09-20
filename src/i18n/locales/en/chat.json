@@ -24,5 +24,30 @@
     "no_conversations": "No conversations",
     "received_new_message": "Received a new message",
     "view_message": "View Message",
-    "new_message_from": "New message from {{name}}"
+    "new_message_from": "New message from {{name}}",
+    "create_deal": "Create Deal",
+    "create_deal_form": {
+        "title": "Create a new Deal",
+        "description": "After creating the deal, the other person will get the option to accept it",
+        "deal_price": "Price",
+        "submit_button": "Send Deal",
+        "submit_error": "Error creating the deal",
+        "select_label": "Select a Currency"
+    },
+    "deals": {
+        "title": "Deals",
+        "description": "All the shared deals",
+        "deal_created": "New deal created",
+        "deal_deleted": "Deal deleted",
+        "deal": {
+            "online": "Online Service",
+            "delete": {
+                "title": "Delete Offer",
+                "delete": "Confirm delete",
+                "cancel": "Cancel"
+            },
+            "accepted": "Accepted",
+            "rejected": "Rejected"
+        }
+    }
 }
