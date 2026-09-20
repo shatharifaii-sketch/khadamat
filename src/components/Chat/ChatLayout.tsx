@@ -7,6 +7,7 @@ import ChatDeals from "./ui/ChatDeals";
 import ErrorBoundary from "../ErrorBoundary";
 import ChatDealsLoader from "./ui/ChatDealsLoader";
 import { CloudAlert } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 export interface ChatServiceProps {
   id: string;

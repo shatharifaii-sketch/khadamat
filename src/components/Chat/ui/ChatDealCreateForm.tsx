@@ -34,7 +34,7 @@ interface Props {
 
 const ChatDealCreateForm = ({ onSuccess }: Props) => {
   const { t } = useTranslation("chat");
-  const lang = localStorage.getItem("language") || "en";
+  const lang = localStorage.getItem("language") || "en"; 
 
   const { user } = useAuth();
   const {
@@ -54,7 +54,8 @@ const ChatDealCreateForm = ({ onSuccess }: Props) => {
   });
 
   const userId = user?.id;
-  console.log(userId);
+  
+  const role = userId == client_id ? "client" : "provider"
 
   const form = useForm<CreateDealSchemaType>({
     resolver: zodResolver(createDealSchema),
@@ -69,7 +70,10 @@ const ChatDealCreateForm = ({ onSuccess }: Props) => {
   });
 
   function onSubmit(values: CreateDealSchemaType) {
-    createDeal(values);
+    createDeal({
+      values,
+      role
+    });
   }
 
   useEffect(() => {

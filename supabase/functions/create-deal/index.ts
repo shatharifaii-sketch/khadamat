@@ -37,7 +37,7 @@ export default {
         };
       }
 
-      const { data: sendTo, error: sendToError } = await supabase.from("profiles_with_emails").select("email").eq("id", role == "client" ? values.provider_id : values.client_id).maybeSingle();
+      const { data: sendTo, error: sendToError } = await supabase.from("profiles_with_email").select("email").eq("id", role == "client" ? values.provider_id : values.client_id).maybeSingle();
 
       if (sendToError) {
         console.error("Error getting sendTo data: ", sendToError);
@@ -47,7 +47,7 @@ export default {
         }
       }
 
-      const { data: userData, error: userError } = await supabase.from("profiles_with_emails").select("full_name, email, phone").eq("id", role == "client" ? values.client_id : values.provider_id).maybeSingle();
+      const { data: userData, error: userError } = await supabase.from("profiles_with_email").select("full_name, email, phone").eq("id", role == "client" ? values.client_id : values.provider_id).maybeSingle();
 
       if (userError) {
         console.error("Error getting userData data: ", userError);
@@ -69,8 +69,8 @@ export default {
           variables: {
             role: role == "client" ? "الزبون" : "مقدم الخدمة",
             name: userData.full_name,
-            phone: userData.phone,
-            deal_price: values.price,
+            phone: JSON.stringify(userData.phone),
+            deal_price: `${JSON.stringify(values.price)} ${values.currency}`,
             conversation_link: conversationLink
           }
         }
