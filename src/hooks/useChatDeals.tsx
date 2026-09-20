@@ -48,7 +48,7 @@ interface ChatDealsReturnType {
   isDealsError: boolean;
   isDealsLoading: boolean;
 
-  createDeal: (values: CreateDealSchemaType) => void;
+  createDeal: ({values, role}: {values: CreateDealSchemaType; role: string}) => void;
   isCreatingDealError: boolean;
   isCreatingDeal: boolean;
   isCreatingDealSuccess: boolean;
@@ -85,7 +85,7 @@ interface ChatDealsReturnType {
   isRejectingDealSuccess: boolean;
 }
 
-async function createNewDeal(values: CreateDealSchemaType) {
+async function createNewDeal({values, role}: {values: CreateDealSchemaType; role: string}) {
   if (
     !values ||
     !values.client_id ||
@@ -98,7 +98,10 @@ async function createNewDeal(values: CreateDealSchemaType) {
   }
 
   const { data, error } = await supabase.functions.invoke("create-deal", {
-    body: values,
+    body: {
+      values,
+      role
+    },
   });
 
   if (error) {
