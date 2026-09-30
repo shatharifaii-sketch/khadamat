@@ -25,6 +25,7 @@
     "received_new_message": "تم استلام رسالة جديدة",
     "view_message": "عرض الرسالة",
     "new_message_from": "رسالة جديدة من {{name}}",
+    "deal_suggestion": "ينصح بالإتفاق على عرض من خلال ميزة العرض على الموقع للحرص على حق الطرفين",
     "create_deal": "انشاء عرض",
     "create_deal_form": {
         "title": "انشاء عرض جديد",
@@ -32,7 +33,9 @@
         "deal_price": "السعر",
         "submit_button": "ارسال العرض",
         "submit_error": "حدث خطأ خلال انشاء العرض",
-        "select_label": "اختر العملة"
+        "select_label": "اختر العملة",
+        "first_note": "تأكد من السعر و العملة.",
+        "second_note": "للمحافظة على حقوق الطرفين لن يسمح بحذف الاتفاق بعد قبول الطرفين"
     },
     "deals": {
         "title": "العروض",
@@ -47,7 +50,8 @@
                 "cancel": "رجوع"
             },
             "rejected": "مرفوض",
-            "accepted": "مقبول"
+            "accepted": "مقبول",
+            "delete_not_allowed": "لا يمكن حذف الاتفاق!"
         }
     }
 }
