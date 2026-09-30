@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 import { Dot, ThumbsDown, ThumbsUp, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 interface Props {
   deal: ChatDeal;
@@ -95,6 +96,9 @@ const DealCard = ({
     userRole == "client" ? deal.client_rejected : deal.provider_rejected;
 
   const handleDelete = () => {
+    if (deal.client_accepted && deal.provider_accepted) {
+      toast.warning(t("deals.deal.delete_not_allowed"))
+    }
     deleteDeal(deal.id);
   };
 

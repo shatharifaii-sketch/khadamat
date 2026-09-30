@@ -125,44 +125,50 @@ const ChatMessageInput = ({
             className="w-full"
           />
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-1/2">
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="hidden"
-            />
-            <Button
-              type="button"
-              onClick={handleOpenFilePicker}
-              variant={previewURL ? "ghost" : "outline"}
-              disabled={!!previewURL}
-              className="w-full"
-            >
-              <Paperclip />
-            </Button>
-          </div>
-          <div className="flex items-center justify-between gap-2 w-full">
-            <Button type="submit" variant="default" className="w-1/2">
-              <SendHorizonal className="w-20 h-20" />
-              {t("send_button")}
-            </Button>
+        <div className="flex flex-col gap-3 pb-2">
+          <div className="flex items-center gap-2">
+            <div className="w-1/3">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+              <Button
+                type="button"
+                onClick={handleOpenFilePicker}
+                variant={previewURL ? "ghost" : "outline"}
+                disabled={!!previewURL}
+                className="w-full"
+              >
+                <Paperclip />
+              </Button>
+            </div>
+            <div className="flex items-center justify-between gap-2 w-full">
+              <Button type="submit" variant="default" className="w-1/2">
+                <SendHorizonal className="w-20 h-20" />
+                {t("send_button")}
+              </Button>
 
-            <Dialog open={creatingDeal} onOpenChange={setCreatingDeal}>
-              <DialogTrigger asChild>
-                <Button type="button" variant="outline" className="w-1/2">
-                  <Handshake className="w-20 h-20" />
-                  {isMobile ? "" : t("create_deal")}
-                </Button>
-              </DialogTrigger>
+              <Dialog open={creatingDeal} onOpenChange={setCreatingDeal}>
+                <DialogTrigger asChild>
+                  <Button type="button" variant="outline" className="w-1/2">
+                    <Handshake className="w-20 h-20" />
+                    {isMobile ? "" : t("create_deal")}
+                  </Button>
+                </DialogTrigger>
 
-              <DialogContent>
-                <ChatDealCreateForm onSuccess={() => setCreatingDeal(false)} />
-              </DialogContent>
-            </Dialog>
+                <DialogContent>
+                  <ChatDealCreateForm
+                    onSuccess={() => setCreatingDeal(false)}
+                  />
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
+
+          <p className="text-muted-foreground text-sm">{t("deal_suggestion")}</p>
         </div>
       </form>
     </div>

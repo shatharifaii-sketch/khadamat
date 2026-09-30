@@ -5,6 +5,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -160,6 +161,13 @@ const ChatDealCreateForm = ({ onSuccess }: Props) => {
               </Field>
             )}
           />
+        </div>
+
+        <div className="px-7">
+          <ul className="list-disc text-sm text-muted-foreground">
+            <li>{t("create_deal_form.first_note")}</li>
+            <li>{t("create_deal_form.second_note")}</li>
+          </ul>
         </div>
 
         <Button

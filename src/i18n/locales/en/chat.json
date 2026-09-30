@@ -25,6 +25,7 @@
     "received_new_message": "Received a new message",
     "view_message": "View Message",
     "new_message_from": "New message from {{name}}",
+    "deal_suggestion": "It is recommended to agree on a deal through the website's deals system to make sure both parties are safe.",
     "create_deal": "Create Deal",
     "create_deal_form": {
         "title": "Create a new Deal",
@@ -32,7 +33,9 @@
         "deal_price": "Price",
         "submit_button": "Send Deal",
         "submit_error": "Error creating the deal",
-        "select_label": "Select a Currency"
+        "select_label": "Select a Currency",
+        "first_note": "Check the price and currency and make sure they are correct",
+        "second_note": "For the safety of both parties, the deal is not allowed to be deleted after both parties have accepted it."
     },
     "deals": {
         "title": "Deals",
@@ -47,7 +50,8 @@
                 "cancel": "Cancel"
             },
             "accepted": "Accepted",
-            "rejected": "Rejected"
+            "rejected": "Rejected",
+            "delete_not_allowed": "Deal can't be deleted!"
         }
     }
 }
