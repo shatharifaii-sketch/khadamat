@@ -407,6 +407,33 @@ export const useServices = () => {
     }
   })
 
+  const {
+    data: popularServices,
+    isLoading: isPopularServicesLoading,
+    isError: isPopularServicesError
+  } = useSuspenseQuery({
+    queryKey: ['popular-services'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("services").select(
+          `
+            *,
+            publisher:fk_services_user_id (
+              id,
+              full_name,
+              profile_image_url
+            )
+          `,
+      ).eq("status", "published").order("views", { ascending: false }).limit(10)
+
+      if (error) {
+        console.error('Error fetching popular services:', error);
+        throw error;
+      }
+
+      return data as PublicService[];
+    }
+  })
+
   return {
     createService,
     updateService,
@@ -419,7 +446,10 @@ export const useServices = () => {
     saveService,
     isSavingService,
     isSavingServiceError,
-    isSavingServiceSuccess
+    isSavingServiceSuccess,
+    popularServices,
+    isPopularServicesLoading,
+    isPopularServicesError
   };
 };
 

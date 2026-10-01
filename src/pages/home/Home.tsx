@@ -17,7 +17,7 @@ const Home = () => {
   const lang = localStorage.getItem("language") || "en";
   const { data: homeStats, isLoading, error } = useHomeStats();
   const { user } = useAuth();
-  const { canPost } = useSubscription();
+  const { hasSubscription } = useSubscription();
   const SubscriptionModal = React.lazy(
     () => import("@/components/PostService/SubscriptionsModal"),
   );
@@ -224,7 +224,7 @@ const Home = () => {
               ? t("cta.subtitle_1", { count: homeStats.serviceProvidersCount })
               : t("cta.subtitle_2")}
           </p>
-          {user && canPost ? (
+          {user && hasSubscription ? (
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/post-service">
                 <Button
