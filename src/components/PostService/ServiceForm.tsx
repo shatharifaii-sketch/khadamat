@@ -1,24 +1,29 @@
-
-import { Card, CardContent } from '@/components/ui/card';
-import { useServiceForm } from '@/hooks/useServiceForm';
-import ServiceFormHeader from './ServiceFormHeader';
-import ServiceBasicInfo from './ServiceBasicInfo';
-import ServicePricing from './ServicePricing';
-import ServiceLocation from './ServiceLocation';
-import ServiceContact from './ServiceContact';
-import ServiceExperience from './ServiceExperience';
-import ServicePortfolio from './ServicePortfolio';
-import ServiceFormSubmit from './ServiceFormSubmit';
-import { useEffect } from 'react';
-import { PENDING_SERVICE_KEY, usePendingService } from '@/hooks/usePendingService';
-import ServiceImages from '../Service/ui/EditServiceImages';
-import { Service } from '@/hooks/useAdminFunctionality';
+import { Card, CardContent } from "@/components/ui/card";
+import { useServiceForm } from "@/hooks/useServiceForm";
+import ServiceFormHeader from "./ServiceFormHeader";
+import ServiceBasicInfo from "./ServiceBasicInfo";
+import ServicePricing from "./ServicePricing";
+import ServiceLocation from "./ServiceLocation";
+import ServiceContact from "./ServiceContact";
+import ServiceExperience from "./ServiceExperience";
+import ServiceFormSubmit from "./ServiceFormSubmit";
+import { useEffect } from "react";
+import {
+  PENDING_SERVICE_KEY,
+  usePendingService,
+} from "@/hooks/usePendingService";
+import ServiceImages from "../Service/ui/EditServiceImages";
+import { Service } from "@/hooks/useAdminFunctionality";
+import ServiceLinks from "./ServiceLinks";
+import WhatsappNumberInput from "./WhatsappNumberInput";
+import AppointmentsCheck from "./AppointmentsCheck";
 
 interface ServiceFormProps {
   serviceToEdit?: Service | null;
 }
 
 const ServiceForm = ({ serviceToEdit }: ServiceFormProps) => {
+  const lang = localStorage.getItem("language") || "en";
   const {
     formData,
     handleInputChange,
@@ -29,7 +34,7 @@ const ServiceForm = ({ serviceToEdit }: ServiceFormProps) => {
     isUpdating,
     canPostService,
     pendingService,
-    getFieldError
+    getFieldError,
   } = useServiceForm(serviceToEdit);
 
   const { clearPendingService, savePendingService } = usePendingService();
@@ -41,70 +46,101 @@ const ServiceForm = ({ serviceToEdit }: ServiceFormProps) => {
   }, [isEditMode, pendingService, clearPendingService]);
 
   return (
-    <Card>
-      <ServiceFormHeader 
-        isEditMode={isEditMode} 
-        hasPendingService={!!pendingService && !isEditMode} 
+    <Card dir={lang === "ar" ? "rtl" : "ltr"}>
+      <ServiceFormHeader
+        isEditMode={isEditMode}
+        hasPendingService={!!pendingService && !isEditMode}
       />
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
+      <CardContent className="px-2 py-1" dir={lang == "ar" ? "rtl" : "ltr"}>
+        <form onSubmit={handleSubmit} className="space-y-3 md:space-y-6"  dir={lang == "ar" ? "rtl" : "ltr"}>
           <ServiceBasicInfo
             title={formData.title}
             category={formData.category}
             description={formData.description}
-            onTitleChange={(value) => handleInputChange('title', value)}
-            onCategoryChange={(value) => handleInputChange('category', value)}
-            onDescriptionChange={(value) => handleInputChange('description', value)}
-            onTitleBlur={() => handleFieldBlur('title')}
-            onDescriptionBlur={() => handleFieldBlur('description')}
-            titleError={getFieldError('title')}
-            categoryError={getFieldError('category')}
-            descriptionError={getFieldError('description')}
+            onTitleChange={(value) => handleInputChange("title", value)}
+            onCategoryChange={(value) => handleInputChange("category", value)}
+            onDescriptionChange={(value) =>
+              handleInputChange("description", value)
+            }
+            onTitleBlur={() => handleFieldBlur("title")}
+            onDescriptionBlur={() => handleFieldBlur("description")}
+            titleError={getFieldError("title")}
+            categoryError={getFieldError("category")}
+            descriptionError={getFieldError("description")}
           />
 
-          <ServicePricing
-            price={formData.price}
-            onPriceChange={(value) => handleInputChange('price', value)}
-            onPriceBlur={() => handleFieldBlur('price')}
-            priceError={getFieldError('price')}
-          />
+          <div className="w-full grid grid-cols-2 gap-7 items-end justify-center">
+            <ServicePricing
+              price={formData.price}
+              onPriceChange={(value) => handleInputChange("price", value)}
+              onPriceBlur={() => handleFieldBlur("price")}
+              priceError={getFieldError("price")}
+            />
+            <AppointmentsCheck
+              check={formData.with_appointments}
+              onChange={(value) =>
+                handleInputChange("with_appointments", value)
+              }
+              availability={formData.availability}
+              onAvailabilityChange={(value) => handleInputChange("availability", value)}
+              isServiceEditMode={isEditMode}
+            />
+          </div>
 
           <ServiceLocation
+            is_online={formData.is_online}
+            onOnlineChange={(value) => handleInputChange("is_online", value)}
             location={formData.location}
-            onLocationChange={(value) => handleInputChange('location', value)}
-            onLocationBlur={() => handleFieldBlur('location')}
-            locationError={getFieldError('location')}
+            onLocationChange={(value) => handleInputChange("location", value)}
+            onLocationBlur={() => handleFieldBlur("location")}
+            locationError={getFieldError("location")}
           />
 
           <ServiceContact
             phone={formData.phone}
             email={formData.email}
-            onPhoneChange={(value) => handleInputChange('phone', value)}
-            onEmailChange={(value) => handleInputChange('email', value)}
-            onPhoneBlur={() => handleFieldBlur('phone')}
-            onEmailBlur={() => handleFieldBlur('email')}
-            phoneError={getFieldError('phone')}
-            emailError={getFieldError('email')}
+            onPhoneChange={(value) => handleInputChange("phone", value)}
+            onEmailChange={(value) => handleInputChange("email", value)}
+            onPhoneBlur={() => handleFieldBlur("phone")}
+            onEmailBlur={() => handleFieldBlur("email")}
+            phoneError={getFieldError("phone")}
+            emailError={getFieldError("email")}
+          />
+
+          <ServiceLinks
+            socialLinks={formData.links}
+            onChange={(value) => handleInputChange("links", value)}
+          />
+
+          <WhatsappNumberInput
+            whatsappNumber={formData.whatsapp_number}
+            onChange={(value) => handleInputChange("whatsapp_number", value)}
+            error={getFieldError("whatsapp_number")}
           />
 
           <ServiceExperience
             experience={formData.experience}
-            onExperienceChange={(value) => handleInputChange('experience', value)}
+            onExperienceChange={(value) =>
+              handleInputChange("experience", value)
+            }
           />
 
           {/* <ServicePortfolio onImagesChange={(images) => {
             handleInputChange('images', images);
           }} /> */}
           <ServiceImages
-           onImagesChange={(images) => {
-            handleInputChange('images', images);
-          }}
-            serviceImages={serviceToEdit?.service_images}
+            onMediaChange={(media) => {
+              handleInputChange("media", media);
+            }}
+            serviceMedia={serviceToEdit?.service_media}
           />
 
           <ServiceFormSubmit
             savePendingService={() => {
-              localStorage.setItem(PENDING_SERVICE_KEY, JSON.stringify(formData));
+              localStorage.setItem(
+                PENDING_SERVICE_KEY,
+                JSON.stringify(formData),
+              );
             }}
             isCreating={isCreating || isUpdating}
             canPostService={canPostService}

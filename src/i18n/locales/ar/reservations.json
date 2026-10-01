@@ -1,0 +1,104 @@
+{
+    "رام الله": "رام الله",
+    "القدس": "القدس",
+    "بيت لحم": "بيت لحم",
+    "الخليل": "الخليل",
+    "نابلس": "نابلس",
+    "جنين": "جنين",
+    "طولكرم": "طولكرم",
+    "قلقيلية": "قلقيلية",
+    "سلفيت": "سلفيت",
+    "أريحا": "أريحا",
+    "طوباس": "طوباس",
+    "غزة": "غزة",
+    "رفح": "رفح",
+    "خان يونس": "خان يونس",
+    "دير البلح": "دير البلح",
+    "page_title": "المواعيد و الحجوزات",
+    "more_data_needed": "البيانات غير كاملة",
+    "unexpected_error_occured": "حدث خطأ غير متوقع",
+    "provider_not_available": "مقدم الخدمة مشغول في الوقت المحدد",
+    "failed_to_check_other_reservations": "حدث خطأ اثناء التحقق من توفر مقدم الخدمة",
+    "provider_busy": "المقدم لديه موعد ثاني في الوقت المحدد",
+    "no_reservation_found": "الحجز غير موجود",
+    "today": "اليوم",
+    "month": "شهر",
+    "week": "اسبوع",
+    "day": "يوم",
+    "list": "قائمة",
+    "year": "سنة",
+    "reservation_deleted": "تم حذف الموعد بنجاح",
+    "days": {
+        "sunday": "الأحد",
+        "monday": "الاثنين",
+        "tuesday": "الثلاثاء",
+        "wednesday": "الأربعاء",
+        "thursday": "الخميس",
+        "friday": "الجمعة",
+        "saturday": "السبت"
+    },
+    "create_reservation": {
+        "title": "احجز موعد جديد!",
+        "description": "أنشئ حجز جديد مع مستخدم آخر.",
+        "pick_date": "اختر تاريخ",
+        "date_field_description": "التاريخ يجب أن يكون بعد اليوم",
+        "pick_start_time": "بداية الموعد",
+        "start_time_field_description": "مقدم الخدمة متاح بين {{fromTime}} و {{toTime}} ",
+        "pick_end_time": "نهاية الموعد",
+        "end_time_field_description": "على الاقل ساعة كاملة بعد البدء",
+        "reset": "إعادة تسجيل",
+        "submit": "تأكيد الحجز",
+        "24_format": "24h",
+        "12_format": "12h",
+        "pick_time": "اختر وقت"
+    },
+    "availability_form": {
+        "title": "حدد أوقات العمل",
+        "desc": "يمكنك تحديد أوقات عملك خلال الاسبوع للخدمة و تحديد إن كان المستخدم بيقدر يحجز موعد",
+        "with_appointments": "افتح حجز المواعيد للخدمة هذه",
+        "days": "قائمة أيام العمل",
+        "reset": "إعادة تسجيل",
+        "from": "بداية الموعد",
+        "to": "نهاية الموعد",
+        "save": "احفظ التغييرات",
+        "errors": {
+            "Invalid ISO time": "خطأ غير متوقع",
+            "end_time_must_be_after_start_time": "نهاية الموعد لازم تكون بعد البداية"
+        }
+    },
+    "service": {
+        "with_appointments": "الخدمة متاحة للحجز",
+        "make_reservation": "احجز موعد",
+        "request_cancel": "طلب إلغاء",
+        "cancel": "الغاء الموعد",
+        "card": {
+            "online": "خدمة رقمية اونلاين",
+            "update_availability": "حدث أوقات العمل"
+        },
+        "no_reservations": "لا توجد أي حجوزات"
+    },
+    "event": {
+        "reject": "رفض",
+        "accept": "قبول",
+        "delete": "حذف",
+        "client": "اسم الزبون",
+        "phone": "رقم الزبون",
+        "date": "تاريخ الموعد",
+        "start_time": "وقت البداية",
+        "end_time": "وقت النهاية",
+        "title": "تفاصيل الموعد",
+        "cancel_requested": "طلب الغاء",
+        "declined": "مرفوض",
+        "accepted": "مقبول",
+        "pending": "منتظر"
+    },
+    "services": {
+        "title": "خدمات للحجز",
+        "description": "اتطلع على معلومات الخدمات و أوقات العمل"
+    },
+    "date": {
+        "title": "تفاصيل اليوم",
+        "description": "تفقد المواعيد المسجلة"
+    },
+    "reservation_accepted": "تم قبول الموعد"
+}

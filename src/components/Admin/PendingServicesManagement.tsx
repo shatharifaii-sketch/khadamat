@@ -1,4 +1,4 @@
-import { Service, useAdminFunctionality } from '@/hooks/useAdminFunctionality';
+import { Service, useAdminFunctionality, usePendingServices } from '@/hooks/useAdminFunctionality';
 import React, { useMemo, useState } from 'react'
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
@@ -12,15 +12,25 @@ import { NavLink } from 'react-router-dom';
 import ServiceForm from './ui/ServiceForm';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 import PendingServiceData from './ui/PendingServiceData';
+import { useTranslation } from 'react-i18next';
+import PaginationComponent from '../PaginationComponent';
 
 interface Props {
-  services: Service[];
-  onServiceUpdated: () => void
+  count?: number
 }
 
 type SortOption = "name-ar" | "name-en" | "date-asc" | "date-desc";
 
-const PendingServicesManagement = ({ services }: Props) => {
+const PendingServicesManagement = ({ count }: Props) => {
+  const { t } = useTranslation("admin");
+  const lang = localStorage.getItem("language") || "en";
+
+  const [page, setPage] = useState(1);
+  const [cursorHistory, setCursorHistory] = useState<number[]>([0]);
+  const cursor = cursorHistory[page - 1];
+
+  const { pendingServicesList: services, hasNextPage, nextCursor, pendServicesCount } = usePendingServices({ pendingServicesCursor: cursor }) 
+
   const [serviceToAccept, setServiceToAccept] = useState<Service | null>(null);
   const [sortOption, setSortOption] = useState<SortOption>('date-desc');
 
@@ -45,13 +55,12 @@ const PendingServicesManagement = ({ services }: Props) => {
     try {
       deleteService.mutate(serviceId);
 
-      toast("تم الحذف", {
-        description: "تم حذف الخدمة بنجاح"
+      toast(t("table.pending_services_management.toasts.deleted_title"), {
+        description: t("table.pending_services_management.toasts.deleted_description"),
       });
-    } catch (error: any) {
-      toast("خطأ", {
-        description: error.message || "حدث خطأ أثناء حذف الخدمة",
-        type: "error"
+    } catch (error: unknown) {
+      toast.error(t("table.pending_services_management.toasts.error_title"), {
+        description: error instanceof Error ? error.message : t("table.pending_services_management.toasts.error_description"),
       });
     }
   };
@@ -60,18 +69,21 @@ const PendingServicesManagement = ({ services }: Props) => {
     <Card>
       <CardHeader className='flex flex-col gap-3'>
         <div className="flex items-center justify-between">
-          <CardTitle>إدارة الخدمات ت المنتظرة</CardTitle>
+          <CardTitle>{t("table.pending_services_management.title")}</CardTitle>
         </div>
         <Select value={sortOption} onValueChange={(value) => setSortOption(value as SortOption)}>
           <SelectTrigger>
-            <SelectValue placeholder="ترتيب حسب التاريخ" />
+            <SelectValue placeholder={t("table.pending_services_management.sort_placeholder")} />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              <SelectLabel className='text-right px-3 text-muted-foreground'>ترتيب حسب</SelectLabel>
-              <SelectItem value="date-desc">الأحدث</SelectItem>
-              <SelectItem value="date-asc">الأقدم</SelectItem>
-              <SelectItem value="name-ar">الاسم عربي</SelectItem> <SelectItem value="name-en">الاسم الانجليزي</SelectItem>
+              <SelectLabel className='text-right px-3 text-muted-foreground'>
+                {t("table.pending_services_management.sort.label")}
+              </SelectLabel>
+              <SelectItem value="date-desc">{t("table.pending_services_management.sort.newest")}</SelectItem>
+              <SelectItem value="date-asc">{t("table.pending_services_management.sort.oldest")}</SelectItem>
+              <SelectItem value="name-ar">{t("table.pending_services_management.sort.name_ar")}</SelectItem>
+              <SelectItem value="name-en">{t("table.pending_services_management.sort.name_en")}</SelectItem>
             </SelectGroup>
           </SelectContent>
         </Select>
@@ -80,12 +92,12 @@ const PendingServicesManagement = ({ services }: Props) => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className='text-end'>العنوان</TableHead>
-              <TableHead className='text-end'>الفئة</TableHead>
-              <TableHead className='text-end'>مقدم الخدمة</TableHead>
-              <TableHead className='text-end'>المشاهدات</TableHead>
-              <TableHead className='text-end'>الحالة</TableHead>
-              <TableHead className='text-end'>إجراءات</TableHead>
+              <TableHead className='text-end'>{t("table.pending_services_management.table.title")}</TableHead>
+              <TableHead className='text-end'>{t("table.pending_services_management.table.category")}</TableHead>
+              <TableHead className='text-end'>{t("table.pending_services_management.table.provider")}</TableHead>
+              <TableHead className='text-end'>{t("table.pending_services_management.table.views")}</TableHead>
+              <TableHead className='text-end'>{t("table.pending_services_management.table.status")}</TableHead>
+              <TableHead className='text-end'>{t("table.pending_services_management.table.actions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -99,7 +111,7 @@ const PendingServicesManagement = ({ services }: Props) => {
                 <TableCell>{service.views}</TableCell>
                 <TableCell>
                   <Badge variant='outline'>
-                    {service.status === 'pending-approval' ? 'قيد المراجعة' : 'موافق'}
+                    {service.status === 'pending-approval' ? t("table.pending_services_management.status.pending") : t("table.pending_services_management.status.approved")}
                   </Badge>
                 </TableCell>
                 <TableCell className='flex justify-end'>
@@ -112,7 +124,7 @@ const PendingServicesManagement = ({ services }: Props) => {
                       </DialogTrigger>
                       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
                         <DialogHeader>
-                          <DialogTitle>تحرير الخدمة</DialogTitle>
+                          <DialogTitle>{t("table.pending_services_management.dialogs.edit_title")}</DialogTitle>
                         </DialogHeader>
                         <PendingServiceData
                           service={serviceToAccept || null}
@@ -130,15 +142,15 @@ const PendingServicesManagement = ({ services }: Props) => {
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>تأكيد الحذف</AlertDialogTitle>
+                          <AlertDialogTitle>{t("table.pending_services_management.dialogs.delete_title")}</AlertDialogTitle>
                           <AlertDialogDescription>
-                            هل أنت متأكد من حذف الخدمة "{service.title}"؟ هذا الإجراء لا يمكن التراجع عنه.
+                            {t("table.pending_services_management.dialogs.delete_description", { title: service.title })}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                          <AlertDialogCancel>{t("table.pending_services_management.dialogs.cancel")}</AlertDialogCancel>
                           <AlertDialogAction onClick={() => handleDeleteService(service.id)} className="bg-destructive text-destructive-foreground">
-                            حذف
+                            {t("table.pending_services_management.dialogs.confirm_delete")}
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
@@ -149,12 +161,21 @@ const PendingServicesManagement = ({ services }: Props) => {
             ))) : (
               <TableRow>
                 <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
-                  لا يوجد خدمات قيد المراجعة
+                  {t("table.pending_services_management.empty_state")}
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
+        <PaginationComponent
+          cursor={nextCursor}
+          page={page}
+          setPage={setPage}
+          setCursorHistory={setCursorHistory}
+          hasNextPage={hasNextPage}
+          count={pendServicesCount}
+          cursorHistory={cursorHistory}
+        />
       </CardContent>
     </Card>
   );

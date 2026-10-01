@@ -1,0 +1,104 @@
+{
+    "رام الله": "Ramallah",
+    "القدس": "Jerusalem",
+    "بيت لحم": "Bethlehem",
+    "الخليل": "Hebron",
+    "نابلس": "Nablus",
+    "جنين": "Jenin",
+    "طولكرم": "Tulkarm",
+    "قلقيلية": "Qalqilya",
+    "سلفيت": "Salfit",
+    "أريحا": "Jericho",
+    "طوباس": "Tubas",
+    "غزة": "Gaza",
+    "رفح": "Rafah",
+    "خان يونس": "Khan Younis",
+    "دير البلح": "Deir al-Balah",
+    "page_title": "Reservations and Appointments",
+    "more_data_needed": "More data needed",
+    "unexpected_error_occured": "An unexpected error occured",
+    "provider_not_available": "Service provider is not available at the selected time",
+    "failed_to_check_other_reservations": "Failed to check if provider is not busy with other reservations",
+    "provider_busy": "Service provider is busy with another reservation",
+    "no_reservation_found": "Reservation was not found",
+    "today": "today",
+    "month": "Month",
+    "week": "Week",
+    "day": "Day",
+    "list": "List",
+    "year": "Year",
+    "reservation_deleted": "Reservation Deleted Successfully",
+    "days": {
+        "sunday": "Sunday",
+        "monday": "Monday",
+        "tuesday": "Tuesday",
+        "wednesday": "Wednesday",
+        "thursday": "Thursday",
+        "friday": "Friday",
+        "saturday": "Saturday"
+    },
+    "create_reservation": {
+        "title": "Create a new Reservation!",
+        "description": "Create a new Reservation with another user.",
+        "pick_date": "Pick a date",
+        "date_field_description": "The date must be at least in the next day",
+        "pick_start_time": "Starts at",
+        "start_time_field_description": "Service Provider is available between {{fromTime}} and {{toTime}}",
+        "pick_end_time": "Ends at",
+        "end_time_field_description": "At least 1 hour after the starting time",
+        "reset": "Reset Fields",
+        "submit": "Submit",
+        "24_format": "24h",
+        "12_format": "12h",
+        "pick_time": "Pick a time"
+    },
+    "availability_form": {
+        "title": "Working Schedule for this Service",
+        "desc": "Create a working schedule for this Service and you can let the Client create reservations through the website",
+        "with_appointments": "Open Client Reservations",
+        "days": "Days List",
+        "reset": "Reset Form Fields",
+        "from": "Start at",
+        "to": "End at",
+        "save": "Save Changes",
+        "errors": {
+            "Invalid ISO time": "Unexpected Error",
+            "end_time_must_be_after_start_time": "End time must be after start time"
+        }
+    },
+    "service": {
+        "with_appointments": "Service is available for reservations",
+        "make_reservation": "Make Reservation",
+        "request_cancel": "Request Cancel",
+        "cancel": "Cancel Reservations",
+        "card": {
+            "online": "Online Service",
+            "update_availability": "Update Availability"
+        },
+        "no_reservations": "No reservations yet"
+    },
+    "event": {
+        "reject": "Reject",
+        "accept": "Accept",
+        "delete": "Delete",
+        "client": "Client Name",
+        "phone": "Phone Number",
+        "date": "Date",
+        "start_time": "Start Time",
+        "end_time": "End Time",
+        "title": "Reservation Details",
+        "cancel_requested": "Cancel Requested",
+        "declined": "Declined",
+        "accepted": "Accepted",
+        "pending": "Pending"
+    },
+    "services": {
+        "title": "Services available for reservations",
+        "description": "View service details and update your time of availability"
+    },
+    "date": {
+        "title": "Day info",
+        "description": "View created appointments"
+    },
+    "reservation_accepted": "Reservation Accepted"
+}

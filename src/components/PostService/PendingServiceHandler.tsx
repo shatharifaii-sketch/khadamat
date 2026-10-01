@@ -53,7 +53,8 @@ const PendingServiceHandler = () => {
           location: pendingService.location,
           phone: pendingService.phone,
           email: pendingService.email,
-          experience: pendingService.experience
+          experience: pendingService.experience,
+          with_appointments: pendingService.with_appointments,
         });
         
         setProcessingStatus('success');
@@ -111,7 +112,7 @@ const PendingServiceHandler = () => {
     const timeoutId = setTimeout(() => handlePendingService(), checkInterval);
     
     return () => clearTimeout(timeoutId);
-  }, [user, pendingService, retryCount]);
+  }, [user, pendingService, retryCount, handlePendingService]);
 
   // Auto-retry mechanism with exponential backoff
   useEffect(() => {
@@ -123,14 +124,14 @@ const PendingServiceHandler = () => {
       
       return () => clearTimeout(retryTimeout);
     }
-  }, [processingStatus, retryCount]);
+  }, [handlePendingService, processingStatus, retryCount]);
 
   // Render processing status for better user feedback
   if (!pendingService || !user) return null;
 
   return (
     <div className="fixed bottom-4 right-4 z-50 max-w-sm">
-      <Card className="border-primary/20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+      <Card className="border-primary/20 bg-background/95 backdrop-blur-sm supports-backdrop-filter:bg-background/80">
         <CardContent className="p-4 space-y-3">
           <div className="flex items-center gap-3">
             {processingStatus === 'checking' && (
