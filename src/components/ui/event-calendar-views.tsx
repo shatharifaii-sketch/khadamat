@@ -45,7 +45,7 @@ const dayRowCommonClasses: CalendarOptions = {
   ),
   listItemEventTimeClass: (info) => cn(
     info.isNarrow ? 'ps-0.5' : 'ps-1',
-    'whitespace-nowrap overflow-hidden shrink-1',
+    'whitespace-nowrap overflow-hidden shrink',
   ),
   listItemEventTitleClass: (info) => cn(
     info.isNarrow ? 'px-0.5' : 'px-1',
@@ -105,7 +105,7 @@ export function EventCalendarViews({
       ----------------------------------------------------------------------------------------- */
 
       backgroundEventColor="var(--chart-3)"
-      backgroundEventClass="not-print:bg-[color-mix(in_oklab,var(--fc-event-color)_10%,transparent)] print:border-1 print:border-(--fc-event-color)"
+      backgroundEventClass="not-print:bg-[color-mix(in_oklab,var(--fc-event-color)_10%,transparent)] print:border print:border-(--fc-event-color)"
       backgroundEventTitleClass={(info) => cn(
         'opacity-50 italic',
         info.isNarrow
@@ -127,7 +127,7 @@ blockEventClass={(info) => cn(
   info.isInteractive && 'hover:bg-[color-mix(in_oklab,var(--fc-event-color)_30%,var(--background))]',
   (info.isDragging && !info.isSelected) && 'opacity-75',
 )}
-      blockEventTimeClass="whitespace-nowrap overflow-hidden shrink-1"
+      blockEventTimeClass="whitespace-nowrap overflow-hidden shrink"
       blockEventTitleClass="whitespace-nowrap overflow-hidden shrink-100"
 
       /* Row Event
@@ -142,22 +142,22 @@ blockEventClass={(info) => cn(
         info.isStartResizable
           ? cn(
               info.isSelected ? rowTouchResizerClass : rowPointerResizerClass,
-              '-start-2',
+              '-inset-s-2',
             )
           : (!info.isStart && !info.isNarrow) ? cn(
-              'ms-1 size-2 border-t-1 border-s-1 border-muted-foreground',
-              '-rotate-45 [[dir=rtl]_&]:rotate-45',
+              'ms-1 size-2 border-t border-s border-muted-foreground',
+              '-rotate-45 in-[[dir=rtl]]:rotate-45',
             ) : ''
       )}
       rowEventAfterClass={(info) => (
         info.isEndResizable
           ? cn(
               info.isSelected ? rowTouchResizerClass : rowPointerResizerClass,
-              '-end-1',
+              '-inset-e-1',
             )
           : (!info.isEnd && !info.isNarrow) ? cn(
-              'me-1 size-2 border-t-1 border-e-1 border-muted-foreground',
-              'rotate-45 [[dir=rtl]_&]:-rotate-45',
+              'me-1 size-2 border-t border-e border-muted-foreground',
+              'rotate-45 in-[[dir=rtl]]:-rotate-45',
             ) : ''
       )}
       rowEventInnerClass={(info) => cn(
@@ -176,7 +176,7 @@ blockEventClass={(info) => cn(
       ----------------------------------------------------------------------------------------- */
 
       columnEventClass={(info) => cn(
-        'border-s-6 not-print:pe-px print:border-e ring ring-background',
+        'border-s-6 not-print:pe-px print:border-e ring-3 ring-background',
         info.isStart && 'not-print:pt-px print:border-t rounded-t-sm',
         info.isEnd && 'mb-px not-print:pb-px print:border-b rounded-b-sm',
       )}
@@ -212,7 +212,7 @@ blockEventClass={(info) => cn(
 
       moreLinkClass="focus-visible:outline-3 outline-ring/50"
       moreLinkInnerClass="whitespace-nowrap overflow-hidden"
-      columnMoreLinkClass="mb-px border border-transparent print:border-black rounded-sm bg-[color-mix(in_oklab,var(--foreground)_10%,var(--background))] hover:bg-[color-mix(in_oklab,var(--foreground)_13%,var(--background))] print:bg-white ring ring-background"
+      columnMoreLinkClass="mb-px border border-transparent print:border-black rounded-sm bg-[color-mix(in_oklab,var(--foreground)_10%,var(--background))] hover:bg-[color-mix(in_oklab,var(--foreground)_13%,var(--background))] print:bg-white ring-3 ring-background"
       columnMoreLinkInnerClass={(info) => (
         info.isNarrow
           ? `p-0.5 ${xxsTextClass}`
@@ -298,7 +298,7 @@ blockEventClass={(info) => cn(
 
       popoverFormat={{ day: 'numeric', weekday: 'long' }}
       popoverClass="border rounded-md overflow-hidden shadow-lg m-1 bg-popover text-popover-foreground min-w-55"
-      popoverCloseClass="group absolute top-1 end-1 p-1 rounded-sm hover:bg-foreground/5 focus-visible:outline-3 outline-ring/50"
+      popoverCloseClass="group absolute top-1 inset-e-1 p-1 rounded-sm hover:bg-foreground/5 focus-visible:outline-3 outline-ring/50"
 
       /* Lane
       ----------------------------------------------------------------------------------------- */
@@ -368,7 +368,7 @@ blockEventClass={(info) => cn(
 
       navLinkClass="focus-visible:outline-3 outline-ring/50"
       inlineWeekNumberClass={(info) => cn(
-        'absolute end-0 whitespace-nowrap rounded-s-sm bg-foreground/5',
+        'absolute inset-e-0 whitespace-nowrap rounded-s-sm bg-foreground/5',
         info.isNarrow
           ? `top-0.5 my-px p-0.5 ${xxsTextClass}`
           : 'top-1 p-1 text-xs',
@@ -376,8 +376,8 @@ blockEventClass={(info) => cn(
       )}
       nonBusinessHoursClass="bg-foreground/3"
       highlightClass="bg-chart-1/15"
-      nowIndicatorLineClass="-m-px border-1 border-destructive"
-      nowIndicatorDotClass="-m-[6px] border-6 border-destructive size-0 rounded-full ring-2 ring-background"
+      nowIndicatorLineClass="-m-px border border-destructive"
+      nowIndicatorDotClass="m-[-6px] border-6 border-destructive size-0 rounded-full ring-2 ring-background"
 
       /* View-Specific Options
       ----------------------------------------------------------------------------------------- */

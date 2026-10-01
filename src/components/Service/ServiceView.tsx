@@ -104,7 +104,7 @@ const ServiceView = ({
               service.id
             }/${service.publisher.id}`}
           >
-            <Button variant="ghost" className="shadow border">
+            <Button variant="ghost" className="shadow-sm border">
               <MessageCircle />
               {t("find_service.service.conversation")}
             </Button>

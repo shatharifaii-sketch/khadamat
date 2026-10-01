@@ -62,7 +62,7 @@ const ServiceStatusIndicator = ({ status, views = 0, isNewlyPublished = false }:
       </Badge>
       
       {isNewlyPublished && (
-        <Badge className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground animate-pulse">
+        <Badge className="bg-linear-to-r from-primary to-primary/80 text-primary-foreground animate-pulse">
           {t("service_card.badge_new")}!
         </Badge>
       )}

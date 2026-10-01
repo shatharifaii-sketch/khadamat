@@ -37,14 +37,14 @@ const StarterWrapper = ({ tier_id, cycle }: Props) => {
     <div className="flex flex-col items-center justify-start h-screen w-4/5 mx-auto gap-5 mt-10" dir={lang === "ar" ? "rtl" : "ltr"}>
       <h1 className="text-4xl font-bold">{t("starter.title")}</h1>
       <Button
-        className="text-xl font-semibold w-full md:w-1/2 border-4 border-dashed border-white outline outline-2 outline-offset-2 outline-primary mb-5 py-6"
+        className="text-xl font-semibold w-full md:w-1/2 border-4 border-dashed border-white outline-solid outline-2 outline-offset-2 outline-primary mb-5 py-6"
         disabled={subscriptionTierIsPending || isSubscriptionTierError || creatingNewSubscription}
         onClick={handleCreateNewSubscription}
       >
         {t("starter.start_button")}
       </Button>
-      <div className="flex flex-col md:flex-row items-center justify-start md:items-start md:justify-center gap-5 h-[600px] text-start" dir={lang === "ar" ? "rtl" : "ltr"}>
-        <div className="flex flex-col gap-3 w-[400px]" dir={lang === "ar" ? "rtl" : "ltr"}>
+      <div className="flex flex-col md:flex-row items-center justify-start md:items-start md:justify-center gap-5 h-150 text-start" dir={lang === "ar" ? "rtl" : "ltr"}>
+        <div className="flex flex-col gap-3 w-100" dir={lang === "ar" ? "rtl" : "ltr"}>
           <h1 className="text-2xl font-semibold">{t("starter.description")}</h1>
           <div>
             <p className="text-muted-foreground">

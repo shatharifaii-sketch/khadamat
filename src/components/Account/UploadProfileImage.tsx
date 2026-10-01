@@ -75,7 +75,7 @@ const UploadProfileImage = ({ userImage, userName, userId }: Props) => {
             <div className={cn("flex items-center gap-5", isMobile && "flex-col")}>
                 <div className="relative rounded-lg">
                     {isPending && (
-                        <div className="absolute inset-0 flex items-center justify-center z-10 backdrop-blur-sm rounded-lg bg-muted-foreground/30">
+                        <div className="absolute inset-0 flex items-center justify-center z-10 backdrop-blur-xs rounded-lg bg-muted-foreground/30">
                             <Loader className="animate-spin text-primary" />
                         </div>
                     )}

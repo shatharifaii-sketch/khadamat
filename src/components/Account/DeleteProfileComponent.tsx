@@ -73,7 +73,7 @@ const DeleteProfileComponent = ({
             </AlertDialog>
 
             {isDeleting && (
-                <div className="fixed inset-0 z-[9999] bg-background/50 backdrop-blur-lg flex items-center justify-center">
+                <div className="fixed inset-0 z-9999 bg-background/50 backdrop-blur-lg flex items-center justify-center">
                     <Shredder className="text-primary size-40" />
                 </div>
             )}

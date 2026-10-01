@@ -197,9 +197,9 @@ const PhoneVerification = ({ phone, password }: Props) => {
           >
             <InputOTPGroup
               className="
-              *:data-[slot=input-otp-slot]:h-12
-              *:data-[slot=input-otp-slot]:w-11
-              *:data-[slot=input-otp-slot]:text-xl
+              data-[slot=input-otp-slot]:*:h-12
+              data-[slot=input-otp-slot]:*:w-11
+              data-[slot=input-otp-slot]:*:text-xl
               "
             >
               <InputOTPSlot index={0} />

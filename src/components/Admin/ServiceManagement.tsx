@@ -137,7 +137,7 @@ export const ServiceManagement = ({ count }: ServiceManagementProps) => {
                 </TableCell>
                 <TableCell className='flex justify-center'>
                   <div className="flex gap-2">
-                    <Button variant='link' size='sm' className='outline-primary outline outline-1'>
+                    <Button variant='link' size='sm' className='outline-primary outline-solid outline-1'>
                       <NavLink to={`/find-service/${service.id}`} className="flex items-center justify-center">
                         <Eye className="size-4" />
                       </NavLink>

@@ -151,7 +151,7 @@ const Navigation = () => {
   return (
     <nav
       className={cn(
-        "bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50",
+        "bg-background/95 backdrop-blur-sm supports-backdrop-filter:bg-background/60 sticky top-0 z-50",
         location.pathname.startsWith("/subscription-starter")
           ? "border-none"
           : "border-b",
@@ -208,7 +208,7 @@ const Navigation = () => {
           {/* Auth Section */}
           <div className="hidden md:flex items-center space-x-4 space-x-reverse">
             {user ? (
-              <div className="flex items-center space-x-4 space-x-reverse">
+              <div className="flex items-center gap-3">
                 <div className="flex items-center gap-6">
                   <AccountButton />
                   <ConvosButton />
@@ -248,7 +248,7 @@ const Navigation = () => {
                   <Menu size={20} />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+              <SheetContent side="right" className="w-75 sm:w-100">
                 <div className="flex flex-col space-y-4 mt-8">
                   <NavLink to="/find-service" onClick={() => setIsOpen(false)}>
                     <div className="flex items-center gap-2 text-lg">

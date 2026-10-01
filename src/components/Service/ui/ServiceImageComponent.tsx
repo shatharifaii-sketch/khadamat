@@ -19,7 +19,7 @@ const ServiceImageComponent = ({ image, removeImage, className, imageUrl, deleti
     return (
         <div className="relative group">
             {deletingImage && (
-                <div className='absolute inset-0 flex items-center justify-center z-50 backdrop-blur-sm rounded-lg'>
+                <div className='absolute inset-0 flex items-center justify-center z-50 backdrop-blur-xs rounded-lg'>
                     <Loader className='animate-spin text-white' />
                 </div>
             )}
