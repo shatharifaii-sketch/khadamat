@@ -6,7 +6,7 @@ const TopCategoriesWrapper = () => {
   const lang = localStorage.getItem("language") || "en";
 
   return (
-    <div className="lg:w-4/6 mx-auto px-10 py-7" dir={lang === "ar" ? "rtl" : "ltr"}>
+    <div className="lg:w-4/6 mx-auto px-3 sm:px-5 md:px-10 py-7" dir={lang === "ar" ? "rtl" : "ltr"}>
       <p className="text-lg md:text-2xl font-semibold text-start">
         {t("top_categories.title")}
       </p>

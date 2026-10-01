@@ -8,7 +8,7 @@ const PopularServicesWrapper = () => {
   const lang = localStorage.getItem("language") || "en";
 
   return (
-    <div className="lg:w-4/6 mx-auto px-10 py-7">
+    <div className="lg:w-4/6 mx-auto px-3 sm:px-5 md:px-10 py-7">
       <p className="text-lg md:text-2xl font-semibold text-start">
         {t("popular_services.title")}
       </p>
