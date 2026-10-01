@@ -138,7 +138,7 @@ const ChatMessageInput = ({
               <Button
                 type="button"
                 onClick={handleOpenFilePicker}
-                variant={previewURL ? "ghost" : "outline"}
+                variant={previewURL ? "ghost" : "outline-solid"}
                 disabled={!!previewURL}
                 className="w-full"
               >

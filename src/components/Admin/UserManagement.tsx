@@ -173,7 +173,7 @@ export const UserManagement = ({
                 </TableCell>
                 <TableCell className='flex items-center justify-center'>
                   <div className="flex gap-2">
-                    <Button variant='link' size='sm' className='outline-primary outline outline-1'>
+                    <Button variant='link' size='sm' className='outline-primary outline-solid outline-1'>
                       <NavLink to={`/profile/${user.id}`} className='flex items-center justify-center'>
                         {user.is_admin ? <ShieldUser className="size-4" /> : <Eye className="size-4" />}
                       </NavLink>

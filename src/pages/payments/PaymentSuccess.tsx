@@ -58,7 +58,7 @@ const ExtraServicePaymentSuccess = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/40 flex flex-col items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-linear-to-b from-background to-muted/40 flex flex-col items-center justify-center px-4 py-12">
       {/* HEADER */}
       <div className="text-center mb-8">
         <Link
@@ -120,9 +120,9 @@ const ExtraServicePaymentSuccess = () => {
         <div className="w-full max-w-lg">
           <Card className="border-green-200 shadow-2xl overflow-hidden">
             {/* TOP SECTION */}
-            <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-6 text-white text-center">
+            <div className="bg-linear-to-r from-green-500 to-emerald-500 p-6 text-white text-center">
               <div className="flex justify-center mb-4">
-                <div className="bg-white/20 backdrop-blur-sm rounded-full p-4">
+                <div className="bg-white/20 backdrop-blur-xs rounded-full p-4">
                   <CheckCircle2 className="size-14" />
                 </div>
               </div>

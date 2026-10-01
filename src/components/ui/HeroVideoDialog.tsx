@@ -155,7 +155,7 @@ export default function HeroVideoDialog({
       {/* {isVideoOpen &&
   createPortal(
     <div
-      className="fixed inset-0 z-[99999] bg-black/80 flex items-center justify-center"
+      className="fixed inset-0 z-99999 bg-black/80 flex items-center justify-center"
       onClick={() => setIsVideoOpen(false)}
     >
       TEST

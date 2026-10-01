@@ -67,17 +67,17 @@ const WebLineChart = ({ dailyStats, monthlyStats, yearlyStats }: StatProps) => {
                 <div className='flex flex-col md:flex-row gap-5'>
                     <ul className='grid grid-cols-3 md:flex md:flex-col gap-2 w-full justify-around md:justify-start'>
                         <li>
-                            <Button variant={dataKey === 'day' ? 'default' : 'outline'} className='w-full' onClick={() => handleChartStatsChange(formattedDailyStats, 'day')}>
+                            <Button variant={dataKey === 'day' ? 'default' : 'outline-solid'} className='w-full' onClick={() => handleChartStatsChange(formattedDailyStats, 'day')}>
                                 {t("chart.daily")}
                             </Button>
                         </li>
                         <li>
-                            <Button variant={dataKey === 'month' ? 'default' : 'outline'} className='w-full' onClick={() => handleChartStatsChange(formattedMonthlyStats, 'month')}>
+                            <Button variant={dataKey === 'month' ? 'default' : 'outline-solid'} className='w-full' onClick={() => handleChartStatsChange(formattedMonthlyStats, 'month')}>
                                 {t("chart.monthly")}
                             </Button>
                         </li>
                         <li>
-                            <Button variant={dataKey === 'year' ? 'default' : 'outline'} className='w-full' onClick={() => handleChartStatsChange(formattedYearlyStats, 'year')}>
+                            <Button variant={dataKey === 'year' ? 'default' : 'outline-solid'} className='w-full' onClick={() => handleChartStatsChange(formattedYearlyStats, 'year')}>
                                 {t("chart.yearly")}
                             </Button>
                         </li>

@@ -94,7 +94,7 @@ const SubscriptionCard = ({
           <Badge
             className={cn(
               "rounded-full px-4 py-1.5 text-sm font-semibold",
-              "shadow-sm",
+              "shadow-xs",
               subscription.badge_class_name,
             )}
           >
@@ -158,7 +158,7 @@ const SubscriptionCard = ({
   {selectedSubscription && (
     <div
       className={cn(
-        "rounded-2xl border-2 p-5 max-h-[400px] overflow-y-auto",
+        "rounded-2xl border-2 p-5 max-h-100 overflow-y-auto",
         selectedSubscription.class_name
       )}
     >
@@ -326,7 +326,7 @@ const SubscriptionsModal = ({
             {t("description")}
           </p>
         </div>
-        <div className="rounded-2xl border bg-gradient-to-b from-muted/40 to-background p-5 lg:p-6">
+        <div className="rounded-2xl border bg-linear-to-b from-muted/40 to-background p-5 lg:p-6">
           <div className="text-center mb-6">
             <p className="text-xl font-bold">{t("choose_plan")}</p>
 
@@ -336,12 +336,12 @@ const SubscriptionsModal = ({
           </div>
 
           <div className="flex flex-col items-center justify-center">
-            <div className="inline-flex items-center gap-1 rounded-full border bg-background p-1 shadow-sm">
+            <div className="inline-flex items-center gap-1 rounded-full border bg-background p-1 shadow-xs">
               <span
                 className={cn(
                   "rounded-full px-4 py-2 text-sm font-medium transition-all",
                   yearly
-                    ? "bg-primary text-primary-foreground shadow-sm"
+                    ? "bg-primary text-primary-foreground shadow-xs"
                     : "text-muted-foreground",
                 )}
               >
@@ -359,7 +359,7 @@ const SubscriptionsModal = ({
                 className={cn(
                   "rounded-full px-4 py-2 text-sm font-medium transition-all",
                   !yearly
-                    ? "bg-primary text-primary-foreground shadow-sm"
+                    ? "bg-primary text-primary-foreground shadow-xs"
                     : "text-muted-foreground",
                 )}
               >

@@ -177,11 +177,11 @@ const ReviewDialog = ({
                                 </Button>
                             ) : (
                                 <div className='flex gap-1'>
-                                    <Button onClick={() => setEditing(true)} className='outline outline-1' size='sm' variant='ghost'>
+                                    <Button onClick={() => setEditing(true)} className='outline-solid outline-1' size='sm' variant='ghost'>
                                         <Edit className='size-4' />
                                         {t("service.reviews.dialog.edit_review")}
                                     </Button>
-                                    <Button onClick={handleDeleteReview} className='outline outline-1' size='sm' variant='destructive' disabled={deleteReviewLoading}>
+                                    <Button onClick={handleDeleteReview} className='outline-solid outline-1' size='sm' variant='destructive' disabled={deleteReviewLoading}>
                                         <Trash className='size-4' />
                                     </Button>
                                 </div>

@@ -49,12 +49,12 @@ const ServicePage = () => {
           className="bg-transparent"
           dir={lang === "ar" ? "rtl" : "ltr"}
         >
-          <BreadcrumbList>
-            <BreadcrumbItem>
+          <BreadcrumbList className="bg-transparent">
+            <BreadcrumbItem className="bg-transparent">
               <BreadcrumbLink asChild>
                 <Link
                   to="/"
-                  className="flex items-center justify-center text-center"
+                  className="flex items-center justify-center text-center bg-transparent"
                 >
                   {t("home")}
                 </Link>
@@ -69,7 +69,7 @@ const ServicePage = () => {
               <BreadcrumbLink asChild>
                 <Link
                   to="/find-service"
-                  className="flex items-center justify-center"
+                  className="flex items-center justify-center bg-transparent"
                 >
                   {t("find_services")}
                 </Link>

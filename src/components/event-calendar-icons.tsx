@@ -3,13 +3,13 @@ import { cn } from '@/lib/utils'
 
 export function EventCalendarPrevIcon() {
   return (
-    <ChevronLeftIcon className="[[dir=rtl]_&]:rotate-180" />
+    <ChevronLeftIcon className="in-[[dir=rtl]]:rotate-180" />
   )
 }
 
 export function EventCalendarNextIcon() {
   return (
-    <ChevronRightIcon className="[[dir=rtl]_&]:rotate-180" />
+    <ChevronRightIcon className="in-[[dir=rtl]]:rotate-180" />
   )
 }
 
@@ -27,7 +27,7 @@ export function EventCalendarExpanderIcon(props: { isExpanded: boolean }) {
       className={cn(
         'size-4 m-px',
         hoverIconClassName,
-        !props.isExpanded && '-rotate-90 [[dir=rtl]_&]:rotate-90',
+        !props.isExpanded && '-rotate-90 in-[[dir=rtl]]:rotate-90',
       )}
     />
   )

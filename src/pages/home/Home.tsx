@@ -33,7 +33,7 @@ const Home = () => {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative pt-14 md:pt-20 pb-10 px-2 md:px-4 text-center bg-gradient-to-br from-accent/30 to-primary/10">
+      <section className="relative pt-14 md:pt-20 pb-10 px-2 md:px-4 text-center bg-linear-to-br from-accent/30 to-primary/10">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl md:text-6xl font-bold text-foreground mb-2 md:mb-6">
             {t("hero.title")}

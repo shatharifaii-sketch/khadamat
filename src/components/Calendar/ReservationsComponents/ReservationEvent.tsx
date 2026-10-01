@@ -55,7 +55,7 @@ const ReservationEvent = ({
       : reservation.status == "accepted"
         ? "default"
         : reservation.status == "delete requested"
-          ? "outline"
+          ? "outline-solid"
           : "destructive";
 
   const acceptRes = async () => {

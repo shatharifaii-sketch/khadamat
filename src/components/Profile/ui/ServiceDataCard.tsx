@@ -43,7 +43,7 @@ const ServiceDataCard = ({
                         </p>
                         <div className='flex gap-2 items-center justify-start' dir={lang === "ar" ? "rtl" : "ltr"}>
                             {isNewlyPublished && (
-                                <Badge className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground animate-pulse">
+                                <Badge className="bg-linear-to-r from-primary to-primary/80 text-primary-foreground animate-pulse">
                                     {t("services.newly_published")}!
                                 </Badge>
                             )}

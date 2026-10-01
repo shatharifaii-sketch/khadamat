@@ -64,7 +64,7 @@ export function EventCalendar({
         hasBorderBottom && 'border-b',
         (hasBorderTop && hasBorderX) && 'rounded-t-sm',
         (hasBorderBottom && hasBorderX) && 'rounded-b-sm',
-        (hasBorderX && hasBorderTop && hasBorderBottom) && 'shadow-xs',
+        (hasBorderX && hasBorderTop && hasBorderBottom) && 'shadow-2xs',
         !isHeightAuto && 'overflow-hidden',
       )}
       style={{ height }}
