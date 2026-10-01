@@ -6,6 +6,11 @@
         "find_service": "Find a Service",
         "post_service": "Post Your Service"
     },
+    "auth": {
+        "welcome_message": "Welcome to our platform!",
+        "description": "We are glad to have you on board. Explore the available services or post your own service.",
+        "become_member": "Start Your Subscription"
+    },
     "stats": {
         "service_providers": "Service Providers",
         "published_services": "Published Services",
