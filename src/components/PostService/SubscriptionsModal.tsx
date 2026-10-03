@@ -336,7 +336,7 @@ const SubscriptionsModal = ({
           </div>
 
           <div className="flex flex-col items-center justify-center">
-            <div className="inline-flex items-center gap-1 rounded-full border bg-background p-1 shadow-xs">
+            <div className="inline-flex items-center gap-1 rounded-full border bg-background p-1 shadow-xs" dir="rtl">
               <span
                 className={cn(
                   "rounded-full px-4 py-2 text-sm font-medium transition-all",

@@ -38,7 +38,6 @@ const TopCategoriesList = () => {
   return (
     <div
       ref={scrollRef}
-      onWheel={handleWheel}
       dir={lang === "ar" ? "rtl" : "ltr"}
       className={cn(
         "flex flex-row gap-2 overflow-x-auto scrollbar-hide py-5",
@@ -77,6 +76,7 @@ const TopCategoriesList = () => {
       focus-visible:ring-2
       focus-visible:ring-primary
       focus-visible:ring-offset-2
+      cursor-pointer
     "
             onClick={() => {
               navigate(`/find-service?category=${category.category}`);

@@ -18,6 +18,20 @@ export interface UserProfile {
   created_at?: string;
 }
 
+export interface TopProviderType {
+  id: string;
+  full_name?: string;
+  phone?: string;
+  location?: string;
+  profile_image_url?: string;
+  is_service_provider?: boolean;
+  services?: {
+    id: string;
+    title: string;
+    category: string;
+  }[];
+}
+
 export type SavedService = {
   id: string,
   user_id: string,
@@ -304,4 +318,54 @@ export const usePublisherProfile = (userId: string) => {
   })
 
   return { profile: getProfile, services: getServices };
+}
+
+export const useProviderProfiles = () => {
+  const { user } = useAuth();
+
+  const {
+    data: providers,
+    isLoading,
+    isError
+  } = useSuspenseQuery({
+    queryKey: ['active-providers'],
+    queryFn: async () => {
+      const { data: topProviders, error: topProvidersError } = await supabase.rpc('get_top_provider_ids');
+
+      if (topProvidersError) {
+        console.error('Error fetching top providers:', topProvidersError);
+        throw topProvidersError;
+      }
+
+      const providerIds = topProviders.map((p) => p.provider_id);
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select(`
+            id,
+            full_name,
+            profile_image_url,
+            location,
+            phone,
+            is_service_provider,
+            services (
+              id,
+              title,
+              category
+            )
+          `)
+          .eq("is_service_provider", true)
+          .neq("id", user?.id)
+          .in("id", providerIds);
+      
+      if (error) {
+        console.error('Error fetching active providers:', error);
+        throw error;
+      }
+
+      return data as TopProviderType[];
+    }
+  })
+
+  return { providers, isLoading, isError };
 }

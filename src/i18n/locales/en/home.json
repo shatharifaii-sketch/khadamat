@@ -30,6 +30,15 @@
         "error": "An error occurred while loading top categories. Please try again.",
         "empty": "No popular categories are currently available."
     },
+    "active_providers":{
+        "title": "Active Service Providers",
+        "description": "Discover the most active professional service providers on our platform",
+        "loading": "Loading active service providers...",
+        "error": "An error occurred while loading active service providers. Please try again.",
+        "empty": "No active service providers are currently available. Be the first to post your service!",
+        "services": "services",
+        "service": "service"
+    },
     "stats": {
         "service_providers": "Service Providers",
         "published_services": "Published Services",

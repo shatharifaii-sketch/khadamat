@@ -1,5 +1,6 @@
 import ErrorBoundary from "@/components/ErrorBoundary";
 import PopularServicesWrapper from "@/components/Home/PopularServicesWrapper";
+import ProvidersWrapper from "@/components/Home/ProvidersWrapper";
 import TopCategoriesWrapper from "@/components/Home/TopCategoriesWrapper";
 import SubscriptionsModal from "@/components/PostService/SubscriptionsModal";
 import { Button } from "@/components/ui/button";
@@ -30,7 +31,7 @@ const AuthHome = () => {
 
   return (
     <>
-      <section className="" dir={lang === "ar" ? "rtl" : "ltr"}>
+      <div dir={lang === "ar" ? "rtl" : "ltr"}>
         {!hasSubscription && (
           <div className="px-3 py-1 bg-primary">
             <div className="flex justify-between items-center text-sm w-full lg:w-1/2 lg:mx-auto">
@@ -55,7 +56,8 @@ const AuthHome = () => {
             </div>
           </div>
         )}
-
+      </div>
+      <section className="" dir={lang === "ar" ? "rtl" : "ltr"}>
         <PopularServicesWrapper />
       </section>
 
@@ -63,12 +65,16 @@ const AuthHome = () => {
         <TopCategoriesWrapper />
       </section>
 
+      <section>
+        <ProvidersWrapper />
+      </section>
+
       <Drawer
         direction={lang === "ar" ? "right" : "left"}
         open={openSubscribeModal}
         onOpenChange={() => setOpenSubscribeModal(false)}
       >
-        <DrawerContent className="max-w-2xl h-full">
+        <DrawerContent className="h-screen w-full sm:w-4/5 lg:w-2/5 transition-all rounded-none">
           <DrawerDescription className="flex flex-col gap-4 px-5 overflow-y-auto">
             <Suspense fallback={<div>Loading...</div>}>
               <ErrorBoundary fallback={<div>Something went wrong</div>}>

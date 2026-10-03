@@ -2738,6 +2738,13 @@ export type Database = {
         Args: { tier_id: string }
         Returns: Json
       }
+      get_top_provider_ids: {
+        Args: never
+        Returns: {
+          completed_deals: number
+          provider_id: string
+        }[]
+      }
       get_top_search_terms: {
         Args: never
         Returns: {
