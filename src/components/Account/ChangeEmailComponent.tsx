@@ -51,9 +51,9 @@ const ChangeEmailComponent = ({
 
         if (sendEmailUpdateEmail.isError) {
             setChangeEmail(false);
-            setError(sendEmailUpdateEmail.error.message);
+            setError("Unknown error occured");
         }
-    }, [sendEmailUpdateEmail.mutate, sendEmailUpdateEmail.isSuccess, sendEmailUpdateEmail.isError]);
+    }, [sendEmailUpdateEmail.mutate, sendEmailUpdateEmail.isSuccess, sendEmailUpdateEmail.isError, sendEmailUpdateEmail.error]);
 
     useEffect(() => {
         if (confirmEmail.isSuccess) {
@@ -62,7 +62,7 @@ const ChangeEmailComponent = ({
         }
 
         if (confirmEmail.isError) {
-            setError(confirmEmail.error.message);
+            setError("Unknown error occured");
             setOpen(false);
         }
     }, [confirmEmail.isSuccess, confirmEmail.mutate, confirmEmail.isError]);

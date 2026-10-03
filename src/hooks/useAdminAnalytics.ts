@@ -117,7 +117,12 @@ export const useAdminAnalytics = () => {
         .eq('action_type', 'view')
         .limit(1000);
 
-      const serviceViewCounts = (serviceViewsData || []).reduce((acc: Record<string, { title: string; views: number }>, item: any) => {
+      const serviceViewCounts = (serviceViewsData || []).reduce((acc: Record<string, { title: string; views: number }>, item: {
+    service_id: string;
+    service: {
+        title: string;
+    };
+}) => {
         const serviceId = item.service_id;
         const title = item.service?.title || 'Unknown';
         if (!acc[serviceId]) {
@@ -154,7 +159,11 @@ export const useAdminAnalytics = () => {
         }
       });
 
-      (serviceCategories || []).forEach((item: any) => {
+      (serviceCategories || []).forEach((item: {
+    service: {
+        category: string;
+    };
+}) => {
         const category = item.service?.category;
         if (category) {
           if (!categoryStats[category]) {

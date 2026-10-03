@@ -7,6 +7,17 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
+export interface BaseConversation {
+    id: string;
+    service_id: string;
+    client_id: string;
+    provider_id: string;
+    status: 'active' | 'archived' | 'closed' | string;
+    last_message_at: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
 export interface Conversation {
     id: string;
     service_id: string;

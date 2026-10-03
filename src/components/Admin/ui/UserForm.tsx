@@ -79,7 +79,11 @@ const UserForm = ({ editingUser, closeForm }: Props) => {
       phone: formattedPhone,
     };
 
-    editingUser ? updateUser.mutate(payload) : createUser.mutate(payload);
+    if (editingUser) {
+      updateUser.mutate(payload)
+    } else {
+      createUser.mutate(payload)
+    }
 
   }
   return (

@@ -251,10 +251,10 @@ export const useWebsiteAnalytics = () => {
                 (payload) => {
                     const newRow = payload.new;
 
-                    queryClient.setQueryData(["analytics"], (old: any) => {
+                    queryClient.setQueryData(["analytics"], (old: AnalyticsRow[]) => {
                         if (!old) return [newRow];
 
-                        if (old.find((item: any) => item.id === newRow.id)) {
+                        if (old.find((item: AnalyticsRow) => item.id === newRow.id)) {
                             return old;
                         }
 

@@ -9,8 +9,9 @@ import ServicesGrid from "@/components/Home/ServicesGrid";
 import { useAuth } from "@/contexts/AuthContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { useSubscription } from "@/hooks/useSubscription";
-import React, { Suspense, useEffect } from "react";
+import React, { Suspense } from "react";
 import { useTranslation } from "react-i18next";
+import SubscriptionsModal from "@/components/PostService/SubscriptionsModal";
 
 const Home = () => {
   const { t } = useTranslation("home");
@@ -18,17 +19,10 @@ const Home = () => {
   const { data: homeStats, isLoading, error } = useHomeStats();
   const { user } = useAuth();
   const { hasSubscription } = useSubscription();
-  const SubscriptionModal = React.lazy(
-    () => import("@/components/PostService/SubscriptionsModal"),
-  );
 
   if (error) {
     console.error("Error loading home stats:", error);
   }
-
-  useEffect(() => {
-    import("@/components/PostService/SubscriptionsModal");
-  }, []);
 
   return (
     <>
@@ -249,7 +243,7 @@ const Home = () => {
             <div>
               <Suspense fallback={<div>Loading...</div>}>
                 <ErrorBoundary fallback={<div>Something went wrong</div>}>
-                  <SubscriptionModal
+                  <SubscriptionsModal
                     user={user}
                     cardClassName="shadow-xl"
                     asDrawer={false}

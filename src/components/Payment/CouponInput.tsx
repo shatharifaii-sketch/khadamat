@@ -6,11 +6,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Ticket, X, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { CouponValidation } from '@/hooks/useCoupon';
 
 interface CouponInputProps {
   couponCode: string;
   setCouponCode: (code: string) => void;
-  appliedCoupon: any;
+  appliedCoupon: CouponValidation;
   isValidating: boolean;
   validateCoupon: (code: string, userId: string) => Promise<void>;
   removeCoupon: () => void;
