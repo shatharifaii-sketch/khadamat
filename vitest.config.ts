@@ -13,6 +13,7 @@ export default defineConfig({
                     browser: 'chromium'
                 }
             ]
-        }
+        },
+        include: ['src/tests/**/*.test.{ts,tsx}'],
     }
 })
