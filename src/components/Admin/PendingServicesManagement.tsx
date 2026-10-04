@@ -19,7 +19,7 @@ interface Props {
   count?: number
 }
 
-type SortOption = "name-ar" | "name-en" | "date-asc" | "date-desc";
+type SortOption = "name-asc" | "name-desc" | "date-asc" | "date-desc";
 
 const PendingServicesManagement = ({ count }: Props) => {
   const { t } = useTranslation("admin");
@@ -28,28 +28,14 @@ const PendingServicesManagement = ({ count }: Props) => {
   const [page, setPage] = useState(1);
   const [cursorHistory, setCursorHistory] = useState<number[]>([0]);
   const cursor = cursorHistory[page - 1];
-
-  const { pendingServicesList: services, hasNextPage, nextCursor, pendServicesCount } = usePendingServices({ pendingServicesCursor: cursor }) 
-
-  const [serviceToAccept, setServiceToAccept] = useState<Service | null>(null);
   const [sortOption, setSortOption] = useState<SortOption>('date-desc');
 
-  const { deleteService } = useAdminFunctionality();
+  const { pendingServicesList: services, hasNextPage, nextCursor, pendServicesCount } = usePendingServices({ pendingServicesCursor: cursor, sort: sortOption }) 
 
-  const sortedServices = useMemo(() => {
-    if (!services) return [];
-    return [...services].sort((a, b) => {
-      if (sortOption === "date-desc") {
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-      } else if (sortOption === "name-ar") {
-        return a.title.localeCompare(b.title, 'ar', { sensitivity: 'base' });
-      } else if (sortOption === "name-en") {
-        return a.title.localeCompare(b.title, 'en', { sensitivity: 'base' });
-      } else if (sortOption === "date-asc") {
-        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-      }
-    });
-  }, [services, sortOption]);
+  const [serviceToAccept, setServiceToAccept] = useState<Service | null>(null);
+  
+
+  const { deleteService } = useAdminFunctionality();
 
   const handleDeleteService = async (serviceId: string) => {
     try {
@@ -82,8 +68,8 @@ const PendingServicesManagement = ({ count }: Props) => {
               </SelectLabel>
               <SelectItem value="date-desc">{t("table.pending_services_management.sort.newest")}</SelectItem>
               <SelectItem value="date-asc">{t("table.pending_services_management.sort.oldest")}</SelectItem>
-              <SelectItem value="name-ar">{t("table.pending_services_management.sort.name_ar")}</SelectItem>
-              <SelectItem value="name-en">{t("table.pending_services_management.sort.name_en")}</SelectItem>
+              <SelectItem value="name-asc">{t("table.pending_services_management.sort.name_asc")}</SelectItem>
+              <SelectItem value="name-desc">{t("table.pending_services_management.sort.name_desc")}</SelectItem>
             </SelectGroup>
           </SelectContent>
         </Select>
@@ -101,7 +87,7 @@ const PendingServicesManagement = ({ count }: Props) => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sortedServices.length > 0 ? (sortedServices.map((service) => (
+            {services?.length > 0 ? (services?.map((service) => (
               <TableRow key={service.id}>
                 <TableCell className="font-medium max-w-xs truncate">
                   {service.title}

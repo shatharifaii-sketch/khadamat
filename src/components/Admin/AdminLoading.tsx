@@ -9,7 +9,7 @@ const AdminLoading = () => {
         <Skeleton className="h-32 w-full shadow-xs bg-white border-muted-foreground" />
       </div>
       <div>
-        <Skeleton className="h-[500px] w-full shadow-xs bg-white border-muted-foreground" />
+        <Skeleton className="h-125 w-full shadow-xs bg-white border-muted-foreground" />
       </div>
     </div>
   )

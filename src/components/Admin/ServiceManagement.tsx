@@ -14,6 +14,7 @@ import { SelectLabel } from '@radix-ui/react-select';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import PaginationComponent from '../PaginationComponent';
+import { truncateString } from '@/lib/utils';
 
 
 export interface UserProfile {
@@ -26,7 +27,7 @@ interface ServiceManagementProps {
   count?: number
 }
 
-type SortOption = "name-ar" | "name-en" | "date-asc" | "date-desc";
+type SortOption = "name-desc" | "name-asc" | "date-asc" | "date-desc";
 
 export const ServiceManagement = ({ count }: ServiceManagementProps) => {
   const { t } = useTranslation("admin");
@@ -35,29 +36,14 @@ export const ServiceManagement = ({ count }: ServiceManagementProps) => {
   const [page, setPage] = useState(1);
   const [cursorHistory, setCursorHistory] = useState<number[]>([0]);
   const cursor = cursorHistory[page - 1];
+  const [sortOption, setSortOption] = useState<SortOption>('date-desc');
 
-  const { servicesList: services, hasNextPage, nextCursor, servicesCount } = useServices({ servicesCursor: cursor });
+  const { servicesList: services, hasNextPage, nextCursor, servicesCount } = useServices({ servicesCursor: cursor, sort: sortOption });
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
-  const [sortOption, setSortOption] = useState<SortOption>('date-desc');
 
   const { deleteService } = useAdminFunctionality();
-
-  const sortedServices = useMemo(() => {
-    if (!services) return [];
-    return [...services].sort((a, b) => {
-      if (sortOption === "date-desc") {
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-      } else if (sortOption === "name-ar") {
-        return a.title.localeCompare(b.title, 'ar', { sensitivity: 'base' });
-      } else if (sortOption === "name-en") {
-        return a.title.localeCompare(b.title, 'en', { sensitivity: 'base' });
-      } else if (sortOption === "date-asc") {
-        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-      }
-    });
-  }, [services, sortOption]);
 
   const handleDeleteService = async (serviceId: string) => {
     try {
@@ -104,7 +90,7 @@ export const ServiceManagement = ({ count }: ServiceManagementProps) => {
               </SelectLabel>
               <SelectItem value="date-desc">{t("table.service_management.sort.newest")}</SelectItem>
               <SelectItem value="date-asc">{t("table.service_management.sort.oldest")}</SelectItem>
-              <SelectItem value="name-ar">{t("table.service_management.sort.name_ar")}</SelectItem> <SelectItem value="name-en">{t("table.service_management.sort.name_en")}</SelectItem>
+              <SelectItem value="name-desc">{t("table.service_management.sort.name_desc")}</SelectItem> <SelectItem value="name-asc">{t("table.service_management.sort.name_asc")}</SelectItem>
             </SelectGroup>
           </SelectContent>
         </Select>
@@ -122,10 +108,10 @@ export const ServiceManagement = ({ count }: ServiceManagementProps) => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sortedServices.map((service) => (
+            {services?.map((service) => (
               <TableRow key={service.id}>
                 <TableCell className="font-medium max-w-xs truncate">
-                  {service.title}
+                  {truncateString(service.title, 20)}
                 </TableCell>
                 <TableCell>{service.category}</TableCell>
                 <TableCell>{service.publisher?.full_name || 'غير محدد'}</TableCell>

@@ -57,8 +57,8 @@ export interface Service {
     id: string;
     name: string;
     url: string;
-    thumbnail_url?: string;
-    type?: "image" | "video";
+    thumbnail_url: string;
+    type: "image" | "video" | string;
   }[];
   with_appointments: boolean;
 }
@@ -68,6 +68,7 @@ type Pagination = {
   servicesCursor?: number | null;
   pendingServicesCursor?: number | null;
   couponsCursor?: number | null;
+  sort?: "name-desc" | "name-asc" | "date-asc" | "date-desc" | "code-name";
 };
 
 interface UploadedImage {
@@ -217,15 +218,37 @@ export const useAdminData = () => {
   };
 };
 
-export const useUsers = ({ usersCursor }: Pagination) => {
+export const useUsers = ({ usersCursor, sort }: Pagination) => {
   const { data: usersData, isLoading: usersDataLoading } = useSuspenseQuery({
-    queryKey: ["admin-users-data", usersCursor],
+    queryKey: ["admin-users-data", usersCursor, sort],
     queryFn: async () => {
-      let listQuery = supabase
-        .from("profiles_with_email")
-        .select("*")
-        .order("user_index", { ascending: true })
-        .limit(PAGE_SIZE + 1);
+      console.log(sort);
+      let listQuery = supabase.from("profiles_with_email").select("*");
+
+      switch (sort) {
+        case "date-asc":
+          listQuery = listQuery.order("created_at", { ascending: true });
+
+          break;
+        case "date-desc":
+          listQuery = listQuery.order("created_at", { ascending: false });
+
+          break;
+        case "name-asc":
+          listQuery = listQuery.order("full_name", { ascending: true });
+
+          break;
+        case "name-desc":
+          listQuery = listQuery.order("full_name", { ascending: false });
+
+          break;
+        default:
+          listQuery = listQuery.order("user_index", {
+            ascending: true,
+          });
+      }
+
+      listQuery = listQuery.limit(PAGE_SIZE + 1);
 
       if (usersCursor !== null) {
         listQuery = listQuery.gt("user_index", usersCursor);
@@ -282,10 +305,10 @@ export const useUsers = ({ usersCursor }: Pagination) => {
   };
 };
 
-export const useServices = ({ servicesCursor }: Pagination) => {
+export const useServices = ({ servicesCursor, sort }: Pagination) => {
   const { data: servicesData, isLoading: servicesDataLoading } =
     useSuspenseQuery({
-      queryKey: ["admin-services-data", servicesCursor],
+      queryKey: ["admin-services-data", servicesCursor, sort],
       queryFn: async () => {
         let listQuery = supabase
           .from("services")
@@ -304,9 +327,32 @@ export const useServices = ({ servicesCursor }: Pagination) => {
               )
             `,
           )
-          .eq("status", "published")
-          .order("service_index", { ascending: true })
-          .limit(PAGE_SIZE + 1);
+          .eq("status", "published");
+
+        switch (sort) {
+          case "date-asc":
+            listQuery = listQuery.order("created_at", { ascending: true });
+
+            break;
+          case "date-desc":
+            listQuery = listQuery.order("created_at", { ascending: false });
+
+            break;
+          case "name-asc":
+            listQuery = listQuery.order("title", { ascending: true });
+
+            break;
+          case "name-desc":
+            listQuery = listQuery.order("title", { ascending: false });
+
+            break;
+          default:
+            listQuery = listQuery.order("service_index", {
+              ascending: true,
+            });
+        }
+
+        listQuery = listQuery.limit(PAGE_SIZE + 1);
 
         if (servicesCursor) {
           listQuery = listQuery.gt("service_index", servicesCursor);
@@ -350,10 +396,10 @@ export const useServices = ({ servicesCursor }: Pagination) => {
   };
 };
 
-export const usePendingServices = ({ pendingServicesCursor }: Pagination) => {
+export const usePendingServices = ({ pendingServicesCursor, sort }: Pagination) => {
   const { data: pendingServicesData, isLoading: pendingServicesDataLoading } =
     useSuspenseQuery({
-      queryKey: ["admin-pending-services-data", pendingServicesCursor],
+      queryKey: ["admin-pending-services-data", pendingServicesCursor, sort],
       queryFn: async () => {
         let listQuery = supabase
           .from("services")
@@ -374,8 +420,32 @@ export const usePendingServices = ({ pendingServicesCursor }: Pagination) => {
             { count: "exact" },
           )
           .eq("status", "pending-approval")
-          .order("service_index", { ascending: true })
-          .limit(PAGE_SIZE + 1);
+          
+        
+        switch (sort) {
+          case "date-asc":
+            listQuery = listQuery.order("created_at", { ascending: true });
+
+            break;
+          case "date-desc":
+            listQuery = listQuery.order("created_at", { ascending: false });
+
+            break;
+          case "name-asc":
+            listQuery = listQuery.order("title", { ascending: true });
+
+            break;
+          case "name-desc":
+            listQuery = listQuery.order("title", { ascending: false });
+
+            break;
+          default:
+            listQuery = listQuery.order("service_index", {
+              ascending: true,
+            });
+        }
+
+        listQuery = listQuery.limit(PAGE_SIZE + 1);
 
         if (pendingServicesCursor) {
           listQuery = listQuery.gt("service_index", pendingServicesCursor);
@@ -419,16 +489,35 @@ export const usePendingServices = ({ pendingServicesCursor }: Pagination) => {
   };
 };
 
-export const useCoupons = ({ couponsCursor }: Pagination) => {
+export const useCoupons = ({ couponsCursor, sort }: Pagination) => {
   const { data: couponsData, isLoading: couponsDataLoading } = useSuspenseQuery(
     {
-      queryKey: ["admin-coupons-data", couponsCursor],
+      queryKey: ["admin-coupons-data", couponsCursor, sort],
       queryFn: async () => {
         let listQuery = supabase
           .from("coupons")
           .select("*", { count: "exact" })
-          .order("coupon_index", { ascending: true })
-          .limit(PAGE_SIZE + 1);
+        
+        switch (sort) {
+          case "date-asc":
+            listQuery = listQuery.order("created_at", { ascending: true });
+
+            break;
+          case "date-desc":
+            listQuery = listQuery.order("created_at", { ascending: false });
+
+            break;
+          case "code-name":
+            listQuery = listQuery.order("code", { ascending: true });
+
+            break;
+          default:
+            listQuery = listQuery.order("coupon_index", {
+              ascending: true,
+            });
+        }
+
+        listQuery = listQuery.limit(PAGE_SIZE + 1);
 
         if (couponsCursor) {
           listQuery = listQuery.gt("coupon_index", couponsCursor);
