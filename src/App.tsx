@@ -39,6 +39,7 @@ import ExtraPaymentSuccess from "./pages/payments/ExtraPaymentSuccess";
 import PhoneOTPVerification from "./pages/verify/PhoneOTPVerification";
 import ReservationsCalendar from "./pages/ReservationsCalendar";
 import { ReservationsProvider } from "./contexts/ReservationsContext";
+import Home from "./pages/home/Home";
 
 const queryClient = new QueryClient();
 
@@ -56,7 +57,7 @@ function App() {
                   <PendingServiceHandler />
                   <Routes>
                     <Route path="/" element={<UserLayout />}>
-                      <Route path="" element={<Index />} />
+                      <Route path="" element={<Home />} />
                       <Route path="post-service" element={<PostService />} />
                       <Route
                         path="completed-payment"
