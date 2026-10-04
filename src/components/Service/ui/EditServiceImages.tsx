@@ -7,7 +7,7 @@ import ServiceImageComponent from './ServiceImageComponent';
 import { useTranslation } from 'react-i18next';
 import { VideoPlayer } from '@/components/VideoPlayer';
 
-type MediaItem = {
+export type MediaItem = {
     id: string;
     url: string;
     name: string;
@@ -25,15 +25,11 @@ const ServiceImages = ({ onMediaChange, serviceMedia }: ServicePortfolioProps) =
     const { t } = useTranslation("services");
     const { media, uploading, handleFileSelect, removeImage, deleteImage, deletingImage } = useImageUpload();
     const fileInputRef = useRef<HTMLInputElement>(null);
-    let allImagesCount = media.length + (serviceMedia ? serviceMedia.length : 0);
+    const allImagesCount = media.length + (serviceMedia?.length);
 
     useEffect(() => {
         onMediaChange?.(media)
-
-        if (serviceMedia) {
-            allImagesCount += media.length;
-        }
-    }, [media]);
+    }, [media, onMediaChange]);
 
     const handleDrop = (e: React.DragEvent) => {
         e.preventDefault();

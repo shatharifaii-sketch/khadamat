@@ -41,7 +41,7 @@ const UploadProfileImage = ({ userImage, userName, userId }: Props) => {
             setImage(null);
             setUserPhoto(data.profile_image_url);
         }
-    }, [image, changeProfileImage, isSuccess]);
+    }, [image, changeProfileImage, isSuccess, userImage, setImage, data?.profile_image_url]);
 
     const handleDrop = (e: React.DragEvent) => {
         e.preventDefault();

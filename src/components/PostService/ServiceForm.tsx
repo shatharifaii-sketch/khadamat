@@ -7,12 +7,12 @@ import ServiceLocation from "./ServiceLocation";
 import ServiceContact from "./ServiceContact";
 import ServiceExperience from "./ServiceExperience";
 import ServiceFormSubmit from "./ServiceFormSubmit";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import {
   PENDING_SERVICE_KEY,
   usePendingService,
 } from "@/hooks/usePendingService";
-import ServiceImages from "../Service/ui/EditServiceImages";
+import ServiceImages, { MediaItem } from "../Service/ui/EditServiceImages";
 import { Service } from "@/hooks/useAdminFunctionality";
 import ServiceLinks from "./ServiceLinks";
 import WhatsappNumberInput from "./WhatsappNumberInput";
@@ -45,6 +45,13 @@ const ServiceForm = ({ serviceToEdit }: ServiceFormProps) => {
     }
   }, [isEditMode, pendingService, clearPendingService]);
 
+  const handleMediaChange = useCallback(
+    (media: MediaItem[]) => {
+      handleInputChange("media", media);
+    },
+    [handleInputChange],
+  );
+
   return (
     <Card dir={lang === "ar" ? "rtl" : "ltr"}>
       <ServiceFormHeader
@@ -52,7 +59,11 @@ const ServiceForm = ({ serviceToEdit }: ServiceFormProps) => {
         hasPendingService={!!pendingService && !isEditMode}
       />
       <CardContent className="px-2 py-1" dir={lang == "ar" ? "rtl" : "ltr"}>
-        <form onSubmit={handleSubmit} className="space-y-3 md:space-y-6"  dir={lang == "ar" ? "rtl" : "ltr"}>
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-3 md:space-y-6"
+          dir={lang == "ar" ? "rtl" : "ltr"}
+        >
           <ServiceBasicInfo
             title={formData.title}
             category={formData.category}
@@ -82,7 +93,9 @@ const ServiceForm = ({ serviceToEdit }: ServiceFormProps) => {
                 handleInputChange("with_appointments", value)
               }
               availability={formData.availability}
-              onAvailabilityChange={(value) => handleInputChange("availability", value)}
+              onAvailabilityChange={(value) =>
+                handleInputChange("availability", value)
+              }
               isServiceEditMode={isEditMode}
             />
           </div>
@@ -129,9 +142,7 @@ const ServiceForm = ({ serviceToEdit }: ServiceFormProps) => {
             handleInputChange('images', images);
           }} /> */}
           <ServiceImages
-            onMediaChange={(media) => {
-              handleInputChange("media", media);
-            }}
+            onMediaChange={handleMediaChange}
             serviceMedia={serviceToEdit?.service_media}
           />
 

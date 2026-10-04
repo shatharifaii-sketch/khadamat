@@ -1,5 +1,29 @@
 import { supabase } from "@/integrations/supabase/client"
+import { Json } from "@/integrations/supabase/types";
 import { useSuspenseQuery } from "@tanstack/react-query"
+
+export type SubscriptionTierType = {
+ allowed_services: number;
+ badge_class_name: string;
+ class_name: string;
+ created_at: string;
+ free_trial: boolean;
+ free_trial_period: number;
+ free_trial_period_text: string;
+ id: string;
+ notes: Json;
+ notes_english: Json | null;
+ price_monthly_title: string | null;
+ price_monthly_value: number | null;
+ price_yearly_title: string | null;
+ price_yearly_value: number | null;
+ stripe_monthly_price_id: string;
+ stripe_product_id: string;
+ stripe_yearly_price_id: string;
+ tier: number | null;
+ title: string | null;
+ users: number;
+}
 
 export const useSubscriptionTiers = () => {
     const subscriptionTiers = useSuspenseQuery({

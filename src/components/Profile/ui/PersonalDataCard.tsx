@@ -19,9 +19,9 @@ const PersonalDataCard = ({
     const { t } = useTranslation("profile");
     const lang = localStorage.getItem("language") || "ar";
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle className='text-lg md:text-md'>{t("description")}</CardTitle>
+        <Card dir={lang === "ar" ? "rtl" : "ltr"}>
+            <CardHeader dir={lang === "ar" ? "rtl" : "ltr"}>
+                <CardTitle className='text-start text-lg md:text-md'>{t("description")}</CardTitle>
                 <CardDescription className='text-muted-foreground border border-gray-100 rounded-lg p-2 md:p-4 text-lg'>
                     {description}
                 </CardDescription>

@@ -13,6 +13,16 @@ export interface ServiceAnalyticsData {
   }>;
 }
 
+type AnalyticsType = {
+    service_id: string;
+    action_type: string;
+    created_at: string;
+    service: {
+        title: string;
+        category: string;
+    };
+}
+
 export const useServiceAnalytics = (serviceId: string) => {
   return useQuery({
     queryKey: ['service-analytics', serviceId],
@@ -73,7 +83,7 @@ export const useUserServiceAnalytics = (userId: string) => {
       if (error) throw error;
       
       // Group by service
-      const serviceStats = (data || []).reduce((acc: any, item: any) => {
+      const serviceStats = (data || []).reduce((acc: unknown, item: AnalyticsType) => {
         const serviceId = item.service_id;
         if (!acc[serviceId]) {
           acc[serviceId] = {

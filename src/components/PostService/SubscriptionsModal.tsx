@@ -12,7 +12,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Badge } from "../ui/badge";
 import { Star } from "lucide-react";
-import { useSubscriptionTiers } from "@/hooks/useSubscriptionTiers";
+import { SubscriptionTierType, useSubscriptionTiers } from "@/hooks/useSubscriptionTiers";
 import { DrawerDescription, DrawerHeader, DrawerTitle } from "../ui/drawer";
 import useStripe from "@/hooks/use-stripe";
 import {
@@ -27,6 +27,7 @@ import {
 import { User } from "../Admin/ui/UserForm";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
+import { Subscription } from "@/hooks/useSubscription";
 
 interface SubscriptionsModalProps {
   cardClassName?: string;
@@ -37,11 +38,11 @@ interface SubscriptionsModalProps {
 }
 
 interface SubscriptionCardProps {
-  subscription: any;
+  subscription: SubscriptionTierType;
   yearly: boolean;
-  selectedSubscription: any;
+  selectedSubscription: SubscriptionTierType;
   cardClassName?: string;
-  onSelect: (sub: any) => void;
+  onSelect: (sub: SubscriptionTierType) => void;
   onNavigate: (priceId: string) => void;
   isCreatingCheckoutSessionPending: boolean;
   setDrawerOpen?: (isOpen: boolean) => void;
@@ -286,7 +287,7 @@ const SubscriptionsModal = ({
     isCreateCheckoutSessionSuccess,
   } = useStripe();
 
-  const handleSubscriptionSelect = (subscriptionTier: any) => {
+  const handleSubscriptionSelect = (subscriptionTier: SubscriptionTierType) => {
     setSelectedSubscription(subscriptionTier);
   };
 

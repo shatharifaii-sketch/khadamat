@@ -46,6 +46,7 @@ const ServiceHeader = ({
           ? '/account' 
           : `/profile/${publisherId}?serviceId=${encodeURIComponent(serviceId)}`
         }
+        state={{ root: "service" }}
         className='flex items-center justify-start gap-2 hover:text-primary transition-colors w-fit'>
         {publisherImage ? (
           <Avatar className='size-7'>

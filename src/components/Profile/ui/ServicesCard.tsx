@@ -16,7 +16,7 @@ const ServicesCard = ({
   return (
     <Card>
         <CardHeader dir={lang === "ar" ? "rtl" : "ltr"}>
-            <CardTitle className='text-md md:text-lg'>{t("services.title")}:</CardTitle>
+            <CardTitle className='text-start text-md md:text-lg'>{t("services.title")}:</CardTitle>
             
             <CardDescription>
                 <div className='flex items-center gap-2'>

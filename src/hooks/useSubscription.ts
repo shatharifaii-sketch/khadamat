@@ -433,7 +433,7 @@ notes
     //createPaymentTransaction,
     //completePayment,
     canPostService,
-    canPost: getUserSubscription.data?.status === 'active' || getUserSubscription.data,
+    hasSubscription: getUserSubscription.data?.status === 'active' || getUserSubscription.data,
     //isCreatingTransaction: createPaymentTransaction.isPending,
     //isCompletingPayment: completePayment.isPending,
     createNewSubscription,

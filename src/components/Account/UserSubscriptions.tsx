@@ -276,11 +276,11 @@ const UserSubscriptions = ({ user }: UserSubscriptionsProps) => {
                 <Label className='text-lg'>{t("subscriptions.past_subscriptions")}</Label>
                 {
                     inactiveSubscriptions && inactiveSubscriptions.length > 0 ? (
-                        <div className='grid grid-cols-1 md:grid-cols-2 w-full gap-3 overflow-y-auto max-h-[300px] border p-2 rounded-md bg-muted'>
+                        <div className='grid grid-cols-1 md:grid-cols-2 w-full gap-3 overflow-y-auto max-h-75 border p-2 rounded-md bg-muted'>
                             {
                                 inactiveSubscriptions.map((subscription: Subscription) => (
                                     <Card key={subscription.id} className='col-span-1'>
-                                        <CardHeader className='flex flex-row items-start justify-between w-[300px]'>
+                                        <CardHeader className='flex flex-row items-start justify-between w-75'>
                                             <div className='text-lg font-bold text-start text-ellipsis overflow-hidden whitespace-nowrap'>
                                                 {subscription.subscription_tier.title}
                                                 <p className='text-muted-foreground text-sm'>{(subscription.billing_cycle === "Monthly" || subscription.billing_cycle === "monthly") ? t("subscriptions.monthly") : t("subscriptions.yearly")}</p>

@@ -80,13 +80,13 @@ export const usePublicServices = ({
         .from("services")
         .select(
           `
-    *,
-    publisher:fk_services_user_id (
-      id,
-      full_name,
-      profile_image_url
-    )
-  `,
+            *,
+            publisher:fk_services_user_id (
+              id,
+              full_name,
+              profile_image_url
+            )
+          `,
         )
         .eq("status", "published")
         .order("service_index", { ascending: true })

@@ -71,9 +71,9 @@ export const usePerformanceOptimization = () => {
   // Debounced search optimization
   const debounce = useCallback((func: () => void, delay: number) => {
     let timeoutId: ReturnType<typeof setTimeout>;
-    return (...args: unknown[]) => {
+    return (...args: Parameters<typeof func>) => {
       clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => func.apply(null, args), delay);
+      timeoutId = setTimeout(() => func(...args), delay);
     };
   }, []);
 

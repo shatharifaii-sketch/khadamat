@@ -52,7 +52,7 @@ const EnhancedServiceCard = ({ service }: EnhancedServiceCardProps) => {
   };
 
   return (
-    <Card className="group flex flex-col justify-between hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 border-0 shadow-md hover:scale-105">
+    <Card className="group flex flex-col justify-between hover:shadow-xl hover:shadow-primary/50 transition-all duration-300 border-0 shadow-md hover:scale-105 min-w-72">
       <CardHeader className="pb-1 md:pb-3">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 text-right">

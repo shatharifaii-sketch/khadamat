@@ -9,7 +9,35 @@
     "auth": {
         "welcome_message": "Welcome to our platform!",
         "description": "We are glad to have you on board. Explore the available services or post your own service.",
-        "become_member": "Start Your Subscription"
+        "become_member": "Subscriptions"
+    },
+    "subscriptions": {
+        "drawer": {
+            "close": "Close"
+        }
+    },
+    "popular_services": {
+        "title": "Popular Services",
+        "description": "Discover the most requested services by users",
+        "loading": "Loading popular services...",
+        "error": "An error occurred while loading popular services. Please try again.",
+        "empty": "No popular services are currently available. Be the first to post your service!"
+    },
+    "top_categories": {
+        "title": "Top Categories",
+        "description": "Discover the most used categories by service providers",
+        "loading": "Loading top categories...",
+        "error": "An error occurred while loading top categories. Please try again.",
+        "empty": "No popular categories are currently available."
+    },
+    "active_providers":{
+        "title": "Active Service Providers",
+        "description": "Discover the most active professional service providers on our platform",
+        "loading": "Loading active service providers...",
+        "error": "An error occurred while loading active service providers. Please try again.",
+        "empty": "No active service providers are currently available. Be the first to post your service!",
+        "services": "services",
+        "service": "service"
     },
     "stats": {
         "service_providers": "Service Providers",

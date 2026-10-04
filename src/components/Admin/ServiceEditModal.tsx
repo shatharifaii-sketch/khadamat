@@ -102,7 +102,7 @@ export const ServiceEditModal = ({ service, isOpen, onClose, onServiceUpdated }:
       toast.success('تم تحديث الخدمة بنجاح');
       onServiceUpdated();
       onClose();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error updating service:', error);
       toast.error('حدث خطأ في تحديث الخدمة');
     } finally {

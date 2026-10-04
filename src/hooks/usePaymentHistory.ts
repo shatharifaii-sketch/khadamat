@@ -23,6 +23,31 @@ export interface PaymentHistory {
   paymentMethodText?: string;
 }
 
+export type PaymentType = {
+ hasDiscount: boolean;
+ finalAmount: number;
+ originalAmount: number;
+ statusText: string;
+ paymentMethodText: string;
+ amount: number;
+ billing_period_end: string;
+ billing_period_start: string;
+ billing_reason: string;
+ coupon_id: string;
+ coupon_used: boolean;
+ created_at: string;
+ currency: string;
+ email_sent: boolean;
+ id: string;
+ invoice_id: number;
+ invoice_url: string;
+ payment_date: string;
+ payment_status: string;
+ status: string;
+ updated_at: string;
+ user_id: string;
+}[]
+
 export const usePaymentHistory = () => {
   const { user } = useAuth();
   const { t } = useTranslation();

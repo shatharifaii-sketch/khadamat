@@ -1,7 +1,6 @@
 import ErrorBoundary from "@/components/ErrorBoundary";
 import UserProfileQueryError from "@/components/ErrorViews/UserProfileQueryError";
 import ProfileLoading from "@/components/Profile/ProfileLoading";
-import ProfileView from "@/components/Profile/ProfileView";
 import ProfileViewWrapper from "@/components/Profile/ProfileViewWrapper";
 import {
   Breadcrumb,
@@ -10,24 +9,24 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/ui/popover";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { usePublisherProfile } from "@/hooks/useProfile";
 import { cn } from "@/lib/utils";
-import { DotIcon, EllipsisVertical } from "lucide-react";
+import { DotIcon } from "lucide-react";
 import { Suspense } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, Navigate, useParams, useSearchParams } from "react-router-dom";
+import {
+  Link,
+  Navigate,
+  useLocation,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 
 const UserProfilePage = () => {
   const { t } = useTranslation("profile");
   const lang = localStorage.getItem("language") || "en";
+  const location = useLocation();
 
   const { user } = useAuth();
   const isMobile = useIsMobile();
@@ -45,12 +44,12 @@ const UserProfilePage = () => {
   }
 
   return (
-    <div 
-    className={cn(
-            isMobile
-              ? "max-w-4xl mx-auto py-5 px-4 space-y-3"
-              : "max-w-4xl mx-auto pt-5 pb-8 px-4 space-y-6",
-          )}
+    <div
+      className={cn(
+        isMobile
+          ? "max-w-4xl mx-auto py-5 px-4 space-y-3"
+          : "max-w-4xl mx-auto pt-5 pb-8 px-4 space-y-6",
+      )}
     >
       <Breadcrumb
         className="bg-transparent"
@@ -68,34 +67,38 @@ const UserProfilePage = () => {
             </BreadcrumbLink>
           </BreadcrumbItem>
 
-          <BreadcrumbSeparator>
-            <DotIcon />
-          </BreadcrumbSeparator>
+          {serviceId && (
+            <>
+              <BreadcrumbSeparator>
+                <DotIcon />
+              </BreadcrumbSeparator>
 
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link
-                to="/find-service"
-                className="flex items-center justify-center"
-              >
-                {t("find_services")}
-              </Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link
+                    to="/find-service"
+                    className="flex items-center justify-center"
+                  >
+                    {t("find_services")}
+                  </Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
 
-          <BreadcrumbSeparator>
-            <DotIcon />
-          </BreadcrumbSeparator>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link
-                to={`/find-service/${serviceId}`}
-                className="flex items-center justify-center"
-              >
-                {t("service")}
-              </Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
+              <BreadcrumbSeparator>
+                <DotIcon />
+              </BreadcrumbSeparator>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link
+                    to={`/find-service/${serviceId}`}
+                    className="flex items-center justify-center"
+                  >
+                    {t("service")}
+                  </Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+            </>
+          )}
 
           <BreadcrumbSeparator>
             <DotIcon />

@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { useLocation } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { BaseConversation, EnrichedConversation } from "@/hooks/useConversations";
 
 export interface Message {
   id: string;
@@ -28,7 +29,7 @@ const ChatContext = createContext(null);
 const getUserConversationsMessages = async ({
   convo,
 }: {
-  convo: any;
+  convo: BaseConversation;
 }): Promise<Message[]> => {
   const { data: messages, error: messagesError } = await supabase
     .from("messages")
@@ -81,9 +82,9 @@ const notifyUser = async ({
   userId,
   convo,
 }: {
-  messages: Message[] | any;
+  messages: Message[];
   userId: string;
-  convo: any;
+  convo: BaseConversation;
 }) => {
   for (const message of messages) {
     if (message.sender_id !== userId && !message.read_at) {
@@ -113,7 +114,7 @@ const sendEmailNotification = async ({
   message,
   userId,
 }: {
-  message: Message | any;
+  message: Message;
   userId: string;
 }) => {
   if (!message.read_at && !isOlderThan2Hours(message.created_at)) {
@@ -147,7 +148,7 @@ const updateMessageReadAt = async ({
   message,
   userId,
 }: {
-  message: Message | any;
+  message: Message;
   userId: string;
 }) => {
   if (message.sender_id !== userId && !message.read_at) {
@@ -174,8 +175,8 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
   const queryClient = useQueryClient();
 
-  const updateConversationsCache = (message: any) => {
-    queryClient.setQueryData(["get-conversations", user?.id], (old: any[]) => {
+  const updateConversationsCache = (message: Message) => {
+    queryClient.setQueryData(["get-conversations", user?.id], (old: EnrichedConversation[]) => {
       if (!old) return old;
 
       return old
@@ -201,7 +202,8 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
     });
   };
 
-  const handleIncomingMessage = async (rawMessage: any) => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const handleIncomingMessage = async (rawMessage: Message) => {
     const message = await enrichMessage(rawMessage);
 
     updateConversationsCache(message);
@@ -233,7 +235,7 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const enrichMessage = async (message: any) => {
+  const enrichMessage = async (message: Message) => {
     const { data: sender } = await supabase
       .from("profiles")
       .select("id, full_name, profile_image_url")
@@ -251,10 +253,8 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
   }, [location.pathname]);
 
   useEffect(() => {
-    if (user) {
-      if (!activeConversation && needNotifcations) {
-        getUserConversations({ userId: user?.id });
-      }
+    if (user && !activeConversation && needNotifcations) {
+      getUserConversations({ userId: user?.id });
     }
   }, [user, needNotifcations, activeConversation]);
 
@@ -286,7 +286,8 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       const filteredMessagesCount = data.filter(
-        (message: any) => message.sender_id !== user?.id && !message.read_at,
+        (message: Message) =>
+          message.sender_id !== user?.id && !message.read_at,
       ).length;
 
       for (const message of data) {
@@ -371,7 +372,7 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
         (payload) => {
           const message = payload.new;
 
-          handleIncomingMessage(message);
+          handleIncomingMessage(message as Message);
         },
       )
       .subscribe();
@@ -379,13 +380,40 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user]);
+  }, [handleIncomingMessage, user]);
 
-  const addLocalMessage = (message: any) => {
+  const addLocalMessage = (
+    message:
+      | Message
+      | {
+          id: string;
+          conversation_id: string;
+          content: string;
+          file_url: string;
+          sender_id: string;
+          created_at: string;
+          pending: boolean;
+        },
+  ) => {
     setMessages((prev) => [...prev, message]);
   };
 
-  const replaceLocalMessage = (tempId: string, realMessage: any) => {
+  const replaceLocalMessage = (
+    tempId: string,
+    realMessage:
+      | Message
+      | {
+          content: string;
+          conversation_id: string;
+          created_at: string;
+          file_url: string;
+          id: string;
+          message_type: string;
+          read_at: string;
+          reply_to_id: string;
+          sender_id: string;
+        },
+  ) => {
     setMessages((prev) => {
       console.log(
         "Replacing temp message:",
@@ -529,7 +557,7 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (notifError) {
         console.error("error occurred", notifError);
-        toast.error(t("unexpected_error_occured"));;
+        toast.error(t("unexpected_error_occured"));
       }
 
       if (!notif.success && notif.error) {
@@ -606,4 +634,5 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useChat = () => useContext(ChatContext);
