@@ -55,7 +55,7 @@ const ReservationEvent = ({
       : reservation.status == "accepted"
         ? "default"
         : reservation.status == "delete requested"
-          ? "outline-solid"
+          ? "outline"
           : "destructive";
 
   const acceptRes = async () => {
@@ -121,7 +121,7 @@ const ReservationEvent = ({
             <span>{reservation.service.title}</span>
             <Badge variant={badgeVariant}>{t(`event.${reservation.status}`)}</Badge>
           </h2>
-          <div
+          {/* <div
             className="flex shrink-0 items-center gap-2 mb-2 w-full"
             dir="ltr"
           >
@@ -151,7 +151,7 @@ const ReservationEvent = ({
             >
               {t("create_reservation.24_format")}
             </FieldLabel>
-          </div>
+          </div> */}
         </div>
 
         <div className="flex flex-col gap-3">

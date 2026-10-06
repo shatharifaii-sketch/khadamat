@@ -11,7 +11,8 @@ const SavedServices = ({
 }: Props) => {
     const {
         savedServices,
-        removeSavedService
+        removeSavedService,
+        isRemoving
     } = useProfile();
 
   return (
@@ -22,7 +23,8 @@ const SavedServices = ({
                 <SavedServiceComponent 
                     key={ss.id} 
                     service={ss.service}
-                    remSavedService={removeSavedService}
+                    remSavedService={() => removeSavedService(ss.id)}
+                    isRemoving={isRemoving}
                 />
             ))
             : (

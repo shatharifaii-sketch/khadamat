@@ -93,7 +93,7 @@ const ProviderAvailbilityForm = ({
         <DialogDescription>{t("availability_form.desc")}</DialogDescription>
       </DialogHeader>
 
-      <div className="flex flex-col gap-10 overflow-y-auto max-h-[500px]">
+      <div className="flex flex-col gap-10 overflow-y-auto max-h-125">
         <div className="flex items-center gap-2">
           <Checkbox
             id="with_appointments"
@@ -103,6 +103,9 @@ const ProviderAvailbilityForm = ({
           <Label htmlFor="with_appointments">
             {t("availability_form.with_appointments")}
           </Label>
+          <span className="text-xs bg-primary text-muted rounded-md px-2 py-1 animate-pulse">
+            {`(${t("availability_form.check_badge")})`}
+          </span>
         </div>
 
         <div>

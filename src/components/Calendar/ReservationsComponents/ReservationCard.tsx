@@ -49,13 +49,13 @@ const ReservationCard = ({ reservation }: Props) => {
   }
 
   return (
-    <Card className={cn("shadow-sm", isMobile ? "h-[133px] mb-1" : "h-[123px]")}>
+    <Card className={cn("shadow-sm", isMobile ? "h-33.25 mb-1" : "h-30.75")}>
       <CardContent className="px-0 pb-2">
         <CardHeader className="px-3 pt-2 pb-1">
           <CardTitle className="text-md flex gap-1 justify-start items-center">
             <Badge
             variant={
-              reservation ? (reservation.status == "pending" ? "outline-solid" : reservation.status == "accepted" ? "default" : "destructive") : "outline-solid"
+              reservation ? (reservation.status == "pending" ? "outline" : reservation.status == "accepted" ? "default" : "destructive") : "outline"
             }
             className={cn(
               "size-6 p-0 flex items-center justify-center", reservation ? reservation.status == "accepted" && "bg-green-600" : "*:bg-gray-200"
@@ -78,7 +78,7 @@ const ReservationCard = ({ reservation }: Props) => {
               {reservation ? formatTime(reservation.end_time, timeFormat) : "--:--"}
             </p>
 
-            <div
+            {/* <div
               className="flex shrink-0 items-center gap-2 mb-2"
               dir="ltr"
             >
@@ -90,7 +90,7 @@ const ReservationCard = ({ reservation }: Props) => {
                 }
                 className="h-6 w-11 min-h-6 min-w-11 max-h-6 max-w-11 shrink-0"
               />
-            </div>
+            </div> */}
           </CardDescription>
         </CardHeader>
 

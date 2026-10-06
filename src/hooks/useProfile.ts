@@ -102,7 +102,8 @@ export const useProfile = () => {
   });
 
   const {
-    mutate: removeSavedService
+    mutate: removeSavedService,
+    isPending: isRemovingService
   } = useMutation({
     mutationFn: async (id: string) => {
       if (!user || !id) {
@@ -285,7 +286,8 @@ export const useProfile = () => {
     deleteError,
 
     savedServices,
-    removeSavedService
+    removeSavedService,
+    isRemoving: isRemovingService
   };
 };
 

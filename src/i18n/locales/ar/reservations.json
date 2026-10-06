@@ -64,7 +64,8 @@
         "errors": {
             "Invalid ISO time": "خطأ غير متوقع",
             "end_time_must_be_after_start_time": "نهاية الموعد لازم تكون بعد البداية"
-        }
+        },
+        "check_badge": "لتفعيل الحجوزات"
     },
     "service": {
         "with_appointments": "الخدمة متاحة للحجز",

@@ -12,26 +12,32 @@ import { Reservation, useReservationsContext } from "@/contexts/ReservationsCont
 import { useMemo, useState } from "react";
 import { Dialog, DialogContent } from "../ui/dialog";
 import { useTranslation } from "react-i18next";
-import { truncateString } from "@/lib/utils";
+import { cn, truncateString } from "@/lib/utils";
 import { CircleCheck, CircleX, Clock8 } from "lucide-react";
 import DateDialog from "./ReservationsComponents/DateDialog";
 import ReservationEvent from "./ReservationsComponents/ReservationEvent";
 import { toast } from "sonner";
+import { useIsMobile } from "@/hooks/use-mobile";
 
-function renderEventContent(eventInfo: EventDisplayInfo) {
+function renderEventContent(eventInfo: EventDisplayInfo, isMobile: boolean) {
   return (
-    <div className="px-1 flex items-center justify-between w-full">
+    <div className={
+      cn(
+        "px-1 flex items-center justify-start w-full mx-0.5 rounded-full",
+        eventInfo.event.extendedProps.status == "pending" ? "text-muted bg-muted-foreground" : eventInfo.event.extendedProps.status == "accepted" ? "text-muted bg-green-600" : "text-muted bg-destructive"
+      )
+    }>
       <i>{truncateString(eventInfo.event.title, 10)}</i>
       <span>
-        {
-        eventInfo.event.extendedProps.status == "pending" ? (
+        {!isMobile && 
+        (eventInfo.event.extendedProps.status == "pending" ? (
           <Clock8 size={14} className="text-muted-foreground" />
         ) : 
         eventInfo.event.extendedProps.status == "accepted" ? (
           <CircleCheck size={14} className="text-green-600" />
         ) : (
           <CircleX size={14} className="text-destructive" />
-        )}
+        ))}
       </span>
     </div>
   );
@@ -42,6 +48,7 @@ const MyCalendarComponent = () => {
   const lang = localStorage.getItem("language") || "en";
   const locale = lang == "ar" ? arLocale : enLocale;
 
+  const isMobile = useIsMobile()
   // const controller = useCalendarController();
   // const buttons = controller.getButtonState();
 
@@ -130,7 +137,7 @@ const MyCalendarComponent = () => {
         events={events}
         dateClick={handleDateClick}
         eventClick={handleEventClick}
-        eventContent={renderEventContent}
+        eventContent={(e) => renderEventContent(e, isMobile)}
         nowIndicator
         className=""
       />

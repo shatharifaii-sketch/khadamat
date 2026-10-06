@@ -16,13 +16,11 @@ import { UseMutateFunction } from "@tanstack/react-query";
 
 interface Props {
   service: SavedService["service"];
-  remSavedService: UseMutateFunction<{
-    success: boolean;
-    error: string;
-}, Error, string, unknown>
+  remSavedService: () => void;
+  isRemoving: boolean;
 }
 
-const SavedServiceComponent = ({ service, remSavedService }: Props) => {
+const SavedServiceComponent = ({ service, remSavedService, isRemoving }: Props) => {
   const { t } = useTranslation("account");
   const lang = localStorage.getItem("language") || "en";
 
@@ -40,7 +38,7 @@ const SavedServiceComponent = ({ service, remSavedService }: Props) => {
           </CardDescription>
         </div>
 
-        <Button variant="secondary" onClick={() => remSavedService(service.id)}>
+        <Button disabled={isRemoving} variant="secondary" onClick={remSavedService}>
             <Bookmark fill="fill" />
             {t("saved_service.remove_service")}
         </Button>
