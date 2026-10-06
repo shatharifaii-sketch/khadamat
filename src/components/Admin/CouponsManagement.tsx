@@ -30,28 +30,17 @@ const CouponsManagement = ({
     const [page, setPage] = useState<number>(0);
     const [cursorHistory, setCursorHistory] = useState<number[]>([0]);
     const cursor = cursorHistory[page - 1];
+    const [sortOption, setSortOption] = useState<SortOption>('date-desc');
 
     const { couponsList: coupons, hasNextPage, nextCursor, couponCount } = useCoupons({
-        couponsCursor: cursor
+        couponsCursor: cursor,
+        sort: sortOption
     })
 
     const { toast } = useToast();
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const [sortOption, setSortOption] = useState<SortOption>('date-desc');
+    
     const { deleteCoupon } = useAdminFunctionality();
-
-    const sortedCoupons = useMemo(() => {
-        if (!coupons) return [];
-        return [...coupons].sort((a, b) => {
-            if (sortOption === "date-desc") {
-                return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-            } else if (sortOption === "code-name") {
-                return a.code.localeCompare(b.code, 'en', { sensitivity: 'base' });
-            } else if (sortOption === "date-asc") {
-                return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-            }
-        });
-    }, [coupons, sortOption]);
 
     const handleDeleteCoupon = async (couponId: string) => {
         try {
@@ -120,7 +109,7 @@ const CouponsManagement = ({
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {sortedCoupons.map((coupon) => (
+                        {coupons?.map((coupon) => (
                             <TableRow key={coupon.id}>
                                 <TableCell className="font-medium max-w-xs truncate">
                                     {coupon.code}

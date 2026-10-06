@@ -64,7 +64,8 @@
         "errors": {
             "Invalid ISO time": "Unexpected Error",
             "end_time_must_be_after_start_time": "End time must be after start time"
-        }
+        },
+        "check_badge": "Activate reservations"
     },
     "service": {
         "with_appointments": "Service is available for reservations",

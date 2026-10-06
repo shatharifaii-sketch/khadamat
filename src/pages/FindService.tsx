@@ -2,7 +2,6 @@ import { useState, useMemo, useEffect, Suspense } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
-import Navigation from "@/components/Navigation";
 import { usePublicServices } from "@/hooks/usePublicServices";
 import EnhancedSearchFilters from "@/components/FindService/EnhancedSearchFilters";
 import EnhancedServiceCard from "@/components/FindService/EnhancedServiceCard";

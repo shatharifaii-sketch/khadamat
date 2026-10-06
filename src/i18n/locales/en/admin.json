@@ -193,8 +193,8 @@
                 "label": "Sort by",
                 "newest": "Newest",
                 "oldest": "Oldest",
-                "name_ar": "Name (Arabic)",
-                "name_en": "Name (English)"
+                "name_asc": "Name (A - Z)",
+                "name_desc": "Name (Z - A)"
             },
             "table": {
                 "name": "Name",

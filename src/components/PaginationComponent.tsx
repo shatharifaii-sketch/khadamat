@@ -75,7 +75,6 @@ const PaginationComponent = ({
 
   const pages = getPaginationItems(page, totalPages);
 
-  console.log("PaginationComponent: ", { cursor, page, hasNextPage, count });
   return (
     <Pagination dir="ltr" className="flex justify-center mt-6 bg-transparent">
       <PaginationContent>

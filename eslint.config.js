@@ -14,6 +14,7 @@ export default tseslint.config(
       "node_modules",
       "coverage",
       "supabase/functions/**",
+      "database.types.ts"
     ],
   },
   {
