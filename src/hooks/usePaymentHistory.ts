@@ -2,6 +2,7 @@
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 export interface PaymentHistory {
   id: string;
@@ -22,8 +23,34 @@ export interface PaymentHistory {
   paymentMethodText?: string;
 }
 
+export type PaymentType = {
+ hasDiscount: boolean;
+ finalAmount: number;
+ originalAmount: number;
+ statusText: string;
+ paymentMethodText: string;
+ amount: number;
+ billing_period_end: string;
+ billing_period_start: string;
+ billing_reason: string;
+ coupon_id: string;
+ coupon_used: boolean;
+ created_at: string;
+ currency: string;
+ email_sent: boolean;
+ id: string;
+ invoice_id: number;
+ invoice_url: string;
+ payment_date: string;
+ payment_status: string;
+ status: string;
+ updated_at: string;
+ user_id: string;
+}[]
+
 export const usePaymentHistory = () => {
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   const getPaymentHistory = useSuspenseQuery({
     queryKey: ['payment-history', user?.id],
@@ -62,12 +89,12 @@ export const usePaymentHistory = () => {
 };
 
 // Helper functions for consistent translation
-const getStatusText = (status: string) => {
+const getStatusText = (status: string, t = (key: string) => key) => {
   switch (status) {
-    case 'completed': return 'مكتملة';
-    case 'pending': return 'قيد المراجعة';
-    case 'failed': return 'فاشلة';
-    case 'cancelled': return 'ملغية';
+    case 'completed': return t("completed");
+    case 'pending': return t("pending");
+    case 'failed': return t("failed");
+    case 'cancelled': return t("cancelled");
     default: return status;
   }
 };
