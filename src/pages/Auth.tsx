@@ -68,10 +68,10 @@ const Auth = () => {
       return;
     }
 
-    // if (usePhone && (!phone.countryCode || !phone.number)) {
-    //   toast.error(t("required_fields_error"));
-    //   return;
-    // }
+    if (usePhone && (!phone.countryCode || !phone.number)) {
+      toast.error(t("required_fields_error"));
+      return;
+    }
 
     if (!isLogin && !fullName) {
       toast.error(t("full_name_error"));
@@ -83,10 +83,10 @@ const Auth = () => {
     try {
       if (isLogin) {
         const { error } = await signIn(
-          email, // usePhone ? null : email,
+          usePhone ? null : email,
           password,
-          null, // usePhone ? phone : null,
-          "email" // usePhone ? "phone" : "email",
+          usePhone ? phone : null,
+          usePhone ? "phone" : "email",
         );
 
         if (error) {
@@ -118,7 +118,11 @@ const Auth = () => {
               );
             }
 
-            if (typeof error == "string" && error == "Too many requests. Please wait a minute before trying again.") {
+            if (
+              typeof error == "string" &&
+              error ==
+                "Too many requests. Please wait a minute before trying again."
+            ) {
               toast.error(t("too_many_requests"));
             }
           }
@@ -136,12 +140,12 @@ const Auth = () => {
         }
       } else {
         const { data, error } = await signUp(
-          email, // usePhone ? null : email,
+          usePhone ? null : email,
           password,
           fullName,
           passwordConfirm,
-          null, // usePhone ? phone : null,
-          "email" // usePhone ? "phone" : "email",
+          usePhone ? phone : null,
+          usePhone ? "phone" : "email",
         );
         if (!error) {
           if (!usePhone) {
@@ -170,7 +174,10 @@ const Auth = () => {
               },
             },
           );
-        } else if (error == "Too many requests. Please wait a minute before trying again.") {
+        } else if (
+          error ==
+          "Too many requests. Please wait a minute before trying again."
+        ) {
           toast.error(t("too_many_requests"));
         }
       }
@@ -253,13 +260,13 @@ const Auth = () => {
             <div className="flex justify-between items-center p-1 gap-2 border rounded-full w-fit mx-auto bg-muted/70 overflow-hidden">
               <div
                 onClick={() => {
-                  // setUsePhone(true)
-                  toast(t("phone_login_disabled"), {
-                    description: t("phone_login_description"),
-                  });
+                  setUsePhone(true);
+                  // toast(t("phone_login_disabled"), {
+                  //   description: t("phone_login_description"),
+                  // });
                 }}
                 className={cn(
-                  "p-2 rounded-full flex items-center justify-center w-1/2 hover:cursor-pointer transition-all opacity-35",
+                  "p-2 rounded-full flex items-center justify-center w-1/2 hover:cursor-pointer transition-all",
                   usePhone ? "bg-white text-primary shadow-md" : "",
                 )}
               >
@@ -302,7 +309,7 @@ const Auth = () => {
                         onValueChange={(e) => handleCountryChange(e)}
                         dir="rtl"
                       >
-                        <SelectTrigger className="w-[130px]">
+                        <SelectTrigger className="w-32.5">
                           <SelectValue placeholder={t("code")} />
                         </SelectTrigger>
                         <SelectContent>
@@ -343,20 +350,19 @@ const Auth = () => {
                 )}
               </div>
 
-              {!usePhone && (
-                <div className="space-y-2">
-                  <Label htmlFor="password">{t("password")}</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder={t("password_placeholder")}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-              )}
-              {!isLogin && !usePhone && (
+              <div className="space-y-2">
+                <Label htmlFor="password">{t("password")}</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder={t("password_placeholder")}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+
+              {!isLogin && (
                 <div className="space-y-2">
                   <Label htmlFor="password">{t("confirm_password")}</Label>
                   <Input

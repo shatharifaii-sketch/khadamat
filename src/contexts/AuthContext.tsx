@@ -3,8 +3,6 @@ import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import AppLoading from "@/components/AppLoading";
 import { toast } from "sonner";
-import { redirect } from "react-router-dom";
-import { ArrowLeftToLine } from "lucide-react";
 
 interface AuthContextType {
   user: User | null;
@@ -70,6 +68,11 @@ async function checkUser({
   if (userExistsError) throw userExistsError;
 
   if (data.userExists) {
+    if (method == "phone" && !data.phoneConfirmed) {
+      //TODO: resend otp
+    } else if (method == "email" && !data.emailConfirmed) {
+      //TODO: resend email otp
+    }
     return "user_exists";
   }
 
@@ -137,14 +140,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     if (method == "phone") {
-      return {};
+      const readyPhone = `${phone.countryCode}${phone.number}`
+
       const { data, error } = await supabase.functions.invoke(
-        "handle-phone-otp",
+        "register-with-whatsapp-otp",
         {
           body: JSON.stringify({
-            phone: `${phone.countryCode}${phone.number}`,
-            isLogin: false,
-            fullName
+            phone: readyPhone,
+            name: fullName,
+            password,
+            passwordConfirm
           }),
         },
       );
