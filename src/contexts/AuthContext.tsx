@@ -45,40 +45,6 @@ type ExtendedUser = User & {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-async function checkUser({
-  phone,
-  email,
-  method,
-}: {
-  phone: string;
-  email: string;
-  method: string;
-}): Promise<string> {
-  const { data, error: userExistsError } = await supabase.functions.invoke(
-    "check-if-user-exists",
-    {
-      body: {
-        phone: phone || null,
-        email: email || null,
-        method,
-      },
-    },
-  );
-
-  if (userExistsError) throw userExistsError;
-
-  if (data.userExists) {
-    if (method == "phone" && !data.phoneConfirmed) {
-      //TODO: resend otp
-    } else if (method == "email" && !data.emailConfirmed) {
-      //TODO: resend email otp
-    }
-    return "user_exists";
-  }
-
-  return "";
-}
-
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<ExtendedUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -129,16 +95,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     phone: { countryCode: string; number: string } | null,
     method: string = "email",
   ) => {
-    const res = await checkUser({
-      phone: method == "phone" ? `${phone.countryCode}${phone.number}` : null,
-      email: method == "phone" ? null : email,
-      method,
-    });
-
-    if (res == "user_exists") {
-      return { data: null, error: res };
-    }
-
     if (method == "phone") {
       const readyPhone = `${phone.countryCode}${phone.number}`
 
@@ -198,18 +154,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } | null,
     method: string = "email",
   ) => {
-    const res = await checkUser({
-      phone: method == "phone" ? `${phone.countryCode}${phone.number}` : null,
-      email: method == "phone" ? null : email,
-      method,
-    });
-
-    if (res != "user_exists") {
-      return { data: null, error: "user_not_found" };
-    }
-
     if (method == "phone") {
-      return {};
       const { data, error } = await supabase.functions.invoke(
         "handle-phone-otp",
         {
@@ -317,7 +262,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const { data, error } = await supabase.functions.invoke('handle-phone-otp', {
         body: JSON.stringify({
           phone,
-          isLogin: true
+          lang
         })
       })
 
@@ -337,27 +282,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     token: string,
     password: string,
   ) => {
-    // const { data, error } = await supabase.functions.invoke(
-    //   "verify-phone-whatsapp-otp", {
-    //   body: JSON.stringify({ phone, token })
-    // }
-    // );
+    const { data, error } = await supabase.functions.invoke(
+      "verify-phone-whatsapp-otp", {
+      body: JSON.stringify({ phone, token })
+    }
+    );
 
-    // if (error) {
-    //   console.error('Error verifying OTP:', error);
-    //   return { error };
-    // }
+    if (error) {
+      console.error('Error verifying OTP:', error);
+      return { error };
+    }
 
-    // const { data: user, error: userError } = await supabase.auth.signInWithPassword({
-    //   phone: `+${phone.countryCode}${phone.number}`,
-    //   password
-    // })
-
-    const { data, error: userError } = await supabase.auth.verifyOtp({
+    const { data: user, error: userError } = await supabase.auth.signInWithPassword({
       phone: `+${phone.countryCode}${phone.number}`,
-      token,
-      type: "sms",
-    });
+      password
+    })
+
+    // const { data, error: userError } = await supabase.auth.verifyOtp({
+    //   phone: `+${phone.countryCode}${phone.number}`,
+    //   token,
+    //   type: "sms",
+    // });
 
     if (userError) {
       console.error("Sign in error:", userError);

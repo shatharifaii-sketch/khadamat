@@ -48,6 +48,9 @@ export default {
 
         return Response.json(
           {
+            userExists: false,
+            phoneConfirmed: false,
+            emailConfirmed: false,
             error: "lookup_failed",
           },
           { status: 500 },
@@ -58,28 +61,28 @@ export default {
         return Response.json({
           userExists: false,
           phoneConfirmed: false,
-          emailConfirmed: false
-        })
+          emailConfirmed: false,
+          error: null
+        });
       }
 
-      const { data: authData, error: authError } = await supabase.auth.admin.getUserById(profile.id);
+      const { data: authData, error: authError } =
+        await supabase.auth.admin.getUserById(profile.id);
 
       if (authError || !authData.user) {
         console.error("Auth user lookup failed: ", authError);
 
-        return Response.json(
-          { error: "lookup_failed" },
-          { status: 500 }
-        );
+        return Response.json({ error: "lookup_failed" }, { status: 500 });
       }
 
-      const {user} = authData;
+      const { user } = authData;
 
       return Response.json({
         userExists: true,
         phoneConfirmed: !!user.phone_confirmed_at,
-        emailConfirmed: !!user.email_confirmed_at
-      })
+        emailConfirmed: !!user.email_confirmed_at,
+        error: null
+      });
     } catch (error) {
       console.log("ERROR: ", error);
       return Response.json({

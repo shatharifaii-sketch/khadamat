@@ -6,90 +6,6 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { withSupabase } from "@supabase/server";
 
-const whatsappAccessToken = Deno.env.get("WHATSAPP_ACCESS_TOKEN")!;
-const whatsappPhoneNumberId = Deno.env.get("WHATSAPP_PHONE_NUMBER_ID")!;
-const whatsappGraphApiVersion = Deno.env.get("WHATSAPP_GRAPH_API_VERSION")!;
-
-async function generateOtp(phone: string, supabase: any) {
-  await supabase.from("phone_verification_codes").delete().eq("phone", phone);
-
-  const array = new Uint32Array(4);
-  crypto.getRandomValues(array);
-
-  const otp = ((array[0] % 900000) + 100000).toString();
-
-  const hashBuffer = await crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(otp),
-  );
-
-  const otpHash = Array.from(new Uint8Array(hashBuffer))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-
-  const { data, error } = await supabase
-    .from("phone_verification_codes")
-    .insert({
-      phone,
-      code_hash: otpHash,
-      expires_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
-    });
-
-  if (error) {
-    return {
-      otp: null,
-      error,
-      success: false,
-    };
-  }
-
-  return {
-    otp,
-    error: null,
-    success: true,
-  };
-}
-
-async function sendWhatsappMessage(
-  token: string,
-  phoneNumber: string,
-  lang: string,
-) {
-  console.log("SENDING WHATSAPP MESSAGE")
-  const url = `https://graph.facebook.com/${whatsappGraphApiVersion}/${whatsappPhoneNumberId}/messages`;
-
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${whatsappAccessToken}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      messaging_product: "whatsapp",
-      to: phoneNumber,
-      type: "template",
-      template: {
-        name: "verification_code",
-        language: {
-          code: lang == "en" ? "en" : "ar",
-        },
-      },
-    }),
-  });
-
-  if (response.status !== 200) {
-    return {
-      success: false,
-      error: `Failed to send WhatsApp message: ${response.statusText}`,
-    };
-  }
-
-  return {
-    success: true,
-    error: null,
-  };
-}
-
 export default {
   fetch: withSupabase(
     {
@@ -128,54 +44,80 @@ export default {
           );
         }
 
-        const { success: createUserSuccess, error: createUserError } =
-          await supabase.functions.invoke("create-user", {
-            body: JSON.stringify({
-              phone,
-              password,
-              fullName: name,
-            }),
+        const {
+          data: checkData,
+          error: checkError,
+        } = await supabase.functions.invoke("check-if-user-exists", {
+          body: {
+            phone,
+            method: "phone",
+            email: null,
+          },
+        });
+
+        const { userExists, phoneConfirmed, error: inCheckError } = checkData ?? {}
+
+        if (checkError) {
+          console.log("server error checking user", checkError)
+          return Response.json(
+            {
+              success: false,
+              error: "lookup_failed",
+            },
+            {
+              status: 500,
+            },
+          );
+        }
+
+        if (inCheckError) {
+          console.log("error checking user", inCheckError)
+
+          return Response.json(
+            {
+              success: false,
+              error: inCheckError
+            }
+          )
+        }
+
+        if (userExists && phoneConfirmed) {
+          return Response.json({
+            success: false,
+            error: "user_exists",
           });
-
-        if (!createUserSuccess && createUserError) {
-          return Response.json(
-            {
-              success: false,
-              error: createUserError,
-            },
-            {
-              status: 400,
-            },
-          );
         }
 
-        const { otp, error, success } = await generateOtp(phone, supabase);
+        const { data, error } = await supabase.functions.invoke(
+          "handle-phone-otp",
+          {
+            body: {
+              phone,
+              lang,
+            },
+          },
+        );
 
-        if (!success || !otp) {
-          return Response.json(
-            {
-              success: false,
-              error: error,
-            },
-            {
-              status: 400,
-            },
-          );
+        if (error) {
+          console.log("error sending otp on register", error)
+          return Response.json({
+            success: false,
+            error: "server_error",
+          });
         }
 
-        const { success: whatsappSuccess, error: whatsappError } =
-          await sendWhatsappMessage(otp, phone, lang);
-
-        if (!whatsappSuccess) {
-          return Response.json(
-            {
+        if (!data.success) {
+          if (data.error) {
+            return Response.json({
               success: false,
-              error: whatsappError,
-            },
-            {
-              status: 400,
-            },
-          );
+              error: data.error,
+            });
+          } else {
+            return Response.json({
+              success: false,
+              error: "unknown_error",
+            });
+          }
         }
 
         return Response.json({

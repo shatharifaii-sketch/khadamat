@@ -37,10 +37,11 @@ export default {
       });
 
       if (error) {
+        console.log("error creating user", error)
         return Response.json(
           {
             success: false,
-            error: error,
+            error: "server_error",
           },
           {
             status: 400,

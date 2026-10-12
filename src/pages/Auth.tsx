@@ -139,7 +139,7 @@ const Auth = () => {
           }
         }
       } else {
-        const { data, error } = await signUp(
+        const { error } = await signUp(
           usePhone ? null : email,
           password,
           fullName,
@@ -176,9 +176,13 @@ const Auth = () => {
           );
         } else if (
           error ==
-          "Too many requests. Please wait a minute before trying again."
+          "too_many_requests"
         ) {
           toast.error(t("too_many_requests"));
+        } else if (error == "server_error") {
+          toast.error(t("server_error"))
+        } else {
+          toast.error(t("unknown_error"))
         }
       }
     } catch (error: unknown) {
