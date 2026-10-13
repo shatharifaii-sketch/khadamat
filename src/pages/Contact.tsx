@@ -48,7 +48,7 @@ const Contact = () => {
     {
       icon: Mail,
       title: 'البريد الإلكتروني',
-      content: 'info@khedmatak.ps',
+      content: 'info@khedmatak.com',
       description: 'راسلنا في أي وقت'
     },
     {

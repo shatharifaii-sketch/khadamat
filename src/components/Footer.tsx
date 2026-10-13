@@ -39,8 +39,13 @@ const Footer = () => {
             <FaInstagram size={24} />
           </a>
         </div>
-        <div className="pt-6 border-t border-border text-muted-foreground">
-          {t("rights")}
+        <div className="pt-6 border-t border-border text-muted-foreground flex flex-col">
+          <span>
+             © 2024 خدمتك. جميع الحقوق محفوظة.
+          </span>
+          <span>
+            © 2024 Khedemtak, LLC. All rights reserved.
+          </span>
         </div>
       </div>
     </footer>
