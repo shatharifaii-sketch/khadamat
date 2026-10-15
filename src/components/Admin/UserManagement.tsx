@@ -1,16 +1,49 @@
-import { useMemo, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { useToast } from '@/hooks/use-toast';
-import { UserPlus, Edit, Trash2, Eye } from 'lucide-react';
-import { useAdminFunctionality } from '@/hooks/useAdminFunctionality';
-import { NavLink } from 'react-router-dom';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select';
-import UserForm from './ui/UserForm';
+import { useEffect, useMemo, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
+import { UserPlus, Edit, Trash2, Eye, ShieldUser } from "lucide-react";
+import { useAdminFunctionality, useUsers } from "@/hooks/useAdminFunctionality";
+import { NavLink } from "react-router-dom";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import UserForm from "./ui/UserForm";
+import { useTranslation } from "react-i18next";
+import PaginationComponent from "../PaginationComponent";
 
 export interface UserProfile {
   id: string;
@@ -24,53 +57,62 @@ export interface UserProfile {
   created_at: string;
   profile_image_url?: string;
   experience_years?: number;
+  is_admin?: boolean;
 }
 
 interface UserManagementProps {
-  users: UserProfile[];
+  count?: number;
 }
 
-type SortOption = "name-ar" | "name-en" | "date-asc" | "date-desc";
+type SortOption = "name-asc" | "name-desc" | "date-asc" | "date-desc";
 
-export const UserManagement = ({ users }: UserManagementProps) => {
+export const UserManagement = ({ count }: UserManagementProps) => {
+  const { t } = useTranslation("admin");
+  const lang = localStorage.getItem("language") || "en";
+
+  const [sortOption, setSortOption] = useState<SortOption>("date-desc");
+  const [page, setPage] = useState(1);
+  const [cursorHistory, setCursorHistory] = useState<(number | null)[]>([null]);
+  const cursor = cursorHistory[page - 1];
+
+  const {
+    usersList: users,
+    nextCursor,
+    hasNextPage,
+    numOfUsers,
+  } = useUsers({ usersCursor: cursor, sort: sortOption });
+
   const { toast } = useToast();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
-  const [sortOption, setSortOption] = useState<SortOption>('date-desc');
+
   const [formData, setFormData] = useState({
-    id: editingUser?.id || '',
-    email: '',
-    full_name: '',
-    phone: '',
-    location: '',
-    bio: '',
+    id: editingUser?.id || "",
+    email: "",
+    full_name: "",
+    phone: "",
+    location: "",
+    bio: "",
     is_service_provider: false,
-    experience_years: 0
+    experience_years: 0,
   });
   const { deleteUser, updateUser } = useAdminFunctionality();
 
-  const sortedUsers = useMemo(() => {
-      if (!users) return [];
-      return [...users].sort((a, b) => {
-        if (sortOption === "date-desc") {
-          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-        } else if (sortOption === "name-ar") {
-          return a.full_name.localeCompare(b.full_name, 'ar', { sensitivity: 'base' });
-        } else if (sortOption === "name-en") {
-          return a.full_name.localeCompare(b.full_name, 'en', { sensitivity: 'base' });
-        } else if (sortOption === "date-asc") {
-          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-        }
-      });
-    }, [users, sortOption]);
+  useEffect(() => {
+    setPage(1);
+    setCursorHistory([null]);
+  }, [sortOption]);
 
   const handleDeleteUser = async (userId: string) => {
     try {
       deleteUser.mutate(userId);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
-        title: "خطأ",
-        description: error.message || "حدث خطأ أثناء حذف المستخدم",
+        title: t("table.user_management.toasts.error_title"),
+        description:
+          error instanceof Error
+            ? error.message
+            : t("table.user_management.toasts.error_description"),
         variant: "destructive",
       });
     }
@@ -80,49 +122,67 @@ export const UserManagement = ({ users }: UserManagementProps) => {
     console.log(user, editingUser);
     setEditingUser(user);
     setFormData({
-      id: editingUser?.id || '',
-      email: editingUser?.email || '',
-      full_name: user.full_name || '',
-      phone: user.phone || '',
-      location: user.location || '',
-      bio: user.bio || '',
+      id: editingUser?.id || "",
+      email: editingUser?.email || "",
+      full_name: user.full_name || "",
+      phone: user.phone || "",
+      location: user.location || "",
+      bio: user.bio || "",
       is_service_provider: user.is_service_provider || false,
-      experience_years: user.experience_years || 0
+      experience_years: user.experience_years || 0,
     });
   };
 
   return (
     <Card>
-      <CardHeader className='flex flex-col gap-3'>
+      <CardHeader className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
-            إدارة المستخدمين
+            {t("table.user_management.title")}
           </CardTitle>
           <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
             <DialogTrigger asChild>
               <Button className="flex items-center gap-2">
                 <UserPlus className="h-4 w-4" />
-                إنشاء حساب جديد
+                {t("table.user_management.create_user")}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-md">
               <DialogHeader>
-                <DialogTitle>إنشاء حساب مستخدم جديد</DialogTitle>
+                <DialogTitle>
+                  {t("table.user_management.create_user_title")}
+                </DialogTitle>
               </DialogHeader>
               <UserForm closeForm={() => setIsCreateModalOpen(false)} />
             </DialogContent>
           </Dialog>
         </div>
-        <Select value={sortOption} onValueChange={(value) => setSortOption(value as SortOption)}>
+        <Select
+          value={sortOption}
+          onValueChange={(value) => setSortOption(value as SortOption)}
+        >
           <SelectTrigger>
-            <SelectValue placeholder="ترتيب حسب التاريخ" />
+            <SelectValue
+              placeholder={t("table.user_management.sort_placeholder")}
+            />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              <SelectLabel className='text-right px-3 text-muted-foreground'>ترتيب حسب</SelectLabel>
-              <SelectItem value="date-desc">الأحدث</SelectItem>
-              <SelectItem value="date-asc">الأقدم</SelectItem>
-              <SelectItem value="name-ar">الاسم عربي</SelectItem> <SelectItem value="name-en">الاسم الانجليزي</SelectItem>
+              <SelectLabel className="text-right px-3 text-muted-foreground">
+                {t("table.user_management.sort.label")}
+              </SelectLabel>
+              <SelectItem value="date-desc">
+                {t("table.user_management.sort.newest")}
+              </SelectItem>
+              <SelectItem value="date-asc">
+                {t("table.user_management.sort.oldest")}
+              </SelectItem>
+              <SelectItem value="name-asc">
+                {t("table.user_management.sort.name_asc")}
+              </SelectItem>
+              <SelectItem value="name-desc">
+                {t("table.user_management.sort.name_desc")}
+              </SelectItem>
             </SelectGroup>
           </SelectContent>
         </Select>
@@ -131,57 +191,101 @@ export const UserManagement = ({ users }: UserManagementProps) => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className='text-end'>الاسم</TableHead>
-              <TableHead className='text-end'>الهاتف</TableHead>
-              <TableHead className='text-end'>الموقع</TableHead>
-              <TableHead className='text-end'>النوع</TableHead>
-              <TableHead className='text-end'>تاريخ التسجيل</TableHead>
-              <TableHead className='text-end'>إجراءات</TableHead>
+              <TableHead className="text-end">
+                {t("table.user_management.table.name")}
+              </TableHead>
+              <TableHead className="text-end">
+                {t("table.user_management.table.phone")}
+              </TableHead>
+              <TableHead className="text-end">
+                {t("table.user_management.table.location")}
+              </TableHead>
+              <TableHead className="text-end">
+                {t("table.user_management.table.type")}
+              </TableHead>
+              <TableHead className="text-end">
+                {t("table.user_management.table.created_at")}
+              </TableHead>
+              <TableHead className="text-end">
+                {t("table.user_management.table.actions")}
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sortedUsers.map((user) => (
+            {users?.map((user) => (
               <TableRow key={user.id}>
                 <TableCell className="font-medium">
-                  <NavLink to={user.id ? `/profile/${user.id}` : '#'}>
-                    {user.full_name || 'غير محدد'}
+                  <NavLink
+                    className="flex justify-end items-center gap-2"
+                    to={user.id ? `/profile/${user.id}` : "#"}
+                  >
+                    {user.full_name || t("table.user_management.empty.name")}{" "}
+                    {user.is_admin && (
+                      <div className="w-2 h-2 bg-primary rounded-full" />
+                    )}
                   </NavLink>
                 </TableCell>
-                <TableCell>{user.phone || '-'}</TableCell>
-                <TableCell>{user.location || '-'}</TableCell>
+                <TableCell>{user.phone || "-"}</TableCell>
+                <TableCell>{user.location || "-"}</TableCell>
                 <TableCell>
-                  <Badge variant={user.is_service_provider ? 'default' : 'secondary'}>
-                    {user.is_service_provider ? 'مقدم خدمة' : 'عميل'}
+                  <Badge
+                    variant={user.is_service_provider ? "default" : "secondary"}
+                  >
+                    {user.is_service_provider
+                      ? t("table.user_management.type.provider")
+                      : t("table.user_management.type.client")}
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  {new Date(user.created_at).toLocaleDateString('ar-SA')}
+                  {new Date(user.created_at).toLocaleDateString(
+                    lang === "en" ? "en-US" : "ar-SA",
+                  )}
                 </TableCell>
-                <TableCell className='flex items-center justify-center'>
+                <TableCell className="flex items-center justify-center">
                   <div className="flex gap-2">
-                    <Button variant='link' size='sm' className='outline-primary outline outline-1'>
-                      <NavLink to={`/profile/${user.id}`}>
-                        <Eye className="size-4" />
+                    <Button
+                      variant="link"
+                      size="sm"
+                      className="outline-primary outline-solid outline-1"
+                    >
+                      <NavLink
+                        to={`/profile/${user.id}`}
+                        className="flex items-center justify-center"
+                      >
+                        {user.is_admin ? (
+                          <ShieldUser className="size-4" />
+                        ) : (
+                          <Eye className="size-4" />
+                        )}
                       </NavLink>
                     </Button>
 
-                    <Dialog open={editingUser?.id === user.id} onOpenChange={(open) => !open && setEditingUser(null)}>
+                    <Dialog
+                      open={editingUser?.id === user.id}
+                      onOpenChange={(open) => !open && setEditingUser(null)}
+                    >
                       <DialogTrigger asChild>
-                        <Button size="sm" variant="outline" onClick={() => openEditModal(user)}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => openEditModal(user)}
+                        >
                           <Edit className="h-4 w-4" />
                         </Button>
                       </DialogTrigger>
                       <DialogContent className="max-w-md">
                         <DialogHeader>
-                          <DialogTitle>تحرير بيانات المستخدم</DialogTitle>
+                          <DialogTitle>
+                            {t("table.user_management.dialogs.edit_title")}
+                          </DialogTitle>
                         </DialogHeader>
-                        <UserForm 
+                        <UserForm
                           editingUser={editingUser}
                           closeForm={() => setEditingUser(null)}
                         />
                       </DialogContent>
                     </Dialog>
-                    
+
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button size="sm" variant="destructive">
@@ -190,15 +294,25 @@ export const UserManagement = ({ users }: UserManagementProps) => {
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>تأكيد الحذف</AlertDialogTitle>
+                          <AlertDialogTitle>
+                            {t("table.user_management.dialogs.delete_title")}
+                          </AlertDialogTitle>
                           <AlertDialogDescription>
-                            هل أنت متأكد من حذف المستخدم "{user.full_name}"؟ هذا الإجراء لا يمكن التراجع عنه.
+                            {t(
+                              "table.user_management.dialogs.delete_description",
+                              { name: user.full_name },
+                            )}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>إلغاء</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => handleDeleteUser(user.id)} className="bg-destructive text-destructive-foreground">
-                            حذف
+                          <AlertDialogCancel>
+                            {t("table.user_management.dialogs.cancel")}
+                          </AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDeleteUser(user.id)}
+                            className="bg-destructive text-destructive-foreground"
+                          >
+                            {t("table.user_management.dialogs.confirm_delete")}
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
@@ -209,6 +323,15 @@ export const UserManagement = ({ users }: UserManagementProps) => {
             ))}
           </TableBody>
         </Table>
+        <PaginationComponent
+          cursor={nextCursor}
+          page={page}
+          setPage={setPage}
+          cursorHistory={cursorHistory}
+          setCursorHistory={setCursorHistory}
+          hasNextPage={hasNextPage}
+          count={numOfUsers}
+        />
       </CardContent>
     </Card>
   );

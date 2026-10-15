@@ -4,12 +4,14 @@ import { CheckCircle, Calendar, CreditCard, Star } from 'lucide-react';
 import { Tables } from '@/integrations/supabase/types';
 import { usePaymentLogic } from '@/hooks/usePaymentLogic';
 import { CouponValidation } from '@/hooks/useCoupon';
+import { Subscription } from '@/hooks/useSubscription';
+import { Service } from '@/types/service';
 
 interface PaymentOrderSummaryProps {
-  subscription: any;
+  subscription: Subscription;
   servicesNeeded: number;
   amount: number;
-  serviceData: any;
+  serviceData: Service;
   finalAmount: number;
   subscriptionTier: string;
   discount?: number;
@@ -57,7 +59,7 @@ const PaymentOrderSummary = (props: PaymentOrderSummaryProps) => {
         )}
 
         {/* Service Info */}
-        {serviceData > 0 && (
+        {serviceData && (
           <div className="space-y-2">
             <h4 className="font-medium">تفاصيل الخدمة</h4>
             <div className="p-3 bg-gray-50 rounded-lg text-sm">
