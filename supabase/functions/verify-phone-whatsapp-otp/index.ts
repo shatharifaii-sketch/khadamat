@@ -3,146 +3,56 @@
 // This enables autocomplete, go to definition, etc.
 
 // Setup type definitions for built-in Supabase Runtime APIs
-import "jsr:@supabase/functions-js/edge-runtime.d.ts"
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { hashOtp } from "../_shared/otp.ts";
 
 type PhoneVerificationCodes = {
   id: string;
   expires_at: string;
   attempts: number;
   used: boolean;
-}
+};
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-function validateAttempt(data: PhoneVerificationCodes): { success: boolean, error: { code: string, message: string } } {
-  if (!data) {
-    return {
-      success: false,
-      error: {
-        code: "phone_not_found",
-        message: "Phone number not found",
-      },
-    };
-  }
-
-  if (new Date(data.expires_at) < new Date()) {
-    return {
-      success: false,
-      error: {
-        code: "token_expired",
-        message: "Token has expired",
-      },
-    };
-  }
-
-  if (data.used) {
-    return {
-      success: false,
-      error: {
-        code: "token_used",
-        message: "Token has already been used",
-      },
-    };
-  }
-
-  if (data.attempts >= 5) {
-    return {
-      success: false,
-      error: {
-        code: "too_many_attempts",
-        message: "Too many attempts",
-      },
-    };
-  }
-
-  return {
-    success: true,
-    error: {
-      code: "",
-      message: "",
-    }
-  }
-}
-
 async function compareTokens(token: string, phone: string) {
-  const hashBuffer = await crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(token)
-  );
+  const codeHash = await hashOtp(phone, token);
 
-  const codeHash = Array.from(new Uint8Array(hashBuffer))
-                .map(b => b.toString(16).padStart(2, "0"))
-                .join("");
-
-  const {
-    data,
-    error
-  } = await supabase
-  .from("phone_verification_codes")
-  .select("*")
-  .eq("phone", phone)
-  .order("created_at", { ascending: false })
-  .limit(1)
-  .maybeSingle();
+  const { data, error } = await supabase.rpc("verify_phone_code", { p_phone: phone, p_code_hash: codeHash })
 
   if (error) {
+    console.error("Error verifying phone: ", error)
     return {
       success: false,
-      error,
-    };
+      error: "server_error"
+    }
   }
 
-  const { success, error: validateError } = validateAttempt(data);
-
-  if (!success) {
+  if (data != 'ok') {
     return {
       success: false,
-      error: validateError,
-    };
-  }
-
-  if (data.code_hash !== codeHash) {
-    await supabase
-      .from("phone_verification_codes")
-      .update({ attempts: data.attempts + 1 })
-      .eq("id", data.id);
-
-      return {
-        success: false,
-        error: {
-          code: "invalid_token",
-          message: "Invalid token",
-        },
-      }
+      error: data
+    }
   } else {
-    await supabase
-      .from("phone_verification_codes")
-      .update({
-        used: true,
-        attempts: data.attempts + 1,
-        code_hash: null
-      })
-      .eq("id", data.id);
-
     return {
       success: true,
-      error: null,
+      error: null
     }
   }
 }
 
 Deno.serve(async (req: Request) => {
-
   if (req.method === "OPTIONS") {
     return new Response("ok", {
       status: 200,
@@ -158,20 +68,58 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { phone, token } = await req.json();
+    const { phone, token, fullName, password } = await req.json();
 
-    const { data, error } = await supabase.auth.verifyOtp({
-      phone,
-      token
-    })
+    const { success, error } = await compareTokens(token, phone);
+
+    if (!success && error) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: error,
+        }),
+        { headers: { "Content-Type": "application/json" } },
+      );
+    }
+
+    const { data, error: createError } = await supabase.functions.invoke(
+      "create-user",
+      {
+        body: {
+          phone,
+          password,
+          fullName,
+          phoneConfirm: true,
+        },
+      },
+    );
+
+    if (createError) {
+      console.error("Creating user error: ", createError);
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "server_error",
+        }),
+      );
+    }
+
+    if (!data.success && data.error) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: data.error,
+        }),
+      );
+    }
 
     return new Response(
       JSON.stringify({
         success: true,
-        error: null
+        error: null,
       }),
       { headers: { "Content-Type": "application/json" } },
-    )
+    );
   } catch (error) {
     console.error("subscription cancellation error:", error);
 
@@ -186,10 +134,10 @@ Deno.serve(async (req: Request) => {
           ...corsHeaders,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
   }
-})
+});
 
 /* To invoke locally:
 

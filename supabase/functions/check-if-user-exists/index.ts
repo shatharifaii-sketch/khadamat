@@ -25,7 +25,7 @@ export default {
       }
 
       const identifier =
-        method === "phone" ? phone?.trum() : email?.trim().toLowerCase();
+        method === "phone" ? phone?.trim() : email?.trim().toLowerCase();
 
       if (typeof identifier !== "string" || identifier.length === 0) {
         return Response.json({ error: "missing_identifier" }, { status: 400 });

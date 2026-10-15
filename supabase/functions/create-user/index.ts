@@ -28,16 +28,18 @@ export default {
     const { supabaseAdmin } = ctx;
 
     try {
-      const { phone, password, fullName } = await req.json();
+      const { phone, password, fullName, phoneConfirm, emailConfirm } = await req.json();
 
       const { data, error } = await supabaseAdmin.auth.admin.createUser({
         phone: phone,
         password: password,
+        phone_confirm: phoneConfirm ?? false,
+        email_confirm: emailConfirm ?? false,
         user_metadata: { name: fullName },
       });
 
       if (error) {
-        console.log("error creating user", error)
+        console.error("error creating user", error)
         return Response.json(
           {
             success: false,

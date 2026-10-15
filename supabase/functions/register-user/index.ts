@@ -3,24 +3,55 @@
 // This enables autocomplete, go to definition, etc.
 
 // Setup type definitions for built-in Supabase Runtime APIs
-import "jsr:@supabase/functions-js/edge-runtime.d.ts"
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { Resend } from "npm:resend@latest";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY")!);
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
 
-async function sendWelcomeEmail(email: string, name: string, otp: string,) {
+const MIN_LEN = 10;
+const MAX_LEN = 120;
+
+function validatePassword(pw: unknown): string | null {
+  if (typeof pw !== "string") return "invalid_password";
+  const len = [...pw].length;
+  if (len < MIN_LEN) return "password_too_short";
+  if (len > MAX_LEN) return "password_too_long";
+  return null;
+}
+
+async function isPwned(pw: string): Promise<boolean> {
+  const buf = await crypto.subtle.digest("SHA-1", new TextEncoder().encode(pw));
+  const hex = [...new Uint8Array(buf)]
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("")
+    .toUpperCase();
+  const prefix = hex.slice(0, 5);
+  const suffix = hex.slice(5);
+  try {
+    const res = await fetch(`https://api.pwnedpasswords.com/range/${prefix}`, {
+      signal: AbortSignal.timeout(3000),
+    });
+    if (!res.ok) return false;
+    const text = await res.text();
+    return text.split("\n").some((l) => l.split(":")[0].trim() === suffix);
+  } catch (error) {
+    return false;
+  }
+}
+
+async function sendWelcomeEmail(email: string, name: string, otp: string) {
   const { data, error } = await resend.emails.send({
     from: "welcome <support@mail.khedemtak.com>",
     to: email,
@@ -28,45 +59,45 @@ async function sendWelcomeEmail(email: string, name: string, otp: string,) {
       id: "welcome",
       variables: {
         name,
-        otp
-      }
-    }
+        otp,
+      },
+    },
   });
 
   if (error) {
     console.error("Error sending email: ", error);
     return {
       success: false,
-      error
+      error,
     };
   }
 
   return {
     success: true,
-    data
-  }
+    data,
+  };
 }
 
 async function generateEmailLinks(email: string, password: string) {
   const { data, error } = await supabase.auth.admin.generateLink({
-    type: 'signup',
+    type: "signup",
     email,
-    password
+    password,
   });
 
   if (error) {
     console.error("Error generating link: ", error);
     return {
       success: false,
-      error
+      error,
     };
   }
 
   return {
     success: true,
     link: data.properties.action_link,
-    otp: data.properties.email_otp
-  }
+    otp: data.properties.email_otp,
+  };
 }
 
 Deno.serve(async (req: Request) => {
@@ -99,8 +130,31 @@ Deno.serve(async (req: Request) => {
             ...corsHeaders,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
+    }
+
+    const pwError = validatePassword(password);
+
+    if (pwError) {
+      console.error("Error validating error")
+      return Response.json(
+        { success: false, error: pwError },
+        {
+          status: 400,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+    }
+
+    if (await isPwned(password)) {
+      return Response.json({
+        success: false,
+        error: "password_breached"
+      })
     }
 
     const { data, error } = await supabase.auth.admin.createUser({
@@ -108,8 +162,8 @@ Deno.serve(async (req: Request) => {
       password,
       user_metadata: {
         full_name: name,
-      }
-    })
+      },
+    });
 
     if (error) {
       console.error("Error creating user: ", error);
@@ -123,7 +177,7 @@ Deno.serve(async (req: Request) => {
             ...corsHeaders,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 
@@ -140,7 +194,7 @@ Deno.serve(async (req: Request) => {
             ...corsHeaders,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 
@@ -157,7 +211,7 @@ Deno.serve(async (req: Request) => {
             ...corsHeaders,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 
@@ -170,7 +224,7 @@ Deno.serve(async (req: Request) => {
           ...corsHeaders,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
   } catch (error) {
     console.error("Checkout error:", error);
@@ -186,10 +240,10 @@ Deno.serve(async (req: Request) => {
           ...corsHeaders,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
   }
-})
+});
 
 /* To invoke locally:
 

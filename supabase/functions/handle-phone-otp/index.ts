@@ -5,6 +5,7 @@
 // Setup type definitions for built-in Supabase Runtime APIs
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { withSupabase } from "@supabase/server";
+import { hashOtp } from "../_shared/otp.ts";
 
 const whatsappAccessToken = Deno.env.get("WHATSAPP_ACCESS_TOKEN")!;
 const whatsappPhoneNumberId = Deno.env.get("WHATSAPP_PHONE_NUMBER_ID")!;
@@ -18,14 +19,7 @@ async function generateOtp(phone: string, supabase: any) {
 
   const otp = ((array[0] % 900000) + 100000).toString();
 
-  const hashBuffer = await crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(otp),
-  );
-
-  const otpHash = Array.from(new Uint8Array(hashBuffer))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
+  const otpHash = await hashOtp(phone, otp);
 
   const { data, error } = await supabase
     .from("phone_verification_codes")
@@ -84,12 +78,24 @@ async function sendWhatsappMessage(
               },
             ],
           },
+          {
+            type: "button",
+            sub_type: "url",
+            index: "0",
+            parameters: [
+              {
+                type: "text",
+                text: token,
+              },
+            ],
+          },
         ],
       },
     }),
   });
 
   if (response.status !== 200) {
+    console.log(response);
     return {
       success: false,
       error: "error_sending_otp",
@@ -148,6 +154,7 @@ export default {
         await sendWhatsappMessage(otp, phone, "en");
 
       if (!whatsappSuccess) {
+        console.log(whatsappError);
         return Response.json(
           {
             success: false,
@@ -170,8 +177,7 @@ export default {
       console.log("ERROR: ", error);
       return Response.json({
         success: false,
-        error:
-          error instanceof Error ? error.message : "unknown_error",
+        error: error instanceof Error ? error.message : "unknown_error",
       });
     }
   }),

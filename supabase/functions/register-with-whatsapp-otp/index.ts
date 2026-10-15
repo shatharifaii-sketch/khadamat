@@ -93,7 +93,7 @@ export default {
           {
             body: {
               phone,
-              lang,
+              lang: lang ?? null,
             },
           },
         );
