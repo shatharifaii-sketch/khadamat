@@ -48,13 +48,19 @@ const Contact = () => {
     {
       icon: Mail,
       title: 'البريد الإلكتروني',
-      content: 'info@khedmatak.com',
+      content: 'support@khedmatak.com',
       description: 'راسلنا في أي وقت'
     },
     {
       icon: Phone,
       title: 'الهاتف',
       content: '02-2345678',
+      description: 'اتصل بنا للدعم الفوري'
+    },
+    {
+      icon: Phone,
+      title: 'الهاتف',
+      content: '+16507403416',
       description: 'اتصل بنا للدعم الفوري'
     },
     {
