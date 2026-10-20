@@ -246,7 +246,9 @@
                 },
                 "toggles": {
                     "service_provider": "Service provider",
-                    "admin": "Admin"
+                    "admin": "Admin",
+                    "verify_phone": "Verify phone",
+                    "verify_email": "Verify email"
                 },
                 "buttons": {
                     "create": "Create account",

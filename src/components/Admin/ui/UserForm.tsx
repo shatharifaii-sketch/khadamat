@@ -21,6 +21,8 @@ export interface User {
   experience_years?: number;
   password?: string;
   is_admin?: boolean;
+  verify_phone?: boolean;
+  verify_email?: boolean;
 }
 
 interface Props {
@@ -60,6 +62,8 @@ const UserForm = ({ editingUser, closeForm }: Props) => {
     password: '',
     full_name: '',
     phone: '',
+    verify_email: true,
+    verify_phone: true,
     location: '',
     bio: '',
     is_service_provider: false,
@@ -96,6 +100,16 @@ const UserForm = ({ editingUser, closeForm }: Props) => {
           value={formData.email}
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
         />
+        <div className="flex items-center space-x-2 mt-1" dir='ltr'>
+
+          <Label htmlFor="is_admin">{t("table.user_management.form.toggles.verify_email")}</Label>
+          <Switch
+            id="verify_email"
+            checked={formData.verify_email}
+            onCheckedChange={(checked) => setFormData({ ...formData, verify_email: checked })}
+            className='relative'
+          />
+        </div>
       </div>
       <div>
         <Label htmlFor="password">{t("table.user_management.form.fields.password")}</Label>
@@ -156,6 +170,16 @@ const UserForm = ({ editingUser, closeForm }: Props) => {
             maxLength={9}
           />
         </div>
+        <div className="flex items-center space-x-2 mt-1" dir='ltr'>
+
+          <Label htmlFor="is_admin">{t("table.user_management.form.toggles.verify_phone")}</Label>
+          <Switch
+            id="verify_phone"
+            checked={formData.verify_phone}
+            onCheckedChange={(checked) => setFormData({ ...formData, verify_phone: checked })}
+            className='relative'
+          />
+        </div>
       </div>
       <div>
         <Label htmlFor="location">{t("table.user_management.form.fields.location")}</Label>
@@ -182,7 +206,7 @@ const UserForm = ({ editingUser, closeForm }: Props) => {
           onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
         />
       </div>
-      <div className='flex justify-between'>
+      <div className='flex justify-start gap-2 text-start items-center'>
         <div className="flex items-center space-x-2" dir='ltr'>
 
           <Label htmlFor="is_service_provider">{t("table.user_management.form.toggles.service_provider")}</Label>
