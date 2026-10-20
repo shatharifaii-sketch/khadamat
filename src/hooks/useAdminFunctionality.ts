@@ -626,6 +626,7 @@ export const useAdminFunctionality = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-data"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-users-data", null, "date-desc"] })
     },
   });
 
@@ -747,6 +748,7 @@ export const useAdminFunctionality = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-data"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-users-data", null, "date-desc"] })
     },
   });
 

@@ -122,6 +122,46 @@ Deno.serve(async (req) => {
           }
         );
       };
+    } else {
+      const { data, error } = await supabase.from('user_roles').select('id').eq('user_id', id).maybeSingle();
+
+      if (error) {
+        console.error("Error checkin admin: ", error);
+        return new Response(
+          JSON.stringify({
+            success: false,
+            user: null,
+            error: error,
+          }),
+          {
+            headers: {
+              ...corsHeaders,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+      };
+
+      if (data && data.id) {
+        const { error } = await supabase.from('user_roles').delete().eq('user_id', id);
+
+        if (error) {
+        console.error("Error deleting admin: ", error);
+        return new Response(
+          JSON.stringify({
+            success: false,
+            user: null,
+            error: error,
+          }),
+          {
+            headers: {
+              ...corsHeaders,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+      };
+      }
     }
 
     return new Response(
