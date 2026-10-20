@@ -58,6 +58,8 @@ export interface UserProfile {
   profile_image_url?: string;
   experience_years?: number;
   is_admin?: boolean;
+  verify_email?: boolean;
+  verify_phone?: boolean;
 }
 
 interface UserManagementProps {

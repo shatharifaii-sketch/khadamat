@@ -34,9 +34,9 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { email, password, phone, is_admin } = await req.json();
+    const { email, password, phone, is_admin, verify_email, verify_phone, admin } = await req.json();
 
-    if (!email || !password) {
+    if (!password || (password && (!email && !phone))) {
       return new Response(
         JSON.stringify({
           success: false,
@@ -51,6 +51,7 @@ Deno.serve(async (req) => {
         }
       );
     }
+
     if (!is_admin) {
       return new Response(
         JSON.stringify({
@@ -72,7 +73,9 @@ Deno.serve(async (req) => {
     const { data: user, error: userError } = await supabase.auth.admin.createUser({
       email,
       password,
-      phone
+      phone,
+      phone_confirm: !!phone && !verify_phone,
+      email_confirm: !!email && !verify_email
     });
 
     if (userError) {
@@ -92,7 +95,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    if (is_admin) {
+    if (admin) {
       const { error: adminError } = await supabase.from('user_roles').insert({ user_id: user.user?.id, role: 'admin' });
 
       if (adminError) {
