@@ -6,7 +6,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -68,9 +67,7 @@ Deno.serve(async (req) => {
       );
     }
 
-
-
-    const { data: user, error: userError } = await supabase.auth.admin.createUser({
+    const { data: userData, error: userError } = await supabase.auth.admin.createUser({
       email,
       password,
       phone,
@@ -97,7 +94,7 @@ Deno.serve(async (req) => {
     }
 
     if (admin) {
-      const { error: adminError } = await supabase.from('user_roles').insert({ user_id: user.user?.id, role: 'admin' });
+      const { error: adminError } = await supabase.from('user_roles').insert({ user_id: userData.user?.id, role: 'admin' });
 
       if (adminError) {
         console.error("Error creating admin user: ", adminError);
@@ -120,7 +117,7 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: true,
-        user,
+        user: userData.user,
         error: null
       }),
       {
