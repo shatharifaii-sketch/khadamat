@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -85,6 +85,12 @@ const Auth = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    if (!isLogin) {
+      setUsePhone(false)
+    }
+  }, [isLogin])
 
   // Redirect if already logged in
   if (user) {
@@ -237,13 +243,18 @@ const Auth = () => {
             <div className="flex justify-between items-center p-1 gap-2 border rounded-full w-fit mx-auto bg-muted/70 overflow-hidden">
               <div
                 onClick={() => {
-                  setUsePhone(true);
+                  if (isLogin) {
+                    setUsePhone(true)
+                  } else {
+                    return
+                  };
                   // toast(t("phone_login_disabled"), {
                   //   description: t("phone_login_description"),
                   // });
                 }}
                 className={cn(
-                  "p-2 rounded-full flex items-center justify-center w-1/2 hover:cursor-pointer transition-all",
+                  "p-2 rounded-full flex items-center justify-center w-1/2 transition-all",
+                  isLogin ? "cursor-pointer" : "disabled opacity-60",
                   usePhone ? "bg-white text-primary shadow-md" : "",
                 )}
               >

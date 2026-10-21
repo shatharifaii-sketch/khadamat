@@ -143,6 +143,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     method: string = "email",
   ): Promise<AuthResult> => {
     if (method == "phone") {
+      return { data: null, error: null }
       if (!phone) return { data: null, error: { phoneError: "required_fields_error" } };
 
       const readyPhone = `${phone.countryCode}${phone.number}`.replace(/[^\d+]/g, "");
@@ -177,15 +178,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     method: string = "email",
   ) => {
     if (method == "phone") {
-      const { data, error } = await supabase.functions.invoke(
-        "handle-phone-otp",
-        {
-          body: JSON.stringify({
-            phone: `${phone.countryCode}${phone.number}`,
-            isLogin: true,
-          }),
-        },
-      );
+      const { data, error } = await supabase.auth.signInWithPassword({
+        phone: `${phone.countryCode}${phone.number}`,
+        password
+      })
+      // const { data, error } = await supabase.functions.invoke(
+      //   "handle-phone-otp",
+      //   {
+      //     body: JSON.stringify({
+      //       phone: `${phone.countryCode}${phone.number}`,
+      //       isLogin: true,
+      //     }),
+      //   },
+      // );
 
       if (error) {
         console.error("Sign in error:", error);

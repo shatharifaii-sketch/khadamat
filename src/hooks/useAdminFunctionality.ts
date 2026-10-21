@@ -588,6 +588,7 @@ export const useAdminFunctionality = () => {
           password: formData.password,
           phone: formData.phone,
           is_admin: admin,
+          full_name: formData.full_name,
           admin: formData.is_admin,
           verify_email: formData.verify_email,
           verify_phone: formData.verify_phone
@@ -603,7 +604,7 @@ export const useAdminFunctionality = () => {
         throw userError ?? error;
       }
 
-      if (formData.verify_email) {
+      if (formData.verify_email && formData.email && formData.email.length > 0) {
         await sendPasswordUpdateEmail.mutateAsync({ email: formData.email! });
       }
 
@@ -639,6 +640,7 @@ export const useAdminFunctionality = () => {
       const { error } = await supabase.functions.invoke("admin-delete-user", {
         body: {
           id,
+          is_admin: admin
         },
       });
 
@@ -648,6 +650,7 @@ export const useAdminFunctionality = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-data"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-users-data", null, "date-desc"] })
     },
   });
 
@@ -707,6 +710,7 @@ export const useAdminFunctionality = () => {
               phone: formData.phone,
               is_admin: admin,
               admin: formData.is_admin,
+              full_name: formData.full_name,
           verify_email: formData.verify_email,
           verify_phone: formData.verify_phone
             },

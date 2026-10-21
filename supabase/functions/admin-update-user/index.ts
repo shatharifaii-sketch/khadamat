@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { id, email, password, phone, is_admin, verify_email, verify_phone, admin } = await req.json();
+    const { id, email, password, phone, is_admin, verify_email, verify_phone, admin, full_name } = await req.json();
 
     if (!id) {
       return new Response(
@@ -72,9 +72,12 @@ Deno.serve(async (req) => {
       email?: string;
       password?: string;
       phone?: string;
+      user_metadata: { name?: string },
       phone_confirm?: boolean;
       email_confirm?: boolean;
-    } = {};
+    } = {
+      user_metadata: full_name ?? "user"
+    };
 
     if (email) updates.email = email;
     if (password) updates.password = password;
