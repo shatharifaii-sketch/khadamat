@@ -580,7 +580,7 @@ export const useAdminFunctionality = () => {
       console.log("Creating user...");
 
       const {
-        data: { success, user, error: userError },
+        data,
         error,
       } = await supabase.functions.invoke("admin-create-user", {
         body: {
@@ -594,6 +594,8 @@ export const useAdminFunctionality = () => {
           verify_phone: formData.verify_phone
         },
       });
+
+      const { success, user, error: userError } = data
 
       if (userError || error) {
         toast.error(
@@ -619,7 +621,7 @@ export const useAdminFunctionality = () => {
           is_service_provider: formData.is_service_provider ?? false,
           profile_image_url: "",
         })
-        .eq("id", user.user?.id);
+        .eq("id", user.id);
 
       if (profileError) throw profileError;
 
