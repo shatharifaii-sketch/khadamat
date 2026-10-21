@@ -247,7 +247,9 @@
                 },
                 "toggles": {
                     "service_provider": "مقدم خدمة",
-                    "admin": "أدمن"
+                    "admin": "أدمن",
+                    "verify_phone": "تحقق من رقم الهاتف",
+                    "verify_email": "تحقق من البريد الإلكتروني"
                 },
                 "buttons": {
                     "create": "إنشاء الحساب",

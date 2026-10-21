@@ -587,7 +587,10 @@ export const useAdminFunctionality = () => {
           email: formData.email,
           password: formData.password,
           phone: formData.phone,
-          is_admin: formData.is_admin,
+          is_admin: admin,
+          admin: formData.is_admin,
+          verify_email: formData.verify_email,
+          verify_phone: formData.verify_phone
         },
       });
 
@@ -600,7 +603,9 @@ export const useAdminFunctionality = () => {
         throw userError ?? error;
       }
 
-      await sendPasswordUpdateEmail.mutateAsync({ email: formData.email! });
+      if (formData.verify_email) {
+        await sendPasswordUpdateEmail.mutateAsync({ email: formData.email! });
+      }
 
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
@@ -621,6 +626,7 @@ export const useAdminFunctionality = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-data"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-users-data", null, "date-desc"] })
     },
   });
 
@@ -699,7 +705,10 @@ export const useAdminFunctionality = () => {
               email: formData.email,
               password: formData.password,
               phone: formData.phone,
-              is_admin: formData.is_admin,
+              is_admin: admin,
+              admin: formData.is_admin,
+          verify_email: formData.verify_email,
+          verify_phone: formData.verify_phone
             },
           },
         );
@@ -714,7 +723,7 @@ export const useAdminFunctionality = () => {
           throw error || data?.error;
         }
 
-        if (formData.email && formData.password) {
+        if (formData.email && formData.password && formData.verify_email) {
           await sendPasswordUpdateEmail.mutateAsync({ email: formData.email });
         }
       }
@@ -739,6 +748,7 @@ export const useAdminFunctionality = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-data"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-users-data", null, "date-desc"] })
     },
   });
 

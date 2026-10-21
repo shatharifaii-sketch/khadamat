@@ -147,8 +147,11 @@ const SubscriptionCard = ({
   )}
 >
   <DialogHeader className="text-center">
-    <DialogTitle className="text-lg md:text-xl">
-      {t("payment_gateway_title")}
+    <DialogTitle asChild>
+      <h3 className="text-sm md:text-xl">
+        {t("payment_gateway_title")}
+      </h3>
+      
     </DialogTitle>
 
     <DialogDescription className="text-sm">
