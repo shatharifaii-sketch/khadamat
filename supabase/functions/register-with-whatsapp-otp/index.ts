@@ -29,6 +29,11 @@ export default {
       console.log("Registering user...");
 
       try {
+        return Response.json({
+          success: true,
+          error: null,
+        });
+        
         const { supabaseAdmin: supabase } = ctx;
 
         const { phone, lang, name, password, passwordConfirm } =
