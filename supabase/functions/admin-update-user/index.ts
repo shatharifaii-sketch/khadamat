@@ -3,19 +3,20 @@
 // This enables autocomplete, go to definition, etc.
 
 // Setup type definitions for built-in Supabase Runtime APIs
-import "jsr:@supabase/functions-js/edge-runtime.d.ts"
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
+import { isPwned, validatePassword } from "../_shared/password.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
 
 Deno.serve(async (req) => {
@@ -34,13 +35,23 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { id, email, password, phone, is_admin, verify_email, verify_phone, admin, full_name } = await req.json();
+    const {
+      id,
+      email,
+      password,
+      phone,
+      is_admin,
+      verify_email,
+      verify_phone,
+      admin,
+      full_name,
+    } = await req.json();
 
     if (!id) {
       return new Response(
         JSON.stringify({
           success: false,
-          error: "User ID is required",
+          error: "required_id",
         }),
         {
           status: 400,
@@ -48,7 +59,7 @@ Deno.serve(async (req) => {
             ...corsHeaders,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 
@@ -64,7 +75,7 @@ Deno.serve(async (req) => {
             ...corsHeaders,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 
@@ -72,21 +83,47 @@ Deno.serve(async (req) => {
       email?: string;
       password?: string;
       phone?: string;
-      user_metadata: { name?: string },
+      user_metadata: { name?: string };
       phone_confirm?: boolean;
       email_confirm?: boolean;
     } = {
-      user_metadata: full_name ?? "user"
+      user_metadata: full_name ?? "user",
     };
 
     if (email) updates.email = email;
-    if (password) updates.password = password;
+    if (password) {
+      const pwError = validatePassword(password);
+
+      if (pwError) {
+        console.error("Error validating error");
+        return Response.json(
+          { success: false, error: pwError },
+          {
+            status: 400,
+            headers: {
+              ...corsHeaders,
+              "Content-Type": "application/json",
+            },
+          },
+        );
+      }
+
+      if (await isPwned(password)) {
+        return Response.json({
+          success: false,
+          error: "password_breached",
+        });
+      }
+      updates.password = password;
+    }
     if (phone) updates.phone = phone;
     updates.phone_confirm = !verify_phone;
-    updates.email_confirm = !verify_email
+    updates.email_confirm = !verify_email;
 
-    const { data, error } =
-      await supabase.auth.admin.updateUserById(id, updates);
+    const { data, error } = await supabase.auth.admin.updateUserById(
+      id,
+      updates,
+    );
 
     if (error) {
       console.error("Update user error:", error);
@@ -94,7 +131,7 @@ Deno.serve(async (req) => {
       return new Response(
         JSON.stringify({
           success: false,
-          error: error.message,
+          error: error,
         }),
         {
           status: 400,
@@ -102,12 +139,14 @@ Deno.serve(async (req) => {
             ...corsHeaders,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 
     if (admin) {
-      const { error: adminError } = await supabase.from('user_roles').insert({ user_id: id, role: 'admin' });
+      const { error: adminError } = await supabase
+        .from("user_roles")
+        .upsert({ user_id: id, role: "admin" }, { onConflict: 'user_id' });
 
       if (adminError) {
         console.error("Error creating admin user: ", adminError);
@@ -115,55 +154,62 @@ Deno.serve(async (req) => {
           JSON.stringify({
             success: false,
             user: null,
-            error: adminError,
+            error: "error_updating",
           }),
           {
             headers: {
               ...corsHeaders,
               "Content-Type": "application/json",
             },
-          }
+          },
         );
-      };
+      }
     } else {
-      const { data, error } = await supabase.from('user_roles').select('id').eq('user_id', id).maybeSingle();
+      const { data, error } = await supabase
+        .from("user_roles")
+        .select("id")
+        .eq("user_id", id)
+        .maybeSingle();
 
       if (error) {
-        console.error("Error checkin admin: ", error);
+        console.error("Error checking admin: ", error);
         return new Response(
           JSON.stringify({
             success: false,
             user: null,
-            error: error,
+            error: "error_updating",
           }),
           {
             headers: {
               ...corsHeaders,
               "Content-Type": "application/json",
             },
-          }
+          },
         );
-      };
+      }
 
       if (data && data.id) {
-        const { error } = await supabase.from('user_roles').delete().eq('user_id', id);
+        const { error } = await supabase
+          .from("user_roles")
+          .delete()
+          .eq("user_id", id);
 
         if (error) {
-        console.error("Error deleting admin: ", error);
-        return new Response(
-          JSON.stringify({
-            success: false,
-            user: null,
-            error: error,
-          }),
-          {
-            headers: {
-              ...corsHeaders,
-              "Content-Type": "application/json",
+          console.error("Error deleting admin: ", error);
+          return new Response(
+            JSON.stringify({
+              success: false,
+              user: null,
+              error: "error_deleting_admin",
+            }),
+            {
+              headers: {
+                ...corsHeaders,
+                "Content-Type": "application/json",
+              },
             },
-          }
-        );
-      };
+          );
+        }
       }
     }
 
@@ -178,7 +224,7 @@ Deno.serve(async (req) => {
           ...corsHeaders,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
   } catch (error) {
     return new Response(
@@ -192,11 +238,10 @@ Deno.serve(async (req) => {
           ...corsHeaders,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
   }
-
-})
+});
 
 /* To invoke locally:
 

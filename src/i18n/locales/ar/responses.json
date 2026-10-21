@@ -86,5 +86,9 @@
     "missing_service_id": "معرف الخدمة مفقود",
     "missing_subscription_id": "معرف الاشتراك مفقود",
     "server_error": "حدث خطأ في الخادم، يرجى المحاولة لاحقاً",
-    "failed_to_deactivate_subscriptions": "فشل في إلغاء الاشتراكات، يرجى المحاولة لاحقاً"
+    "failed_to_deactivate_subscriptions": "فشل في إلغاء الاشتراكات، يرجى المحاولة لاحقاً",
+    "password_too_short": "كلمة المرور قصيرة جدا",
+    "password_too_long": "كلمة المرور طويلة جدا",
+    "missing_data": "بعض المعلومات مفقودة",
+    "password_breached": "كلمة المرور غير امنة"
 }

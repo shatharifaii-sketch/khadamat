@@ -3,18 +3,20 @@
 // This enables autocomplete, go to definition, etc.
 
 // Setup type definitions for built-in Supabase Runtime APIs
-import "jsr:@supabase/functions-js/edge-runtime.d.ts"
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { isPwned, validatePassword } from "../_shared/password.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
 
 Deno.serve(async (req) => {
@@ -33,9 +35,18 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { email, password, phone, is_admin, verify_email, verify_phone, admin, full_name } = await req.json();
+    const {
+      email,
+      password,
+      phone,
+      is_admin,
+      verify_email,
+      verify_phone,
+      admin,
+      full_name,
+    } = await req.json();
 
-    if (!password || (password && (!email && !phone))) {
+    if (!password || (password && !email && !phone)) {
       return new Response(
         JSON.stringify({
           success: false,
@@ -47,8 +58,31 @@ Deno.serve(async (req) => {
             ...corsHeaders,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
+    }
+
+    const pwError = validatePassword(password);
+
+    if (pwError) {
+      console.error("Error validating error");
+      return Response.json(
+        { success: false, error: pwError },
+        {
+          status: 400,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+    }
+
+    if (await isPwned(password)) {
+      return Response.json({
+        success: false,
+        error: "password_breached",
+      });
     }
 
     if (!is_admin) {
@@ -63,18 +97,19 @@ Deno.serve(async (req) => {
             ...corsHeaders,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 
-    const { data: userData, error: userError } = await supabase.auth.admin.createUser({
-      email,
-      password,
-      phone,
-      user_metadata: { name: full_name ?? "new_user" },
-      phone_confirm: !!phone && !verify_phone,
-      email_confirm: !!email && !verify_email
-    });
+    const { data: userData, error: userError } =
+      await supabase.auth.admin.createUser({
+        email,
+        password,
+        phone,
+        user_metadata: { name: full_name ?? "new_user" },
+        phone_confirm: !!phone && !verify_phone,
+        email_confirm: !!email && !verify_email,
+      });
 
     if (userError) {
       console.error("Error creating user: ", userError);
@@ -89,12 +124,14 @@ Deno.serve(async (req) => {
             ...corsHeaders,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 
     if (admin) {
-      const { error: adminError } = await supabase.from('user_roles').insert({ user_id: userData.user?.id, role: 'admin' });
+      const { error: adminError } = await supabase
+        .from("user_roles")
+        .insert({ user_id: userData.user?.id, role: "admin" });
 
       if (adminError) {
         console.error("Error creating admin user: ", adminError);
@@ -109,23 +146,23 @@ Deno.serve(async (req) => {
               ...corsHeaders,
               "Content-Type": "application/json",
             },
-          }
+          },
         );
-      };
+      }
     }
 
     return new Response(
       JSON.stringify({
         success: true,
         user: userData.user,
-        error: null
+        error: null,
       }),
       {
         headers: {
           ...corsHeaders,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
   } catch (error) {
     return new Response(
@@ -140,11 +177,10 @@ Deno.serve(async (req) => {
           ...corsHeaders,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
   }
-
-})
+});
 
 /* To invoke locally:
 

@@ -6,6 +6,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { Resend } from "npm:resend@latest";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { isPwned, validatePassword } from "../_shared/password.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -19,37 +20,6 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
-
-const MIN_LEN = 10;
-const MAX_LEN = 120;
-
-function validatePassword(pw: unknown): string | null {
-  if (typeof pw !== "string") return "invalid_password";
-  const len = [...pw].length;
-  if (len < MIN_LEN) return "password_too_short";
-  if (len > MAX_LEN) return "password_too_long";
-  return null;
-}
-
-async function isPwned(pw: string): Promise<boolean> {
-  const buf = await crypto.subtle.digest("SHA-1", new TextEncoder().encode(pw));
-  const hex = [...new Uint8Array(buf)]
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("")
-    .toUpperCase();
-  const prefix = hex.slice(0, 5);
-  const suffix = hex.slice(5);
-  try {
-    const res = await fetch(`https://api.pwnedpasswords.com/range/${prefix}`, {
-      signal: AbortSignal.timeout(3000),
-    });
-    if (!res.ok) return false;
-    const text = await res.text();
-    return text.split("\n").some((l) => l.split(":")[0].trim() === suffix);
-  } catch (error) {
-    return false;
-  }
-}
 
 async function sendWelcomeEmail(email: string, name: string, otp: string) {
   const { data, error } = await resend.emails.send({
