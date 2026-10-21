@@ -14,6 +14,7 @@ import { ServiceLink } from "@/components/PostService/ServiceLinks";
 import { useEmail } from "./useEmail";
 import { useTranslation } from "react-i18next";
 import { useMemo, useState } from "react";
+import { errorMessages } from "@/types/analytics";
 
 interface UserProfile {
   id: string;
@@ -396,7 +397,10 @@ export const useServices = ({ servicesCursor, sort }: Pagination) => {
   };
 };
 
-export const usePendingServices = ({ pendingServicesCursor, sort }: Pagination) => {
+export const usePendingServices = ({
+  pendingServicesCursor,
+  sort,
+}: Pagination) => {
   const { data: pendingServicesData, isLoading: pendingServicesDataLoading } =
     useSuspenseQuery({
       queryKey: ["admin-pending-services-data", pendingServicesCursor, sort],
@@ -419,9 +423,8 @@ export const usePendingServices = ({ pendingServicesCursor, sort }: Pagination) 
             `,
             { count: "exact" },
           )
-          .eq("status", "pending-approval")
-          
-        
+          .eq("status", "pending-approval");
+
         switch (sort) {
           case "date-asc":
             listQuery = listQuery.order("created_at", { ascending: true });
@@ -496,8 +499,8 @@ export const useCoupons = ({ couponsCursor, sort }: Pagination) => {
       queryFn: async () => {
         let listQuery = supabase
           .from("coupons")
-          .select("*", { count: "exact" })
-        
+          .select("*", { count: "exact" });
+
         switch (sort) {
           case "date-asc":
             listQuery = listQuery.order("created_at", { ascending: true });
@@ -579,34 +582,38 @@ export const useAdminFunctionality = () => {
 
       console.log("Creating user...");
 
-      const {
-        data,
-        error,
-      } = await supabase.functions.invoke("admin-create-user", {
-        body: {
-          email: formData.email,
-          password: formData.password,
-          phone: formData.phone,
-          is_admin: admin,
-          full_name: formData.full_name,
-          admin: formData.is_admin,
-          verify_email: formData.verify_email,
-          verify_phone: formData.verify_phone
+      const { data, error } = await supabase.functions.invoke(
+        "admin-create-user",
+        {
+          body: {
+            email: formData.email,
+            password: formData.password,
+            phone: formData.phone,
+            is_admin: admin,
+            full_name: formData.full_name,
+            admin: formData.is_admin,
+            verify_email: formData.verify_email,
+            verify_phone: formData.verify_phone,
+          },
         },
-      });
+      );
 
-      const { success, user, error: userError } = data
+      const { success, user, error: userError } = data;
 
       if (userError || error) {
-        toast.error(
-          userError.code === "email_exists"
-            ? t("email_exists_error")
-            : t("user_creation_error"),
-        );
+        const errorCode = typeof userError === "string" ? userError : userError?.code;
+
+          toast.error(
+            t(errorMessages[errorCode ?? ""] ?? "user_creation_error")
+          )
         throw userError ?? error;
       }
 
-      if (formData.verify_email && formData.email && formData.email.length > 0) {
+      if (
+        formData.verify_email &&
+        formData.email &&
+        formData.email.length > 0
+      ) {
         await sendPasswordUpdateEmail.mutateAsync({ email: formData.email! });
       }
 
@@ -629,7 +636,9 @@ export const useAdminFunctionality = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-data"] });
-      queryClient.invalidateQueries({ queryKey: ["admin-users-data", null, "date-desc"] })
+      queryClient.invalidateQueries({
+        queryKey: ["admin-users-data", null, "date-desc"],
+      });
     },
   });
 
@@ -642,7 +651,7 @@ export const useAdminFunctionality = () => {
       const { error } = await supabase.functions.invoke("admin-delete-user", {
         body: {
           id,
-          is_admin: admin
+          is_admin: admin,
         },
       });
 
@@ -652,7 +661,9 @@ export const useAdminFunctionality = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-data"] });
-      queryClient.invalidateQueries({ queryKey: ["admin-users-data", null, "date-desc"] })
+      queryClient.invalidateQueries({
+        queryKey: ["admin-users-data", null, "date-desc"],
+      });
     },
   });
 
@@ -713,20 +724,22 @@ export const useAdminFunctionality = () => {
               is_admin: admin,
               admin: formData.is_admin,
               full_name: formData.full_name,
-          verify_email: formData.verify_email,
-          verify_phone: formData.verify_phone
+              verify_email: formData.verify_email,
+              verify_phone: formData.verify_phone,
             },
           },
         );
 
-        if (error || !data?.success) {
-          toast.error(
-            data?.error?.code === "email_exists"
-              ? t("email_exists_error")
-              : t("user_creation_error"),
-          );
+        const { success, error: updateError } = data;
 
-          throw error || data?.error;
+        if (updateError || error) {
+          const errorCode = typeof updateError === "string" ? updateError : updateError?.code;
+
+          toast.error(
+            t(errorMessages[errorCode ?? ""] ?? "user_creation_error")
+          )
+
+          throw updateError ?? error;
         }
 
         if (formData.email && formData.password && formData.verify_email) {
@@ -754,7 +767,9 @@ export const useAdminFunctionality = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-data"] });
-      queryClient.invalidateQueries({ queryKey: ["admin-users-data", null, "date-desc"] })
+      queryClient.invalidateQueries({
+        queryKey: ["admin-users-data", null, "date-desc"],
+      });
     },
   });
 
