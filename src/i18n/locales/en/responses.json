@@ -87,8 +87,8 @@
     "missing_subscription_id": "Subscription ID is missing",
     "server_error": "An error occurred on the server, please try again later",
     "failed_to_deactivate_subscriptions": "Failed to deactivate subscriptions, please try again later",
-    "password_too_short": "The entered password is too short",
-    "password_too_long": "The entered password is too long",
+    "password_too_short": "The entered password is too short, atleast 6 characters",
+    "password_too_long": "The entered password is too long, 100 characters allowed",
     "missing_data": "missing some data",
     "password_breached": "This password is not safe"
 }
