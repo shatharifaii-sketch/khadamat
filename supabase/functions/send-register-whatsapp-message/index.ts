@@ -77,18 +77,7 @@ async function sendWhatsappMessage(token: string, phoneNumber: string, lang: str
         name: "verification_code",
         language: {
           code: lang == "en" ? "en" : "ar"
-        },
-        components: [
-          {
-            type: "body",
-            "parameters": [
-              {
-                type: "text",
-                text: lang == "en" ? `Your verification code is ${token}` : `رمز التحقق الخاص بك هو ${token}`
-              }
-            ]
-          }
-        ]
+        }
       }
     })
   });

@@ -38,6 +38,7 @@ const countries = [
   { code: "971", label: "AE +971" },
   { code: "963", label: "SY +963" },
   { code: "962", label: "JO +962" },
+  { code: "31", label: "NL +31" },
   { code: "1", label: "US +1" },
 ];
 

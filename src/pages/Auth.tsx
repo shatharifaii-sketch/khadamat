@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,6 +29,30 @@ import { Dialog } from "@/components/ui/dialog";
 import PhoneVerification from "@/components/PhoneVerification";
 import { SelectLabel } from "@radix-ui/react-select";
 import { countries } from "@/types/constants";
+import { FieldErrors } from "@/types/auth";
+
+const hasErrors = (e: FieldErrors) => Object.values(e).some(Boolean);
+
+function validateForm(v: {
+  isLogin: boolean; usePhone: boolean; email: string; password: string; passwordConfirm: string; fullName: string; phone: { countryCode: string; number: string};
+}): FieldErrors {
+  const e: FieldErrors = {};
+
+  if (v.usePhone) {
+    if (!v.phone.countryCode || !v.phone.number) e.phoneError = "required_fields_error";
+  } else if (!v.email) {
+    e.emailError = "required_fields_error";
+  }
+
+  if ((!v.usePhone || !v.isLogin) && !v.password) e.passwordError = "required_fields_error";
+
+  if (!v.isLogin) {
+    if (!v.fullName.trim()) e.fullNameError = "full_name_error";
+    if (v.password !== v.passwordConfirm) e.passwordConfirmError = "passwords_do_not_match"
+  }
+
+  return e;
+}
 
 const Auth = () => {
   const { t } = useTranslation("auth");
@@ -36,11 +60,19 @@ const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
 
   const [email, setEmail] = useState("");
-
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const [errors, setErrors] = useState<FieldErrors>({});
+
+  const clearError = (...keys: (keyof FieldErrors)[]) =>
+    setErrors((prev) => {
+      const next = { ...prev };
+      keys.forEach((k) => delete next[k]);
+      return next;
+    });
 
   const { signIn, signUp, user, signInWithGoogle } = useAuth();
 
@@ -54,6 +86,12 @@ const Auth = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  useEffect(() => {
+    if (!isLogin) {
+      setUsePhone(false)
+    }
+  }, [isLogin])
+
   // Redirect if already logged in
   if (user) {
     const from = location.state?.from?.pathname || "/";
@@ -61,118 +99,70 @@ const Auth = () => {
     return null;
   }
 
+  const handleAuthError = (error: FieldErrors) => {
+    setErrors(error);
+
+    switch(error.formError) {
+      case undefined:
+        if (!hasErrors(error)) toast.error(t("unknown_error"));
+        break;
+      case "user_not_found":
+        toast.warning(t("user_not_found"), {
+          icon: <ArrowLeftToLine size={16} />,
+          action: {
+            label: t("signup_action"), onClick: () => setIsLogin(false)
+          }
+        });
+        break;
+      case "user_exists":
+        toast.warning(t("user_exists"), {
+          icon: <ArrowLeftToLine size={16} />,
+          action: {
+            label: t("login_action"), onClick: () => setIsLogin(true)
+          }
+        });
+        break;
+      default:
+        toast.error(t(error.formError))
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!usePhone && (!email || !password)) {
-      toast.error(t("required_fields_error"));
+    
+    const clientErrors = validateForm({
+      isLogin, usePhone, email, password, passwordConfirm, fullName, phone
+    });
+
+    if (hasErrors(clientErrors)) {
+      setErrors(clientErrors);
       return;
     }
 
-    // if (usePhone && (!phone.countryCode || !phone.number)) {
-    //   toast.error(t("required_fields_error"));
-    //   return;
-    // }
-
-    if (!isLogin && !fullName) {
-      toast.error(t("full_name_error"));
-      return;
-    }
-
+    setErrors({});
     setLoading(true);
 
     try {
-      if (isLogin) {
-        const { error } = await signIn(
-          email, // usePhone ? null : email,
-          password,
-          null, // usePhone ? phone : null,
-          "email" // usePhone ? "phone" : "email",
-        );
+      const method = usePhone ? "phone" : "email";
 
-        if (error) {
-          console.error("Sign in error:", error);
+      const result = isLogin 
+        ? await signIn(usePhone ? null : email, password, usePhone ? phone : null, method)
+        : await signUp(usePhone ? null : email, password, fullName, passwordConfirm, usePhone ? phone : null, method);
+      
+      if (result.error) {
+        handleAuthError(result.error);
+        return;
+      }
 
-          if (error instanceof Error) {
-            if (error.message.includes("Invalid login credentials")) {
-              toast.error(t("invalid_credentials"));
-            } else if (error.message.includes("Email not confirmed")) {
-              toast.error(t("email_not_confirmed"));
-            }
-          } else {
-            if (typeof error == "string" && error == "user_not_found") {
-              toast.warning(
-                lang == "ar" ? "ما لقينا المستخدم!" : "User not found!",
-                {
-                  icon: (
-                    <>
-                      <ArrowLeftToLine size={16} />
-                    </>
-                  ),
-                  action: {
-                    label: lang == "ar" ? "إنشاء حساب!" : "Signup!",
-                    onClick: () => {
-                      setIsLogin(false);
-                    },
-                  },
-                },
-              );
-            }
-
-            if (typeof error == "string" && error == "Too many requests. Please wait a minute before trying again.") {
-              toast.error(t("too_many_requests"));
-            }
-          }
-
-          return;
-        } else {
-          if (usePhone) {
-            setLoading(false);
-            setVerifyingPhone(true);
-          } else {
-            toast.success(t("login_success"));
-            const from = location.state?.from?.pathname || "/";
-            navigate(from, { replace: true });
-          }
-        }
+      if (usePhone) {
+        if (!isLogin) toast.success(t("phone_signup_success"));
+        setVerifyingPhone(true);
+      } else if (isLogin) {
+        toast.success(t("login_success"));
+        navigate(location.state?.from?.pathname || "/", { replace: true });
       } else {
-        const { data, error } = await signUp(
-          email, // usePhone ? null : email,
-          password,
-          fullName,
-          passwordConfirm,
-          null, // usePhone ? phone : null,
-          "email" // usePhone ? "phone" : "email",
-        );
-        if (!error) {
-          if (!usePhone) {
-            toast.success(t("signup_success"));
-            setLoading(false);
-            navigate("/confirm-email", { state: { email } });
-          } else {
-            toast.success(t("phone_signup_success"));
-            setLoading(false);
-            setVerifyingPhone(true);
-          }
-        } else if (error == "user_exists") {
-          toast.warning(
-            lang == "ar" ? "المستخدم مسجل من قبل!" : "User already exsts!",
-            {
-              icon: (
-                <>
-                  <ArrowLeftToLine size={16} />
-                </>
-              ),
-              action: {
-                label: lang == "ar" ? "تسجيل الدخول!" : "Login!",
-                onClick: () => {
-                  setIsLogin(true);
-                },
-              },
-            },
-          );
-        } else if (error == "Too many requests. Please wait a minute before trying again.") {
-          toast.error(t("too_many_requests"));
-        }
+        toast.success(t("signup_success"));
+        navigate("/confirm-email", { state: { email } });
       }
     } catch (error: unknown) {
       console.error(
@@ -253,13 +243,18 @@ const Auth = () => {
             <div className="flex justify-between items-center p-1 gap-2 border rounded-full w-fit mx-auto bg-muted/70 overflow-hidden">
               <div
                 onClick={() => {
-                  // setUsePhone(true)
-                  toast(t("phone_login_disabled"), {
-                    description: t("phone_login_description"),
-                  });
+                  if (isLogin) {
+                    setUsePhone(true)
+                  } else {
+                    return
+                  };
+                  // toast(t("phone_login_disabled"), {
+                  //   description: t("phone_login_description"),
+                  // });
                 }}
                 className={cn(
-                  "p-2 rounded-full flex items-center justify-center w-1/2 hover:cursor-pointer transition-all opacity-35",
+                  "p-2 rounded-full flex items-center justify-center w-1/2 transition-all",
+                  isLogin ? "cursor-pointer" : "disabled opacity-60",
                   usePhone ? "bg-white text-primary shadow-md" : "",
                 )}
               >
@@ -289,6 +284,10 @@ const Auth = () => {
                     onChange={(e) => setFullName(e.target.value)}
                     required={!isLogin}
                   />
+                  
+                  {errors.fullNameError && (
+                      <p id="email-error">{t(errors.fullNameError)}</p>
+                    )}
                 </div>
               )}
 
@@ -302,7 +301,7 @@ const Auth = () => {
                         onValueChange={(e) => handleCountryChange(e)}
                         dir="rtl"
                       >
-                        <SelectTrigger className="w-[130px]">
+                        <SelectTrigger className="w-32.5">
                           <SelectValue placeholder={t("code")} />
                         </SelectTrigger>
                         <SelectContent>
@@ -327,6 +326,10 @@ const Auth = () => {
                         dir={lang === "ar" ? "rtl" : "ltr"}
                       />
                     </div>
+
+                    {errors.phoneError && (
+                      <p id="email-error">{t(errors.phoneError)}</p>
+                    )}
                   </>
                 ) : (
                   <>
@@ -336,27 +339,39 @@ const Auth = () => {
                       type="email"
                       placeholder={t("email_placeholder")}
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        clearError("emailError", "formError");
+                      }}
+                      aria-invalid={!!errors.emailError}
+                      aria-describedby={
+                        errors.emailError ? "email-error" : undefined
+                      }
                       required
                     />
+                    {errors.emailError && (
+                      <p id="email-error">{t(errors.emailError)}</p>
+                    )}
                   </>
                 )}
               </div>
 
-              {!usePhone && (
-                <div className="space-y-2">
-                  <Label htmlFor="password">{t("password")}</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder={t("password_placeholder")}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-              )}
-              {!isLogin && !usePhone && (
+              <div className="space-y-2">
+                <Label htmlFor="password">{t("password")}</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder={t("password_placeholder")}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                {errors.passwordError && (
+                      <p id="email-error">{t(errors.passwordError)}</p>
+                    )}
+              </div>
+
+              {!isLogin && (
                 <div className="space-y-2">
                   <Label htmlFor="password">{t("confirm_password")}</Label>
                   <Input
@@ -367,6 +382,9 @@ const Auth = () => {
                     onChange={(e) => setPasswordConfirm(e.target.value)}
                     required
                   />
+                  {errors.passwordConfirmError && (
+                      <p id="email-error">{t(errors.passwordConfirmError)}</p>
+                    )}
                 </div>
               )}
               {isLogin && !usePhone && (

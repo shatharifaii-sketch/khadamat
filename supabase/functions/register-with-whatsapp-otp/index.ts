@@ -11,40 +11,33 @@ export default {
     {
       auth: ["publishable", "secret"],
     },
-    async (req, ctx) => {
-      if (req.method !==
-        "POST"
-      ) {
-        return new Response(JSON.stringify({
-          error:
-            "Method not allowed"
-        }), {
-          status:
-            405
-          ,
-          headers: {
-            "Content-Type"
-              :
-              "application/json"
+    async (req: any, ctx: any) => {
+      if (req.method !== "POST") {
+        return new Response(
+          JSON.stringify({
+            error: "Method not allowed",
+          }),
+          {
+            status: 405,
+            headers: {
+              "Content-Type": "application/json",
+            },
           },
-        });
+        );
       }
 
       console.log("Registering user...");
 
       try {
-        const supabase = ctx.supabaseAdmin;
+        return Response.json({
+          success: true,
+          error: null,
+        });
+        
+        const { supabaseAdmin: supabase } = ctx;
 
-
-        const {
-          phone,
-          lang,
-          name,
-          password,
-          passwordConfirm,
-        } = await req.json();
-
-
+        const { phone, lang, name, password, passwordConfirm } =
+          await req.json();
 
         if (password !== passwordConfirm) {
           return Response.json(
@@ -52,41 +45,102 @@ export default {
               success: false,
               error: "Passwords do not match",
             },
-            { status: 400 }
+            { status: 400 },
           );
         }
 
-        const { data, error } = await supabase.auth.signInWithOtp({
-          phone: phone,
-          options: {
-            shouldCreateUser: true,
-            channel: "sms"
-          }
-        })
+        const {
+          data: checkData,
+          error: checkError,
+        } = await supabase.functions.invoke("check-if-user-exists", {
+          body: {
+            phone,
+            method: "phone",
+            email: null,
+          },
+        });
 
+        const { userExists, phoneConfirmed, error: inCheckError } = checkData ?? {}
+
+        if (checkError) {
+          console.log("server error checking user", checkError)
+          return Response.json(
+            {
+              success: false,
+              error: "lookup_failed",
+            },
+            {
+              status: 500,
+            },
+          );
+        }
+
+        if (inCheckError) {
+          console.log("error checking user", inCheckError)
+
+          return Response.json(
+            {
+              success: false,
+              error: inCheckError
+            }
+          )
+        }
+
+        if (userExists && phoneConfirmed) {
+          return Response.json({
+            success: false,
+            error: "user_exists",
+          });
+        }
+
+        const { data, error } = await supabase.functions.invoke(
+          "handle-phone-otp",
+          {
+            body: {
+              phone,
+              lang: lang ?? null,
+            },
+          },
+        );
+
+        if (error) {
+          console.log("error sending otp on register", error)
+          return Response.json({
+            success: false,
+            error: "server_error",
+          });
+        }
+
+        if (!data.success) {
+          if (data.error) {
+            return Response.json({
+              success: false,
+              error: data.error,
+            });
+          } else {
+            return Response.json({
+              success: false,
+              error: "unknown_error",
+            });
+          }
+        }
 
         return Response.json({
           success: true,
           error: null,
         });
-
-
       } catch (error) {
-
         console.error(error);
 
         return Response.json(
           {
             success: false,
-            error:
-              error instanceof Error
-                ? error.message
-                : String(error),
+            error: error instanceof Error ? error.message : String(error),
           },
-          { status: 500 }
+          { status: 500 },
         );
       }
-    }
+    },
   ),
 };
 

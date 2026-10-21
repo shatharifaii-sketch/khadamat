@@ -1,10 +1,9 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { User, Session } from "@supabase/supabase-js";
+import { User, Session, FunctionsHttpError } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import AppLoading from "@/components/AppLoading";
 import { toast } from "sonner";
-import { redirect } from "react-router-dom";
-import { ArrowLeftToLine } from "lucide-react";
+import { AuthResult, CODE_ALIASES, FIELD_FOR_CODE, FieldErrors } from "@/types/auth";
 
 interface AuthContextType {
   user: User | null;
@@ -37,6 +36,7 @@ interface AuthContextType {
     phone: { countryCode: string; number: string },
     token: string,
     password: string,
+    fullName: string
   ) => Promise<{ error?: unknown; data?: User }>;
   tryPhoneSignIn: () => Promise<void>;
 }
@@ -45,42 +45,58 @@ type ExtendedUser = User & {
   is_service_provider?: boolean | null;
 };
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-async function checkUser({
-  phone,
-  email,
-  method,
-}: {
-  phone: string;
-  email: string;
-  method: string;
-}): Promise<string> {
-  const { data, error: userExistsError } = await supabase.functions.invoke(
-    "check-if-user-exists",
-    {
-      body: {
-        phone: phone || null,
-        email: email || null,
-        method,
-      },
-    },
-  );
-
-  if (userExistsError) throw userExistsError;
-
-  if (data.userExists) {
-    return "user_exists";
-  }
-
-  return "";
+function toFieldErrors(code: string): FieldErrors {
+  const field = FIELD_FOR_CODE[code];
+  return field ? { [field]: code } : { formError: code }
 }
+
+function extractCode(err: unknown): string | undefined {
+  if (typeof err == "string") return err;
+  if (err && typeof err == "object" && "code" in err && typeof (err as any).code == "string") {
+    return (err as any).code;
+  }
+  return undefined;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<ExtendedUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const lang = localStorage.getItem("language") || "en";
+
+  async function invokeFunction<T = unknown>(
+    name: string,
+    body: Record<string, unknown>,
+  ): Promise<AuthResult<T>> {
+    const { data, error } = await supabase.functions.invoke(name, { body });
+
+    let code: string | undefined;
+
+    if (error) {
+      code = "server_error";
+      if (error instanceof FunctionsHttpError) {
+        try {
+          const payload = await error.context.json();
+          code = extractCode(payload?.error) ?? code;
+        } catch {
+          code = "server_error"
+        }
+      } else {
+        code = "network_error";
+      }
+    } else if (!data?.success) {
+      code = extractCode(data?.error) ?? "unknown";
+    }
+
+    if (code) {
+      code = CODE_ALIASES[code] ?? code;
+      return { data: null, error: toFieldErrors(code) };
+    }
+
+    return { data: data as T, error: null }
+  }
 
   useEffect(() => {
     // Set up auth state listener
@@ -125,63 +141,31 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     passwordConfirm: string,
     phone: { countryCode: string; number: string } | null,
     method: string = "email",
-  ) => {
-    const res = await checkUser({
-      phone: method == "phone" ? `${phone.countryCode}${phone.number}` : null,
-      email: method == "phone" ? null : email,
-      method,
-    });
-
-    if (res == "user_exists") {
-      return { data: null, error: res };
-    }
-
+  ): Promise<AuthResult> => {
     if (method == "phone") {
-      return {};
-      const { data, error } = await supabase.functions.invoke(
-        "handle-phone-otp",
-        {
-          body: JSON.stringify({
-            phone: `${phone.countryCode}${phone.number}`,
-            isLogin: false,
-            fullName
-          }),
-        },
-      );
+      return { data: null, error: null }
+      if (!phone) return { data: null, error: { phoneError: "required_fields_error" } };
 
-      if (error) {
-        console.error("Sign in error:", error);
-        return error;
-      }
+      const readyPhone = `${phone.countryCode}${phone.number}`.replace(/[^\d+]/g, "");
 
-      return data;
-    } else if (method == "email") {
-      console.log("Attempting sign up for:", email);
-      const { data, error } = await supabase.functions.invoke("register-user", {
-        body: JSON.stringify({
-          email,
-          password,
-          name: fullName,
-          passwordConfirm,
-        }),
+      return invokeFunction("register-with-whatsapp-otp", {
+        phone: readyPhone,
+        name: fullName,
+        password,
+        passwordConfirm
       });
-
-      if (!data.success) {
-        const err = data.error;
-
-        if (err.code === "email_exists") {
-          toast.error(
-            lang == "ar"
-              ? "البريد الإلكتروني مستخدم بالفعل"
-              : "Email Address is already in use!",
-          );
-        }
-
-        return { data: null, error: err };
-      }
-
-      return { data, error };
     }
+
+    if (method == "email") {
+      return invokeFunction("register-user", {
+        email,
+        password,
+        name: fullName,
+        passwordConfirm,
+      })
+    }
+
+    return { data: null, error: { formError: "unknown_error" } };
   };
 
   const signIn = async (
@@ -193,27 +177,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } | null,
     method: string = "email",
   ) => {
-    const res = await checkUser({
-      phone: method == "phone" ? `${phone.countryCode}${phone.number}` : null,
-      email: method == "phone" ? null : email,
-      method,
-    });
-
-    if (res != "user_exists") {
-      return { data: null, error: "user_not_found" };
-    }
-
     if (method == "phone") {
-      return {};
-      const { data, error } = await supabase.functions.invoke(
-        "handle-phone-otp",
-        {
-          body: JSON.stringify({
-            phone: `${phone.countryCode}${phone.number}`,
-            isLogin: true,
-          }),
-        },
-      );
+      const { data, error } = await supabase.auth.signInWithPassword({
+        phone: `${phone.countryCode}${phone.number}`,
+        password
+      })
+      // const { data, error } = await supabase.functions.invoke(
+      //   "handle-phone-otp",
+      //   {
+      //     body: JSON.stringify({
+      //       phone: `${phone.countryCode}${phone.number}`,
+      //       isLogin: true,
+      //     }),
+      //   },
+      // );
 
       if (error) {
         console.error("Sign in error:", error);
@@ -312,7 +289,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const { data, error } = await supabase.functions.invoke('handle-phone-otp', {
         body: JSON.stringify({
           phone,
-          isLogin: true
+          lang
         })
       })
 
@@ -331,28 +308,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     phone: { countryCode: string; number: string },
     token: string,
     password: string,
+    fullName: string
   ) => {
-    // const { data, error } = await supabase.functions.invoke(
-    //   "verify-phone-whatsapp-otp", {
-    //   body: JSON.stringify({ phone, token })
-    // }
-    // );
+    const { data, error } = await supabase.functions.invoke(
+      "verify-phone-whatsapp-otp", {
+      body: JSON.stringify({ phone, token, fullName, password })
+    }
+    );
 
-    // if (error) {
-    //   console.error('Error verifying OTP:', error);
-    //   return { error };
-    // }
+    if (error) {
+      console.error('Error verifying OTP:', error);
+      return { error };
+    }
 
-    // const { data: user, error: userError } = await supabase.auth.signInWithPassword({
-    //   phone: `+${phone.countryCode}${phone.number}`,
-    //   password
-    // })
-
-    const { data, error: userError } = await supabase.auth.verifyOtp({
+    const { data: user, error: userError } = await supabase.auth.signInWithPassword({
       phone: `+${phone.countryCode}${phone.number}`,
-      token,
-      type: "sms",
-    });
+      password
+    })
+
+    // const { data, error: userError } = await supabase.auth.verifyOtp({
+    //   phone: `+${phone.countryCode}${phone.number}`,
+    //   token,
+    //   type: "sms",
+    // });
 
     if (userError) {
       console.error("Sign in error:", userError);
