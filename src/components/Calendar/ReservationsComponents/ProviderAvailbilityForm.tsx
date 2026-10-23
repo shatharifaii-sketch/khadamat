@@ -23,6 +23,8 @@ interface Props {
   errors?: FieldErrors<ProviderAvailabilityFormValues>;
   isSubmitting?: boolean;
   isDirty?: boolean;
+
+  onClose: () => void
 }
 
 const weekDays = [
@@ -44,7 +46,8 @@ const ProviderAvailbilityForm = ({
   serviceId,
   errors,
   isSubmitting,
-  isDirty = false
+  isDirty = false,
+  onClose
 }: Props) => {
   const { t } = useTranslation("reservations");
   const lang = localStorage.getItem("language") || "en";
@@ -139,15 +142,15 @@ const ProviderAvailbilityForm = ({
         <Button className="flex-1" type="button" variant="ghost" onClick={handleReset}>
           {t("availability_form.reset")}
         </Button>
-        {updating && (
-          <Button
+
+        <Button
             className="flex-1"
-            type="submit"
-            disabled={isSubmitting || !isDirty}
+            type={updating ? "button" : "submit"}
+            disabled={updating && (isSubmitting || !isDirty)}
+            onClick={!updating && onClose}
           >
             {t("availability_form.save")}
           </Button>
-        )}
       </div>
     </>
   );

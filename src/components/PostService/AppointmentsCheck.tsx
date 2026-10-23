@@ -51,6 +51,7 @@ const AppointmentsCheck = ({
             onChange={onChange}
             availability={availability}
             onAvailabilityChange={onAvailabilityChange}
+            onClose={() => setOpen(false)}
           />
         </DialogContent>
       </Dialog>
