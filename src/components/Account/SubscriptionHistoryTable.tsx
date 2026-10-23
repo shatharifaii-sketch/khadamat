@@ -44,19 +44,19 @@ const SubscriptionHistoryTable = () => {
     }
   };
 
-  const formatAmount = (payment: any) => {
-    if (payment.amount === 0) {
-      return 'مجاني';
-    }
+  // const formatAmount = (payment: PaymentType) => {
+  //   if (payment.amount === 0) {
+  //     return 'مجاني';
+  //   }
     
-    let displayText = `${payment.finalAmount || payment.amount} ${payment.currency}`;
+  //   let displayText = `${payment.finalAmount || payment.amount} ${payment.currency}`;
     
-    if (payment.hasDiscount && payment.discount_applied && payment.discount_applied > 0) {
-      displayText += ` (خصم ${payment.discount_applied} من ${payment.original_amount})`;
-    }
+  //   if (payment.hasDiscount && payment.discount_applied && payment.discount_applied > 0) {
+  //     displayText += ` (خصم ${payment.discount_applied} من ${payment.original_amount})`;
+  //   }
     
-    return displayText;
-  };
+  //   return displayText;
+  // };
 
   if (isLoading) {
     return (
@@ -94,7 +94,7 @@ const SubscriptionHistoryTable = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paymentHistory.map((payment: any) => (
+              {/* {paymentHistory.map((payment) => (
                 <TableRow key={payment.id}>
                   <TableCell>
                     {new Date(payment.created_at).toLocaleDateString('ar')}
@@ -111,7 +111,7 @@ const SubscriptionHistoryTable = () => {
                     {getStatusBadge(payment.status)}
                   </TableCell>
                 </TableRow>
-              ))}
+              ))} */}
             </TableBody>
           </Table>
         )}

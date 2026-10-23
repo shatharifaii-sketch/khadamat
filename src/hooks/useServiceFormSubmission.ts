@@ -5,20 +5,27 @@ import { usePendingService } from '@/hooks/usePendingService';
 import { ServiceFormData } from '@/types/service';
 import { toast } from 'sonner';
 import { Service } from './useAdminFunctionality';
+import { formatWhatsappNumber } from '@/utils/formValidation';
+import { useTranslation } from 'react-i18next';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
   const navigate = useNavigate();
-  const { createService, updateService, isCreating, isUpdating, saveImages } = useServices();
+  const { createService, updateService, isCreating, isUpdating, saveImages, setProviderAvailability, isError: errorSettingProviderAvailability } = useServices();
   const { canPostService } = useSubscription();
   const { savePendingService, clearPendingService } = usePendingService();
+  const { user } = useAuth();
   
   const isEditMode = !!serviceToEdit;
 
   const handleSubmit = async (formData: ServiceFormData) => {
+
+    console.log('Submitting form data:', formData);
+    
     // If we're editing, update the service
     if (isEditMode && serviceToEdit) {
       try {
-        console.log('Updating service:', serviceToEdit.id, formData);
+        console.log("FORMDATA: ", formData)
         await updateService.mutateAsync({
           id: serviceToEdit.id,
           title: formData.title,
@@ -29,16 +36,21 @@ export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
           phone: formData.phone,
           email: formData.email,
           experience: formData.experience,
-        }).finally(() => {
-          toast('تم تحديث الخدمة بنجاح! انتظر الموافقة من الإدارة.', { type: 'success' });
+          is_online: formData.is_online,
+          links: formData.links,
+          whatsapp_number: formatWhatsappNumber({
+            countryCode: formData.whatsapp_number.countryCode,
+            number: formData.whatsapp_number.number
+          }),
+          with_appointments: formData.with_appointments
         });
 
-        if (formData.images && formData.images.length > 0) {
-        await saveImages({
-          serviceId: serviceToEdit.id,
-          images: formData.images
-        });
-      }
+        if (formData.media && formData.media.length > 0) {
+          await saveImages({
+            serviceId: serviceToEdit.id,
+            images: formData.media
+          });
+        }
         
         navigate('/account');
       } catch (error) {
@@ -49,7 +61,7 @@ export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
 
     // Check if user can post more services (for new services only)
     const canPost = canPostService;
-    if (!canPost) {
+    if (!canPost.canPost) {
       clearPendingService();
       // Save the service data before redirecting to payment
       savePendingService(formData);
@@ -60,6 +72,8 @@ export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
     }
 
     try {
+      console.log("FORMDATA: ", formData);
+
       const result = await createService.mutateAsync({
         title: formData.title,
         category: formData.category,
@@ -69,13 +83,26 @@ export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
         phone: formData.phone,
         email: formData.email,
         experience: formData.experience,
+        is_online: formData.is_online,
+        links: formData.links,
+        whatsapp_number: formatWhatsappNumber({
+          countryCode: formData.whatsapp_number.countryCode,
+          number: formData.whatsapp_number.number
+        }),
+        with_appointments: formData.with_appointments
+      });
+
+      const res = await setProviderAvailability({
+        availability: formData.availability,
+        userId: user?.id,
+        serviceId: result.id
       });
 
       //TODO: Handle image uploads here if necessary
-      if (formData.images && formData.images.length > 0) {
+      if (formData.media && formData.media.length > 0) {
         await saveImages({
           serviceId: result.id,
-          images: formData.images
+          images: formData.media
         });
       }
     
@@ -83,7 +110,7 @@ export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
       clearPendingService();
 
       // Navigate to account page to see the service
-      navigate('/account');
+      navigate('/account', { state: { servicePending: true }});
     } catch (error) {
       console.error('Error submitting service:', error);
     }

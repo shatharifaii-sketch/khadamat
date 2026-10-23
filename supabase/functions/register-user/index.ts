@@ -3,24 +3,25 @@
 // This enables autocomplete, go to definition, etc.
 
 // Setup type definitions for built-in Supabase Runtime APIs
-import "jsr:@supabase/functions-js/edge-runtime.d.ts"
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { Resend } from "npm:resend@latest";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
+import { isPwned, validatePassword } from "../_shared/password.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY")!);
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
 
-async function sendWelcomeEmail(email: string, name: string, link: string, otp: string,) {
+async function sendWelcomeEmail(email: string, name: string, otp: string) {
   const { data, error } = await resend.emails.send({
     from: "welcome <support@mail.khedemtak.com>",
     to: email,
@@ -28,46 +29,45 @@ async function sendWelcomeEmail(email: string, name: string, link: string, otp: 
       id: "welcome",
       variables: {
         name,
-        action_url: link,
-        otp
-      }
-    }
+        otp,
+      },
+    },
   });
 
   if (error) {
     console.error("Error sending email: ", error);
     return {
       success: false,
-      error
+      error,
     };
   }
 
   return {
     success: true,
-    data
-  }
+    data,
+  };
 }
 
 async function generateEmailLinks(email: string, password: string) {
   const { data, error } = await supabase.auth.admin.generateLink({
-    type: 'signup',
+    type: "signup",
     email,
-    password
+    password,
   });
 
   if (error) {
     console.error("Error generating link: ", error);
     return {
       success: false,
-      error
+      error,
     };
   }
 
   return {
     success: true,
     link: data.properties.action_link,
-    otp: data.properties.email_otp
-  }
+    otp: data.properties.email_otp,
+  };
 }
 
 Deno.serve(async (req: Request) => {
@@ -89,19 +89,42 @@ Deno.serve(async (req: Request) => {
     const { email, name, password, passwordConfirm } = await req.json();
 
     if (password !== passwordConfirm) {
+      console.error("Passwords do not match");
       return new Response(
         JSON.stringify({
           success: false,
           error: "Passwords do not match",
         }),
         {
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+    }
+
+    const pwError = validatePassword(password);
+
+    if (pwError) {
+      console.error("Error validating error")
+      return Response.json(
+        { success: false, error: pwError },
+        {
           status: 400,
           headers: {
             ...corsHeaders,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
+    }
+
+    if (await isPwned(password)) {
+      return Response.json({
+        success: false,
+        error: "password_breached"
+      })
     }
 
     const { data, error } = await supabase.auth.admin.createUser({
@@ -109,22 +132,22 @@ Deno.serve(async (req: Request) => {
       password,
       user_metadata: {
         full_name: name,
-      }
-    })
+      },
+    });
 
     if (error) {
+      console.error("Error creating user: ", error);
       return new Response(
         JSON.stringify({
           success: false,
           error: error,
         }),
         {
-          status: 400,
           headers: {
             ...corsHeaders,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 
@@ -137,16 +160,15 @@ Deno.serve(async (req: Request) => {
           error: linkResponse.error,
         }),
         {
-          status: 400,
           headers: {
             ...corsHeaders,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 
-    const emailResponse = await sendWelcomeEmail(email, name, linkResponse.link, linkResponse.otp);
+    const emailResponse = await sendWelcomeEmail(email, name, linkResponse.otp);
 
     if (!emailResponse.success) {
       return new Response(
@@ -155,12 +177,11 @@ Deno.serve(async (req: Request) => {
           error: emailResponse.error,
         }),
         {
-          status: 400,
           headers: {
             ...corsHeaders,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 
@@ -169,12 +190,11 @@ Deno.serve(async (req: Request) => {
         success: true,
       }),
       {
-        status: 200,
         headers: {
           ...corsHeaders,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
   } catch (error) {
     console.error("Checkout error:", error);
@@ -190,10 +210,10 @@ Deno.serve(async (req: Request) => {
           ...corsHeaders,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
   }
-})
+});
 
 /* To invoke locally:
 

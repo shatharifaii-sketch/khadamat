@@ -3,12 +3,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { usePendingService } from '@/hooks/usePendingService';
 import { ServiceFormData } from '@/types/service';
 import { Service } from './useAdminFunctionality';
+import { ServiceLink } from '@/components/PostService/ServiceLinks';
 
 export const useServiceFormState = (serviceToEdit?: Service | null) => {
   const { user } = useAuth();
   const { pendingService } = usePendingService();
   const isEditMode = !!serviceToEdit;
-  
+
   const [formData, setFormData] = useState<ServiceFormData>({
     title: '',
     category: '',
@@ -18,18 +19,22 @@ export const useServiceFormState = (serviceToEdit?: Service | null) => {
     phone: '',
     email: user?.email || '',
     experience: '',
-    images: [
-      {
-        id: '',
-        image_name: '',
-        image_url: '',
-      }
-    ],
+    is_online: false,
+    links: [],
+    whatsapp_number: {
+      countryCode: '',
+      number: '',
+    },
+    media: [],
+    with_appointments: false,
+    availability: []
   });
 
   // Load service data for editing or pending service data
   useEffect(() => {
     if (serviceToEdit) {
+      const digits = serviceToEdit.whatsapp_number.toString().replace(/\D/g, "");
+
       setFormData({
         title: serviceToEdit.title,
         category: serviceToEdit.category,
@@ -39,8 +44,16 @@ export const useServiceFormState = (serviceToEdit?: Service | null) => {
         phone: serviceToEdit.phone,
         email: serviceToEdit.email,
         experience: serviceToEdit.experience || '',
-        images: serviceToEdit.service_images,
+        is_online: serviceToEdit.is_online || false,
+        links: serviceToEdit.links as [],
+        whatsapp_number: {
+          countryCode: digits.slice(0, digits.length - 9),
+          number: digits.slice(digits.length - 9),
+        },
+        media: [],
+        with_appointments: serviceToEdit.with_appointments,
       });
+
     } else if (pendingService && !isEditMode) {
       console.log('Loading pending service data into form');
       setFormData(pendingService);
@@ -52,9 +65,11 @@ export const useServiceFormState = (serviceToEdit?: Service | null) => {
     if (user?.email && !formData.email && !isEditMode) {
       setFormData(prev => ({ ...prev, email: user.email || '' }));
     }
-  }, [user?.email, isEditMode]);
+  }, [user.email, isEditMode, formData.email]);
 
-  const handleInputChange = (field: string, value: string | { id: string; image_name: string; image_url: string; }[]) => {
+  const handleInputChange = <K extends keyof ServiceFormData> (
+    field: K, value: ServiceFormData[K] | ServiceLink[]
+  ) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 

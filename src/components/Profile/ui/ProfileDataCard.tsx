@@ -4,9 +4,10 @@ import { Tables } from '@/integrations/supabase/types';
 import { cn } from '@/lib/utils';
 import ServicesCard from './ServicesCard';
 import PersonalDataCard from './PersonalDataCard';
+import { UserProfile } from '@/hooks/useProfile';
 
 interface Props {
-    profile: Tables<'profiles_with_email'>
+    profile: UserProfile;
     services: Tables<'services'>[];
 }
 const ProfileDataCard = ({
@@ -14,7 +15,7 @@ const ProfileDataCard = ({
     services
 }: Props) => {
     return (
-        <div className='space-y-7'>
+        <div className='space-y-2 md:space-y-7'>
             <PersonalDataCard
                 description={profile.bio}
                 joinedAt={profile.created_at}
