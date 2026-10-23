@@ -157,9 +157,9 @@ const AdminView = ({
         </TabsContent>
         <TabsContent value="web_analytics">
           <WebLineChart
-            dailyStats={dailyStats}
-            monthlyStats={monthlyStats}
-            yearlyStats={yearlyStats}
+            dailyStats={analyticsDailyStats}
+            monthlyStats={analyticsMonthlyStats}
+            yearlyStats={analyticsYearlyStats}
           />
         </TabsContent>
       </Tabs>
@@ -167,26 +167,26 @@ const AdminView = ({
       {/* Main Admin Tabs */}
       <Tabs defaultValue="analytics" className="space-y-6">
         <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="analytics" className="flex items-center gap-2">
+          <TabsTrigger value="analytics" className="flex items-center gap-2 cursor-pointer">
             <BarChart3 className="h-4 w-4" />
             {t("table.header.analytics")}
           </TabsTrigger>
-          <TabsTrigger value="users" className="flex items-center gap-2">
+          <TabsTrigger value="users" className="flex items-center gap-2 cursor-pointer">
             <Users className="h-4 w-4" />
             {t("table.header.users")}
           </TabsTrigger>
-          <TabsTrigger value="services" className="flex items-center gap-2">
+          <TabsTrigger value="services" className="flex items-center gap-2 cursor-pointer">
             <Settings className="h-4 w-4" />
             {t("table.header.services")}
           </TabsTrigger>
           <TabsTrigger
             value="pending-services"
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 cursor-pointer"
           >
             <Settings className="h-4 w-4" />
             {t("table.header.pending_services")}
           </TabsTrigger>
-          <TabsTrigger value="coupons" className="flex items-center gap-2">
+          <TabsTrigger value="coupons" className="flex items-center gap-2 cursor-pointer">
             <BadgePercent className="h-4 w-4" />
             {t("table.header.coupons")}
           </TabsTrigger>
