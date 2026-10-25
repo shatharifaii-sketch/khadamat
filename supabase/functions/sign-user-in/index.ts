@@ -115,24 +115,11 @@ export default {
         })
       }
 
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
-
-      if (error) {
-        console.error("Error signing user in: ", error);
-        return Response.json({
-          success: false,
-          data: null,
-          error: error
-        })
-      }
+      console.log("EMAIL: ", email, "PASSWORD: ", password)
 
       return {
         success: true,
-        data,
-        error,
+        error: null
       };
     } catch (error) {
       console.error("ERROR: ", error);
