@@ -51,6 +51,41 @@ interface StripeActions {
   isCreateExtraCheckoutSessionSuccess: boolean;
 }
 
+const isEligibleForExtraProduct = async (user_id: string) => {
+  const { data: activeSubscription, error: activeSubscriptionError } = await supabase
+        .from('subscriptions')
+        .select(`*, 
+          subscription_tier:subscriptions_tier_id_fkey (
+            id,
+            title,
+            allowed_services,
+            price_monthly_title,
+            price_yearly_title,
+            price_monthly_value,
+            price_yearly_value,
+            class_name,
+            badge_class_name,
+            free_trial_period_text,
+            notes
+          )`)
+        .eq('user_id', user_id)
+        .eq('status', 'active')
+        .maybeSingle();
+
+      if (activeSubscriptionError && activeSubscriptionError.code !== 'PGRST116') {
+        console.error('Error fetching subscription:', activeSubscriptionError);
+        throw activeSubscriptionError;
+      }
+
+      const { count: pendingServicesCount, error: pendingServicesCountError } = await supabase.from("services").select("*", { count: 'exact', head: true }).eq("user_id", user_id);
+
+      if (pendingServicesCountError && pendingServicesCountError.code !== 'PGRST116') {
+        console.error('Error pending services data:', pendingServicesCountError);
+      }
+
+      return pendingServicesCount < activeSubscription.services_used
+}
+
 const createStripeCheckoutSession = async ({
   priceId,
   userId,
@@ -195,7 +230,11 @@ const createExtraStripeCheckoutSession = async ({
   email: string;
   name: string;
 }) => {
-  console.log("Creating extra checkout session for user:", userId, email, name);
+  const lang = localStorage.getItem("language") || "en"
+
+  if (!(await isEligibleForExtraProduct(userId))) {
+    throw new Error(lang === "en" ? "Not eligible for extra product" : "غير مؤهل للحصول على خدمات إضافية")
+  }
 
   const { data, error } = await supabase.functions.invoke(
     "create-extra-product-checkout-session",
@@ -207,8 +246,6 @@ const createExtraStripeCheckoutSession = async ({
       },
     },
   );
-
-  console.log("SESSION DATA: ", data ? data : error)
 
   if (error && !data.success) {
     console.log(error);
@@ -285,6 +322,7 @@ const useStripe = (): StripeActions => {
     },
     onError: (error) => {
       console.log(error);
+      toast.warning(error.message)
     },
   });
 
