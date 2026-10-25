@@ -197,7 +197,7 @@ const createExtraStripeCheckoutSession = async ({
 }) => {
   console.log("Creating extra checkout session for user:", userId, email, name);
 
-  const { data, response, error } = await supabase.functions.invoke(
+  const { data, error } = await supabase.functions.invoke(
     "create-extra-product-checkout-session",
     {
       body: {
@@ -208,10 +208,14 @@ const createExtraStripeCheckoutSession = async ({
     },
   );
 
-  if (error && !response.ok && !data.success) {
+  console.log("SESSION DATA: ", data ? data : error)
+
+  if (error && !data.success) {
     console.log(error);
     return error;
   }
+
+  console.log("SESSION DATA: ", data)
 
   return data.sessionUrl;
 };

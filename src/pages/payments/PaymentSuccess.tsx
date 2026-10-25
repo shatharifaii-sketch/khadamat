@@ -155,7 +155,7 @@ const ExtraServicePaymentSuccess = () => {
                     </span>
 
                     <span className="font-semibold">
-                      {paymentData.product_name}
+                      {paymentData.title}
                     </span>
                   </div>
 

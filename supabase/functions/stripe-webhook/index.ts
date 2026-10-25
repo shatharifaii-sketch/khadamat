@@ -645,6 +645,7 @@ async function handleSubscriptionCreated(subscription: any) {
         {
           user_id: subscription.metadata.user_id,
           tier_id: subscriptionTier.id,
+          services_allowed: subscriptionTier.allowed_services,
           currency: subscription.currency,
           billing_cycle:
             subscription.items.data[0].plan.interval === "month"
