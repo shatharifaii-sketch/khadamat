@@ -59,7 +59,9 @@ async function generateEmailLinks(email: string, password: string) {
     console.error("Error generating link: ", error);
     return {
       success: false,
-      error,
+      link: null,
+      otp: null,
+      error: "network_error",
     };
   }
 
@@ -67,6 +69,7 @@ async function generateEmailLinks(email: string, password: string) {
     success: true,
     link: data.properties.action_link,
     otp: data.properties.email_otp,
+    error: null,
   };
 }
 
@@ -107,7 +110,7 @@ Deno.serve(async (req: Request) => {
     const pwError = validatePassword(password);
 
     if (pwError) {
-      console.error("Error validating error")
+      console.error("Error validating error");
       return Response.json(
         { success: false, error: pwError },
         {
@@ -123,8 +126,102 @@ Deno.serve(async (req: Request) => {
     if (await isPwned(password)) {
       return Response.json({
         success: false,
-        error: "password_breached"
-      })
+        error: "password_breached",
+      });
+    }
+
+    const { data: checkData, error: checkError } =
+      await supabase.functions.invoke("check-if-user-exists", {
+        body: {
+          email: email,
+          method: "email",
+        },
+      });
+
+    if (checkError) {
+      console.error("Error checking user data: ", checkError);
+
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "network_error",
+        }),
+        {
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+    }
+
+    const {
+      userExists,
+      phoneConfirmed,
+      emailConfirmed,
+      error: checkDataError,
+    } = checkData;
+
+    if (checkDataError) {
+      console.error("Error checking user data: ", checkDataError);
+
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: checkDataError,
+        }),
+        {
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+    }
+
+    if (userExists && emailConfirmed) {
+      console.error("User exists");
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "user_exists",
+        }),
+        {
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+    } else if (userExists && !emailConfirmed) {
+      const { data, error } = await supabase.functions.invoke(
+        "send-email-otp",
+        {
+          body: {
+            email,
+            password,
+            name,
+          },
+        },
+      );
+
+      if (error) {
+        console.error("Server error sending otp: ", error);
+        return Response.json({
+          success: false,
+          data: null,
+          error: "network_error",
+        });
+      }
+
+      if (!data.success) {
+        console.error("Error sending otp: ", data.error);
+        return Response.json({
+          success: false,
+          data: null,
+          error: data.error,
+        });
+      }
     }
 
     const { data, error } = await supabase.auth.admin.createUser({
@@ -151,38 +248,31 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const linkResponse = await generateEmailLinks(email, password);
-
-    if (!linkResponse.success) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: linkResponse.error,
-        }),
-        {
-          headers: {
-            ...corsHeaders,
-            "Content-Type": "application/json",
-          },
+    const { data: sendOtpData, error: sendOtpError } =
+      await supabase.functions.invoke("send-email-otp", {
+        body: {
+          email,
+          password,
+          name,
         },
-      );
+      });
+
+    if (sendOtpError) {
+      console.error("Server error sending otp: ", sendOtpError);
+      return Response.json({
+        success: false,
+        data: null,
+        error: "network_error",
+      });
     }
 
-    const emailResponse = await sendWelcomeEmail(email, name, linkResponse.otp);
-
-    if (!emailResponse.success) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: emailResponse.error,
-        }),
-        {
-          headers: {
-            ...corsHeaders,
-            "Content-Type": "application/json",
-          },
-        },
-      );
+    if (!sendOtpData.success) {
+      console.error("Error sending otp: ", sendOtpData.error);
+      return Response.json({
+        success: false,
+        data: null,
+        error: sendOtpData.error,
+      });
     }
 
     return new Response(

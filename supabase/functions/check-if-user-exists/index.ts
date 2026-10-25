@@ -12,7 +12,7 @@ type lookupMethod = "phone" | "email";
 // Use publishable for Client-facing, key-validated endpoints
 // Use secret for Server-to-server, internal calls
 export default {
-  fetch: withSupabase({ auth: ["publishable", "secret"] }, async (req, ctx) => {
+  fetch: withSupabase({ auth: ["secret"] }, async (req, ctx) => {
     try {
       const body = await req.json();
       const method = body?.method as lookupMethod;
@@ -79,6 +79,7 @@ export default {
 
       return Response.json({
         userExists: true,
+        username: user.user_metadata.full_name ?? "Khedemtak User",
         phoneConfirmed: !!user.phone_confirmed_at,
         emailConfirmed: !!user.email_confirmed_at,
         error: null

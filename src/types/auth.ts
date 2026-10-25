@@ -27,5 +27,8 @@ export const FIELD_FOR_CODE: Record<string, keyof FieldErrors> = {
 export const CODE_ALIASES: Record<string, string> = {
     email_exists: "user_exists",
     phone_exists: "user_exists",
-    weak_password: "password_too_short"
+    password_too_short: "password_too_short",
+    password_too_long: "password_too_long",
+    password_breached: "password_breached",
+    lookup_failed: "lookup_failed"
 }
