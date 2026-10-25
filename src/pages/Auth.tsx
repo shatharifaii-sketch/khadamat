@@ -178,7 +178,7 @@ const Auth = () => {
     } catch (error: unknown) {
       console.error(
         "Auth error:",
-        error instanceof Error ? error.message : error,
+        error
       );
       toast.error(t("unexpected_error"));
     } finally {

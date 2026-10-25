@@ -200,25 +200,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return data;
     }
     console.log("Attempting sign in for:", email);
-    const { data, error } = await supabase.functions.invoke("sign-user-in", {
+    const { data: checkData, error: checkError } = await supabase.functions.invoke("sign-user-in", {
       body: {
         email,
         password
       }
     })
 
-    if (error) {
-      console.error("Sign in error:", error);
+    if (checkError) {
+      console.error("Sign in error:", checkError);
+      return {
+        data: null,
+        error: "network_error"
+      }
     }
     
-    if (data.data.message == "otp_sent") {
+    if (checkData.data?.message && checkData.data?.message == "otp_sent") {
       return {
         data: "otp_sent",
         error: null
       }
     }
 
-    if (data.data && !data.data.message) {
+    const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+    if (error) {
+      console.error("Sign in error:", error)
+    } else {
       console.log("Sign in successful", userId);
       const { error } = await supabase.from("user_activity").insert({
         activity_type: "login",
