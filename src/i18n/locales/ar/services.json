@@ -84,7 +84,8 @@
         "uploading...": "جاري رفع الصور...",
         "service_email_note": "هذا البريد متاح لأي مستخدم على الموقع!",
         "with_appointments": "افتح حجز المواعيد للخدمة...",
-        "edit_availability": "حدث أوقات العمل في صفحة الحجوزات"
+        "edit_availability": "حدث أوقات العمل في صفحة الحجوزات",
+        "services_pending": "خدماتك المنشورة قيد المراجعة"
     },
     "find_service": {
         "find_the_right_service": "ابحث عن الخدمة المناسبة",

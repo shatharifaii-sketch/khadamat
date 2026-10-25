@@ -205,14 +205,22 @@ notes
         console.error('Error fetching subscription:', userExtraProductsError);
       }
 
+      const { count: pendingServicesCount, error: pendingServicesCountError } = await supabase.from("services").select("*", { count: 'exact', head: true }).eq("user_id", user?.id);
+
+      if (pendingServicesCountError && pendingServicesCountError.code !== 'PGRST116') {
+        console.error('Error pending services data:', pendingServicesCountError);
+      }
+
       return {
         activeSubscription,
         inactiveSubscriptions,
-        extraProductsCount: userExtraProducts?.extra_products_count || 0
+        extraProductsCount: userExtraProducts?.extra_products_count || 0,
+        isEligibleForExtraProduct: pendingServicesCount < activeSubscription.services_used
       } as {
         activeSubscription: Subscription;
         inactiveSubscriptions: Subscription[];
         extraProductsCount: number;
+        isEligibleForExtraProduct: boolean;
       };
     },
   });
@@ -349,8 +357,12 @@ notes
       // Get actual count of user's services
       const { data: userServices, error } = await supabase
         .from('services')
-        .select('id')
+        .select('id, status')
         .eq('user_id', user.id);
+
+      const pendingServices = userServices.filter((s) => s.status === "pending-approval")
+
+      console.log(pendingServices)
 
       if (error) {
         console.error('Error checking user services for quota:', error);
@@ -374,7 +386,8 @@ notes
       return {
         user: true,
         subscription: true,
-        canPost
+        canPost,
+        allServicesPending: pendingServices.length === userServices.length
       };
     }
   })

@@ -787,6 +787,8 @@ export const useAdminFunctionality = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-data"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-services-data", null, "date-desc"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-pending-services-data", null, "date-desc"] });
     },
   });
 
@@ -837,6 +839,7 @@ export const useAdminFunctionality = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-data"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-services-data", null, "date-desc"] });
     },
   });
 
@@ -887,6 +890,7 @@ export const useAdminFunctionality = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-data"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-services-data", null, "date-desc"] });
     },
   });
 
@@ -906,7 +910,7 @@ export const useAdminFunctionality = () => {
       return { success: true };
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-data"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-pending-services-data", null, "date-desc"] });
       toast.success(t("service_approved"));
     },
     onError: (error: Error) => {
@@ -954,6 +958,7 @@ export const useAdminFunctionality = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-data"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-coupons-data", null, "date-desc"] });
     },
     onError: (error) => {
       console.error("Mutation error:", error);
@@ -976,6 +981,7 @@ export const useAdminFunctionality = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-data"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-coupons-data", null, "date-desc"] });
     },
     onError: (error) => {
       console.error("Mutation error:", error);

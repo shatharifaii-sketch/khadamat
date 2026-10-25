@@ -36,13 +36,14 @@ const ServiceFormSubmit = ({ isCreating, canPostService: editMode, isEditMode = 
     }
   }, [canPostServiceAsync, isEditMode]);
 
+
   return (
     <div className="pt-6">
       <Button
         type={isEditMode || allowed ? 'submit' : 'button'}
         size="lg"
         className="w-full text-xl py-6"
-        disabled={isCreating}
+        disabled={isCreating || (!isEditMode && canPostServiceAsync?.allServicesPending)}
         onClick={() => {
           if (isReady && !sub) {
             setOpenSubscribeModal(true);
@@ -58,7 +59,7 @@ const ServiceFormSubmit = ({ isCreating, canPostService: editMode, isEditMode = 
           (isEditMode 
             ? t("post_service.save_changes") 
             : allowed && sub 
-              ? t("post_service.publish_service") 
+              ? t("post_service.publish_service") : canPostServiceAsync?.allServicesPending ? t("post_service.services_pending")
               : !allowed && sub 
                 ? t("post_service.get_extra_service")
                 : sub ? t("post_service.not_allowed_to_post") : t("post_service.get_subscription"))
