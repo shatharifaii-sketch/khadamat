@@ -104,7 +104,7 @@ export default {
 
         return Response.json({
           success: true,
-          data: { message: "otp_sent" },
+          message: "otp_sent",
           error
         })
       } else if (!userExists) {
@@ -119,6 +119,7 @@ export default {
 
       return {
         success: true,
+        message: "",
         error: null
       };
     } catch (error) {

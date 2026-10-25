@@ -215,7 +215,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     }
     
-    if (checkData.data?.message && checkData.data?.message == "otp_sent") {
+    if (checkData.message && checkData.message == "otp_sent") {
       return {
         data: "otp_sent",
         error: null

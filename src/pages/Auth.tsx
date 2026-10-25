@@ -166,14 +166,29 @@ const Auth = () => {
       } else if (isLogin) {
         if (result.data == "otp_sent") {
           toast.success(t("otp_sent"));
-          navigate("/confirm-email", { state: { email }, replace: true });
+          navigate("/confirm-email", {
+            state: {
+              email,
+              password,
+              method: "signIn"
+            },
+            replace: true
+          });
           return;
         }
         toast.success(t("login_success"));
         navigate(location.state?.from?.pathname || "/", { replace: true });
       } else {
         toast.success(t("signup_success"));
-        navigate("/confirm-email", { state: { email } });
+        navigate("/confirm-email", {
+          state: {
+            email,
+            password,
+            function: "signup"
+          }, 
+          replace: true 
+        }
+        );
       }
     } catch (error: unknown) {
       console.error(

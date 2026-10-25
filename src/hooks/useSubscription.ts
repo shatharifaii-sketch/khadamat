@@ -215,7 +215,7 @@ notes
         activeSubscription,
         inactiveSubscriptions,
         extraProductsCount: userExtraProducts?.extra_products_count || 0,
-        isEligibleForExtraProduct: pendingServicesCount < activeSubscription.services_used
+        isEligibleForExtraProduct: pendingServicesCount < activeSubscription?.services_used
       } as {
         activeSubscription: Subscription;
         inactiveSubscriptions: Subscription[];
