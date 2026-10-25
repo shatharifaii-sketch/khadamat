@@ -4,7 +4,6 @@
 
 // Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { Resend } from "npm:resend@latest";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { isPwned, validatePassword } from "../_shared/password.ts";
 
@@ -15,63 +14,10 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY")!);
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
-
-async function sendWelcomeEmail(email: string, name: string, otp: string) {
-  const { data, error } = await resend.emails.send({
-    from: "welcome <support@mail.khedemtak.com>",
-    to: email,
-    template: {
-      id: "welcome",
-      variables: {
-        name,
-        otp,
-      },
-    },
-  });
-
-  if (error) {
-    console.error("Error sending email: ", error);
-    return {
-      success: false,
-      error,
-    };
-  }
-
-  return {
-    success: true,
-    data,
-  };
-}
-
-async function generateEmailLinks(email: string, password: string) {
-  const { data, error } = await supabase.auth.admin.generateLink({
-    type: "signup",
-    email,
-    password,
-  });
-
-  if (error) {
-    console.error("Error generating link: ", error);
-    return {
-      success: false,
-      link: null,
-      otp: null,
-      error: "network_error",
-    };
-  }
-
-  return {
-    success: true,
-    link: data.properties.action_link,
-    otp: data.properties.email_otp,
-    error: null,
-  };
-}
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
