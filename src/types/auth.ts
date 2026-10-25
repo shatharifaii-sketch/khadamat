@@ -29,5 +29,6 @@ export const CODE_ALIASES: Record<string, string> = {
     phone_exists: "user_exists",
     password_too_short: "password_too_short",
     password_too_long: "password_too_long",
-    password_breached: "password_breached"
+    password_breached: "password_breached",
+    lookup_failed: "lookup_failed"
 }

@@ -164,6 +164,11 @@ const Auth = () => {
         if (!isLogin) toast.success(t("phone_signup_success"));
         setVerifyingPhone(true);
       } else if (isLogin) {
+        if (result.data == "otp_sent") {
+          toast.success(t("otp_sent"));
+          navigate("/confirm-email", { state: { email }, replace: true });
+          return;
+        }
         toast.success(t("login_success"));
         navigate(location.state?.from?.pathname || "/", { replace: true });
       } else {
@@ -292,7 +297,7 @@ const Auth = () => {
                   />
                   
                   {errors.fullNameError && (
-                      <p id="email-error">{t(errors.fullNameError)}</p>
+                      <p id="email-error" className="text-sm text-destructive">{t(errors.fullNameError)}</p>
                     )}
                 </div>
               )}
@@ -334,7 +339,7 @@ const Auth = () => {
                     </div>
 
                     {errors.phoneError && (
-                      <p id="email-error">{t(errors.phoneError)}</p>
+                      <p id="email-error" className="text-sm text-destructive">{t(errors.phoneError)}</p>
                     )}
                   </>
                 ) : (
@@ -356,7 +361,7 @@ const Auth = () => {
                       required
                     />
                     {errors.emailError && (
-                      <p id="email-error">{t(errors.emailError)}</p>
+                      <p id="email-error" className="text-sm text-destructive">{t(errors.emailError)}</p>
                     )}
                   </>
                 )}
@@ -373,7 +378,7 @@ const Auth = () => {
                   required
                 />
                 {errors.passwordError && (
-                      <p id="email-error">{t(errors.passwordError)}</p>
+                      <p id="email-error" className="text-sm text-destructive">{t(errors.passwordError)}</p>
                     )}
               </div>
 
@@ -389,7 +394,7 @@ const Auth = () => {
                     required
                   />
                   {errors.passwordConfirmError && (
-                      <p id="email-error">{t(errors.passwordConfirmError)}</p>
+                      <p id="email-error" className="text-sm text-destructive">{t(errors.passwordConfirmError)}</p>
                     )}
                 </div>
               )}
