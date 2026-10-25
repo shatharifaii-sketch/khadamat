@@ -122,6 +122,12 @@ const Auth = () => {
           }
         });
         break;
+      case "password_too_short":
+        toast.warning(t("password_too_short"));
+        break;
+      case "password_too_long":
+        toast.warning(t("password_too_long"));
+        break;
       default:
         toast.error(t(error.formError))
     }
