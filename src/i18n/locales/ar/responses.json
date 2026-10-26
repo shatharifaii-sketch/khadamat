@@ -90,5 +90,11 @@
     "password_too_short": "كلمة المرور قصيرة جدا, 6 أحرف على الاقل",
     "password_too_long": "كلمة المرور طويلة جدا, مسموح 100 حرف",
     "missing_data": "بعض المعلومات مفقودة",
-    "password_breached": "كلمة المرور غير امنة"
+    "password_breached": "كلمة المرور غير امنة",
+    "error_updating_admin": "خطأ في تحديث الادمن",
+    "error_updating_user": "خطأ في تحديث المستخدم",
+    "error_checking_admin": "خطأ في التحقق من الادمن",
+    "error_deleting_admin": "خطأ في حذف الادمن",
+    "user_id_required": "البيانات غير كاملة",
+    "error_deleting_user": "خطأ في حذف المستخدم"
 }

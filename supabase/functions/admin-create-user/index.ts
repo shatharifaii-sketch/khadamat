@@ -139,7 +139,7 @@ Deno.serve(async (req) => {
           JSON.stringify({
             success: false,
             user: null,
-            error: adminError,
+            error: "error_updating_admin",
           }),
           {
             headers: {
@@ -165,11 +165,12 @@ Deno.serve(async (req) => {
       },
     );
   } catch (error) {
+    console.error("SERVER ERROR: ", error)
     return new Response(
       JSON.stringify({
         success: false,
         user: null,
-        error: error.message,
+        error: "server_error",
       }),
       {
         status: 400,
