@@ -598,9 +598,11 @@ export const useAdminFunctionality = () => {
         },
       );
 
+
       const { success, user, error: userError } = data;
 
       if (userError || error) {
+        console.log(userError)
         const errorCode = typeof userError === "string" ? userError : userError?.code;
 
           toast.error(

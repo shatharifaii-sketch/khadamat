@@ -156,10 +156,14 @@ const Auth = () => {
         : await signUp(usePhone ? null : email, password, fullName, passwordConfirm, usePhone ? phone : null, method);
       
       if (result.error) {
-        handleAuthError(result.error);
+        console.log(JSON.stringify(result.error))
+        if (result.error instanceof Error && result.error.message === "Invalid login credentials") {
+          toast.error(t("invalid_credentials"))
+        } else {
+          handleAuthError(result.error);
+        }
         return;
       }
-
       if (usePhone) {
         if (!isLogin) toast.success(t("phone_signup_success"));
         setVerifyingPhone(true);

@@ -98,23 +98,32 @@ Deno.serve(async (req) => {
 
       if (pwError) {
         console.error("Error validating error");
-        return Response.json(
-          { success: false, error: pwError },
-          {
-            status: 400,
-            headers: {
-              ...corsHeaders,
-              "Content-Type": "application/json",
-            },
+        return new Response(
+        JSON.stringify(
+          { success: false, error: pwError }
+        ),
+        {
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
           },
-        );
+        },
+      );
       }
 
       if (await isPwned(password)) {
-        return Response.json({
-          success: false,
-          error: "password_breached",
-        });
+        return new Response(
+        JSON.stringify({
+        success: false,
+        error: "password_breached",
+      }),
+      {
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+      }
+      );
       }
       updates.password = password;
     }

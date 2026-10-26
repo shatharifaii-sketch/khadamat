@@ -46,6 +46,8 @@ Deno.serve(async (req) => {
       full_name,
     } = await req.json();
 
+    console.log("CREATING USER");
+
     if (!password || (password && !email && !phone)) {
       return new Response(
         JSON.stringify({
@@ -66,10 +68,11 @@ Deno.serve(async (req) => {
 
     if (pwError) {
       console.error("Error validating error");
-      return Response.json(
-        { success: false, error: pwError },
+      return new Response(
+        JSON.stringify(
+          { success: false, error: pwError }
+        ),
         {
-          status: 400,
           headers: {
             ...corsHeaders,
             "Content-Type": "application/json",
@@ -79,10 +82,18 @@ Deno.serve(async (req) => {
     }
 
     if (await isPwned(password)) {
-      return Response.json({
+      return new Response(
+        JSON.stringify({
         success: false,
         error: "password_breached",
-      });
+      }),
+      {
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+      }
+      );
     }
 
     if (!is_admin) {
