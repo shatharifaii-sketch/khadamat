@@ -106,7 +106,7 @@ Deno.serve(async (req) => {
         email,
         password,
         phone,
-        user_metadata: { name: full_name ?? "new_user" },
+        user_metadata: { full_name: full_name ?? "new_user" },
         phone_confirm: !!phone && !verify_phone,
         email_confirm: !!email && !verify_email,
       });

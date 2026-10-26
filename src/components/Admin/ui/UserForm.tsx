@@ -49,7 +49,6 @@ const UserForm = ({ editingUser, closeForm }: Props) => {
   const { updateUser, updateUserSuccess, createUser, createUserSuccess } = useAdminFunctionality();
   const [countryCode, setCountryCode] = useState<string>(editingUser?.phone ? editingUser.phone.replace(/\D/g, '').slice(0, -9) : countries[0].code);
   const [phone, setPhone] = useState<string>(editingUser?.phone ? (editingUser.phone.replace(/\D/g, '').slice(-9) || editingUser.phone) : '');
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (updateUserSuccess || createUserSuccess) {
@@ -240,7 +239,7 @@ const UserForm = ({ editingUser, closeForm }: Props) => {
           />
         </div>
       )}
-      <Button onClick={handleCreateUser} disabled={createUser.isPending} className={`w-full ${createUser.isPending ? 'opacity-50' : ''}`}>
+      <Button onClick={handleCreateUser} disabled={createUser.isPending || updateUser.isPending} className={`w-full ${createUser.isPending ? 'opacity-50' : ''}`}>
         {editingUser
           ? t("table.user_management.form.buttons.update")
           : t("table.user_management.form.buttons.create")

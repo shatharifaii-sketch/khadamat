@@ -83,11 +83,13 @@ Deno.serve(async (req) => {
       email?: string;
       password?: string;
       phone?: string;
-      user_metadata: { name?: string };
+      user_metadata: { full_name?: string };
       phone_confirm?: boolean;
       email_confirm?: boolean;
     } = {
-      user_metadata: full_name ?? "user",
+      user_metadata: {
+        full_name: full_name ?? "user"
+      },
     };
 
     if (email) updates.email = email;
