@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePendingService } from '@/hooks/usePendingService';
 import { ServiceFormData } from '@/types/service';
@@ -67,11 +67,14 @@ export const useServiceFormState = (serviceToEdit?: Service | null) => {
     }
   }, [user.email, isEditMode, formData.email]);
 
-  const handleInputChange = <K extends keyof ServiceFormData> (
+  const handleInputChange = useCallback(
+    <K extends keyof ServiceFormData> (
     field: K, value: ServiceFormData[K] | ServiceLink[]
   ) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-  };
+  },
+  []
+  )
 
   return {
     formData,
