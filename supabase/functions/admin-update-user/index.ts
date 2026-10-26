@@ -133,7 +133,7 @@ Deno.serve(async (req) => {
       return new Response(
         JSON.stringify({
           success: false,
-          error: error,
+          error: "error_updating_user",
         }),
         {
           status: 400,
@@ -156,7 +156,7 @@ Deno.serve(async (req) => {
           JSON.stringify({
             success: false,
             user: null,
-            error: "error_updating",
+            error: "error_updating_admin",
           }),
           {
             headers: {
@@ -179,7 +179,7 @@ Deno.serve(async (req) => {
           JSON.stringify({
             success: false,
             user: null,
-            error: "error_updating",
+            error: "error_checking_admin",
           }),
           {
             headers: {
@@ -229,10 +229,11 @@ Deno.serve(async (req) => {
       },
     );
   } catch (error) {
+    console.error("SERVER ERROR: ", error)
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message,
+        error: "server_error",
       }),
       {
         status: 500,

@@ -90,5 +90,11 @@
     "password_too_short": "The entered password is too short, atleast 6 characters",
     "password_too_long": "The entered password is too long, 100 characters allowed",
     "missing_data": "missing some data",
-    "password_breached": "This password is not safe"
+    "password_breached": "This password is not safe",
+    "error_updating_admin": "Error updating the admin",
+    "error_updating_user": "Error updating user",
+    "error_checking_admin": "Error checking for admin",
+    "error_deleting_admin": "Error deleting admin",
+    "user_id_required": "Missing required data",
+    "error_deleting_user": "Error deleting user"
 }
