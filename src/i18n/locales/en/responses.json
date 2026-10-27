@@ -96,5 +96,13 @@
     "error_checking_admin": "Error checking for admin",
     "error_deleting_admin": "Error deleting admin",
     "user_id_required": "Missing required data",
-    "error_deleting_user": "Error deleting user"
+    "error_deleting_user": "Error deleting user",
+    "error_service_providers": "Error loading service providers",
+    "verify_no_email": "No email address provided to verify",
+    "verify_no_phone": "No phone number provided to verify",
+    "no_password": "A user needs a password",
+    "password_no_lowercase": "Password requires capitalcase and lowercase letters",
+    "password_no_capital": "Password requires capitalcase and lowercase letters",
+    "password_no_number": "Password requires at least one number and one symbol",
+    "password_no_symbol": "Password requires at least one number and one symbol"
 }

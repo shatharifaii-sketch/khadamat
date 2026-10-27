@@ -3,11 +3,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { UserProfile } from "../ServiceManagement";
 import { Service, useAdminFunctionality } from "@/hooks/useAdminFunctionality";
 import { categories, locations } from "@/components/FindService/ServiceCategories";
-import ServiceImages from "@/components/Service/ui/EditServiceImages";
+import ServiceImages, { MediaItem } from "@/components/Service/ui/EditServiceImages";
 import ServiceLinks, { ServiceLink } from "@/components/PostService/ServiceLinks";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useTranslation } from "react-i18next";
@@ -23,9 +23,8 @@ const ServiceForm = ({ isEdit, service, closeForm }: Props) => {
     const { t } = useTranslation("admin");
     const lang = localStorage.getItem("language") || "en";
 
-    const { createService, updateService, createServiceSuccess, updateServiceSuccess } = useAdminFunctionality();
-
-    const serviceProviders = [];
+    const [isMember, setIsMember] = useState<boolean>(false)
+    const { createService, updateService, createServiceSuccess, updateServiceSuccess, serviceProviders, loadingServiceProviders, isUserMember } = useAdminFunctionality();
 
     const [formData, setFormData] = useState(service ?? {
         title: '',
@@ -55,6 +54,10 @@ const ServiceForm = ({ isEdit, service, closeForm }: Props) => {
         if (service) setFormData(service);
     }, [service]);
 
+    const handleMediaChange = useCallback((media: MediaItem[]) => {
+        setFormData((prev) => ({...prev, service_media: media}));
+    }, [])
+
     const handleSubmit = () => {
         if (isEdit) { updateService.mutate(formData) } else { createService.mutate(formData) };
     }
@@ -62,7 +65,7 @@ const ServiceForm = ({ isEdit, service, closeForm }: Props) => {
     return (
         <div className="space-y-4" dir={lang === "ar" ? "rtl" : "ltr"}>
 
-            <div className="flex flex-col overflow-y-scroll h-[510px] space-x-2 pr-3 text-start">
+            <div className="flex flex-col overflow-y-scroll h-127.5 space-x-2 pr-3 text-start">
                 <div className="ml-2">
                     <Label htmlFor="title">{t("table.service_management.form.title")}</Label>
                     <Input
@@ -149,6 +152,25 @@ const ServiceForm = ({ isEdit, service, closeForm }: Props) => {
                             </SelectContent>
                         </Select>
                     </div>
+                    <div className='grid grid-cols-2 mt-3'>
+                        <div className='flex items-center gap-2'>
+                            <Checkbox
+                                id="offline"
+                                checked={!formData.is_online}
+                                onCheckedChange={() => setFormData({ ...formData, is_online: false })}
+                            />
+                            <Label htmlFor="offline">{t("table.service_management.form.offline_service")}</Label>
+                        </div>
+
+                        <div className='flex items-center gap-2'>
+                            <Checkbox
+                                id="online"
+                                checked={formData.is_online}
+                                onCheckedChange={() => setFormData({ ...formData, is_online: true })}
+                            />
+                            <Label htmlFor="online">{t("table.service_management.form.online_service")}</Label>
+                        </div>
+                    </div>
 
                     <div>
                         <Label htmlFor="phone">{t("table.service_management.form.phone")}</Label>
@@ -202,26 +224,6 @@ const ServiceForm = ({ isEdit, service, closeForm }: Props) => {
                         />
                     </div>
 
-                    <div className='grid grid-cols-2 my-2'>
-                        <div className='flex items-center gap-2'>
-                            <Checkbox
-                                id="offline"
-                                checked={!formData.is_online}
-                                onCheckedChange={() => setFormData({ ...formData, is_online: false })}
-                            />
-                            <Label htmlFor="offline">{t("table.service_management.form.offline_service")}</Label>
-                        </div>
-
-                        <div className='flex items-center gap-2'>
-                            <Checkbox
-                                id="online"
-                                checked={formData.is_online}
-                                onCheckedChange={() => setFormData({ ...formData, is_online: true })}
-                            />
-                            <Label htmlFor="online">{t("table.service_management.form.online_service")}</Label>
-                        </div>
-                    </div>
-
                     <div className="col-span-2">
                         <ServiceLinks
                             socialLinks={formData.links as ServiceLink[]}
@@ -237,9 +239,7 @@ const ServiceForm = ({ isEdit, service, closeForm }: Props) => {
 
                 </div>
                 <ServiceImages
-                    onMediaChange={(media) => {
-                        setFormData((prev) => ({ ...prev, service_media: media }));
-                    }}
+                    onMediaChange={handleMediaChange}
                     serviceMedia={service ? service.service_media : []} />
             </div>
 

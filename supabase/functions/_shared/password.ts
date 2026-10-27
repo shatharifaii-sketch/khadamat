@@ -1,12 +1,79 @@
+export interface User {
+  id: string;
+  email?: string;
+  phone?: string;
+  full_name?: string;
+  is_service_provider?: boolean;
+  location?: string;
+  bio?: string;
+  experience_years?: number;
+  password?: string;
+  is_admin?: boolean;
+  verify_phone?: boolean;
+  verify_email?: boolean;
+}
+
+type PasswordError =
+  | "password_too_short"
+  | "password_too_long"
+  | "password_no_lowercase"
+  | "password_no_uppercase"
+  | "password_no_number"
+  | "password_no_symbol"
+  | null;
+
 const MIN_LEN = 6;
 const MAX_LEN = 120;
 
-export function validatePassword(pw: unknown): string | null {
-  if (typeof pw !== "string") return "invalid_password";
-  const len = [...pw].length;
-  if (len < MIN_LEN) return "password_too_short";
-  if (len > MAX_LEN) return "password_too_long";
-  return null;
+
+function validatePassword(password: string): PasswordError {
+  if ([...password].length < MIN_LEN) {
+    return "password_too_short"
+  }
+
+  if ([...password].length > MAX_LEN) {
+    return "password_too_long"
+  }
+
+  if (!/\p{Ll}/u.test(password)) {
+    return "password_no_lowercase"
+  }
+
+  if (!/\p{Lu}/u.test(password)) {
+    return "password_no_uppercase"
+  }
+
+  if (!/\p{N}/u.test(password)) {
+    return "password_no_number"
+  }
+
+  if (!/[^\p{L}\p{N}\s]/u.test(password)) {
+    return "password_no_symbol"
+  }
+
+  return null
+}
+
+export const validateAdminUserForm = (form: Partial<User>) => {
+  if ((!form.email || form.email.length < 10) && form.verify_email) {
+    return "verify_no_email"
+  }
+
+  if ((!form.phone || form.phone.length < 5) && form.verify_phone) {
+    return "verify_no_phone"
+  }
+
+  if (!form.password) {
+    return "no_password"
+  }
+
+  const passwordValidation = validatePassword(form.password);
+
+  if (passwordValidation) {
+    return passwordValidation
+  }
+
+  return null
 }
 
 export async function isPwned(pw: string): Promise<boolean> {

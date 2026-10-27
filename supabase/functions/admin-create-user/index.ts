@@ -5,7 +5,7 @@
 // Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { isPwned, validatePassword } from "../_shared/password.ts";
+import { validateAdminUserForm } from "../_shared/password.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -64,13 +64,13 @@ Deno.serve(async (req) => {
       );
     }
 
-    const pwError = validatePassword(password);
+    const formError = validateAdminUserForm(password);
 
-    if (pwError) {
+    if (formError) {
       console.error("Error validating error");
       return new Response(
         JSON.stringify(
-          { success: false, error: pwError }
+          { success: false, error: formError }
         ),
         {
           headers: {
@@ -81,20 +81,20 @@ Deno.serve(async (req) => {
       );
     }
 
-    if (await isPwned(password)) {
-      return new Response(
-        JSON.stringify({
-        success: false,
-        error: "password_breached",
-      }),
-      {
-          headers: {
-            ...corsHeaders,
-            "Content-Type": "application/json",
-          },
-      }
-      );
-    }
+    // if (await isPwned(password)) {
+    //   return new Response(
+    //     JSON.stringify({
+    //     success: false,
+    //     error: "password_breached",
+    //   }),
+    //   {
+    //       headers: {
+    //         ...corsHeaders,
+    //         "Content-Type": "application/json",
+    //       },
+    //   }
+    //   );
+    // }
 
     if (!is_admin) {
       return new Response(

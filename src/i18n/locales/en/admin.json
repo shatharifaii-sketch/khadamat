@@ -181,7 +181,8 @@
                 "accept_title": "Approve service publishing",
                 "accept_button": "Publish service",
                 "offline_fallback": "Online",
-                "with_appointments": "Reservations"
+                "with_appointments": "Reservations",
+                "provider":"Service Provider"
             }
         },
         "user_management": {

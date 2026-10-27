@@ -96,5 +96,13 @@
     "error_checking_admin": "خطأ في التحقق من الادمن",
     "error_deleting_admin": "خطأ في حذف الادمن",
     "user_id_required": "البيانات غير كاملة",
-    "error_deleting_user": "خطأ في حذف المستخدم"
+    "error_deleting_user": "خطأ في حذف المستخدم",
+    "error_service_providers": "خطأ في تحميل مقدمي الخدمات",
+    "verify_no_email": "لا يوجد بريد الكتروني للتحقق",
+    "verify_no_phone": "لا يوجد رقم هاتف للتحقق",
+    "no_password": "لا يمكن انشاء حساب جديد من غير كلمة مرور",
+    "password_no_lowercase": "استخدم أحرف صغيرة و كبيرة في كلمة المرور",
+    "password_no_capital": "استخدم أحرف صغيرة و كبيرة في كلمة المرور",
+    "password_no_number": "كلمة المرور يجب أن تحتوي أرقام و رموز",
+    "password_no_symbol": "كلمة المرور يجب أن تحتوي أرقام و رموز"
 }

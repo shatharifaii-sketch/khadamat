@@ -57,8 +57,8 @@ Deno.serve(async (req: Request) => {
 
     if (pwError) {
       console.error("Error validating error");
-      return Response.json(
-        { success: false, error: pwError },
+      return new Response(
+        JSON.stringify({ success: false, error: pwError }),
         {
           status: 400,
           headers: {
@@ -69,12 +69,12 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    if (await isPwned(password)) {
-      return Response.json({
-        success: false,
-        error: "password_breached",
-      });
-    }
+    // if (await isPwned(password)) {
+    //   return Response.json({
+    //     success: false,
+    //     error: "password_breached",
+    //   });
+    // }
 
     const { data: checkData, error: checkError } =
       await supabase.functions.invoke("check-if-user-exists", {

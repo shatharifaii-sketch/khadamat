@@ -38,6 +38,10 @@ const PendingServiceData = ({ service, setServiceToAccept }: Props) => {
           <span className="px-4 text-2xl">{service.title}</span>
         </h1>
         <p className="flex flex-col">
+          {t("table.pending_services_management.data.provider")}
+          <span className="px-4">{service.publisher.full_name}</span>
+        </p>
+        <p className="flex flex-col">
           {t("table.pending_services_management.data.title_description")}
           <span className="px-4">{service.description}</span>
         </p>

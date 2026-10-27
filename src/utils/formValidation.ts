@@ -1,12 +1,83 @@
+import { User } from "@/components/Admin/ui/UserForm";
 import { locations } from "@/components/FindService/ServiceCategories";
 import { ServiceLink } from "@/components/PostService/ServiceLinks";
+import { Service } from "@/hooks/useAdminFunctionality";
+import { isValid } from "date-fns";
 
 export interface ValidationResult {
   isValid: boolean;
   message: string;
 }
 
+const PASSWORD_MIN_LENGTH = 6;
+const PASSWORD_MAX_LENGTH = 128;
+
 const lang = localStorage.getItem("language") || "en";
+
+function validatePassword(password: string): ValidationResult {
+  if ([...password].length < PASSWORD_MIN_LENGTH) {
+    return { isValid: false, message: "password_too_short" }
+  }
+
+  if ([...password].length > PASSWORD_MAX_LENGTH) {
+    return { isValid: false, message: "password_too_long" }
+  }
+
+  if (!/\p{Ll}/u.test(password)) {
+    return { isValid: false, message: "password_no_lowercase" };
+  }
+
+  if (!/\p{Lu}/u.test(password)) {
+    return { isValid: false, message: "password_no_uppercase" };
+  }
+
+  if (!/\p{N}/u.test(password)) {
+    return { isValid: false, message: "password_no_number" };
+  }
+
+  if (!/[^\p{L}\p{N}\s]/u.test(password)) {
+    return { isValid: false, message: "password_no_symbol" }
+  }
+
+  return { isValid: true, message: "" }
+}
+
+export const validateAdminUserForm = (form: Partial<User>): ValidationResult => {
+  if ((!form.email || form.email.length < 10) && form.verify_email) {
+    return {
+      isValid: false,
+      message: "verify_no_email"
+    }
+  }
+
+  if ((!form.phone || form.phone.length < 5) && form.verify_phone) {
+    return {
+      isValid: false,
+      message: "verify_no_phone"
+    }
+  }
+
+  if (!form.password) {
+    return {
+      isValid: false,
+      message: "no_password"
+    }
+  }
+
+  const passwordValidation = validatePassword(form.password);
+
+  if (!passwordValidation.isValid) {
+    return passwordValidation
+  }
+
+  return { isValid: true, message: "" }
+}
+
+export const validateAdminServiceForm = (formData: Partial<Service>) => {
+  if (!formData.is_online && (formData.location.length === 0 || formData.location)) {
+    return { isValid: false, message: "no_location"}
+  }
+} 
 
 export const validateEmail = (email: string): ValidationResult => {
   if (!email.trim()) {
