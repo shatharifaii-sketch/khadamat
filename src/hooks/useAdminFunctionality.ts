@@ -15,6 +15,7 @@ import { useEmail } from "./useEmail";
 import { useTranslation } from "react-i18next";
 import { useMemo, useState } from "react";
 import { errorMessages } from "@/types/analytics";
+import { validateAdminUserForm } from "@/utils/formValidation";
 
 interface UserProfile {
   id: string;
@@ -580,6 +581,13 @@ export const useAdminFunctionality = () => {
         throw new Error("Only admins can create users");
       }
 
+      const res = validateAdminUserForm(formData);
+
+      if (!res.isValid) {
+        toast.error(t(res.message))
+        throw new Error(res.message)
+      }
+
       console.log("Creating user...");
 
       const { data, error } = await supabase.functions.invoke(
@@ -714,6 +722,15 @@ export const useAdminFunctionality = () => {
         throw new Error("Only admins can update users");
       }
 
+      const res = validateAdminUserForm(formData);
+
+      console.log(res)
+
+      if (!res.isValid) {
+        toast.error(t(res.message))
+        throw new Error(res.message)
+      }
+
       if (formData.email || formData.password || formData.phone) {
         const { data, error } = await supabase.functions.invoke(
           "admin-update-user",
@@ -773,6 +790,9 @@ export const useAdminFunctionality = () => {
         queryKey: ["admin-users-data", null, "date-desc"],
       });
     },
+    onError: () => {
+
+    }
   });
 
   const deleteService = useMutation({
@@ -899,6 +919,9 @@ export const useAdminFunctionality = () => {
   const acceptServicePost = useMutation({
     mutationKey: ["accept-service-post"],
     mutationFn: async (serviceId: string) => {
+      if (!admin) {
+        throw new Error("Only admins can delete users");
+      }
       const { error } = await supabase
         .from("services")
         .update({ status: "published" })
@@ -924,6 +947,9 @@ export const useAdminFunctionality = () => {
   const createCoupon = useMutation({
     mutationKey: ["create-coupon"],
     mutationFn: async (formData: Partial<Tables<"coupons">>) => {
+      if (!admin) {
+        throw new Error("Only admins can delete users");
+      }
       const { data: couponData, error: couponError } =
         await supabase.functions.invoke("create-coupons-with-stripe", {
           body: JSON.stringify({ formData }),
@@ -969,6 +995,9 @@ export const useAdminFunctionality = () => {
 
   const deleteCoupon = useMutation({
     mutationFn: async (couponId: string) => {
+      if (!admin) {
+        throw new Error("Only admins can delete users");
+      }
       const { error } = await supabase
         .from("coupons")
         .delete()
@@ -990,6 +1019,45 @@ export const useAdminFunctionality = () => {
     },
   });
 
+  const {
+    data: serviceProviders,
+    isLoading: loadingServiceProviders,
+    isError: errorLoadingServiceProviders
+  } = useQuery({
+    queryKey: ["service-providers"],
+    queryFn: async () => {
+      if (!admin) {
+        throw new Error("Only admins can delete users");
+      }
+
+      const { data, error } = await supabase.from("profiles").select("id, full_name, profile_image_url").eq("is_service_provider", true);
+
+      if (error) {
+        console.error("Error loading service providers")
+        toast.error("error_service_providers")
+        return [];
+      }
+
+      return data
+    }
+  });
+
+  const isUserMember = async (id: string) => {
+    if (!id || id.length < 1) {
+      console.error("error getting user data")
+      throw new Error("no_id")
+    }
+
+    const { count, error } = await supabase.from("subscriptions").select("id", { count: "exact", head: true }).eq("user_id", id).eq("status", "active");
+
+    if (error) {
+      console.error("error getting user data")
+      throw new Error("error_getting_user_sub")
+    }
+
+    return count > 0
+  }
+
   return {
     deleteUser,
     setupRealTimeSubscriptions,
@@ -1008,5 +1076,9 @@ export const useAdminFunctionality = () => {
     createCoupon,
     createCouponSuccess: createCoupon.isSuccess,
     acceptServicePost,
+    serviceProviders,
+    loadingServiceProviders,
+    errorLoadingServiceProviders,
+    isUserMember
   };
 };
