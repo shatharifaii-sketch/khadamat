@@ -25,7 +25,6 @@ export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
     // If we're editing, update the service
     if (isEditMode && serviceToEdit) {
       try {
-        console.log("FORMDATA: ", formData)
         await updateService.mutateAsync({
           id: serviceToEdit.id,
           title: formData.title,

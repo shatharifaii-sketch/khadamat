@@ -1,14 +1,27 @@
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
-import { useEffect, useState } from 'react'
-import { UserProfile } from '../UserManagement'
-import { useAdminFunctionality } from '@/hooks/useAdminFunctionality'
-import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { locations } from '@/components/FindService/ServiceCategories'
-import { useTranslation } from 'react-i18next'
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { useEffect, useState } from "react";
+import { UserProfile } from "../UserManagement";
+import { useAdminFunctionality } from "@/hooks/useAdminFunctionality";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { locations } from "@/components/FindService/ServiceCategories";
+import { useTranslation } from "react-i18next";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
+import { Eye, EyeOff, Info } from "lucide-react";
 
 export interface User {
   id: string;
@@ -27,7 +40,7 @@ export interface User {
 
 interface Props {
   editingUser?: UserProfile;
-  closeForm: () => void
+  closeForm: () => void;
 }
 
 const countries = [
@@ -46,37 +59,48 @@ const UserForm = ({ editingUser, closeForm }: Props) => {
   const { t } = useTranslation("admin");
   const lang = localStorage.getItem("language") || "en";
 
-  const { updateUser, updateUserSuccess, createUser, createUserSuccess } = useAdminFunctionality();
-  const [countryCode, setCountryCode] = useState<string>(editingUser?.phone ? editingUser.phone.replace(/\D/g, '').slice(0, -9) : countries[0].code);
-  const [phone, setPhone] = useState<string>(editingUser?.phone ? (editingUser.phone.replace(/\D/g, '').slice(-9) || editingUser.phone) : '');
+  const { updateUser, updateUserSuccess, createUser, createUserSuccess } =
+    useAdminFunctionality();
+  const [peakPassword, setPeakPassword] = useState<boolean>(false);
+
+  const [countryCode, setCountryCode] = useState<string>(
+    editingUser?.phone
+      ? editingUser.phone.replace(/\D/g, "").slice(0, -9)
+      : countries[0].code,
+  );
+  const [phone, setPhone] = useState<string>(
+    editingUser?.phone
+      ? editingUser.phone.replace(/\D/g, "").slice(-9) || editingUser.phone
+      : "",
+  );
 
   useEffect(() => {
     if (updateUserSuccess || createUserSuccess) {
       closeForm();
     }
-  }, [updateUserSuccess, createUserSuccess, closeForm])
+  }, [updateUserSuccess, createUserSuccess, closeForm]);
 
-  const [formData, setFormData] = useState(editingUser ?? {
-    id: editingUser?.id || '',
-    email: '',
-    password: '',
-    full_name: '',
-    phone: '',
-    verify_email: true,
-    verify_phone: true,
-    location: '',
-    bio: '',
-    is_service_provider: false,
-    experience_years: 0,
-    is_admin: false,
-  });
+  const [formData, setFormData] = useState(
+    editingUser ?? {
+      id: editingUser?.id || "",
+      email: "",
+      password: "",
+      full_name: "",
+      phone: "",
+      verify_email: true,
+      verify_phone: true,
+      location: "",
+      bio: "",
+      is_service_provider: false,
+      experience_years: 0,
+      is_admin: false,
+    },
+  );
 
   const handleCreateUser = () => {
     // Implement user creation logic here
-    const formattedPhone =
-      phone.length > 0
-        ? `+${countryCode}${phone}`
-        : "";
+    const formattedPhone = phone.length > 0 ? `+${countryCode}${phone}` : "";
+    formData.password.trim()
 
     const payload = {
       ...formData,
@@ -84,169 +108,237 @@ const UserForm = ({ editingUser, closeForm }: Props) => {
     };
 
     if (editingUser) {
-      updateUser.mutate(payload)
+      updateUser.mutate(payload);
     } else {
-      createUser.mutate(payload)
+      createUser.mutate(payload);
     }
-
-  }
+  };
   return (
     <div className="space-y-4 text-start" dir={lang === "ar" ? "rtl" : "ltr"}>
-      <div>
-        <Label htmlFor="email">{t("table.user_management.form.fields.email")}</Label>
-        <Input
-          id="email"
-          type="email"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-        />
-        <div className="flex items-center space-x-2 mt-1" dir='ltr'>
-
-          <Label htmlFor="is_admin">{t("table.user_management.form.toggles.verify_email")}</Label>
-          <Switch
-            id="verify_email"
-            checked={formData.verify_email}
-            onCheckedChange={(checked) => setFormData({ ...formData, verify_email: checked })}
-            className='relative'
+      <div className="max-h-100 md:max-h-132 overflow-y-auto px-2">
+        <div>
+          <Label htmlFor="email">
+            {t("table.user_management.form.fields.email")}
+          </Label>
+          <Input
+            id="email"
+            type="email"
+            value={formData.email}
+            onChange={(e) =>
+              setFormData({ ...formData, email: e.target.value })
+            }
+          />
+          <div className="flex items-center space-x-2 mt-1" dir="ltr">
+            <Label htmlFor="is_admin">
+              {t("table.user_management.form.toggles.verify_email")}
+            </Label>
+            <Switch
+              id="verify_email"
+              checked={formData.verify_email}
+              onCheckedChange={(checked) =>
+                setFormData({ ...formData, verify_email: checked })
+              }
+              className="relative"
+            />
+          </div>
+        </div>
+        <div>
+          <Label htmlFor="password">
+            {t("table.user_management.form.fields.password")}
+          </Label>
+          <div className="flex w-full">
+            <div className="flex w-full">
+              <Input
+              id="password"
+              type={peakPassword ? "text" : "password"}
+              value={formData.password}
+              onChange={(e) =>
+                setFormData({ ...formData, password: e.target.value })
+              }
+            />
+            <Button type="button" variant="ghost" onClick={() => setPeakPassword((prev) => !prev)}>
+                  {peakPassword ? <EyeOff /> : <Eye />}
+                </Button>
+            </div>
+            <HoverCard openDelay={10} closeDelay={100}>
+              <HoverCardTrigger asChild>
+                <Button variant="link"><Info /></Button>
+              </HoverCardTrigger>
+              <HoverCardContent side="left" className="px-3 py-2">
+                <ul className="text-xs text-muted-foreground list-disc list-inside">
+                  <li>{t("table.user_management.form.fields.rules.numbers")}</li>
+                  <li>{t("table.user_management.form.fields.rules.symbol")}</li>
+                  <li>{t("table.user_management.form.fields.rules.capital")}</li>
+                  <li>{t("table.user_management.form.fields.rules.lower")}</li>
+                  <li>{t("table.user_management.form.fields.rules.length")}</li>
+                </ul>
+              </HoverCardContent>
+            </HoverCard>
+          </div>
+        </div>
+        <div>
+          <Label htmlFor="full_name">
+            {t("table.user_management.form.fields.full_name")}
+          </Label>
+          <Input
+            id="full_name"
+            value={formData.full_name}
+            onChange={(e) =>
+              setFormData({ ...formData, full_name: e.target.value })
+            }
           />
         </div>
-      </div>
-      <div>
-        <Label htmlFor="password">{t("table.user_management.form.fields.password")}</Label>
-        <Input
-          id="password"
-          type="password"
-          value={formData.password}
-          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-        />
-      </div>
-      <div>
-        <Label htmlFor="full_name">{t("table.user_management.form.fields.full_name")}</Label>
-        <Input
-          id="full_name"
-          value={formData.full_name}
-          onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-        />
-      </div>
-      <div>
-        <Label htmlFor="phone">{t("table.user_management.form.fields.phone")}</Label>
-        <div className='grid grid-cols-5 items-center gap-2'>
+        <div>
+          <Label htmlFor="phone">
+            {t("table.user_management.form.fields.phone")}
+          </Label>
+          <div className="grid grid-cols-5 items-center gap-2">
+            <Select
+              value={countryCode}
+              onValueChange={(e) => setCountryCode(e)}
+              dir="rtl"
+            >
+              <SelectTrigger className="col-span-2">
+                <SelectValue
+                  placeholder={t(
+                    "table.user_management.form.placeholders.country_code",
+                  )}
+                />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {countries.map((c) => (
+                    <SelectItem key={c.code} value={c.code}>
+                      <div className="flex items-center gap-2">{c.label}</div>
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+
+            <Input
+              type="tel"
+              value={phone}
+              onChange={(e) => {
+                const numericValue = e.target.value.replace(/\D/g, "");
+
+                // limit digits
+                setPhone(numericValue.slice(0, 9));
+              }}
+              placeholder="599123456"
+              dir="ltr"
+              className="col-span-3"
+              maxLength={9}
+            />
+          </div>
+          <div className="flex items-center space-x-2 mt-1" dir="ltr">
+            <Label htmlFor="is_admin">
+              {t("table.user_management.form.toggles.verify_phone")}
+            </Label>
+            <Switch
+              id="verify_phone"
+              checked={formData.verify_phone}
+              onCheckedChange={(checked) =>
+                setFormData({ ...formData, verify_phone: checked })
+              }
+              className="relative"
+            />
+          </div>
+        </div>
+        <div>
+          <Label htmlFor="location">
+            {t("table.user_management.form.fields.location")}
+          </Label>
           <Select
-            value={countryCode}
-            onValueChange={(e) => setCountryCode(e)}
-            dir="rtl"
+            value={formData.location}
+            onValueChange={(value) =>
+              setFormData({ ...formData, location: value })
+            }
           >
-            <SelectTrigger className="col-span-2">
-              <SelectValue placeholder={t("table.user_management.form.placeholders.country_code")} />
+            <SelectTrigger id="location">
+              <SelectValue
+                placeholder={t(
+                  "table.user_management.form.placeholders.select_location",
+                )}
+              />
             </SelectTrigger>
             <SelectContent>
-              <SelectGroup>
-                {countries.map((c) => (
-                  <SelectItem
-                    key={c.code} value={c.code}
-                  >
-                    <div className="flex items-center gap-2">
-                      {c.label}
-                    </div>
-                  </SelectItem>
-                )
-                )}
-              </SelectGroup>
+              {locations.map((loc) => (
+                <SelectItem key={loc} value={loc}>
+                  {loc}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
-
-          <Input
-            type="tel"
-            value={phone}
-            onChange={(e) => {
-              const numericValue = e.target.value.replace(/\D/g, "");
-
-              // limit digits
-              setPhone(numericValue.slice(0, 9));
-            }}
-            placeholder="599123456"
-            dir="ltr"
-            className='col-span-3'
-            maxLength={9}
-          />
         </div>
-        <div className="flex items-center space-x-2 mt-1" dir='ltr'>
-
-          <Label htmlFor="is_admin">{t("table.user_management.form.toggles.verify_phone")}</Label>
-          <Switch
-            id="verify_phone"
-            checked={formData.verify_phone}
-            onCheckedChange={(checked) => setFormData({ ...formData, verify_phone: checked })}
-            className='relative'
-          />
-        </div>
-      </div>
-      <div>
-        <Label htmlFor="location">{t("table.user_management.form.fields.location")}</Label>
-        <Select
-          value={formData.location} onValueChange={(value) => setFormData({ ...formData, location: value })}
-        >
-          <SelectTrigger id="location">
-            <SelectValue placeholder={t("table.user_management.form.placeholders.select_location")} />
-          </SelectTrigger>
-          <SelectContent>
-            {locations.map((loc) => (
-              <SelectItem key={loc} value={loc}>
-                {loc}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div>
-        <Label htmlFor="bio">{t("table.user_management.form.fields.bio")}</Label>
-        <Textarea
-          id="bio"
-          value={formData.bio}
-          onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-        />
-      </div>
-      <div className='flex justify-start gap-2 text-start items-center'>
-        <div className="flex items-center space-x-2" dir='ltr'>
-
-          <Label htmlFor="is_service_provider">{t("table.user_management.form.toggles.service_provider")}</Label>
-          <Switch
-            id="is_service_provider"
-            checked={formData.is_service_provider}
-            onCheckedChange={(checked) => setFormData({ ...formData, is_service_provider: checked })}
-            className='relative'
-          />
-        </div>
-        <div className="flex items-center space-x-2" dir='ltr'>
-
-          <Label htmlFor="is_admin">{t("table.user_management.form.toggles.admin")}</Label>
-          <Switch
-            id="is_admin"
-            checked={formData.is_admin}
-            onCheckedChange={(checked) => setFormData({ ...formData, is_admin: checked })}
-            className='relative'
-          />
-        </div>
-      </div>
-      {formData.is_service_provider && (
         <div>
-          <Label htmlFor="experience_years">{t("table.user_management.form.fields.experience_years")}</Label>
-          <Input
-            id="experience_years"
-            type="number"
-            value={formData.experience_years}
-            onChange={(e) => setFormData({ ...formData, experience_years: parseInt(e.target.value) || 0 })}
+          <Label htmlFor="bio">
+            {t("table.user_management.form.fields.bio")}
+          </Label>
+          <Textarea
+            id="bio"
+            value={formData.bio}
+            onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
           />
         </div>
-      )}
-      <Button onClick={handleCreateUser} disabled={createUser.isPending || updateUser.isPending} className={`w-full ${createUser.isPending ? 'opacity-50' : ''}`}>
+        <div className="flex justify-start gap-2 text-start items-center">
+          <div className="flex items-center space-x-2" dir="ltr">
+            <Label htmlFor="is_service_provider">
+              {t("table.user_management.form.toggles.service_provider")}
+            </Label>
+            <Switch
+              id="is_service_provider"
+              checked={formData.is_service_provider}
+              onCheckedChange={(checked) =>
+                setFormData({ ...formData, is_service_provider: checked })
+              }
+              className="relative"
+            />
+          </div>
+          <div className="flex items-center space-x-2" dir="ltr">
+            <Label htmlFor="is_admin">
+              {t("table.user_management.form.toggles.admin")}
+            </Label>
+            <Switch
+              id="is_admin"
+              checked={formData.is_admin}
+              onCheckedChange={(checked) =>
+                setFormData({ ...formData, is_admin: checked })
+              }
+              className="relative"
+            />
+          </div>
+        </div>
+        {formData.is_service_provider && (
+          <div>
+            <Label htmlFor="experience_years">
+              {t("table.user_management.form.fields.experience_years")}
+            </Label>
+            <Input
+              id="experience_years"
+              type="number"
+              value={formData.experience_years}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  experience_years: parseInt(e.target.value) || 0,
+                })
+              }
+            />
+          </div>
+        )}
+      </div>
+      <Button
+        onClick={handleCreateUser}
+        disabled={createUser.isPending || updateUser.isPending}
+        className={`w-full ${createUser.isPending ? "opacity-50" : ""}`}
+      >
         {editingUser
           ? t("table.user_management.form.buttons.update")
-          : t("table.user_management.form.buttons.create")
-        }
+          : t("table.user_management.form.buttons.create")}
       </Button>
     </div>
-  )
-}
+  );
+};
 
-export default UserForm
+export default UserForm;

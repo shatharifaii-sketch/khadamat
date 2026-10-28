@@ -14,6 +14,23 @@ export type AuthResult<T = unknown> = {
     error: FieldErrors | null;
 }
 
+export const PASSWORD_ERRORS = [
+  "password_too_short",
+  "password_too_long",
+  "password_no_lowercase",
+  "password_no_uppercase",
+  "password_no_number",
+  "password_no_symbol",
+] as const;
+
+export type PasswordError = (typeof PASSWORD_ERRORS)[number];
+
+export function isPasswordError(value: unknown): value is PasswordError {
+    return (
+        typeof value === "string" && (PASSWORD_ERRORS as readonly string[]).includes(value)
+    )
+}
+
 export const FIELD_FOR_CODE: Record<string, keyof FieldErrors> = {
     invalid_email: "emailError",
     invalid_phone: "phoneError",

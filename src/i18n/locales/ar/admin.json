@@ -239,7 +239,14 @@
                     "phone": "رقم الهاتف",
                     "location": "الموقع",
                     "bio": "الوصف",
-                    "experience_years": "سنوات الخبرة"
+                    "experience_years": "سنوات الخبرة",
+                    "rules": {
+                        "numbers": "رقم واحد على الاقل",
+                        "symbol": "رمز واحد على الاقل",
+                        "capital": "حرف كبير واحد على الاقل",
+                        "lower": "حرف صغير على الاقل",
+                        "length": "على الاقل 6 احرف"
+                    }
                 },
                 "placeholders": {
                     "country_code": "رقم البلد",

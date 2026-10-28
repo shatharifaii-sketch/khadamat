@@ -851,6 +851,7 @@ export const useAdminFunctionality = () => {
               url: image.url,
               name: image.name,
               thumbnail_url: image.thumbnail_url,
+              type: image.type
             });
 
           if (imageError) throw imageError;

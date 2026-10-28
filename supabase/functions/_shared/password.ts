@@ -26,7 +26,7 @@ const MIN_LEN = 6;
 const MAX_LEN = 120;
 
 
-function validatePassword(password: string): PasswordError {
+export function validatePassword(password: string): PasswordError {
   if ([...password].length < MIN_LEN) {
     return "password_too_short"
   }

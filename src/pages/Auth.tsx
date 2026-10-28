@@ -12,7 +12,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { ArrowLeftToLine, Home, Loader, Mail, Phone } from "lucide-react";
+import {
+  ArrowLeftToLine,
+  ChevronDownIcon,
+  Eye,
+  EyeOff,
+  Home,
+  Loader,
+  Mail,
+  Phone,
+} from "lucide-react";
 import GoogleSignInButton from "@/components/GoogleSignInButton";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
@@ -29,26 +38,41 @@ import { Dialog } from "@/components/ui/dialog";
 import PhoneVerification from "@/components/PhoneVerification";
 import { SelectLabel } from "@radix-ui/react-select";
 import { countries } from "@/types/constants";
-import { FieldErrors } from "@/types/auth";
+import { FieldErrors, isPasswordError } from "@/types/auth";
+import type { PasswordError } from "@/types/auth";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 const hasErrors = (e: FieldErrors) => Object.values(e).some(Boolean);
 
 function validateForm(v: {
-  isLogin: boolean; usePhone: boolean; email: string; password: string; passwordConfirm: string; fullName: string; phone: { countryCode: string; number: string};
+  isLogin: boolean;
+  usePhone: boolean;
+  email: string;
+  password: string;
+  passwordConfirm: string;
+  fullName: string;
+  phone: { countryCode: string; number: string };
 }): FieldErrors {
   const e: FieldErrors = {};
 
   if (v.usePhone) {
-    if (!v.phone.countryCode || !v.phone.number) e.phoneError = "required_fields_error";
+    if (!v.phone.countryCode || !v.phone.number)
+      e.phoneError = "required_fields_error";
   } else if (!v.email) {
     e.emailError = "required_fields_error";
   }
 
-  if ((!v.usePhone || !v.isLogin) && !v.password) e.passwordError = "required_fields_error";
+  if ((!v.usePhone || !v.isLogin) && !v.password)
+    e.passwordError = "required_fields_error";
 
   if (!v.isLogin) {
     if (!v.fullName.trim()) e.fullNameError = "full_name_error";
-    if (v.password !== v.passwordConfirm) e.passwordConfirmError = "passwords_do_not_match"
+    if (v.password !== v.passwordConfirm)
+      e.passwordConfirmError = "passwords_do_not_match";
   }
 
   return e;
@@ -66,6 +90,8 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
 
   const [errors, setErrors] = useState<FieldErrors>({});
+  const [showPasswordRules, setShowPasswordRules] = useState<boolean>(false);
+  const [peakPassword, setPeakPassword] = useState<boolean>(false);
 
   const clearError = (...keys: (keyof FieldErrors)[]) =>
     setErrors((prev) => {
@@ -88,9 +114,9 @@ const Auth = () => {
 
   useEffect(() => {
     if (!isLogin) {
-      setUsePhone(false)
+      setUsePhone(false);
     }
-  }, [isLogin])
+  }, [isLogin]);
 
   // Redirect if already logged in
   if (user) {
@@ -102,7 +128,7 @@ const Auth = () => {
   const handleAuthError = (error: FieldErrors) => {
     setErrors(error);
 
-    switch(error.formError) {
+    switch (error.formError) {
       case undefined:
         if (!hasErrors(error)) toast.error(t("unknown_error"));
         break;
@@ -110,16 +136,18 @@ const Auth = () => {
         toast.warning(t("user_not_found"), {
           icon: <ArrowLeftToLine size={16} />,
           action: {
-            label: t("signup_action"), onClick: () => setIsLogin(false)
-          }
+            label: t("signup_action"),
+            onClick: () => setIsLogin(false),
+          },
         });
         break;
       case "user_exists":
         toast.warning(t("user_exists"), {
           icon: <ArrowLeftToLine size={16} />,
           action: {
-            label: t("login_action"), onClick: () => setIsLogin(true)
-          }
+            label: t("login_action"),
+            onClick: () => setIsLogin(true),
+          },
         });
         break;
       case "password_too_short":
@@ -129,15 +157,21 @@ const Auth = () => {
         toast.warning(t("password_too_long"));
         break;
       default:
-        toast.error(t(error.formError))
+        toast.error(t(error.formError));
     }
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const clientErrors = validateForm({
-      isLogin, usePhone, email, password, passwordConfirm, fullName, phone
+      isLogin,
+      usePhone,
+      email,
+      password,
+      passwordConfirm,
+      fullName,
+      phone,
     });
 
     if (hasErrors(clientErrors)) {
@@ -151,16 +185,35 @@ const Auth = () => {
     try {
       const method = usePhone ? "phone" : "email";
 
-      const result = isLogin 
-        ? await signIn(usePhone ? null : email, password, usePhone ? phone : null, method)
-        : await signUp(usePhone ? null : email, password, fullName, passwordConfirm, usePhone ? phone : null, method);
-      
+      const result = isLogin
+        ? await signIn(
+            usePhone ? null : email,
+            password,
+            usePhone ? phone : null,
+            method,
+          )
+        : await signUp(
+            usePhone ? null : email,
+            password,
+            fullName,
+            passwordConfirm,
+            usePhone ? phone : null,
+            method,
+          );
+
       if (result.error) {
-        console.log(JSON.stringify(result.error))
-        if (result.error instanceof Error && result.error.message === "Invalid login credentials") {
-          toast.error(t("invalid_credentials"))
+        console.log(JSON.stringify(result.error));
+        if (
+          result.error instanceof Error &&
+          result.error.message === "Invalid login credentials"
+        ) {
+          toast.error(t("invalid_credentials"));
         } else {
           handleAuthError(result.error);
+        }
+
+        if (isPasswordError(result.error)) {
+          setShowPasswordRules(true);
         }
         return;
       }
@@ -174,9 +227,9 @@ const Auth = () => {
             state: {
               email,
               password,
-              method: "signIn"
+              method: "signIn",
             },
-            replace: true
+            replace: true,
           });
           return;
         }
@@ -188,17 +241,13 @@ const Auth = () => {
           state: {
             email,
             password,
-            function: "signup"
-          }, 
-          replace: true 
-        }
-        );
+            function: "signup",
+          },
+          replace: true,
+        });
       }
     } catch (error: unknown) {
-      console.error(
-        "Auth error:",
-        error
-      );
+      console.error("Auth error:", error);
       toast.error(t("unexpected_error"));
     } finally {
       setLoading(false);
@@ -274,10 +323,10 @@ const Auth = () => {
               <div
                 onClick={() => {
                   if (isLogin) {
-                    setUsePhone(true)
+                    setUsePhone(true);
                   } else {
-                    return
-                  };
+                    return;
+                  }
                   // toast(t("phone_login_disabled"), {
                   //   description: t("phone_login_description"),
                   // });
@@ -314,10 +363,12 @@ const Auth = () => {
                     onChange={(e) => setFullName(e.target.value)}
                     required={!isLogin}
                   />
-                  
+
                   {errors.fullNameError && (
-                      <p id="email-error" className="text-sm text-destructive">{t(errors.fullNameError)}</p>
-                    )}
+                    <p id="email-error" className="text-sm text-destructive">
+                      {t(errors.fullNameError)}
+                    </p>
+                  )}
                 </div>
               )}
 
@@ -358,7 +409,9 @@ const Auth = () => {
                     </div>
 
                     {errors.phoneError && (
-                      <p id="email-error" className="text-sm text-destructive">{t(errors.phoneError)}</p>
+                      <p id="email-error" className="text-sm text-destructive">
+                        {t(errors.phoneError)}
+                      </p>
                     )}
                   </>
                 ) : (
@@ -380,7 +433,9 @@ const Auth = () => {
                       required
                     />
                     {errors.emailError && (
-                      <p id="email-error" className="text-sm text-destructive">{t(errors.emailError)}</p>
+                      <p id="email-error" className="text-sm text-destructive">
+                        {t(errors.emailError)}
+                      </p>
                     )}
                   </>
                 )}
@@ -388,33 +443,81 @@ const Auth = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="password">{t("password")}</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder={t("password_placeholder")}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
+                <div className="flex gap-1">
+                  <Input
+                    id="password"
+                    type={peakPassword ? "text" : "password"}
+                    placeholder={t("password_placeholder")}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => setPeakPassword((prev) => !prev)}
+                  >
+                    {peakPassword ? <EyeOff /> : <Eye />}
+                  </Button>
+                </div>
+
+                {!isLogin && (
+                  <Collapsible
+                    className="rounded-md data-[state=open]:bg-muted transition-all"
+                    open={showPasswordRules}
+                    onOpenChange={setShowPasswordRules}
+                  >
+                    <CollapsibleTrigger className="group w-full" asChild>
+                      <Button type="button" variant="ghost">
+                        <p className="text-xs">
+                          {t("password_rules.show_rules")}
+                        </p>
+                        <ChevronDownIcon className="ml-auto group-data-[state=open]:rotate-180 transition-transform" />
+                      </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="flex flex-col items-start gap-2 p-2.5 pt-0 text-sm transition-all">
+                      <ul className="text-xs text-muted-foreground list-disc list-inside px-2">
+                        <li>{t("password_rules.numbers")}</li>
+                        <li>{t("password_rules.symbol")}</li>
+                        <li>{t("password_rules.capital")}</li>
+                        <li>{t("password_rules.lower")}</li>
+                        <li>{t("password_rules.length")}</li>
+                      </ul>
+                    </CollapsibleContent>
+                  </Collapsible>
+                )}
                 {errors.passwordError && (
-                      <p id="email-error" className="text-sm text-destructive">{t(errors.passwordError)}</p>
-                    )}
+                  <p id="email-error" className="text-sm text-destructive">
+                    {t(errors.passwordError)}
+                  </p>
+                )}
               </div>
 
               {!isLogin && (
                 <div className="space-y-2">
                   <Label htmlFor="password">{t("confirm_password")}</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder={t("password_placeholder")}
-                    value={passwordConfirm}
-                    onChange={(e) => setPasswordConfirm(e.target.value)}
-                    required
-                  />
+                  <div className="flex gap-1">
+                    <Input
+                      id="password"
+                      type={peakPassword ? "text" : "password"}
+                      placeholder={t("password_placeholder")}
+                      value={passwordConfirm}
+                      onChange={(e) => setPasswordConfirm(e.target.value)}
+                      required
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => setPeakPassword((prev) => !prev)}
+                    >
+                      {peakPassword ? <EyeOff /> : <Eye />}
+                    </Button>
+                  </div>
                   {errors.passwordConfirmError && (
-                      <p id="email-error" className="text-sm text-destructive">{t(errors.passwordConfirmError)}</p>
-                    )}
+                    <p id="email-error" className="text-sm text-destructive">
+                      {t(errors.passwordConfirmError)}
+                    </p>
+                  )}
                 </div>
               )}
               {isLogin && !usePhone && (
