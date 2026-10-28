@@ -238,7 +238,14 @@
                     "phone": "Phone number",
                     "location": "Location",
                     "bio": "Bio",
-                    "experience_years": "Years of experience"
+                    "experience_years": "Years of experience",
+                    "rules": {
+                        "numbers": "At least one Number",
+                        "symbol": "At least one Symbol",
+                        "capital": "At least one Capital letter",
+                        "lower": "At least one Lower letter",
+                        "length": "At least 6 characters"
+                    }
                 },
                 "placeholders": {
                     "country_code": "Country code",

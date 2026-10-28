@@ -149,7 +149,7 @@ export const UserManagement = ({ count }: UserManagementProps) => {
                 {t("table.user_management.create_user")}
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-md">
+            <DialogContent className="px-5">
               <DialogHeader>
                 <DialogTitle>
                   {t("table.user_management.create_user_title")}
