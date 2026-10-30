@@ -55,7 +55,7 @@ const PendingServicesManagement = ({ count }: Props) => {
     <Card>
       <CardHeader className='flex flex-col gap-3'>
         <div className="flex items-center justify-between">
-          <CardTitle>{t("table.pending_services_management.title")}</CardTitle>
+          <CardTitle className="text-start" dir={lang === "en" ? "ltr" : "rtl"}>{t("table.pending_services_management.title")}</CardTitle>
         </div>
         <Select value={sortOption} onValueChange={(value) => setSortOption(value as SortOption)}>
           <SelectTrigger>
