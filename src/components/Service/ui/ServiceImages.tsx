@@ -1,15 +1,21 @@
 import { Carousel, type CarouselApi, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import { VideoPlayer } from '@/components/VideoPlayer';
 import { useServiceImages } from '@/hooks/useServices';
 import React, { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     serviceId: string
 }
 const ServiceImages = ({ serviceId }: Props) => {
+    const { t } = useTranslation('services');
+    const lang = localStorage.getItem('language') || 'en';
     const images = useServiceImages(serviceId);
     const [api, setApi] = useState<CarouselApi>(null);
     const [current, setCurrent] = useState(0);
     const [count, setCount] = useState(0);
+
+    console.log('ServiceImages component rendered with serviceId:', images);
 
     useEffect(() => {
         if (!api) {
@@ -25,7 +31,7 @@ const ServiceImages = ({ serviceId }: Props) => {
     }, [api]);
 
     return (
-        <div dir='ltr'>
+        <div>
             {images.length > 0 ? (
                 <>
                     <Carousel className='w-3/4 mx-auto py-3' setApi={setApi}>
@@ -34,7 +40,16 @@ const ServiceImages = ({ serviceId }: Props) => {
                                 <CarouselItem
                                     key={image.id}
                                     className='basis-full shrink-0 flex items-center justify-center'>
-                                    <img className='border rounded-md object-contain max-h-70' src={image.image_url} alt={image.image_name} />
+                                    {image.type === "image" ? (
+                                        <img className='border rounded-md object-contain max-h-70' src={image.url} alt={image.name} key={image.id} />
+                                    ) : (
+                                        <VideoPlayer 
+                                        id={image.id}
+                                        url={image.url}
+                                        thumbnail={image.thumbnail_url}
+                                        key={image.id}
+                                        />
+                                    )}
                                 </CarouselItem>
                             ))}
                         </CarouselContent>
@@ -42,12 +57,14 @@ const ServiceImages = ({ serviceId }: Props) => {
                         <CarouselPrevious className='bg-primary' />
                     </Carousel>
                     <div className="text-muted-foreground py-2 text-center text-xs">
-                        صورة {current} من {count}
+                        {t('service.images_count', { current, count })}
                     </div>
                 </>
             ) : (
-                <div className='flex items-center justify-end'>
-                    <p className='text-muted-foreground text-sm bg-muted py-1 px-2 rounded-full opacity-60'>لا يوجد صور ملحقة لهذه الخدمة</p>
+                <div className='flex items-center justify-end' dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+                    <p className='text-muted-foreground text-sm bg-muted py-1 px-2 rounded-full opacity-60'>
+                        {t('service.no_images')}
+                    </p>
                 </div>
             )}
         </div>

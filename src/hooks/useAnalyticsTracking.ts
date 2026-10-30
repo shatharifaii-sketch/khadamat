@@ -2,6 +2,9 @@
 import { useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { Database } from '@/integrations/supabase/types';
+
+export type Json = Database["public"]["Tables"]["user_activity"]["Insert"]["details"];
 
 export const useAnalyticsTracking = () => {
   const { user } = useAuth();
@@ -72,7 +75,7 @@ export const useAnalyticsTracking = () => {
       details 
     }: { 
       activityType: 'login' | 'logout'; 
-      details?: Record<string, any>;
+      details?: Json;
     }) => {
       if (!user) return;
       

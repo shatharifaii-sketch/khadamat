@@ -1,5 +1,6 @@
 
 import FormField from '@/components/ui/form-field';
+import { useTranslation } from 'react-i18next';
 
 interface ServicePricingProps {
   price: string;
@@ -14,11 +15,12 @@ const ServicePricing = ({
   onPriceBlur,
   priceError
 }: ServicePricingProps) => {
+  const { t } = useTranslation("services");
   return (
     <FormField
-      label="نطاق الأسعار"
+      label={t("post_service.price")}
       id="price"
-      placeholder="مثال: 200-500 شيكل"
+      placeholder={t("post_service.price_placeholder")}
       value={price}
       onChange={onPriceChange}
       onBlur={onPriceBlur}
