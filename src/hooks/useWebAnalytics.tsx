@@ -91,50 +91,50 @@ function getVisitsPerDay(data: AnalyticsRow[]) {
         .sort((a, b) => a.date.localeCompare(b.date));
 }
 
+function countUnique(rows: AnalyticsRow[], bucketOf: (r: AnalyticsRow) => string) {
+  const buckets = new Map<string, Set<string>>();
+  for (const r of rows) {
+    if (!r.session_id) continue;
+    const key = bucketOf(r);
+    if (!buckets.has(key)) buckets.set(key, new Set());
+    buckets.get(key)!.add(r.session_id);
+  }
+  return [...buckets.entries()].map(([bucket, set]) => ({ bucket, session_count: set.size })).sort((a, b) => a.bucket.localeCompare(b.bucket));
+}
+
+const iso = (r: AnalyticsRow) => new Date(r.created_at).toISOString();
+
+function dailyCutoff(): Date {
+  const d = new Date();
+  d.setUTCHours(0, 0, 0, 0);
+  d.setUTCMonth(d.getUTCMonth() - 3);
+  return d;
+}
+
+function monthlyCutoff(): Date {
+  const d = new Date();
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() - 11, 1));
+}
+
+function yearlyCutoff(): Date {
+  return new Date(Date.UTC(new Date().getUTCFullYear() - 2, 0, 1));
+}
+
+function since(data: AnalyticsRow[], cutoff: Date) {
+  const t = cutoff.getTime();
+  return data.filter((r) => new Date(r.created_at).getTime() >= t);
+}
+
 function getDailyStats(data: AnalyticsRow[]) {
-    const map: Record<string, number> = {};
-
-    for (const r of data) {
-        const day = new Date(r.created_at).toISOString().split("T")[0];
-        map[day] = (map[day] || 0) + 1;
-    }
-
-    return Object.entries(map)
-        .map(([day, user_count]) => ({
-            day,
-            user_count
-        }));
+  return countUnique(since(data, dailyCutoff()), (r) => iso(r).slice(0, 10)).map(({ bucket, session_count }) => ({ day: bucket, user_count: session_count }))
 }
 
 function getMonthlyStats(data: AnalyticsRow[]) {
-    const map: Record<string, number> = {};
-
-    for (const r of data) {
-        const d = new Date(r.created_at);
-        const key = `${d.getFullYear()}-${d.getMonth() + 1}`;
-        map[key] = (map[key] || 0) + 1;
-    }
-
-    return Object.entries(map)
-        .map(([month, user_count]) => ({
-            month: `${month}-01`,
-            user_count
-        }))
+  return countUnique(since(data, monthlyCutoff()), (r) => iso(r).slice(0, 7)).map(({ bucket, session_count }) => ({ month: `${bucket}-01`, user_count: session_count }));
 }
 
 function getYearlyStats(data: AnalyticsRow[]) {
-    const map: Record<string, number> = {};
-
-    for (const r of data) {
-        const year = new Date(r.created_at).getFullYear().toString();
-        map[year] = (map[year] || 0) + 1;
-    }
-
-    return Object.entries(map)
-        .map(([year, user_count]) => ({
-            year: `${year}-01-01`,
-            user_count
-        }));
+  return countUnique(since(data, yearlyCutoff()), (r) => iso(r).slice(0, 7)).map(({ bucket, session_count }) => ({ month: `${bucket}-01`, user_count: session_count }))
 }
 
 function getDeviceStats(data: AnalyticsRow[]) {
@@ -156,6 +156,30 @@ function getDeviceStats(data: AnalyticsRow[]) {
     }
 }
 
+const COLUMNS = "created_at, session_id, normalized_path, is_mobile";
+
+async function fetchPageViewSince(cutoff: Date): Promise<AnalyticsRow[]> {
+  const pageSize = 1000;
+  const rows: AnalyticsRow[] = [];
+
+  for (let from = 0; ; from += pageSize) {
+    const { data, error } = await supabase.from("analytics_page_views")
+    .select(COLUMNS)
+    .gte("created_at", cutoff.toISOString())
+    .order("created_at", { ascending: true })
+    .order("id", { ascending: true })
+    .range(from, from + pageSize - 1)
+
+    if (error) throw error;
+    rows.push(...(data as AnalyticsRow[]));
+    if (data.length < pageSize) break;
+  }
+
+  console.log(rows)
+
+  return rows
+}
+
 /* -----------------------------
    Hook
 ------------------------------ */
@@ -170,15 +194,9 @@ export const useWebAnalytics = () => {
      FETCH ANALYTICS
   ------------------------------ */
   const { data: analyticsData = [], refetch: refetchAnalytics } = useQuery({
-    queryKey: ["analytics"],
-    queryFn: async () => {
-        const { data, error } = await supabase
-            .from("analytics_page_views")
-            .select("*");
-        
-        if (error) throw error;
-        return data as AnalyticsRow[];
-    }
+    queryKey: ["analytics", "last-3-months"],
+    queryFn: () => fetchPageViewSince(yearlyCutoff()),
+    staleTime: 5 * 60 * 1000
   })
 
   /* -----------------------------
@@ -248,14 +266,15 @@ export const useWebAnalytics = () => {
   ------------------------------ */
   const derived = useMemo(() => {
     const data = analyticsData ?? [];
+    const recent = since(data, dailyCutoff());
 
     return {
-        topPaths: getTopPaths(data),
+        topPaths: getTopPaths(recent),
         visitsPerDay: getVisitsPerDay(data),
         dailyStats: getDailyStats(data),
         monthlyStats: getMonthlyStats(data),
         yearlyStats: getYearlyStats(data),
-        deviceStats: getDeviceStats(data)
+        deviceStats: getDeviceStats(recent)
     };
   }, [analyticsData]);
 

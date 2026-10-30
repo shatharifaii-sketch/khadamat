@@ -139,12 +139,12 @@ export const UserManagement = ({ count }: UserManagementProps) => {
     <Card>
       <CardHeader className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="text-start" dir={lang === "en" ? "ltr" : "rtl"}>
             {t("table.user_management.title")}
           </CardTitle>
           <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
             <DialogTrigger asChild>
-              <Button className="flex items-center gap-2">
+              <Button className="flex items-center gap-2 text-xs md:text-md">
                 <UserPlus className="h-4 w-4" />
                 {t("table.user_management.create_user")}
               </Button>

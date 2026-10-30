@@ -166,7 +166,7 @@ const AdminView = ({
 
       {/* Main Admin Tabs */}
       <Tabs defaultValue="analytics" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-5 grid-rows-3 sm:grid-rows-2 min-h-32 sm:min-h-24 md:min-h-5 items-center justify-center md:py-5">
           <TabsTrigger value="analytics" className="flex items-center gap-2 cursor-pointer">
             <BarChart3 className="h-4 w-4" />
             {t("table.header.analytics")}

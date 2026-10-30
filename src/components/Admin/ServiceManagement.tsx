@@ -63,10 +63,10 @@ export const ServiceManagement = ({ count }: ServiceManagementProps) => {
     <Card>
       <CardHeader className='flex flex-col gap-3'>
         <div className="flex items-center justify-between">
-          <CardTitle>{t("table.service_management.title")}</CardTitle>
+          <CardTitle className="text-start" dir={lang === "en" ? "ltr" : "rtl"}>{t("table.service_management.title")}</CardTitle>
           <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
             <DialogTrigger asChild>
-              <Button className="flex items-center gap-2">
+              <Button className="flex items-center gap-2 text-xs md:text-md">
                 <Plus className="h-4 w-4" />
                 {t("table.service_management.create_service")}
               </Button>
