@@ -112,17 +112,17 @@ const ChatMessageInput = ({
         </div>
       )}
       <form
-        className="flex md:flex-row flex-col w-full gap-1 md:gap-4"
+        className="grid grid-cols-1 md:grid-cols-3 w-full gap-1"
         dir="ltr"
         onSubmit={handleSendMessage}
       >
-        <div className="flex-1 mb-1">
+        <div className="flex-1 mb-1 col-span-2">
           <Input
             type="text"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder={t("message_placeholder")}
-            className="w-full"
+            className="w-full col-span-2"
           />
         </div>
         <div className="flex flex-col gap-3 pb-2">
@@ -138,7 +138,7 @@ const ChatMessageInput = ({
               <Button
                 type="button"
                 onClick={handleOpenFilePicker}
-                variant={previewURL ? "ghost" : "outline-solid"}
+                variant={previewURL ? "ghost" : "outline"}
                 disabled={!!previewURL}
                 className="w-full"
               >
@@ -167,9 +167,8 @@ const ChatMessageInput = ({
               </Dialog>
             </div>
           </div>
-
-          <p className="text-muted-foreground text-sm">{t("deal_suggestion")}</p>
         </div>
+        <p className="text-muted-foreground text-sm col-span-3">{t("deal_suggestion")}</p>
       </form>
     </div>
   );

@@ -2734,6 +2734,7 @@ export type Database = {
           updated_at: string
         }[]
       }
+      get_services_used: { Args: { user_id: string }; Returns: number }
       get_subscription_data_with_stripe: {
         Args: { tier_id: string }
         Returns: Json

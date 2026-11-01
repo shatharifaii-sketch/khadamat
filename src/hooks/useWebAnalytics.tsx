@@ -175,8 +175,6 @@ async function fetchPageViewSince(cutoff: Date): Promise<AnalyticsRow[]> {
     if (data.length < pageSize) break;
   }
 
-  console.log(rows)
-
   return rows
 }
 

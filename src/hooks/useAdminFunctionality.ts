@@ -796,7 +796,7 @@ export const useAdminFunctionality = () => {
   });
 
   const deleteService = useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async ({id, provider_id}: {id: string, provider_id: string}) => {
       if (!admin) {
         throw new Error("Only admins can delete users");
       }
@@ -804,6 +804,20 @@ export const useAdminFunctionality = () => {
       const { error } = await supabase.from("services").delete().eq("id", id);
 
       if (error) throw error;
+
+      const { data: servicesUsedData, error: servicesUsedError } = await supabase
+        .rpc("get_services_used", { user_id: provider_id })
+        .single();
+      
+      if (servicesUsedError) throw servicesUsedError;
+
+      const curresntUsed = servicesUsedData ?? 0;
+
+      const { error: subError } = await supabase.from("subscriptions").update({
+        services_used: Math.max(curresntUsed - 1, 0)
+      }).eq("user_id", provider_id);
+
+      if (subError) throw subError;
 
       return;
     },

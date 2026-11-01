@@ -298,12 +298,15 @@ export const useChatDeals = ({
                     )
                 `,
         )
+        .eq("conversation_id", conversationId)
         .order("created_at", { ascending: false });
 
       if (error) {
         console.error("Error fetching deals!", error);
         throw error;
       }
+
+      console.log("deals", data);
 
       return data as ChatDeal[];
     },

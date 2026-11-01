@@ -383,11 +383,13 @@ notes
 
       const canPost = currentServiceCount < (subscription.services_allowed + (userExtraProducts?.extra_products_count || 0));
 
+      console.log("can post service: ", canPost, "currentServiceCount: ", currentServiceCount, "allowed: ", subscription.services_allowed, "extra products: ", userExtraProducts?.extra_products_count || 0)
+
       return {
         user: true,
         subscription: true,
         canPost,
-        allServicesPending: pendingServices.length === userServices.length
+        allServicesPending: pendingServices.length > 0 && pendingServices.length === userServices.length
       };
     }
   })
