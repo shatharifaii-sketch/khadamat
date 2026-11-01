@@ -9,11 +9,12 @@ import CouponInput from './CouponInput';
 import { Subscription, useSubscription } from '@/hooks/useSubscription';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
+import { CouponValidation } from '@/hooks/useCoupon';
 
 interface PaymentFormProps {
   paymentMethod: string;
   onPaymentMethodChange: (method: string) => void;
-  paymentData: any;
+  paymentData: PaymentFormProps;
   onInputChange: (field: string, value: string) => void;
   onSubmit: (e: React.FormEvent) => void;
   finalAmount: number;
@@ -21,7 +22,7 @@ interface PaymentFormProps {
   onBack: () => void;
   couponCode: string;
   setCouponCode: (code: string) => void;
-  appliedCoupon: any;
+  appliedCoupon: CouponValidation;
   isValidating: boolean;
   validateCoupon: (code: string, userId: string) => Promise<void>;
   removeCoupon: () => void;

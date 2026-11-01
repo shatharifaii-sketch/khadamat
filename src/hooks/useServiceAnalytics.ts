@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useTranslation } from 'react-i18next';
 
 export interface ServiceAnalyticsData {
   totalViews: number;
@@ -10,6 +11,16 @@ export interface ServiceAnalyticsData {
     created_at: string;
     user_id?: string;
   }>;
+}
+
+type AnalyticsType = {
+    service_id: string;
+    action_type: string;
+    created_at: string;
+    service: {
+        title: string;
+        category: string;
+    };
 }
 
 export const useServiceAnalytics = (serviceId: string) => {
@@ -53,6 +64,8 @@ export const useServiceAnalytics = (serviceId: string) => {
 };
 
 export const useUserServiceAnalytics = (userId: string) => {
+  const { t } = useTranslation('responses');
+
   return useQuery({
     queryKey: ['user-service-analytics', userId],
     queryFn: async () => {
@@ -70,12 +83,12 @@ export const useUserServiceAnalytics = (userId: string) => {
       if (error) throw error;
       
       // Group by service
-      const serviceStats = (data || []).reduce((acc: any, item: any) => {
+      const serviceStats = (data || []).reduce((acc: unknown, item: AnalyticsType) => {
         const serviceId = item.service_id;
         if (!acc[serviceId]) {
           acc[serviceId] = {
             serviceId,
-            title: item.service?.title || 'خدمة محذوفة',
+            title: item.service?.title || t("unknown_service") || 'خدمة محذوفة',
             category: item.service?.category || '',
             views: 0,
             contacts: 0,

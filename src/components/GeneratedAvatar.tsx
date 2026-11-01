@@ -13,7 +13,7 @@ interface GeneratedAvatarProps {
 export const GeneratedAvatar = ({
     seed, className, variant
 }: GeneratedAvatarProps) => {
-    let avatar: any;
+    let avatar;
 
     if (variant === "botttsNeutral") {
         avatar = createAvatar(botttsNeutral, {

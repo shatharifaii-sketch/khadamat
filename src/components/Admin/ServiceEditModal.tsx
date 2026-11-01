@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Loader2, Save, X } from 'lucide-react';
+import { categories } from '../FindService/ServiceCategories';
 
 interface Service {
   id: string;
@@ -101,7 +102,7 @@ export const ServiceEditModal = ({ service, isOpen, onClose, onServiceUpdated }:
       toast.success('تم تحديث الخدمة بنجاح');
       onServiceUpdated();
       onClose();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error updating service:', error);
       toast.error('حدث خطأ في تحديث الخدمة');
     } finally {
@@ -151,9 +152,9 @@ export const ServiceEditModal = ({ service, isOpen, onClose, onServiceUpdated }:
                   <SelectValue placeholder="اختر الفئة" />
                 </SelectTrigger>
                 <SelectContent>
-                  {SERVICE_CATEGORIES.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category}
+                  {categories.map((category) => (
+                    <SelectItem key={category.value} value={category.value}>
+                      {category.label}
                     </SelectItem>
                   ))}
                 </SelectContent>

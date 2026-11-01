@@ -12,7 +12,7 @@ interface PaymentMethod {
   id: string;
   name: string;
   description: string;
-  icon: any;
+  icon: unknown;
   available: boolean;
 }
 

@@ -1,22 +1,40 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { MapPin, Phone, Mail, Eye, Star, MessageCircle, Heart } from 'lucide-react';
-import ContactOptions from '@/components/Chat/ui/ContactOptions';
-import { useServiceViews } from '@/hooks/useServiceViews';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  MapPin,
+  Phone,
+  Mail,
+  Eye,
+  Star,
+  MessageCircle,
+  Heart,
+} from "lucide-react";
+import ContactOptions from "@/components/Chat/ui/ContactOptions";
+import { useServiceViews } from "@/hooks/useServiceViews";
 
-import { categories } from '@/components/FindService/ServiceCategories';
-import type { PublicService } from '@/hooks/usePublicServices';
-import { truncateString } from '@/lib/utils';
-import { NavLink, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { categories } from "@/components/FindService/ServiceCategories";
+import type { PublicService } from "@/hooks/usePublicServices";
+import { truncateString } from "@/lib/utils";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useTranslation } from "react-i18next";
+import ReviewsComponent from "../Service/ui/ReviewsComponent";
 
 interface EnhancedServiceCardProps {
   service: PublicService;
 }
 
 const EnhancedServiceCard = ({ service }: EnhancedServiceCardProps) => {
+  const { t } = useTranslation("services");
+  const lang = localStorage.getItem("language") || "en";
   const { incrementView } = useServiceViews();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -24,7 +42,9 @@ const EnhancedServiceCard = ({ service }: EnhancedServiceCardProps) => {
   const [isConvo, setIsConvo] = useState<boolean>(false);
   const [convoId, setConvoId] = useState<string>(null);
 
-  const categoryLabel = categories.find(cat => cat.value === service.category)?.label || service.category;
+  const categoryLabel =
+    categories.find((cat) => cat.value === service.category)?.label ||
+    service.category;
 
   const handleViewService = () => {
     incrementView(service.id);
@@ -32,27 +52,31 @@ const EnhancedServiceCard = ({ service }: EnhancedServiceCardProps) => {
   };
 
   return (
-    <Card className="group flex flex-col justify-between hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 border-0 shadow-md hover:scale-105">
-      <CardHeader className="pb-3">
+    <Card className="group flex flex-col justify-between hover:shadow-xl hover:shadow-primary/50 transition-all duration-300 border-0 shadow-md hover:scale-105 min-w-72">
+      <CardHeader className="pb-1 md:pb-3">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 text-right">
-            <div className="flex items-center gap-2 justify-end mb-2">
+            <div className="flex items-center gap-2 justify-end md:mb-2">
               <Badge variant="secondary" className="text-xs font-medium">
-                {categoryLabel}
+                {t(categoryLabel)}
               </Badge>
             </div>
-            <CardTitle className="text-lg leading-tight group-hover:text-primary transition-colors line-clamp-2">
-              <Button 
-              variant='link'
-              onClick={handleViewService}
-              className='text-lg hover:no-underline px-0 text-wrap text-start'>
-                {service.title}
-              </Button>
-              <NavLink 
-              to={`/profile/${service.publisher?.id}`} className='text-sm text-muted-foreground flex items-center gap-2 hover:text-primary transition-colors mt-2'
+            <CardTitle className="min-w-0 text-lg leading-tight">
+              <Button
+                variant="link"
+                onClick={handleViewService}
+                className="block h-auto w-full min-w-0 whitespace-normal wrap-break-word p-0 text-start text-lg hover:no-underline"
               >
-              {service.publisher?.full_name}
-              
+                {truncateString(service.title, 50)}
+              </Button>
+
+              <NavLink
+                to={`/profile/${service.publisher?.id}`}
+                className="mt-2 flex min-w-0 items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+              >
+                <span className="min-w-0 wrap-break-word">
+                  {truncateString(service.publisher?.full_name, 30)}
+                </span>
               </NavLink>
             </CardTitle>
           </div>
@@ -68,33 +92,44 @@ const EnhancedServiceCard = ({ service }: EnhancedServiceCardProps) => {
         {/* Price and Location */}
         <div className="space-y-2">
           <div className="flex items-center gap-2 justify-end">
-            <span className="font-semibold text-primary">{service.price_range}</span>
-            <Badge variant="outline" className="text-xs">السعر</Badge>
+            <span className="font-semibold text-primary">
+              {service.price_range}
+            </span>
+            <Badge variant="outline" className="text-xs">
+              {t("find_service.card.price")}
+            </Badge>
           </div>
           <div className="flex items-center gap-2 justify-end text-sm text-muted-foreground">
-            <span>{service.location}</span>
+            <span>{t(service.location)}</span>
             <MapPin className="h-4 w-4" />
           </div>
         </div>
 
         {/* Stats */}
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <div
+          dir={lang == "ar" ? "rtl" : "ltr"}
+          className="flex items-center justify-between text-xs text-muted-foreground"
+        >
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1">
               <span>{service.views}</span>
-              <Eye className="h-3 w-3" />
+              <Eye className="size-4" />
             </div>
+            <ReviewsComponent
+              review_count={service.review_count}
+              avg_rating={service.average_rating}
+            />
           </div>
         </div>
 
         {/* Action Buttons */}
         <div className="flex gap-2 pt-2">
           <ContactOptions
-            className='flex-1'
+            className="flex-1"
             serviceId={service.id}
             providerId={service.user_id}
             serviceName={service.title}
-            providerName={service.publisher?.full_name || 'مقدم الخدمة'}
+            providerName={service.publisher?.full_name || "مقدم الخدمة"}
             email={service.email}
             phone={service.phone}
             isConvo={isConvo}

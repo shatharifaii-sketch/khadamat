@@ -7,7 +7,7 @@ const LoadingReviews = () => {
     return (
         <div className='flex w-full gap-4 mx-auto items-center justify-start overflow-x-auto'>
             {[1, 2].map((item, index) => (
-                <Card className='w-96 p-4'>
+                <Card className='w-96 p-4' key={index}>
                     <CardHeader className='flex justify-between items-center flex-row'>
                         <div className='flex  items-center gap-2'>
                             <Skeleton key={index} className='size-9 rounded-full' />

@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useServiceReviews } from '@/hooks/UseServiceReviews'
 import { StarIcon } from 'lucide-react';
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     serviceId: string;
@@ -13,6 +14,9 @@ interface Props {
 }
 
 const CreateReviewForm = ({ serviceId, closeForm }: Props) => {
+    const { t } = useTranslation("services");
+    const lang = localStorage.getItem("language") || "en";
+
     const { createReview, createReviewLoading } = useServiceReviews(serviceId);
     const [formData, setFormData] = useState({
         review_body: '',
@@ -32,14 +36,16 @@ const CreateReviewForm = ({ serviceId, closeForm }: Props) => {
     return (
         <>
             <DialogTitle className='text-center text-xl'>
-                انشر تقييمك للخدمة
+                {t("service.reviews.dialog.create_dialog_title")}
             </DialogTitle>
             <Separator />
             <DialogDescription className='mt-4 flex flex-col gap-6'>
                     <div className='flex w-1/2 gap-5 items-center justify-between'>
-                        <Label htmlFor="review_body" className='text-black'>التقييم</Label>
+                        <Label htmlFor="review_body" className='text-black'>
+                            {t("service.reviews.dialog.rating_label")}
+                        </Label>
                         <div className='flex items-center gap-2'>
-                            <div className='flex items-center'>
+                            <div className='flex items-center gap-2'>
                                 {[...Array(5)].map((_, index) => (
                                 <StarIcon
                                     key={index}
@@ -47,6 +53,7 @@ const CreateReviewForm = ({ serviceId, closeForm }: Props) => {
                                     fill={index < formData.rating ? '#fbbf24' : 'none'}
                                     stroke={index < formData.rating ? '#fbbf24' : '#d1d5db'}
                                     onClick={() => setFormData({ ...formData, rating: index + 1 })}
+                                    className='size-7'
                                 />
                             ))}
                             </div>
@@ -54,7 +61,9 @@ const CreateReviewForm = ({ serviceId, closeForm }: Props) => {
                         </div>
                     </div>
                     <div className='flex flex-col gap-3'>
-                        <Label htmlFor="review_body" className='text-black'>نص التقييم</Label>
+                        <Label htmlFor="review_body" className='text-black'>
+                            {t("service.reviews.dialog.create_dialog_review")}
+                        </Label>
                         <Textarea
                             id="review_body"
                             value={formData.review_body}
@@ -65,7 +74,7 @@ const CreateReviewForm = ({ serviceId, closeForm }: Props) => {
             </DialogDescription>
             <DialogFooter>
                 <Button disabled={createReviewLoading} onClick={handleSubmit} className='flex-1'>
-                    أضف التقييم
+                    {t("service.reviews.dialog.create_dialog_submit")}
                 </Button>
             </DialogFooter>
         </>
