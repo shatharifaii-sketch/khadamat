@@ -23,8 +23,9 @@ import {
   CreateDealSchemaType,
   currencyOpt,
 } from "@/types/deal";
+import { normalizeDecimalInput } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
@@ -56,7 +57,8 @@ const ChatDealCreateForm = ({ onSuccess }: Props) => {
 
   const userId = user?.id;
   
-  const role = userId == client_id ? "client" : "provider"
+  const role = userId == client_id ? "client" : "provider";
+  const [priceText, setPriceText] = useState("");
 
   const form = useForm<CreateDealSchemaType>({
     resolver: zodResolver(createDealSchema),
@@ -65,7 +67,6 @@ const ChatDealCreateForm = ({ onSuccess }: Props) => {
       client_id: client_id,
       conversation_id: conversationId,
       service_id: service_id ?? null,
-      price: 0,
       currency: "ILS",
     },
   });
@@ -110,15 +111,20 @@ const ChatDealCreateForm = ({ onSuccess }: Props) => {
                 <Input
                   {...field}
                   id={field.name}
+                  name={field.name}
+                  ref={field.ref}
                   aria-invalid={fieldState.invalid}
-                  type="number"
-                  value={field.value ?? ""}
+                  type="text"
+                  inputMode="decimal"
+                  autoComplete="off"
+                  dir="ltr"
+                  value={priceText}
                   onChange={(e) => {
-                    const { value } = e.target;
-                    field.onChange(value === "" ? undefined : Number(value));
+                    const text = normalizeDecimalInput(e.target.value);
+                    setPriceText(text);
+                    field.onChange(text === "" || text === "." ? undefined : Number(text));
                   }}
                   onBlur={field.onBlur}
-                  ref={field.ref}
                 />
 
                 {fieldState.invalid && (

@@ -26,6 +26,7 @@
     "view_message": "View Message",
     "new_message_from": "New message from {{name}}",
     "deal_suggestion": "It is recommended to agree on a deal through the website's deals system to make sure both parties are safe.",
+    "convos_unknown_conversation": "User not found",
     "create_deal": "Create Deal",
     "create_deal_form": {
         "title": "Create a new Deal",

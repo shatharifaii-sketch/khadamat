@@ -26,6 +26,7 @@
     "view_message": "عرض الرسالة",
     "new_message_from": "رسالة جديدة من {{name}}",
     "deal_suggestion": "ينصح بالإتفاق على عرض من خلال ميزة العرض على الموقع للحرص على حق الطرفين",
+    "convos_unknown_conversation": "المستخدم غير موجود",
     "create_deal": "انشاء عرض",
     "create_deal_form": {
         "title": "انشاء عرض جديد",

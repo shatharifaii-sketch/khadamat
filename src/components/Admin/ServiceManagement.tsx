@@ -45,9 +45,9 @@ export const ServiceManagement = ({ count }: ServiceManagementProps) => {
 
   const { deleteService } = useAdminFunctionality();
 
-  const handleDeleteService = async (serviceId: string) => {
+  const handleDeleteService = async (serviceId: string, provider_id: string) => {
     try {
-      deleteService.mutate(serviceId);
+      deleteService.mutate({ id: serviceId, provider_id });
 
       toast(t("table.service_management.toasts.deleted_title"), {
         description: t("table.service_management.toasts.deleted_description"),
@@ -158,7 +158,7 @@ export const ServiceManagement = ({ count }: ServiceManagementProps) => {
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel>{t("table.service_management.delete_dialog.cancel")}</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => handleDeleteService(service.id)} className="bg-destructive text-destructive-foreground">
+                          <AlertDialogAction onClick={() => handleDeleteService(service.id, service.user_id)} className="bg-destructive text-destructive-foreground">
                             {t("table.service_management.delete_dialog.confirm")}
                           </AlertDialogAction>
                         </AlertDialogFooter>
