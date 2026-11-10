@@ -12,6 +12,7 @@ import { TimeFormat } from "@/types/reservations";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import AddToCalendar from "./AddToCalendar";
 
 interface Props {
   reservation: Reservation;
@@ -44,6 +45,8 @@ const ReservationEvent = ({
   onSuccess
 }: Props) => {
   const { t } = useTranslation("reservations");
+  const lang = localStorage.getItem("language") || "en";
+  
   const [timeFormat, setTimeFormat] = useState<TimeFormat>("12h");
   const [accepting, setAccepting] = useState(false);
   const [rejecting, setRejecting] = useState(false);
@@ -164,14 +167,9 @@ const ReservationEvent = ({
             </p>
             <p>
               {t("event.date")}: {reservation.date}
-            </p>
-            <p>
-              {t("event.start_time")}:{" "}
-              {formatTime(reservation.start_time, timeFormat)}
-            </p>
-            <p>
-              {t("event.end_time")}:{" "}
-              {formatTime(reservation.end_time, timeFormat)}
+              <span dir="ltr" className="text-start mx-3">
+                {" "} {formatTime(reservation.start_time, timeFormat)} {" - "} {formatTime(reservation.end_time, timeFormat)}
+              </span>
             </p>
           </div>
 
@@ -191,6 +189,7 @@ const ReservationEvent = ({
                 {t("event.reject")}
               </Button>
             </div>
+            <AddToCalendar reservation={reservation} />
           </div>
         </div>
       </div>

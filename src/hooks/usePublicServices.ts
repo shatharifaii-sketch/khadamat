@@ -183,8 +183,6 @@ export const useServiceData = (id: string, userId: string) => {
 
       if (isSavedError) throw isSavedError;
 
-      console.log("isSaved data:", isSaved);
-
       return !!isSaved;
     }
   })

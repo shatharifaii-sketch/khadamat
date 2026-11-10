@@ -101,5 +101,9 @@
         "title": "تفاصيل اليوم",
         "description": "تفقد المواعيد المسجلة"
     },
-    "reservation_accepted": "تم قبول الموعد"
+    "reservation_accepted": "تم قبول الموعد",
+    "add_to_google_calendar": "أضف إلى Google",
+    "add_to_calendar_file": "تحميل الموعد كملف",
+    "add_to_calendar": "جدول مواعيد خاص",
+    "calendar_options": "خيارات الجدول"
 }

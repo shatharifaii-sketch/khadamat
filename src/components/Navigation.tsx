@@ -60,18 +60,23 @@ const Navigation = () => {
     children,
     className = "",
     onClick,
+    disabled
   }: {
     to: string;
     children: React.ReactNode;
     className?: string;
     onClick?: () => void;
+    disabled?: boolean
   }) => (
     <Link
       to={to}
       className={`text-sm font-medium transition-colors hover:text-primary ${
         isActive(to) ? "text-primary" : "text-muted-foreground"
       } ${className}`}
-      onClick={onClick}
+      onClick={disabled ? 
+          (e) => e.preventDefault()
+        : onClick}
+      tabIndex={disabled ? -1 : undefined}
     >
       {children}
     </Link>
@@ -183,7 +188,9 @@ const Navigation = () => {
                 {t("find_service")}
               </div>
             </NavLink>
-            <NavLink to="/post-service">
+            <NavLink to="/post-service" disabled={
+              !!location.pathname.startsWith("/post-service")
+            }>
               <div className="flex items-center gap-2">
                 <PlusCircle size={16} />
                 {t("add_service")}

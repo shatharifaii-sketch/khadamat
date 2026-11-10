@@ -7,15 +7,33 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import { Reservation, ReservationList, useReservationsContext } from "@/contexts/ReservationsContext";
+import {
+  ReservationList,
+  useReservationsContext,
+} from "@/contexts/ReservationsContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn, formatTime } from "@/lib/utils";
 import { TimeFormat } from "@/types/reservations";
 import { formatDate } from "@fullcalendar/react";
-import { Check, Clock, LayoutDashboard, Loader, LoaderCircle, X } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  Clock,
+  LayoutDashboard,
+  LoaderCircle,
+  X,
+} from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import AddToCalendar from "./AddToCalendar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Props {
   reservation: ReservationList;
@@ -27,55 +45,95 @@ const ReservationCard = ({ reservation }: Props) => {
   const [requestingCancel, setRequestingCancel] = useState(false);
 
   const isMobile = useIsMobile();
-  const { requestCancelReservation, cancelReservation, refresh } = useReservationsContext();
+  const { requestCancelReservation, cancelReservation, refresh } =
+    useReservationsContext();
 
+  const [expanded, setExpanded] = useState<boolean>(false);
   const [timeFormat, setTimeFormat] = useState<TimeFormat>("12h");
 
   const handleRequestCancel = async () => {
     if (!reservation) return;
     setRequestingCancel(true);
-    
-    const { success, error } = reservation.status == "accepted" ? await requestCancelReservation({
-      reservationId: reservation.id,
-      serviceId: reservation.service_id,
-      clientId: reservation.client_id
-    }) : await cancelReservation({
-      reservationId: reservation.id,
-      serviceId: reservation.service_id,
-      clientId: reservation.client_id
-    })
+
+    const { success, error } =
+      reservation.status == "accepted"
+        ? await requestCancelReservation({
+            reservationId: reservation.id,
+            serviceId: reservation.service_id,
+            clientId: reservation.client_id,
+          })
+        : await cancelReservation({
+            reservationId: reservation.id,
+            serviceId: reservation.service_id,
+            clientId: reservation.client_id,
+          });
     setRequestingCancel(false);
     await refresh();
-  }
+  };
 
   return (
-    <Card className={cn("shadow-sm", isMobile ? "h-33.25 mb-1" : "h-30.75")}>
+    <Card
+      className={cn(
+        "shadow-sm",
+        isMobile
+          ? "h-33.25 mb-1"
+          : reservation.status == "accepted"
+            ? "h-34"
+            : "h-30.75",
+      )}
+    >
       <CardContent className="px-0 pb-2">
         <CardHeader className="px-3 pt-2 pb-1">
           <CardTitle className="text-md flex gap-1 justify-start items-center">
             <Badge
-            variant={
-              reservation ? (reservation.status == "pending" ? "outline" : reservation.status == "accepted" ? "default" : "destructive") : "outline"
-            }
-            className={cn(
-              "size-6 p-0 flex items-center justify-center", reservation ? reservation.status == "accepted" && "bg-green-600" : "*:bg-gray-200"
-            )}>
-              {reservation ? reservation.status == "pending" ? <Clock size={16} /> : reservation.status == "accepted" ? <Check size={16} /> : <X size={16} /> : <LayoutDashboard size={16} />}
+              variant={
+                reservation
+                  ? reservation.status == "pending"
+                    ? "outline"
+                    : reservation.status == "accepted"
+                      ? "default"
+                      : "destructive"
+                  : "outline"
+              }
+              className={cn(
+                "size-6 p-0 flex items-center justify-center",
+                reservation
+                  ? reservation.status == "accepted" && "bg-green-600"
+                  : "*:bg-gray-200",
+              )}
+            >
+              {reservation ? (
+                reservation.status == "pending" ? (
+                  <Clock size={16} />
+                ) : reservation.status == "accepted" ? (
+                  <Check size={16} />
+                ) : (
+                  <X size={16} />
+                )
+              ) : (
+                <LayoutDashboard size={16} />
+              )}
             </Badge>
 
-            {reservation ? formatDate(reservation.date, {
-              month: "long",
-              year: "numeric",
-              day: "numeric",
-              weekday: "long",
-              locale: lang,
-            }) : "--.--.--"}
+            {reservation
+              ? formatDate(reservation.date, {
+                  month: "long",
+                  year: "numeric",
+                  day: "numeric",
+                  weekday: "long",
+                  locale: lang,
+                })
+              : "--.--.--"}
           </CardTitle>
           <CardDescription className="flex flex-row items-center justify-between">
             <p className="text-nowrap w-fit flex gap-1" dir="ltr">
-              {reservation ? formatTime(reservation.start_time, timeFormat) : "--:--"} 
+              {reservation
+                ? formatTime(reservation.start_time, timeFormat)
+                : "--:--"}
               <span>-</span>
-              {reservation ? formatTime(reservation.end_time, timeFormat) : "--:--"}
+              {reservation
+                ? formatTime(reservation.end_time, timeFormat)
+                : "--:--"}
             </p>
 
             {/* <div
@@ -95,15 +153,47 @@ const ReservationCard = ({ reservation }: Props) => {
         </CardHeader>
 
         <div className="mx-1">
-          <Button 
-          variant="outline" 
-          disabled={reservation?.status == "declined" || reservation?.status == "cancelled" || requestingCancel || reservation?.status == "cancel_requested"} 
-          className="w-full"
-          onClick={handleRequestCancel}
+          <Button
+            variant="outline"
+            disabled={
+              reservation?.status == "declined" ||
+              reservation?.status == "cancelled" ||
+              requestingCancel ||
+              reservation?.status == "cancel_requested"
+            }
+            className="w-full"
+            onClick={handleRequestCancel}
           >
-            {requestingCancel && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
-                {t(reservation?.status == "pending" ? "service.cancel" : "service.request_cancel")}
+            {requestingCancel && (
+              <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+            )}
+            {t(
+              reservation?.status == "pending"
+                ? "service.cancel"
+                : "service.request_cancel",
+            )}
           </Button>
+          {reservation.status == "accepted" && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <span
+                  className="text-muted-foreground text-sm p-1 flex items-center justify-center gap-1 cursor-pointer"
+                  dir="ltr"
+                >
+                  {t("add_to_calendar")}
+                  <ChevronDown size={16} />
+                </span>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-fit" align="start">
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel className="text-muted-foreground">{t("calendar_options")}</DropdownMenuLabel>
+                  <div className="">
+                    <AddToCalendar reservation={reservation} display="card" />
+                  </div>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       </CardContent>
     </Card>

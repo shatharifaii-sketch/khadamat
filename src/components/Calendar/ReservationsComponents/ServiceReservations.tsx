@@ -69,7 +69,7 @@ const ServiceReservations = ({
     <div
       className={cn(
         "border-2 rounded-md border-dashed mt-5 px-2 py-2",
-        isMobile ? "h-fit" : "h-36",
+        isMobile ? "h-fit" : latestReservation?.status == "accepted" ? "h-40" : "h-36",
       )}
       dir={lang == "ar" ? "rtl" : "ltr"}
     >

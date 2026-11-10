@@ -101,5 +101,9 @@
         "title": "Day info",
         "description": "View created appointments"
     },
-    "reservation_accepted": "Reservation Accepted"
+    "reservation_accepted": "Reservation Accepted",
+    "add_to_google_calendar": "Google Calendar",
+    "add_to_calendar_file": "Download as file",
+    "add_to_calendar": "Add to Calendar",
+    "calendar_options": "Calendar options"
 }
