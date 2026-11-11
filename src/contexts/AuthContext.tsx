@@ -2,8 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { User, Session, FunctionsHttpError } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import AppLoading from "@/components/AppLoading";
-import { toast } from "sonner";
-import { AuthResult, CODE_ALIASES, FIELD_FOR_CODE, FieldErrors } from "@/types/auth";
+import { AuthResult, CODE_ALIASES, FIELD_FOR_CODE, FieldErrors, mapAuthError } from "@/types/auth";
 
 interface AuthContextType {
   user: User | null;
@@ -15,17 +14,14 @@ interface AuthContextType {
     fullName: string,
     passwordConfirm: string,
     phone: { countryCode: string; number: string } | null,
-    method: string,
-  ) => Promise<{
-    error: unknown;
-    data: { user: User; session: Session } | { user: null; session: null };
-  }>;
+    method?: string,
+  ) => Promise<AuthResult>;
   signIn: (
     email: string | null,
     password: string,
     phone: { countryCode: string; number: string } | null,
     method: string,
-  ) => Promise<{ error: unknown, data: string | unknown }>;
+  ) => Promise<AuthResult>;
   signOut: () => Promise<void>;
   verifyOtp: (
     email: string,
@@ -36,7 +32,7 @@ interface AuthContextType {
     phone: { countryCode: string; number: string },
     token: string,
     password: string,
-    fullName: string
+    fullName?: string
   ) => Promise<{ error?: unknown; data?: User }>;
   tryPhoneSignIn: () => Promise<void>;
 }
@@ -52,8 +48,8 @@ function toFieldErrors(code: string): FieldErrors {
 
 function extractCode(err: unknown): string | undefined {
   if (typeof err == "string") return err;
-  if (err && typeof err == "object" && "code" in err && typeof (err as any).code == "string") {
-    return (err as any).code;
+  if (err && typeof err == "object" && "code" in err && typeof err.code == "string") {
+    return err.code;
   }
   return undefined;
 }
@@ -178,6 +174,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     method: string = "email",
   ) => {
     if (method == "phone") {
+      if (!phone) return { data: null, error: { phoneError: "required_fields_error" } };
+
       const { data, error } = await supabase.auth.signInWithPassword({
         phone: `${phone.countryCode}${phone.number}`,
         password
@@ -193,34 +191,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // );
 
       if (error) {
-        console.error("Sign in error:", error);
-        return error;
+        return { data: null, error: mapAuthError(error) };
       }
 
-      return data;
+      return { data, error: null };
     }
-    console.log("Attempting sign in for:", email);
-    const { data: checkData, error: checkError } = await supabase.functions.invoke("sign-user-in", {
-      body: {
-        email,
-        password
-      }
+    const check = await invokeFunction<{message?: string}>("sign-user-in", {
+      email,
+      password
     })
-
-    if (checkError) {
-      console.error("Sign in error:", checkError);
-      return {
-        data: null,
-        error: "network_error"
-      }
-    }
-    
-    if (checkData.message && checkData.message == "otp_sent") {
-      return {
-        data: "otp_sent",
-        error: null
-      }
-    }
+    if (check.error) return { data: null, error: check.error }
+    if (check.data?.message === "otp_sent") return { data: "otp_sent", error: null}
 
     const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -228,7 +209,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
 
     if (error) {
-      console.error("Sign in error:", error)
+      return { data: null, error: mapAuthError(error) }
     } else {
       console.log("Sign in successful", userId);
       const { error } = await supabase.from("user_activity").insert({
@@ -246,7 +227,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     return { 
       data, 
-      error 
+      error: null
     };
   };
 

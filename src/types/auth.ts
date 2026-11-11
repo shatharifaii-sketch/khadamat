@@ -1,3 +1,4 @@
+import { AuthError } from "@supabase/supabase-js";
 import { FieldError } from "react-hook-form";
 
 export type FieldErrors = {
@@ -48,4 +49,14 @@ export const CODE_ALIASES: Record<string, string> = {
     password_too_long: "password_too_long",
     password_breached: "password_breached",
     lookup_failed: "lookup_failed"
+}
+
+export function mapAuthError(error: AuthError): FieldErrors {
+  switch (error.code) {
+    case "invalid_credentials":      return { formError: "invalid_credentials" };
+    case "email_not_confirmed":      return { formError: "email_not_confirmed" };
+    case "phone_not_confirmed":      return { formError: "phone_not_confirmed" };
+    case "over_request_rate_limit":  return { formError: "too_many_requests" };
+    default:                         return { formError: "server_error" };
+  }
 }

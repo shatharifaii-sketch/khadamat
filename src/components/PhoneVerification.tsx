@@ -142,7 +142,7 @@ const PhoneVerification = ({ phone, password }: Props) => {
       setLoading(true);
       setAttempts((prev) => prev + 1);
 
-      await verifyPhoneOtp(phone, otp, password);
+      await verifyPhoneOtp(phone, otp, password, );
 
       navigate("/", {
         replace: true,

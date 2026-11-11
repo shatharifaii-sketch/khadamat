@@ -41,7 +41,7 @@ export const ServiceManagement = ({ count }: ServiceManagementProps) => {
   const { servicesList: services, hasNextPage, nextCursor, servicesCount } = useServices({ servicesCursor: cursor, sort: sortOption });
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [editingService, setEditingService] = useState<Service | null>(null);
+  const [editingService, setEditingService] = useState(null);
 
   const { deleteService } = useAdminFunctionality();
 

@@ -76,7 +76,7 @@ const ReservationCard = ({ reservation }: Props) => {
       className={cn(
         "shadow-sm",
         isMobile
-          ? "h-33.25 mb-1"
+          ? reservation.status == "accepted" ? "h-38 mb-1" : "h-33.25 mb-1"
           : reservation.status == "accepted"
             ? "h-34"
             : "h-30.75",

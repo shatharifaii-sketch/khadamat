@@ -2,6 +2,7 @@ import { User } from "@/components/Admin/ui/UserForm";
 import { locations } from "@/components/FindService/ServiceCategories";
 import { ServiceLink } from "@/components/PostService/ServiceLinks";
 import { Service } from "@/hooks/useAdminFunctionality";
+import { Json } from "@/integrations/supabase/types";
 import { isValid } from "date-fns";
 
 export interface ValidationResult {

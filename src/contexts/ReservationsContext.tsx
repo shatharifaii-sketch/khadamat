@@ -58,7 +58,7 @@ export interface ReservationList {
   client_seen: boolean | null;
   start_time: string;
   end_time: string;
-  service: {
+  service?: {
     title: string;
     is_online: boolean;
     location: string;

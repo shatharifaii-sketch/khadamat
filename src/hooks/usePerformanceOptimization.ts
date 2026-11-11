@@ -21,13 +21,14 @@ export const usePerformanceOptimization = () => {
   useEffect(() => {
     const measurePerformance = () => {
       // Memory usage (if available)
-      if ('memory' in performance) {
-        const {memory} = performance;
-        setMetrics(prev => ({
-          ...prev,
-          memoryUsage: memory.usedJSHeapSize / 1024 / 1024 // MB
-        }));
-      }
+      
+      // if ('memory' in performance) {
+      //   const {memory} = performance;
+      //   setMetrics(prev => ({
+      //     ...prev,
+      //     memoryUsage: memory.usedJSHeapSize / 1024 / 1024 // MB
+      //   }));
+      // }
 
       // Measure page load time
       const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;

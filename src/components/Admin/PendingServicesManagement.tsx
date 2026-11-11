@@ -32,14 +32,17 @@ const PendingServicesManagement = ({ count }: Props) => {
 
   const { pendingServicesList: services, hasNextPage, nextCursor, pendServicesCount } = usePendingServices({ pendingServicesCursor: cursor, sort: sortOption }) 
 
-  const [serviceToAccept, setServiceToAccept] = useState<Service | null>(null);
+  const [serviceToAccept, setServiceToAccept] = useState(null);
   
 
   const { deleteService } = useAdminFunctionality();
 
-  const handleDeleteService = async (serviceId: string) => {
+  const handleDeleteService = async (serviceId: string, provdierId: string) => {
     try {
-      deleteService.mutate(serviceId);
+      deleteService.mutate({
+        id: serviceId,
+        provider_id: provdierId
+      });
 
       toast(t("table.pending_services_management.toasts.deleted_title"), {
         description: t("table.pending_services_management.toasts.deleted_description"),
@@ -135,7 +138,7 @@ const PendingServicesManagement = ({ count }: Props) => {
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel>{t("table.pending_services_management.dialogs.cancel")}</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => handleDeleteService(service.id)} className="bg-destructive text-destructive-foreground">
+                          <AlertDialogAction onClick={() => handleDeleteService(service.id, service.user_id)} className="bg-destructive text-destructive-foreground">
                             {t("table.pending_services_management.dialogs.confirm_delete")}
                           </AlertDialogAction>
                         </AlertDialogFooter>

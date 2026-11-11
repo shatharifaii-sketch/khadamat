@@ -134,7 +134,7 @@ function getMonthlyStats(data: AnalyticsRow[]) {
 }
 
 function getYearlyStats(data: AnalyticsRow[]) {
-  return countUnique(since(data, yearlyCutoff()), (r) => iso(r).slice(0, 7)).map(({ bucket, session_count }) => ({ month: `${bucket}-01`, user_count: session_count }))
+  return countUnique(since(data, yearlyCutoff()), (r) => iso(r).slice(0, 7)).map(({ bucket, session_count }) => ({ year: `${bucket}-01`, user_count: session_count }))
 }
 
 function getDeviceStats(data: AnalyticsRow[]) {
