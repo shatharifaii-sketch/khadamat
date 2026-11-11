@@ -9,6 +9,7 @@ import { PAGE_SIZE, Service } from "./useAdminFunctionality";
 import { ServiceLink } from "@/components/PostService/ServiceLinks";
 import { Reservation, ReservationList } from "@/contexts/ReservationsContext";
 import { getReservationAvailability } from "@/lib/utils";
+import { Json } from "@/integrations/supabase/types";
 
 export interface PublicService {
   id: string;
@@ -24,7 +25,7 @@ export interface PublicService {
   created_at: string;
   user_id: string;
   is_online?: boolean;
-  links: [];
+  links: [] | ServiceLink[] | Json[];
   whatsapp_number?: string;
   updated_at: string;
   publisher: {
@@ -130,7 +131,7 @@ export const usePublicServices = ({
         : null;
 
       return {
-        services: services.slice(0, PAGE_SIZE),
+        services: services.slice(0, PAGE_SIZE) as PublicService[],
         hasNextPage,
         nextCursor,
         count: count ?? 0,
@@ -182,8 +183,6 @@ export const useServiceData = (id: string, userId: string) => {
         .maybeSingle();
 
       if (isSavedError) throw isSavedError;
-
-      console.log("isSaved data:", isSaved);
 
       return !!isSaved;
     }

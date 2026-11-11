@@ -10,6 +10,7 @@ import {
   validateWhatsappNumber
 } from '@/utils/formValidation';
 import { ServiceFormData } from '@/types/service';
+import { ServiceLink } from '@/components/PostService/ServiceLinks';
 
 export const useServiceFormValidation = () => {
   const { validateField, setFieldTouched, hasErrors, getFieldError } = useFormValidation();
@@ -31,7 +32,7 @@ export const useServiceFormValidation = () => {
         validateField(field, validatePhone(formData.phone));
         break;
       case 'links':
-        validateField(field, validateLinks(formData.links,));
+        validateField(field, validateLinks(formData.links as ServiceLink[]));
         break;
       case 'whatsapp_number':
         validateField(field, validateWhatsappNumber(formData.whatsapp_number));
@@ -57,7 +58,7 @@ export const useServiceFormValidation = () => {
       { field: 'title', validation: validateTitle(formData.title) },
       { field: 'category', validation: validateRequired(formData.category, 'فئة الخدمة') },
       { field: 'description', validation: validateDescription(formData.description) },
-      { field: 'links', validation: validateLinks(formData.links) },
+      { field: 'links', validation: validateLinks(formData.links as ServiceLink[]) },
       { field: 'whatsapp_number', validation: validateWhatsappNumber(formData.whatsapp_number) },
       { field: 'price', validation: validateRequired(formData.price, 'نطاق الأسعار') },
       { field: 'location', validation: validateLocation(formData.location, 'المنطقة') },

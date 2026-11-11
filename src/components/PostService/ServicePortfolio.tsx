@@ -94,7 +94,7 @@ const ServicePortfolio = ({ onMediaChange }: ServicePortfolioProps) => {
               </div>
               <button
                 type="button"
-                onClick={() => removeImage(item.id)}
+                onClick={() => removeImage(item.id, item.type)}
                 className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
               >
                 <X size={16} />

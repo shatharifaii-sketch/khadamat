@@ -36,6 +36,8 @@ export interface Reservation {
   service: {
     id: string;
     title: string;
+    location: string;
+    is_online: boolean;
   } | null;
   status: string | null;
   provider_seen: boolean | null;
@@ -56,6 +58,11 @@ export interface ReservationList {
   client_seen: boolean | null;
   start_time: string;
   end_time: string;
+  service?: {
+    title: string;
+    is_online: boolean;
+    location: string;
+  }
 }
 
 interface ProviderAvailability {
@@ -165,8 +172,6 @@ export const ReservationsProvider = ({
     if (!user) return;
     setLoading(true);
 
-    console.log("LOADING>>>>")
-
     const { data, error } = await supabase
       .from("calendar_reservations")
       .select(
@@ -183,7 +188,9 @@ export const ReservationsProvider = ({
         ),
         service:services!calendar_reservations_service_id_fkey(
         id,
-        title
+        title,
+        is_online,
+        location
         )
             `,
       )
@@ -195,6 +202,8 @@ export const ReservationsProvider = ({
       console.error("Error fetching reservations:", error);
       throw error;
     }
+
+    console.log(data)
 
     setReservations(data as Reservation[]);
     setLoading(false);

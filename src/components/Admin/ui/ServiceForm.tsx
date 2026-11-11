@@ -240,7 +240,7 @@ const ServiceForm = ({ isEdit, service, closeForm }: Props) => {
                 </div>
                 <ServiceImages
                     onMediaChange={handleMediaChange}
-                    serviceMedia={service ? service.service_media : []} />
+                    serviceMedia={service ? service.service_media : [] as MediaItem[]} />
             </div>
 
             <Button

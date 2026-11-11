@@ -115,7 +115,10 @@ export const toMinutes = (time: string) => {
   return hours * 60 + minutes;
 };
 
-export function getReservationAvailability(reservations: ReservationList[]) {
+
+export function getReservationAvailability(
+  reservations: ReservationList[],
+) {
   const pendingReservation = reservations.find(
     (res) => res.status === "pending",
   );
@@ -128,29 +131,26 @@ export function getReservationAvailability(reservations: ReservationList[]) {
     };
   }
 
-  const acceptedReservations = reservations
-    .filter((res) => res.status === "accepted" && res.date)
-    .sort((a, b) => {
-      const dateA = new Date(`${a.date}T${a.start_time}`);
-      const dateB = new Date(`${b.date}T${b.start_time}`);
+  const now = new Date();
 
-      return dateB.getTime() - dateA.getTime();
-    });
+  const activeReservation = reservations.find((res) => {
+    if (res.status !== "accepted" || !res.date) {
+      return false;
+    }
 
-  const latestAcceptedReservation = acceptedReservations[0];
-
-  if (latestAcceptedReservation) {
     const reservationEnd = new Date(
-      `${latestAcceptedReservation.date}T${latestAcceptedReservation.end_time}`,
+      `${res.date}T${res.end_time}`,
     );
 
-    if (reservationEnd > new Date()) {
-      return {
-        canReserve: false,
-        reason: "active_reservation",
-        reservation: latestAcceptedReservation,
-      };
-    }
+    return reservationEnd > now;
+  });
+
+  if (activeReservation) {
+    return {
+      canReserve: false,
+      reason: "active_reservation",
+      reservation: activeReservation,
+    };
   }
 
   return {
@@ -159,6 +159,7 @@ export function getReservationAvailability(reservations: ReservationList[]) {
     reservation: null,
   };
 }
+
 
 export function formatTime(time: string, timeFormat: string) {
   if (!time) return "";

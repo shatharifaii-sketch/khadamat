@@ -218,7 +218,7 @@ const SubscriptionCard = ({
 
         <ul className="space-y-2 text-sm text-muted-foreground">
           {lang === "ar" &&
-            (selectedSubscription.notes ?? []).map(
+            (selectedSubscription.notes as [] ?? []).map(
               (note: string) => (
                 <li
                   className="flex gap-2 text-start"
@@ -231,7 +231,7 @@ const SubscriptionCard = ({
             )}
 
           {lang === "en" &&
-            (selectedSubscription.notes_english ?? []).map(
+            (selectedSubscription.notes_english as [] ?? []).map(
               (note: string) => (
                 <li
                   className="flex gap-2 text-start"

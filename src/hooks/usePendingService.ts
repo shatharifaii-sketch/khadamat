@@ -1,5 +1,6 @@
 
 import { ServiceLink } from '@/components/PostService/ServiceLinks';
+import { Json } from '@/integrations/supabase/types';
 import { useState, useEffect } from 'react';
 
 export interface PendingServiceData {
@@ -12,7 +13,7 @@ export interface PendingServiceData {
   email: string;
   experience: string;
   is_online: boolean;
-  links: [] | ServiceLink[];
+  links: [] | ServiceLink[] | Json[];
   whatsapp_number?: {
     countryCode: string;
     number: string;

@@ -1,5 +1,6 @@
 import { ServiceLink } from "@/components/PostService/ServiceLinks";
 import { ProviderAvailability } from "./reservations";
+import { Json } from "@/integrations/supabase/types";
 
 export interface Service {
   id: string;
@@ -29,7 +30,7 @@ export interface ServiceFormData {
   experience: string;
   user_id?: string;
   is_online: boolean;
-  links: [];
+  links: [] | ServiceLink[] | Json[];
   whatsapp_number?: {
     countryCode: string;
     number: string;

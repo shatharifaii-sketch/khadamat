@@ -24,7 +24,7 @@ interface Props {
   isSubmitting?: boolean;
   isDirty?: boolean;
 
-  onClose: () => void
+  onClose?: () => void
 }
 
 const weekDays = [

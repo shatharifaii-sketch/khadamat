@@ -16,6 +16,7 @@ import { useTranslation } from "react-i18next";
 import { useMemo, useState } from "react";
 import { errorMessages } from "@/types/analytics";
 import { validateAdminUserForm } from "@/utils/formValidation";
+import { PublicService } from "./usePublicServices";
 
 interface UserProfile {
   id: string;
@@ -59,8 +60,9 @@ export interface Service {
     id: string;
     name: string;
     url: string;
-    thumbnail_url: string;
-    type: "image" | "video" | string;
+    thumbnail?: string;
+    thumbnail_url?: string;
+    type?: "image" | "video";
   }[];
   with_appointments: boolean;
 }

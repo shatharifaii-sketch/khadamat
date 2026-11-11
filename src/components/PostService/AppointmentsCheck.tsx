@@ -31,7 +31,7 @@ const AppointmentsCheck = ({
       dir={lang == "ar" ? "rtl" : "ltr"}
     >
       <Button
-        variant={(check || availability.length > 0) ? "default" : "outline"}
+        variant={(check || availability?.length > 0) ? "default" : "outline"}
         type="button"
         className="flex flex-1 items-center justify-between overflow-hidden"
         onClick={() => setOpen(true)}

@@ -14,7 +14,7 @@ import {
 } from "@/hooks/usePendingService";
 import ServiceImages, { MediaItem } from "../Service/ui/EditServiceImages";
 import { Service } from "@/hooks/useAdminFunctionality";
-import ServiceLinks from "./ServiceLinks";
+import ServiceLinks, { ServiceLink } from "./ServiceLinks";
 import WhatsappNumberInput from "./WhatsappNumberInput";
 import AppointmentsCheck from "./AppointmentsCheck";
 
@@ -121,7 +121,7 @@ const ServiceForm = ({ serviceToEdit }: ServiceFormProps) => {
           />
 
           <ServiceLinks
-            socialLinks={formData.links}
+            socialLinks={formData.links as ServiceLink[]}
             onChange={(value) => handleInputChange("links", value)}
           />
 

@@ -8,6 +8,7 @@ import { Service } from './useAdminFunctionality';
 import { formatWhatsappNumber } from '@/utils/formValidation';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
+import { ServiceLink } from '@/components/PostService/ServiceLinks';
 
 export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
   const navigate = useNavigate();
@@ -18,10 +19,7 @@ export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
   
   const isEditMode = !!serviceToEdit;
 
-  const handleSubmit = async (formData: ServiceFormData) => {
-
-    console.log('Submitting form data:', formData);
-    
+  const handleSubmit = async (formData: ServiceFormData) => {    
     // If we're editing, update the service
     if (isEditMode && serviceToEdit) {
       try {
@@ -36,7 +34,7 @@ export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
           email: formData.email,
           experience: formData.experience,
           is_online: formData.is_online,
-          links: formData.links,
+          links: formData.links as [],
           whatsapp_number: formatWhatsappNumber({
             countryCode: formData.whatsapp_number.countryCode,
             number: formData.whatsapp_number.number
@@ -83,7 +81,7 @@ export const useServiceFormSubmission = (serviceToEdit?: Service | null) => {
         email: formData.email,
         experience: formData.experience,
         is_online: formData.is_online,
-        links: formData.links,
+        links: formData.links as [],
         whatsapp_number: formatWhatsappNumber({
           countryCode: formData.whatsapp_number.countryCode,
           number: formData.whatsapp_number.number

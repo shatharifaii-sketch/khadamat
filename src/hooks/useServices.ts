@@ -10,6 +10,7 @@ import { ServiceFormData } from '@/types/service';
 import { ServiceLink } from '@/components/PostService/ServiceLinks';
 import { useTranslation } from 'react-i18next';
 import { AvailabilityType } from '@/contexts/ReservationsContext';
+import { Json } from '@/integrations/supabase/types';
 
 export interface Service {
   id?: string;
@@ -317,7 +318,8 @@ export const useServices = () => {
           experience: serviceData.experience,
           updated_at: new Date().toISOString(),
           status: 'pending-approval',
-          with_appointments: serviceData.with_appointments
+          with_appointments: serviceData.with_appointments,
+          links: serviceData.links
         })
         .eq('id', serviceData.id)
         .eq('user_id', user.id) // Ensure user can only update their own services
