@@ -21,13 +21,14 @@ export const usePerformanceOptimization = () => {
   useEffect(() => {
     const measurePerformance = () => {
       // Memory usage (if available)
-      if ('memory' in performance) {
-        const memory = (performance as any).memory;
-        setMetrics(prev => ({
-          ...prev,
-          memoryUsage: memory.usedJSHeapSize / 1024 / 1024 // MB
-        }));
-      }
+      
+      // if ('memory' in performance) {
+      //   const {memory} = performance;
+      //   setMetrics(prev => ({
+      //     ...prev,
+      //     memoryUsage: memory.usedJSHeapSize / 1024 / 1024 // MB
+      //   }));
+      // }
 
       // Measure page load time
       const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
@@ -69,11 +70,11 @@ export const usePerformanceOptimization = () => {
   }, [queryClient]);
 
   // Debounced search optimization
-  const debounce = useCallback((func: Function, delay: number) => {
-    let timeoutId: NodeJS.Timeout;
-    return (...args: any[]) => {
+  const debounce = useCallback((func: () => void, delay: number) => {
+    let timeoutId: ReturnType<typeof setTimeout>;
+    return (...args: Parameters<typeof func>) => {
       clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => func.apply(null, args), delay);
+      timeoutId = setTimeout(() => func(...args), delay);
     };
   }, []);
 
@@ -99,8 +100,7 @@ export const usePerformanceOptimization = () => {
   // Bundle size optimization
   const dynamicImport = useCallback(async (modulePath: string) => {
     try {
-      const module = await import(modulePath);
-      return module;
+      return await import(modulePath);
     } catch (error) {
       console.error('Failed to load module:', modulePath, error);
       return null;

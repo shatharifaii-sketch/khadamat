@@ -1,3 +1,7 @@
+import { ServiceLink } from "@/components/PostService/ServiceLinks";
+import { ProviderAvailability } from "./reservations";
+import { Json } from "@/integrations/supabase/types";
+
 export interface Service {
   id: string;
   title: string;
@@ -25,9 +29,19 @@ export interface ServiceFormData {
   email: string;
   experience: string;
   user_id?: string;
-  images: {
+  is_online: boolean;
+  links: [] | ServiceLink[] | Json[];
+  whatsapp_number?: {
+    countryCode: string;
+    number: string;
+  };
+  media: {
     id: string;
-    image_name: string;
-    image_url: string;
+    name: string;
+    url: string;
+    thumbnail?: string;
+    type?: string;
   }[];
+  with_appointments: boolean;
+  availability?: ProviderAvailability[];
 }

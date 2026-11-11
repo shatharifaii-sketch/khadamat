@@ -53,7 +53,8 @@ const paymentLogic = useEnhancedPaymentLogic();
           />
 
           {/* Payment Form */}
-          <PaymentForm
+          
+          {/* <PaymentForm
             paymentMethod={paymentMethod}
             onPaymentMethodChange={setPaymentMethod}
             paymentData={paymentData}
@@ -71,7 +72,7 @@ const paymentLogic = useEnhancedPaymentLogic();
             subscription={subscription}
             subscriptionTierId={subscriptionToGet.id}
             billingCycle={subscriptionTier}
-          />
+          /> */}
         </div>
       </div>
   );

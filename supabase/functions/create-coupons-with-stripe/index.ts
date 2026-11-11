@@ -6,7 +6,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 import Stripe from "npm:stripe";
 
-const stripe = new Stripe(Deno.env.get("STRIPE_TEST_SEC_KEY")!);
+const stripe = new Stripe(Deno.env.get("VITE_STRIPE_LIVE_SEC_KEY")!);
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
 
     const percent = formData.discount_percentage ? Number(formData.discount_percentage) : null;
 
-    const amount = formData.discount_amount ? Number(formData.discount_amount) : null;
+    const amount = formData.discount_amount ? Number(formData.discount_amount) * 100 : null;
 
     if (!percent && !amount) {
       throw new Error('Discount percentage or amount is required.');

@@ -23,11 +23,6 @@ export const usePaymentLogic = () => {
   const servicesNeeded = 1;
   const baseAmount = subscriptionTier === 'yearly' ? 100 : 10;
 
-  if (!user) {
-    navigate('/auth');
-    return null;
-  }
-
   const getToken = useMutation({
     mutationKey: ['get-payment-url'],
     mutationFn: async () => {

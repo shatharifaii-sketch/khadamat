@@ -8,10 +8,10 @@ import React, { useEffect, useRef, useState } from 'react'
 
 /**TODO: Add reply to message */
 interface Props {
-  //setReplyToMessage: React.Dispatch<React.SetStateAction<Message | null>>
+  setReplyToMessage: React.Dispatch<React.SetStateAction<Message | null>>
 }
 
-const ChatConversationView = ({ /*setReplyToMessage*/ }: Props) => {
+const ChatConversationView = () => {
   const { messages, activeConversation, userId, deleteMessage } = useChat();
   const containerRef = useRef<HTMLDivElement>(null);
   const [messageHover, setMessageHover] = useState(false);
