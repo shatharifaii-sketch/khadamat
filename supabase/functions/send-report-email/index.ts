@@ -66,7 +66,7 @@ Deno.serve(async (req) => {
 
     const { data, error } = await resend.emails.send({
       from: "Khedemtak <support@mail.khedemtak.com>",
-      to: "support@khedemtak.com",
+      to: Deno.env.get("APP_SUPPORT_EMAIL"),
       template: {
         id: "report",
         variables: {

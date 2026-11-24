@@ -51,4 +51,16 @@ export const subscriptions = [
         badgeClassName: 'bg-primary text-secondary px-4 py-1 hover:bg-primary',
         className: 'bg-secondary text-secondary-foreground'
     }
-]
+];
+
+export const countries = [
+  { code: "970", label: "PS +970" },
+  { code: "972", label: "IS +972" },
+  { code: "966", label: "SA +966" },
+  { code: "20", label: "EG +20" },
+  { code: "971", label: "AE +971" },
+  { code: "963", label: "SY +963" },
+  { code: "962", label: "JO +962" },
+  { code: "31", label: "NL +31" },
+  { code: "1", label: "US +1" },
+];

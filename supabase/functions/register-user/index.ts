@@ -3,72 +3,21 @@
 // This enables autocomplete, go to definition, etc.
 
 // Setup type definitions for built-in Supabase Runtime APIs
-import "jsr:@supabase/functions-js/edge-runtime.d.ts"
-import { Resend } from "npm:resend@latest";
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
+import { validatePassword } from "../_shared/password.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY")!);
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
-
-async function sendWelcomeEmail(email: string, name: string, link: string, otp: string,) {
-  const { data, error } = await resend.emails.send({
-    from: "welcome <support@mail.khedemtak.com>",
-    to: email,
-    template: {
-      id: "welcome",
-      variables: {
-        name,
-        action_url: link,
-        otp
-      }
-    }
-  });
-
-  if (error) {
-    console.error("Error sending email: ", error);
-    return {
-      success: false,
-      error
-    };
-  }
-
-  return {
-    success: true,
-    data
-  }
-}
-
-async function generateEmailLinks(email: string, password: string) {
-  const { data, error } = await supabase.auth.admin.generateLink({
-    type: 'signup',
-    email,
-    password
-  });
-
-  if (error) {
-    console.error("Error generating link: ", error);
-    return {
-      success: false,
-      error
-    };
-  }
-
-  return {
-    success: true,
-    link: data.properties.action_link,
-    otp: data.properties.email_otp
-  }
-}
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -89,19 +38,136 @@ Deno.serve(async (req: Request) => {
     const { email, name, password, passwordConfirm } = await req.json();
 
     if (password !== passwordConfirm) {
+      console.error("Passwords do not match");
       return new Response(
         JSON.stringify({
           success: false,
           error: "Passwords do not match",
         }),
         {
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+    }
+
+    const pwError = validatePassword(password);
+
+    if (pwError) {
+      console.error("Error validating error");
+      return new Response(
+        JSON.stringify({ success: false, error: pwError }),
+        {
           status: 400,
           headers: {
             ...corsHeaders,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
+    }
+
+    // if (await isPwned(password)) {
+    //   return Response.json({
+    //     success: false,
+    //     error: "password_breached",
+    //   });
+    // }
+
+    const { data: checkData, error: checkError } =
+      await supabase.functions.invoke("check-if-user-exists", {
+        body: {
+          email: email,
+          method: "email",
+        },
+      });
+
+    if (checkError) {
+      console.error("Error checking user data: ", checkError);
+
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "network_error",
+        }),
+        {
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+    }
+
+    const {
+      userExists,
+      phoneConfirmed,
+      emailConfirmed,
+      error: checkDataError,
+    } = checkData;
+
+    if (checkDataError) {
+      console.error("Error checking user data: ", checkDataError);
+
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: checkDataError,
+        }),
+        {
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+    }
+
+    if (userExists && emailConfirmed) {
+      console.error("User exists");
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "user_exists",
+        }),
+        {
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+    } else if (userExists && !emailConfirmed) {
+      const { data, error } = await supabase.functions.invoke(
+        "send-email-otp",
+        {
+          body: {
+            email,
+            password,
+            name,
+          },
+        },
+      );
+
+      if (error) {
+        console.error("Server error sending otp: ", error);
+        return Response.json({
+          success: false,
+          data: null,
+          error: "network_error",
+        });
+      }
+
+      if (!data.success) {
+        console.error("Error sending otp: ", data.error);
+        return Response.json({
+          success: false,
+          data: null,
+          error: data.error,
+        });
+      }
     }
 
     const { data, error } = await supabase.auth.admin.createUser({
@@ -109,59 +175,50 @@ Deno.serve(async (req: Request) => {
       password,
       user_metadata: {
         full_name: name,
-      }
-    })
+      },
+    });
 
     if (error) {
+      console.error("Error creating user: ", error);
       return new Response(
         JSON.stringify({
           success: false,
           error: error,
         }),
         {
-          status: 400,
           headers: {
             ...corsHeaders,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 
-    const linkResponse = await generateEmailLinks(email, password);
+    const { data: sendOtpData, error: sendOtpError } =
+      await supabase.functions.invoke("send-email-otp", {
+        body: {
+          email,
+          password,
+          name,
+        },
+      });
 
-    if (!linkResponse.success) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: linkResponse.error,
-        }),
-        {
-          status: 400,
-          headers: {
-            ...corsHeaders,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+    if (sendOtpError) {
+      console.error("Server error sending otp: ", sendOtpError);
+      return Response.json({
+        success: false,
+        data: null,
+        error: "network_error",
+      });
     }
 
-    const emailResponse = await sendWelcomeEmail(email, name, linkResponse.link, linkResponse.otp);
-
-    if (!emailResponse.success) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: emailResponse.error,
-        }),
-        {
-          status: 400,
-          headers: {
-            ...corsHeaders,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+    if (!sendOtpData.success) {
+      console.error("Error sending otp: ", sendOtpData.error);
+      return Response.json({
+        success: false,
+        data: null,
+        error: sendOtpData.error,
+      });
     }
 
     return new Response(
@@ -169,12 +226,11 @@ Deno.serve(async (req: Request) => {
         success: true,
       }),
       {
-        status: 200,
         headers: {
           ...corsHeaders,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
   } catch (error) {
     console.error("Checkout error:", error);
@@ -190,10 +246,10 @@ Deno.serve(async (req: Request) => {
           ...corsHeaders,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
   }
-})
+});
 
 /* To invoke locally:
 

@@ -30,7 +30,7 @@ const PaymentSuccessCard = () => {
   if (!showCard || !paymentSuccess) return null;
 
   return (
-    <Card className="border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 dark:border-green-800 mb-6">
+    <Card className="border-green-200 bg-linear-to-r from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 dark:border-green-800 mb-6">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-green-800 dark:text-green-200">
           <CheckCircle className="w-5 h-5" />

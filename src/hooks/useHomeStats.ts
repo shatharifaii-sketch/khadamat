@@ -17,7 +17,6 @@ export const useHomeStats = () => {
 
   // Set up real-time subscription for stats updates
   useEffect(() => {
-    console.log('Setting up real-time subscription for home stats...');
     
     const channel = supabase
       .channel('home-stats-changes')
@@ -28,9 +27,7 @@ export const useHomeStats = () => {
           schema: 'public',
           table: 'services'
         },
-        (payload) => {
-          console.log('Real-time service change detected for stats:', payload);
-          
+        () => {          
           // Invalidate and refetch the stats data
           queryClient.invalidateQueries({ queryKey: ['home-stats'] });
         }
@@ -38,7 +35,6 @@ export const useHomeStats = () => {
       .subscribe();
 
     return () => {
-      console.log('Cleaning up real-time subscription for home stats');
       supabase.removeChannel(channel);
     };
   }, [queryClient]);
@@ -50,16 +46,16 @@ export const useHomeStats = () => {
       
       // Get count of service providers by counting distinct users with published services
       const { data: serviceProviders, error: providersError } = await supabase
-        .from('services')
-        .select('user_id')
-        .eq('status', 'published');
+        .from('profiles')
+        .select('id')
+        .eq('is_service_provider', true);
 
       if (providersError) {
         console.error('Error fetching service providers count:', providersError);
       }
 
       // Count unique service providers
-      const uniqueProviders = new Set(serviceProviders?.map(s => s.user_id) || []);
+      const uniqueProviders = new Set(serviceProviders?.map(s => s.id) || []);
       const serviceProvidersCount = uniqueProviders.size;
 
       // Get count of published services
@@ -99,7 +95,6 @@ export const useHomeStats = () => {
         categoriesWithServices
       };
 
-      console.log('Home stats fetched:', stats);
       return stats;
     },
     staleTime: 60000, // 1 minute

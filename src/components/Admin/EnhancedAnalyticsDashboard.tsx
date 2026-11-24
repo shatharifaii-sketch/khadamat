@@ -15,7 +15,8 @@ import {
   Calendar,
   BarChart3,
   PieChart,
-  RefreshCw
+  RefreshCw,
+  LucideIcon
 } from 'lucide-react';
 import { useAdminAnalytics } from '@/hooks/useAdminAnalytics';
 import { formatDistanceToNow } from 'date-fns';
@@ -48,7 +49,7 @@ const EnhancedAnalyticsDashboard = () => {
     title: string;
     value: string | number;
     change?: string;
-    icon: any;
+    icon: LucideIcon;
     color?: "default" | "success" | "warning" | "danger";
     description?: string;
   }) => (

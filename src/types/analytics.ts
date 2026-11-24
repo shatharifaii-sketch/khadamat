@@ -44,3 +44,15 @@ export interface AnalyticsSummary {
   topViewedServices: Array<{ service_id: string; title: string; views: number }>;
   topCategories: Array<{ category: string; searches: number; views: number }>;
 }
+
+export const errorMessages: Record<string, string> = {
+  email_exists: "email_exists_error",
+  password_too_short: "password_too_short",
+  password_too_long: "password_too_long",
+  missing_data: "missing_data",
+  password_breached: "password_breached",
+  required_id: "id_required",
+  unauthorized: "unauthorized",
+  user_update_error: "user_update_error",
+  error_updating: "error_updating",
+};

@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -44,52 +44,6 @@ export const RealTimeTracker = () => {
   });
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
-
-  useEffect(() => {
-    loadRealTimeStats();
-    const interval = setInterval(loadRealTimeStats, 30000); // Update every 30 seconds
-
-    // Set up real-time subscriptions for live updates
-    const profilesChannel = supabase
-      .channel('profiles-live')
-      .on('postgres_changes', 
-        { event: 'INSERT', schema: 'public', table: 'profiles' },
-        (payload) => {
-          addNotification('new_user', `مستخدم جديد: ${payload.new.full_name || 'مستخدم'}`);
-          loadRealTimeStats();
-        }
-      )
-      .subscribe();
-
-    const servicesChannel = supabase
-      .channel('services-live')
-      .on('postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'services' },
-        (payload) => {
-          addNotification('new_service', `خدمة جديدة: ${payload.new.title}`);
-          loadRealTimeStats();
-        }
-      )
-      .subscribe();
-
-    const contactsChannel = supabase
-      .channel('contacts-live')
-      .on('postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'contact_submissions' },
-        (payload) => {
-          addNotification('new_contact', `نموذج تواصل جديد من: ${payload.new.name}`);
-          loadRealTimeStats();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      clearInterval(interval);
-      supabase.removeChannel(profilesChannel);
-      supabase.removeChannel(servicesChannel);
-      supabase.removeChannel(contactsChannel);
-    };
-  }, []);
 
   const loadRealTimeStats = async () => {
     try {
@@ -153,7 +107,12 @@ export const RealTimeTracker = () => {
         .eq('action_type', 'contact_click')
         .order('created_at', { ascending: false });
 
-      const clickCounts = (serviceClicks || []).reduce((acc: any, item: any) => {
+      const clickCounts = (serviceClicks || []).reduce((acc: unknown, item: {
+    service_id: string;
+    service: {
+        title: string;
+    };
+}) => {
         const title = item.service?.title || 'خدمة محذوفة';
         acc[title] = (acc[title] || 0) + 1;
         return acc;
@@ -173,7 +132,12 @@ export const RealTimeTracker = () => {
         `)
         .eq('action_type', 'view');
 
-      const viewCounts = (serviceViewsData || []).reduce((acc: any, item: any) => {
+      const viewCounts = (serviceViewsData || []).reduce((acc: unknown, item: {
+    service_id: string;
+    service: {
+        title: string;
+    };
+}) => {
         const title = item.service?.title || 'خدمة محذوفة';
         acc[title] = (acc[title] || 0) + 1;
         return acc;
@@ -221,7 +185,7 @@ export const RealTimeTracker = () => {
     }
   };
 
-  const addNotification = (type: Notification['type'], message: string) => {
+  const addNotification = useCallback((type: Notification['type'], message: string) => {
     const newNotification: Notification = {
       id: Date.now().toString(),
       type,
@@ -237,7 +201,53 @@ export const RealTimeTracker = () => {
       title: "إشعار جديد",
       description: message,
     });
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    loadRealTimeStats();
+    const interval = setInterval(loadRealTimeStats, 30000); // Update every 30 seconds
+
+    // Set up real-time subscriptions for live updates
+    const profilesChannel = supabase
+      .channel('profiles-live')
+      .on('postgres_changes', 
+        { event: 'INSERT', schema: 'public', table: 'profiles' },
+        (payload) => {
+          addNotification('new_user', `مستخدم جديد: ${payload.new.full_name || 'مستخدم'}`);
+          loadRealTimeStats();
+        }
+      )
+      .subscribe();
+
+    const servicesChannel = supabase
+      .channel('services-live')
+      .on('postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'services' },
+        (payload) => {
+          addNotification('new_service', `خدمة جديدة: ${payload.new.title}`);
+          loadRealTimeStats();
+        }
+      )
+      .subscribe();
+
+    const contactsChannel = supabase
+      .channel('contacts-live')
+      .on('postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'contact_submissions' },
+        (payload) => {
+          addNotification('new_contact', `نموذج تواصل جديد من: ${payload.new.name}`);
+          loadRealTimeStats();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      clearInterval(interval);
+      supabase.removeChannel(profilesChannel);
+      supabase.removeChannel(servicesChannel);
+      supabase.removeChannel(contactsChannel);
+    };
+  }, [addNotification]);
 
   const markNotificationsAsRead = () => {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));

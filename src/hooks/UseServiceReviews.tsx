@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client"
 import { Tables } from "@/integrations/supabase/types";
 import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query"
 import { useIsAdmin } from "./useAdminFunctionality";
+import { useTranslation } from "react-i18next";
 
 type Review = Tables<'service_reviews'>;
 
@@ -20,6 +21,7 @@ export interface PublicReview extends Review {
 
 export const useServiceReviews = (serviceId: string) => {
     const queryClient = useQueryClient();
+    const { t } = useTranslation("responses");
     const { user } = useAuth();
     const admin = useIsAdmin();
     const { data: userAllowed } = useQuery({
@@ -74,7 +76,7 @@ export const useServiceReviews = (serviceId: string) => {
         mutationFn: async (formData: { review_body: string, rating: number }) => {
             if (!userAllowed.allowed) {
                 console.log('User not allowed to review');
-                throw new Error('You already reviewed this Service | لقد قمت بتقييم هذه الخدمة من قبل')
+                throw new Error(t("service_reviewed_already") || 'You already reviewed this Service | لقد قمت بتقييم هذه الخدمة من قبل')
             }
 
             const { data: createdReview, error } = await supabase
@@ -95,7 +97,8 @@ export const useServiceReviews = (serviceId: string) => {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['service-reviews'] });
-            queryClient.invalidateQueries({ queryKey: ['number-of-user-reviews']})
+            queryClient.invalidateQueries({ queryKey: ['number-of-user-reviews']});
+            queryClient.invalidateQueries({ queryKey: ['service-with-convo', serviceId, user?.id]})
         }
     })
 
@@ -140,7 +143,7 @@ export const useServiceReviews = (serviceId: string) => {
 
     const deleteReview = useMutation({
         mutationFn: async (reviewId: string) => {
-            if (userAllowed.reviews?.map(r => r.id).indexOf(reviewId) === -1 || admin) {
+            if (userAllowed.reviews?.map(r => r.id).indexOf(reviewId) === -1) {
                 console.log('User not allowed to delete this review');
                 throw new Error('You are not allowed to delete this review');
             }

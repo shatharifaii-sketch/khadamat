@@ -5,9 +5,11 @@ import { useServiceFormState } from '@/hooks/useServiceFormState';
 import { useServiceFormValidation } from '@/hooks/useServiceFormValidation';
 import { useServiceFormSubmission } from '@/hooks/useServiceFormSubmission';
 import { Service } from './useAdminFunctionality';
+import { useTranslation } from 'react-i18next';
 
 export const useServiceForm = (serviceToEdit?: Service | null) => {
   const { pendingService } = usePendingService();
+  const { t } = useTranslation("responses");
   
   const {
     formData,
@@ -37,7 +39,7 @@ export const useServiceForm = (serviceToEdit?: Service | null) => {
     e.preventDefault();
     
     if (!validateAllFields(formData)) {
-      toast.error('يرجى تصحيح الأخطاء في النموذج');
+      toast.error(t("resolve_form_errors") || 'يرجى تصحيح الأخطاء في النموذج');
       return;
     }
 
