@@ -8,8 +8,10 @@ import type {
 } from '@/types/analytics';
 import { useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
+import { useIsAdmin } from './useAdminFunctionality';
 
 export const useAdminAnalytics = () => {
+  const { isAdmin, isLoading: adminLoading } = useIsAdmin();
   const location = useLocation();
 
   const queryClient = useQueryClient();
@@ -26,7 +28,8 @@ export const useAdminAnalytics = () => {
 
       if (error) throw error;
       return data || [];
-    }
+    },
+    enabled: isAdmin
   });
 
   // Get service analytics
@@ -44,7 +47,8 @@ export const useAdminAnalytics = () => {
 
       if (error) throw error;
       return (data || []) as ServiceAnalytic[];
-    }
+    },
+    enabled: isAdmin
   });
 
   // Get conversation analytics
@@ -62,7 +66,8 @@ export const useAdminAnalytics = () => {
 
       if (error) throw error;
       return data || [];
-    }
+    },
+    enabled: isAdmin
   });
 
   // Get analytics summary
@@ -188,7 +193,8 @@ export const useAdminAnalytics = () => {
         topViewedServices,
         topCategories,
       };
-    }
+    },
+    enabled: isAdmin
   });
 
   const getLoginStats = useSuspenseQuery({

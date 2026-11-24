@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,6 +44,8 @@ import {
 import UserForm from "./ui/UserForm";
 import { useTranslation } from "react-i18next";
 import PaginationComponent from "../PaginationComponent";
+import SearchComponent from "./ui/SearchComponent";
+import { useDebounce } from "@/hooks/useDebounce";
 
 export interface UserProfile {
   id: string;
@@ -72,17 +74,28 @@ export const UserManagement = ({ count }: UserManagementProps) => {
   const { t } = useTranslation("admin");
   const lang = localStorage.getItem("language") || "en";
 
-  const [sortOption, setSortOption] = useState<SortOption>("date-desc");
+  const [sortOption, setSortOption] = useState<SortOption>("date-asc");
   const [page, setPage] = useState(1);
   const [cursorHistory, setCursorHistory] = useState<(number | null)[]>([null]);
   const cursor = cursorHistory[page - 1];
+
+  const [search, setSearch] = useState<string>("");
+  const debouncedSearch = useDebounce(search, 400);
+
+  const filterKey = `${sortOption}|${debouncedSearch}`;
+  const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
+  if (prevFilterKey !== filterKey) {
+    setPrevFilterKey(filterKey);
+    setPage(1);
+    setCursorHistory([null]);
+  }
 
   const {
     usersList: users,
     nextCursor,
     hasNextPage,
     numOfUsers,
-  } = useUsers({ usersCursor: cursor, sort: sortOption });
+  } = useUsers({ usersCursor: cursor, sort: sortOption, search: debouncedSearch });
 
   const { toast } = useToast();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -159,14 +172,17 @@ export const UserManagement = ({ count }: UserManagementProps) => {
             </DialogContent>
           </Dialog>
         </div>
-        <Select
+        <div className="grid grid-cols-2 gap-4">
+          <SearchComponent page={"users"} search={search} setSearch={setSearch} />
+          <Select
           value={sortOption}
           onValueChange={(value) => setSortOption(value as SortOption)}
         >
-          <SelectTrigger>
+          <SelectTrigger disabled={true}>
             <SelectValue
               placeholder={t("table.user_management.sort_placeholder")}
             />
+            <span>under fixing</span>
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
@@ -188,6 +204,7 @@ export const UserManagement = ({ count }: UserManagementProps) => {
             </SelectGroup>
           </SelectContent>
         </Select>
+        </div>
       </CardHeader>
       <CardContent>
         <Table>

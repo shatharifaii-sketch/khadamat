@@ -9,7 +9,7 @@ export type CalendarEvent = {
     timeZone?: string;
 };
 
-const compactDate = (d: string) => d.replace("-", "");
+const compactDate = (d: string) => d.replace(/-/g, "");
 
 const compactTime = (t: string) => {
     const [h, m, s = "00"] = t.split(":");
@@ -35,7 +35,7 @@ export function googleCalendarUrl(e: CalendarEvent): string {
 
 
 /** .ics FILE */
-const escapeText = (s: string) => s.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
+const escapeText = (s: string) => s.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
 
 function fold(line: string): string {
     const enc = new TextEncoder();
@@ -65,7 +65,7 @@ export function buildIcs(e: CalendarEvent): string {
         "BEGIN:VCALENDAR",
         "VERSION:2.0",
         "PRODID:-//Khedemtak//Reservations//EN",
-        "CALSCALE:GEORGIAN",
+        "CALSCALE:GREGORIAN",
         "BEGIN:VEVENT",
         `UID:${e.id}@khedemtak.com`,
         `DTSTAMP:${dtstamp}`,

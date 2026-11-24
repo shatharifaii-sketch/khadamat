@@ -151,7 +151,6 @@ export const useRealTimeNotifications = () => {
         }
       )
       .subscribe((status) => {
-        console.log('🔔 Notifications subscription status:', status);
         setIsConnected(status === 'SUBSCRIBED');
       });
 
@@ -168,7 +167,6 @@ export const useRealTimeNotifications = () => {
     const interval = setInterval(invalidateQueries, 30000); // Every 30 seconds
 
     return () => {
-      console.log('🔌 Cleaning up notifications subscription');
       clearInterval(interval);
       supabase.removeChannel(notificationsChannel);
     };

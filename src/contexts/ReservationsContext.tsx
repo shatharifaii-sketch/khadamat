@@ -203,8 +203,6 @@ export const ReservationsProvider = ({
       throw error;
     }
 
-    console.log(data)
-
     setReservations(data as Reservation[]);
     setLoading(false);
   }, [user]);

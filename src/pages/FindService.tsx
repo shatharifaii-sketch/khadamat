@@ -12,11 +12,15 @@ import { useAnalytics } from "@/hooks/useAnalytics";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { useTranslation } from "react-i18next";
 import PaginationComponent from "@/components/PaginationComponent";
+import { useDebounce } from "@/hooks/useDebounce";
 
 const FindService = () => {
   const { t } = useTranslation("services");
   const [searchParams] = useSearchParams();
-  const [searchTerm, setSearchTerm] = useState("");
+
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const debouncedSearch = useDebounce(searchTerm, 400);
+
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedLocation, setSelectedLocation] = useState<string>("all");
 
@@ -25,6 +29,14 @@ const FindService = () => {
   const [page, setPage] = useState(1);
   const [cursorHistory, setCursorHistory] = useState<number[]>([0]);
   const cursor = cursorHistory[page - 1];
+
+  const filterKey = `${selectedLocation}|${selectedCategory}|${debouncedSearch}`;
+  const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
+  if (prevFilterKey !== filterKey) {
+    setPrevFilterKey(filterKey);
+    setPage(1);
+    setCursorHistory([null]);
+  }
 
   const {
     data: {
@@ -35,7 +47,12 @@ const FindService = () => {
     } = {},
     error,
     isLoading,
-  } = usePublicServices({ servicesCursor: cursor });
+  } = usePublicServices({
+    servicesCursor: cursor,
+    search: debouncedSearch,
+    location: selectedLocation,
+    category: selectedCategory
+  });
 
   const { trackSearch } = useAnalytics();
 

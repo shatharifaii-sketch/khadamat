@@ -1,19 +1,19 @@
-import { Service, useAdminFunctionality, usePendingServices } from '@/hooks/useAdminFunctionality';
-import React, { useMemo, useState } from 'react'
+import { useAdminFunctionality, usePendingServices } from '@/hooks/useAdminFunctionality';
+import { useState } from 'react'
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { Button } from '../ui/button';
-import { Edit, Eye, Plus, Trash2 } from 'lucide-react';
+import { Edit, Trash2 } from 'lucide-react';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Badge } from '../ui/badge';
-import { NavLink } from 'react-router-dom';
-import ServiceForm from './ui/ServiceForm';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 import PendingServiceData from './ui/PendingServiceData';
 import { useTranslation } from 'react-i18next';
 import PaginationComponent from '../PaginationComponent';
+import SearchComponent from './ui/SearchComponent';
+import { useDebounce } from '@/hooks/useDebounce';
 
 interface Props {
   count?: number
@@ -28,9 +28,20 @@ const PendingServicesManagement = ({ count }: Props) => {
   const [page, setPage] = useState(1);
   const [cursorHistory, setCursorHistory] = useState<number[]>([0]);
   const cursor = cursorHistory[page - 1];
-  const [sortOption, setSortOption] = useState<SortOption>('date-desc');
+  const [sortOption, setSortOption] = useState<SortOption>('date-asc');
 
-  const { pendingServicesList: services, hasNextPage, nextCursor, pendServicesCount } = usePendingServices({ pendingServicesCursor: cursor, sort: sortOption }) 
+  const [search, setSearch] = useState<string>("");
+    const debouncedSearch = useDebounce(search, 400);
+  
+    const filterKey = `${sortOption}|${debouncedSearch}`;
+    const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
+    if (prevFilterKey !== filterKey) {
+      setPrevFilterKey(filterKey);
+      setPage(1);
+      setCursorHistory([null]);
+    }
+
+  const { pendingServicesList: services, hasNextPage, nextCursor, pendServicesCount } = usePendingServices({ pendingServicesCursor: cursor, sort: sortOption, search: debouncedSearch }) 
 
   const [serviceToAccept, setServiceToAccept] = useState(null);
   
@@ -60,9 +71,12 @@ const PendingServicesManagement = ({ count }: Props) => {
         <div className="flex items-center justify-between">
           <CardTitle className="text-start" dir={lang === "en" ? "ltr" : "rtl"}>{t("table.pending_services_management.title")}</CardTitle>
         </div>
-        <Select value={sortOption} onValueChange={(value) => setSortOption(value as SortOption)}>
-          <SelectTrigger>
+        <div className='grid grid-cols-2 gap-4'>
+          <SearchComponent page="pending-services" search={search} setSearch={setSearch} />
+          <Select value={sortOption} onValueChange={(value) => setSortOption(value as SortOption)}>
+          <SelectTrigger disabled={true}>
             <SelectValue placeholder={t("table.pending_services_management.sort_placeholder")} />
+            <span>under fixing</span>
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
@@ -76,6 +90,8 @@ const PendingServicesManagement = ({ count }: Props) => {
             </SelectGroup>
           </SelectContent>
         </Select>
+        </div>
+        
       </CardHeader>
       <CardContent>
         <Table>

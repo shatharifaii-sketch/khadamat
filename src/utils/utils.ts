@@ -38,3 +38,7 @@ export function normalizeDecimalInput(input: string): string {
 
   return s;
 }
+
+export function toSearchTerm(raw: string) {
+  return toWesternDigits(raw).trim().replace(/[%,()""\\*]/g, " ").replace(/\s+/g, " ").trim();
+}
