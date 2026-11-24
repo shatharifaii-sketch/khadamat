@@ -6,7 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const AdminViewWrapper = () => {
   const { user } = useAuth();
-  const admin = useIsAdmin();
+  const { isAdmin, isLoading: adminLoading} = useIsAdmin();
 
   const { stats } = useAdminData();
   const {
@@ -17,7 +17,7 @@ const AdminViewWrapper = () => {
     yearlyStats,
   } = useAdminAnalytics();
 
-  if (!user || !admin) return <Navigate to="/" />;
+  if ((!user || !isAdmin) && !adminLoading) return <Navigate to="/" />;
   return (
     <AdminView
       stats={stats}

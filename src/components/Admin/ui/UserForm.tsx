@@ -100,7 +100,7 @@ const UserForm = ({ editingUser, closeForm }: Props) => {
   const handleCreateUser = () => {
     // Implement user creation logic here
     const formattedPhone = phone.length > 0 ? `+${countryCode}${phone}` : "";
-    formData.password.trim()
+    formData.password?.trim()
 
     const payload = {
       ...formData,
@@ -164,7 +164,7 @@ const UserForm = ({ editingUser, closeForm }: Props) => {
               <HoverCardTrigger asChild>
                 <Button variant="link"><Info /></Button>
               </HoverCardTrigger>
-              <HoverCardContent side="left" className="px-3 py-2">
+              <HoverCardContent side={lang === "en" ? "left" : "right"} className="px-3 py-2">
                 <ul className="text-xs text-muted-foreground list-disc list-inside">
                   <li>{t("table.user_management.form.fields.rules.numbers")}</li>
                   <li>{t("table.user_management.form.fields.rules.symbol")}</li>

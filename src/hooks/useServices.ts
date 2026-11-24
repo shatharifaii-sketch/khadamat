@@ -364,7 +364,6 @@ export const useServices = () => {
         throw error;
       }
       
-      console.log('User services fetched:', data?.length, 'services');
       return data || [];
     },
     enabled: !!user?.id

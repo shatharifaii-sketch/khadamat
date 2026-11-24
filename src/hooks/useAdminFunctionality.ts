@@ -13,10 +13,10 @@ import { toast } from "sonner";
 import { ServiceLink } from "@/components/PostService/ServiceLinks";
 import { useEmail } from "./useEmail";
 import { useTranslation } from "react-i18next";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { errorMessages } from "@/types/analytics";
 import { validateAdminUserForm } from "@/utils/formValidation";
-import { PublicService } from "./usePublicServices";
+import { toSearchTerm } from "@/utils/utils";
 
 interface UserProfile {
   id: string;
@@ -72,6 +72,7 @@ type Pagination = {
   servicesCursor?: number | null;
   pendingServicesCursor?: number | null;
   couponsCursor?: number | null;
+  search?: string;
   sort?: "name-desc" | "name-asc" | "date-asc" | "date-desc" | "code-name";
 };
 
@@ -145,11 +146,11 @@ async function deleteServiceMedia(
   return { success: true };
 }
 
-export const useIsAdmin = (): boolean => {
+export const useIsAdmin = () => {
   const { user } = useAuth();
 
-  const { data, error } = useQuery({
-    queryKey: ["is-admin"],
+  const { data, error, isLoading } = useQuery({
+    queryKey: ["is-admin", user?.id],
     queryFn: async () => {
       if (!user) return false;
       const { data, error } = await supabase.rpc("is_admin", { uid: user?.id });
@@ -162,10 +163,15 @@ export const useIsAdmin = (): boolean => {
 
   if (error) throw error;
 
-  return data ?? false;
+  return {
+    isAdmin: data ?? false,
+    isLoading,
+  };
 };
 
 export const useAdminData = () => {
+  const { isAdmin, isLoading } = useIsAdmin();
+
   const [profilesQuery, servicesQuery, pendingServicesQuery, couponsQuery] =
     useSuspenseQueries({
       queries: [
@@ -174,6 +180,8 @@ export const useAdminData = () => {
           queryKey: ["profiles"],
           queryFn: async () => {
             const query = supabase.from("profiles_with_email");
+
+            if (!isAdmin && !isLoading) return null;
 
             const {
               data,
@@ -197,6 +205,8 @@ export const useAdminData = () => {
             const query = supabase
               .from("services")
               .select("id, user_id", { count: "exact" });
+
+            if (!isAdmin && !isLoading) return null;
 
             const {
               data,
@@ -225,6 +235,8 @@ export const useAdminData = () => {
           queryFn: async () => {
             const query = supabase.from("services");
 
+            if (!isAdmin && !isLoading) return null;
+
             const { count: pendServicesCount, error: numQueryError } =
               await query
                 .select("id", { count: "exact", head: true })
@@ -241,6 +253,8 @@ export const useAdminData = () => {
           queryKey: ["coupons"],
           queryFn: async () => {
             const query = supabase.from("coupons");
+
+            if (!isAdmin && !isLoading) return null;
 
             const { count: couponsCount, error: numQueryError } =
               await query.select("id", { count: "exact", head: true });
@@ -278,47 +292,57 @@ export const useAdminData = () => {
   };
 };
 
-export const useUsers = ({ usersCursor, sort }: Pagination) => {
+export const useUsers = ({ usersCursor, sort, search }: Pagination) => {
+  const term = toSearchTerm(search ?? "");
+
   const { data: usersData, isLoading: usersDataLoading } = useSuspenseQuery({
-    queryKey: ["admin-users-data", usersCursor, sort],
+    queryKey: ["admin-users-data", usersCursor, sort, search],
     queryFn: async () => {
       console.log(sort);
-      let listQuery = supabase.from("profiles_with_email").select("*");
+      let listQuery = supabase
+        .from("profiles_with_email")
+        .select("*", { count: "exact" });
 
-      switch (sort) {
-        case "date-asc":
-          listQuery = listQuery.order("created_at", { ascending: true });
+      // switch (sort) {
+      //   case "date-asc":
+      //     listQuery = listQuery.order("created_at", { ascending: true });
 
-          break;
-        case "date-desc":
-          listQuery = listQuery.order("created_at", { ascending: false });
+      //     break;
+      //   case "date-desc":
+      //     listQuery = listQuery.order("created_at", { ascending: false });
 
-          break;
-        case "name-asc":
-          listQuery = listQuery.order("full_name", { ascending: true });
+      //     break;
+      //   case "name-asc":
+      //     listQuery = listQuery.order("full_name", { ascending: true });
 
-          break;
-        case "name-desc":
-          listQuery = listQuery.order("full_name", { ascending: false });
+      //     break;
+      //   case "name-desc":
+      //     listQuery = listQuery.order("full_name", { ascending: false });
 
-          break;
-        default:
-          listQuery = listQuery.order("user_index", {
-            ascending: true,
-          });
+      //     break;
+      //   default:
+      //     listQuery = listQuery.order("user_index", {
+      //       ascending: true,
+      //     });
+      // }
+      if (term) {
+        listQuery = listQuery.or(
+          `full_name.ilike.*${term}*,email.ilike.*${term}*,phone.ilike.*${term}*`,
+        );
       }
 
+      listQuery = listQuery.order("created_at", { ascending: true });
       listQuery = listQuery.limit(PAGE_SIZE + 1);
 
       if (usersCursor !== null) {
         listQuery = listQuery.gt("user_index", usersCursor);
       }
 
-      const { data, error } = await listQuery;
+      const { data, error, count } = await listQuery;
 
       if (error) throw error;
 
-      return data;
+      return { rows: data, total: count ?? 0 };
     },
   });
 
@@ -339,6 +363,8 @@ export const useUsers = ({ usersCursor, sort }: Pagination) => {
     },
   });
 
+  const { rows } = usersData;
+
   const adminSet = useMemo(
     () =>
       new Set(roles.filter((r) => r.role === "admin").map((r) => r.user_id)),
@@ -346,34 +372,40 @@ export const useUsers = ({ usersCursor, sort }: Pagination) => {
   );
 
   const profiles = useMemo(() => {
-    return usersData.map((profile) => ({
+    return rows.map((profile) => ({
       ...profile,
       is_admin: adminSet.has(profile.id),
     }));
-  }, [usersData, adminSet]);
+  }, [rows, adminSet]);
 
-  const hasNextPage = usersData.length > PAGE_SIZE;
+  const hasNextPage = rows.length > PAGE_SIZE;
 
-  const nextCursor = hasNextPage ? usersData[PAGE_SIZE - 1].user_index : null;
+  const nextCursor = hasNextPage ? rows[PAGE_SIZE - 1].user_index : null;
 
   return {
     usersList: profiles.slice(0, PAGE_SIZE),
     nextCursor,
     hasNextPage,
     isLoading: usersDataLoading || rolesQueryLoading,
-    numOfUsers: counts.userCount,
+    numOfUsers: term ? usersData.total : counts.userCount,
   };
 };
 
-export const useServices = ({ servicesCursor, sort }: Pagination) => {
-  const { data: servicesData, isLoading: servicesDataLoading } =
-    useSuspenseQuery({
-      queryKey: ["admin-services-data", servicesCursor, sort],
-      queryFn: async () => {
-        let listQuery = supabase
-          .from("services")
-          .select(
-            `
+export const useServices = ({ servicesCursor, sort, search }: Pagination) => {
+  const term = toSearchTerm(search ?? "");
+
+  const [
+    { data: servicesData, isLoading: servicesDataLoading },
+    { data: servicesCount },
+  ] = useSuspenseQueries({
+    queries: [
+      {
+        queryKey: ["admin-services-data", servicesCursor, sort, term],
+        queryFn: async () => {
+          let listQuery = supabase
+            .from("services")
+            .select(
+              `
               *,
               publisher:fk_services_user_id (
                 full_name
@@ -386,63 +418,66 @@ export const useServices = ({ servicesCursor, sort }: Pagination) => {
                 type
               )
             `,
-          )
-          .eq("status", "published");
+            )
+            .eq("status", "published");
 
-        switch (sort) {
-          case "date-asc":
-            listQuery = listQuery.order("created_at", { ascending: true });
+          // switch (sort) {
+          //   case "date-asc":
+          //     listQuery = listQuery.order("created_at", { ascending: true });
 
-            break;
-          case "date-desc":
-            listQuery = listQuery.order("created_at", { ascending: false });
+          //     break;
+          //   case "date-desc":
+          //     listQuery = listQuery.order("created_at", { ascending: false });
 
-            break;
-          case "name-asc":
-            listQuery = listQuery.order("title", { ascending: true });
+          //     break;
+          //   case "name-asc":
+          //     listQuery = listQuery.order("title", { ascending: true });
 
-            break;
-          case "name-desc":
-            listQuery = listQuery.order("title", { ascending: false });
+          //     break;
+          //   case "name-desc":
+          //     listQuery = listQuery.order("title", { ascending: false });
 
-            break;
-          default:
-            listQuery = listQuery.order("service_index", {
-              ascending: true,
-            });
-        }
+          //     break;
+          //   default:
+          //     listQuery = listQuery.order("service_index", {
+          //       ascending: true,
+          //     });
+          // }
 
-        listQuery = listQuery.limit(PAGE_SIZE + 1);
+          if (term) listQuery = listQuery.ilike("title", `%${term}%`);
+          listQuery = listQuery.order("created_at", { ascending: true });
+          listQuery = listQuery.limit(PAGE_SIZE + 1);
 
-        if (servicesCursor) {
-          listQuery = listQuery.gt("service_index", servicesCursor);
-        }
+          if (servicesCursor != null) {
+            listQuery = listQuery.gt("service_index", servicesCursor);
+          }
 
-        const { data, error } = await listQuery;
+          const { data, error } = await listQuery;
 
-        if (error) throw error;
+          if (error) throw error;
 
-        return data;
+          return data;
+        },
       },
-    });
+      {
+        queryKey: ["admin-services-count", term],
+        queryFn: async () => {
+          let countQuery = supabase
+            .from("services")
+            .select("id", { count: "exact", head: true })
+            .eq("status", "published");
 
-  const { data: servicesCount, isLoading: pubServicesCountLoading } =
-    useSuspenseQuery({
-      queryKey: ["published-services-count"],
-      queryFn: async () => {
-        const { count, error } = await supabase
-          .from("services")
-          .select("id", { count: "exact", head: true })
-          .eq("status", "published");
+          if (term) countQuery = countQuery.ilike("title", `%${term}%`);
 
-        if (error) throw error;
-
-        return count;
+          const { count, error } = await countQuery;
+          if (error) throw error;
+          return count ?? 0;
+        },
       },
-    });
+    ],
+  });
 
   const hasNextPage = servicesData.length > PAGE_SIZE;
-
   const nextCursor = hasNextPage
     ? servicesData[PAGE_SIZE - 1].service_index
     : null;
@@ -459,15 +494,27 @@ export const useServices = ({ servicesCursor, sort }: Pagination) => {
 export const usePendingServices = ({
   pendingServicesCursor,
   sort,
+  search,
 }: Pagination) => {
-  const { data: pendingServicesData, isLoading: pendingServicesDataLoading } =
-    useSuspenseQuery({
-      queryKey: ["admin-pending-services-data", pendingServicesCursor, sort],
-      queryFn: async () => {
-        let listQuery = supabase
-          .from("services")
-          .select(
-            `
+  const term = toSearchTerm(search ?? "");
+
+  const [
+    { data: rows, isLoading: pendingServicesDataLoading },
+    { data: pendServicesCount },
+  ] = useSuspenseQueries({
+    queries: [
+      {
+        queryKey: [
+          "admin-pending-services-data",
+          pendingServicesCursor,
+          sort,
+          term,
+        ],
+        queryFn: async () => {
+          let listQuery = supabase
+            .from("services")
+            .select(
+              `
               *,
               publisher:fk_services_user_id (
                 full_name
@@ -480,70 +527,71 @@ export const usePendingServices = ({
                 type
               )
             `,
-            { count: "exact" },
-          )
-          .eq("status", "pending-approval");
+            )
+            .eq("status", "pending-approval");
 
-        switch (sort) {
-          case "date-asc":
-            listQuery = listQuery.order("created_at", { ascending: true });
+          // switch (sort) {
+          //   case "date-asc":
+          //     listQuery = listQuery.order("created_at", { ascending: true });
 
-            break;
-          case "date-desc":
-            listQuery = listQuery.order("created_at", { ascending: false });
+          //     break;
+          //   case "date-desc":
+          //     listQuery = listQuery.order("created_at", { ascending: false });
 
-            break;
-          case "name-asc":
-            listQuery = listQuery.order("title", { ascending: true });
+          //     break;
+          //   case "name-asc":
+          //     listQuery = listQuery.order("title", { ascending: true });
 
-            break;
-          case "name-desc":
-            listQuery = listQuery.order("title", { ascending: false });
+          //     break;
+          //   case "name-desc":
+          //     listQuery = listQuery.order("title", { ascending: false });
 
-            break;
-          default:
-            listQuery = listQuery.order("service_index", {
-              ascending: true,
-            });
-        }
+          //     break;
+          //   default:
+          //     listQuery = listQuery.order("service_index", {
+          //       ascending: true,
+          //     });
+          // }
 
-        listQuery = listQuery.limit(PAGE_SIZE + 1);
+          if (term) listQuery = listQuery.ilike("title", `%${term}%`);
+          listQuery = listQuery.order("created_at", { ascending: true });
+          listQuery = listQuery.limit(PAGE_SIZE + 1);
 
-        if (pendingServicesCursor) {
-          listQuery = listQuery.gt("service_index", pendingServicesCursor);
-        }
+          if (pendingServicesCursor != null) {
+            listQuery = listQuery.gt("service_index", pendingServicesCursor);
+          }
 
-        const { data, error } = await listQuery;
+          const { data, error } = await listQuery;
 
-        if (error) throw error;
+          if (error) throw error;
 
-        return data;
+          return data;
+        },
       },
-    });
+      {
+        queryKey: ["pending-services-count", term],
+        queryFn: async () => {
+          let countQuery = supabase
+            .from("services")
+            .select("id", { count: "exact", head: true })
+            .eq("status", "pending-approval");
 
-  const { data: pendServicesCount, isLoading: pendServicesCountLoading } =
-    useSuspenseQuery({
-      queryKey: ["pending-services-count"],
-      queryFn: async () => {
-        const { count, error } = await supabase
-          .from("services")
-          .select("id", { count: "exact", head: true })
-          .eq("status", "pending-approval");
+          if (term) countQuery = countQuery.ilike("title", `%${term}%`);
 
-        if (error) throw error;
-
-        return count;
+          const { count, error } = await countQuery;
+          if (error) throw error;
+          return count ?? 0;
+        },
       },
-    });
+    ],
+  });
 
-  const hasNextPage = pendingServicesData.length > PAGE_SIZE;
+  const hasNextPage = rows.length > PAGE_SIZE;
 
-  const nextCursor = hasNextPage
-    ? pendingServicesData[PAGE_SIZE - 1].service_index
-    : null;
+  const nextCursor = hasNextPage ? rows[PAGE_SIZE - 1].service_index : null;
 
   return {
-    pendingServicesList: pendingServicesData.slice(0, PAGE_SIZE),
+    pendingServicesList: rows.slice(0, PAGE_SIZE),
     hasNextPage,
     nextCursor,
     pendServicesCount,
@@ -551,72 +599,75 @@ export const usePendingServices = ({
   };
 };
 
-export const useCoupons = ({ couponsCursor, sort }: Pagination) => {
-  const { data: couponsData, isLoading: couponsDataLoading } = useSuspenseQuery(
-    {
-      queryKey: ["admin-coupons-data", couponsCursor, sort],
-      queryFn: async () => {
-        let listQuery = supabase
-          .from("coupons")
-          .select("*", { count: "exact" });
+export const useCoupons = ({ couponsCursor, sort, search }: Pagination) => {
+  const term = toSearchTerm(search ?? "");
+  const [{ data: rows, isLoading: couponsDataLoading }, { data: couponCount }] =
+    useSuspenseQueries({
+      queries: [
+        {
+          queryKey: ["admin-coupons-data", couponsCursor, sort, term],
+          queryFn: async () => {
+            let listQuery = supabase.from("coupons").select("*");
 
-        switch (sort) {
-          case "date-asc":
+            // switch (sort) {
+            //   case "date-asc":
+            //     listQuery = listQuery.order("created_at", { ascending: true });
+
+            //     break;
+            //   case "date-desc":
+            //     listQuery = listQuery.order("created_at", { ascending: false });
+
+            //     break;
+            //   case "code-name":
+            //     listQuery = listQuery.order("code", { ascending: true });
+
+            //     break;
+            //   default:
+            //     listQuery = listQuery.order("coupon_index", {
+            //       ascending: true,
+            //     });
+            // }
+
+            if (term) {
+              listQuery = listQuery.ilike("code", `%${term}%`);
+            }
             listQuery = listQuery.order("created_at", { ascending: true });
+            listQuery = listQuery.limit(PAGE_SIZE + 1);
 
-            break;
-          case "date-desc":
-            listQuery = listQuery.order("created_at", { ascending: false });
+            if (couponsCursor != null) {
+              listQuery = listQuery.gt("coupon_index", couponsCursor);
+            }
 
-            break;
-          case "code-name":
-            listQuery = listQuery.order("code", { ascending: true });
+            const { data, error } = await listQuery;
 
-            break;
-          default:
-            listQuery = listQuery.order("coupon_index", {
-              ascending: true,
-            });
-        }
+            if (error) throw error;
 
-        listQuery = listQuery.limit(PAGE_SIZE + 1);
+            return data;
+          },
+        },
+        {
+          queryKey: ["coupons-count", term],
+          queryFn: async () => {
+            let countQuery = supabase
+              .from("services")
+              .select("id", { count: "exact", head: true })
+              .eq("status", "pending-approval");
 
-        if (couponsCursor) {
-          listQuery = listQuery.gt("coupon_index", couponsCursor);
-        }
+            if (term) countQuery = countQuery.ilike("title", `%${term}%`);
 
-        const { data, error } = await listQuery;
+            const { count, error } = await countQuery;
+            if (error) throw error;
+            return count ?? 0;
+          },
+        },
+      ],
+    });
 
-        if (error) throw error;
-
-        return data;
-      },
-    },
-  );
-
-  const { data: couponCount, isLoading: couponCountLoading } = useSuspenseQuery(
-    {
-      queryKey: ["coupon-count"],
-      queryFn: async () => {
-        const { count, error } = await supabase
-          .from("coupons")
-          .select("id", { count: "exact", head: true });
-
-        if (error) throw error;
-
-        return count;
-      },
-    },
-  );
-
-  const hasNextPage = couponsData.length > PAGE_SIZE;
-
-  const nextCursor = hasNextPage
-    ? couponsData[PAGE_SIZE - 1].coupon_index
-    : null;
+  const hasNextPage = rows.length > PAGE_SIZE;
+  const nextCursor = hasNextPage ? rows[PAGE_SIZE - 1].coupon_index : null;
 
   return {
-    couponsList: couponsData,
+    couponsList: rows.slice(0, PAGE_SIZE),
     hasNextPage,
     nextCursor,
     couponCount,
@@ -629,13 +680,12 @@ export const useAdminFunctionality = () => {
   const { t } = useTranslation("responses");
   const { sendPasswordUpdateEmail } = useEmail();
 
-  // Admin check - in a real app, you'd check this from the database
-  const admin = useIsAdmin();
+  const { isAdmin: admin, isLoading: adminLoading} = useIsAdmin();
 
   const createUser = useMutation({
     mutationFn: async (formData: Partial<User>) => {
       // Implement user creation logic here
-      if (!admin) {
+      if (!admin && !adminLoading) {
         throw new Error("Only admins can create users");
       }
 
@@ -700,11 +750,22 @@ export const useAdminFunctionality = () => {
 
       return;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-data"] });
-      queryClient.invalidateQueries({
-        queryKey: ["admin-users-data", null, "date-desc"],
-      });
+    onSuccess: async (_data, variables) => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["admin-users-data"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["admin-data"],
+        }),
+        ...(variables.is_admin !== undefined
+          ? [
+              queryClient.invalidateQueries({
+                queryKey: ["user-roles"],
+              }),
+            ]
+          : []),
+      ]);
     },
   });
 
@@ -725,11 +786,15 @@ export const useAdminFunctionality = () => {
 
       return;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-data"] });
-      queryClient.invalidateQueries({
-        queryKey: ["admin-users-data", null, "date-desc"],
-      });
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["admin-users-data"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["admin-data"],
+        }),
+      ]);
     },
   });
 
@@ -778,7 +843,12 @@ export const useAdminFunctionality = () => {
         throw new Error("Only admins can update users");
       }
 
-      const res = validateAdminUserForm(formData);
+      const res = formData.password
+        ? validateAdminUserForm(formData)
+        : {
+            isValid: true,
+            message: "",
+          };
 
       console.log(res);
 
@@ -787,7 +857,12 @@ export const useAdminFunctionality = () => {
         throw new Error(res.message);
       }
 
-      if (formData.email || formData.password || formData.phone) {
+      if (
+        formData.email ||
+        formData.password ||
+        formData.phone ||
+        formData.is_admin !== undefined
+      ) {
         const { data, error } = await supabase.functions.invoke(
           "admin-update-user",
           {
@@ -841,11 +916,22 @@ export const useAdminFunctionality = () => {
 
       return;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-data"] });
-      queryClient.invalidateQueries({
-        queryKey: ["admin-users-data", null, "date-desc"],
-      });
+    onSuccess: async (_data, variables) => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["admin-users-data"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["admin-data"],
+        }),
+        ...(variables.is_admin !== undefined
+          ? [
+              queryClient.invalidateQueries({
+                queryKey: ["user-roles"],
+              }),
+            ]
+          : []),
+      ]);
     },
     onError: () => {},
   });
@@ -886,7 +972,7 @@ export const useAdminFunctionality = () => {
 
       if (!deleteMediaError && !success) {
         throw new Error("error_deleting_service_media");
-      };
+      }
 
       if (deleteMediaError) {
         console.error("Error deleting service media:", deleteMediaError);
@@ -917,14 +1003,18 @@ export const useAdminFunctionality = () => {
 
       return;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-data"] });
-      queryClient.invalidateQueries({
-        queryKey: ["admin-services-data", null, "date-desc"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["admin-pending-services-data", null, "date-desc"],
-      });
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["admin-services-data"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["admin-services-count"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["admin-data"],
+        }),
+      ]);
     },
   });
 
@@ -974,11 +1064,18 @@ export const useAdminFunctionality = () => {
 
       return;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-data"] });
-      queryClient.invalidateQueries({
-        queryKey: ["admin-services-data", null, "date-desc"],
-      });
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["admin-services-data"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["admin-services-count"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["admin-data"],
+        }),
+      ]);
     },
   });
 
@@ -1027,11 +1124,18 @@ export const useAdminFunctionality = () => {
 
       return;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-data"] });
-      queryClient.invalidateQueries({
-        queryKey: ["admin-services-data", null, "date-desc"],
-      });
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["admin-services-data"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["admin-services-count"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["admin-data"],
+        }),
+      ]);
     },
   });
 
@@ -1053,10 +1157,18 @@ export const useAdminFunctionality = () => {
 
       return { success: true };
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["admin-pending-services-data", null, "date-desc"],
-      });
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["admin-pending-services-data"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["admin-pending-services-count"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["admin-data"],
+        }),
+      ]);
       toast.success(t("service_approved"));
     },
     onError: (error: Error) => {
@@ -1105,11 +1217,15 @@ export const useAdminFunctionality = () => {
 
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-data"] });
-      queryClient.invalidateQueries({
-        queryKey: ["admin-coupons-data", null, "date-desc"],
-      });
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["admin-coupons-data"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["admin-data"],
+        }),
+      ]);
     },
     onError: (error) => {
       console.error("Mutation error:", error);
@@ -1133,11 +1249,15 @@ export const useAdminFunctionality = () => {
 
       return { success: true };
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-data"] });
-      queryClient.invalidateQueries({
-        queryKey: ["admin-coupons-data", null, "date-desc"],
-      });
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["admin-coupons-data"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["admin-data"],
+        }),
+      ]);
     },
     onError: (error) => {
       console.error("Mutation error:", error);

@@ -244,7 +244,8 @@ const ServiceForm = ({ isEdit, service, closeForm }: Props) => {
             </div>
 
             <Button
-                onClick={() => handleSubmit()}
+                onClick={handleSubmit}
+                disabled={updateService.isPending || createService.isPending}
                 className="w-full"
             >
                 {isEdit ? t("table.service_management.form.save_edit") : t("table.service_management.form.create")}

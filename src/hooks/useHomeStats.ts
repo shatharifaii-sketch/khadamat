@@ -17,7 +17,6 @@ export const useHomeStats = () => {
 
   // Set up real-time subscription for stats updates
   useEffect(() => {
-    console.log('Setting up real-time subscription for home stats...');
     
     const channel = supabase
       .channel('home-stats-changes')
@@ -28,9 +27,7 @@ export const useHomeStats = () => {
           schema: 'public',
           table: 'services'
         },
-        (payload) => {
-          console.log('Real-time service change detected for stats:', payload);
-          
+        () => {          
           // Invalidate and refetch the stats data
           queryClient.invalidateQueries({ queryKey: ['home-stats'] });
         }
@@ -38,7 +35,6 @@ export const useHomeStats = () => {
       .subscribe();
 
     return () => {
-      console.log('Cleaning up real-time subscription for home stats');
       supabase.removeChannel(channel);
     };
   }, [queryClient]);

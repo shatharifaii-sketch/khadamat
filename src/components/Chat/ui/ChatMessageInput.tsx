@@ -112,7 +112,7 @@ const ChatMessageInput = ({
         </div>
       )}
       <form
-        className="grid grid-cols-1 md:grid-cols-3 w-full gap-1"
+        className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 w-full gap-1"
         dir="ltr"
         onSubmit={handleSendMessage}
       >
@@ -125,7 +125,7 @@ const ChatMessageInput = ({
             className="w-full col-span-2"
           />
         </div>
-        <div className="flex flex-col gap-3 pb-2">
+        <div className="flex flex-col gap-3 pb-2 col-span-1 lg:col-span-2">
           <div className="flex items-center gap-2">
             <div className="w-1/3">
               <input
@@ -168,7 +168,7 @@ const ChatMessageInput = ({
             </div>
           </div>
         </div>
-        <p className="text-muted-foreground text-sm col-span-3">{t("deal_suggestion")}</p>
+        <p className="text-muted-foreground text-sm col-span-3 lg:col-span-4">{t("deal_suggestion")}</p>
       </form>
     </div>
   );

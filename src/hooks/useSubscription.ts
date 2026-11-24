@@ -362,8 +362,6 @@ notes
 
       const pendingServices = userServices.filter((s) => s.status === "pending-approval")
 
-      console.log(pendingServices)
-
       if (error) {
         console.error('Error checking user services for quota:', error);
         return {
@@ -382,8 +380,6 @@ notes
       const currentServiceCount = userServices?.length || 0;
 
       const canPost = currentServiceCount < (subscription.services_allowed + (userExtraProducts?.extra_products_count || 0));
-
-      console.log("can post service: ", canPost, "currentServiceCount: ", currentServiceCount, "allowed: ", subscription.services_allowed, "extra products: ", userExtraProducts?.extra_products_count || 0)
 
       return {
         user: true,

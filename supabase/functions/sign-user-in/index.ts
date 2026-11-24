@@ -117,11 +117,11 @@ export default {
 
       console.log("EMAIL: ", email, "PASSWORD: ", password)
 
-      return {
+      return Response.json({
         success: true,
         message: "",
         error: null
-      };
+      })
     } catch (error) {
       console.error("ERROR: ", error);
       return Response.json({

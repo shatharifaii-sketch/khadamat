@@ -1,6 +1,4 @@
-import { UserProfile } from '@/hooks/useProfile';
-import { Tables } from '@/integrations/supabase/types'
-import React, { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { Button } from '../ui/button';
@@ -14,6 +12,8 @@ import CouponForm from './ui/CouponForm';
 import { useAdminFunctionality, useCoupons } from '@/hooks/useAdminFunctionality';
 import { useTranslation } from 'react-i18next';
 import PaginationComponent from '../PaginationComponent';
+import SearchComponent from './ui/SearchComponent';
+import { useDebounce } from '@/hooks/useDebounce';
 
 interface Props {
     count?: number;
@@ -30,11 +30,23 @@ const CouponsManagement = ({
     const [page, setPage] = useState<number>(0);
     const [cursorHistory, setCursorHistory] = useState<number[]>([0]);
     const cursor = cursorHistory[page - 1];
-    const [sortOption, setSortOption] = useState<SortOption>('date-desc');
+    const [sortOption, setSortOption] = useState<SortOption>('date-asc');
+
+    const [search, setSearch] = useState<string>("");
+      const debouncedSearch = useDebounce(search, 400);
+    
+      const filterKey = `${sortOption}|${debouncedSearch}`;
+      const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
+      if (prevFilterKey !== filterKey) {
+        setPrevFilterKey(filterKey);
+        setPage(1);
+        setCursorHistory([null]);
+      }
 
     const { couponsList: coupons, hasNextPage, nextCursor, couponCount } = useCoupons({
         couponsCursor: cursor,
-        sort: sortOption
+        sort: sortOption,
+        search: debouncedSearch
     })
 
     const { toast } = useToast();
@@ -79,9 +91,12 @@ const CouponsManagement = ({
                         </DialogContent>
                     </Dialog>
                 </div>
-                <Select value={sortOption} onValueChange={(value: SortOption) => setSortOption(value)}>
-                    <SelectTrigger>
+                <div className='grid grid-cols-2 gap-4'>
+                    <SearchComponent page='coupons' search={search} setSearch={setSearch} />
+                    <Select value={sortOption} onValueChange={(value: SortOption) => setSortOption(value)}>
+                    <SelectTrigger disabled={true}>
                         <SelectValue placeholder={t("table.coupons_management.sort.label")} />
+                        <span>under fixing</span>
                     </SelectTrigger>
                     <SelectContent>
                         <SelectGroup>
@@ -92,6 +107,8 @@ const CouponsManagement = ({
                         </SelectGroup>
                     </SelectContent>
                 </Select>
+                </div>
+                
             </CardHeader>
             <CardContent>
                 <Table>

@@ -10,6 +10,7 @@ import { ServiceLink } from "@/components/PostService/ServiceLinks";
 import { Reservation, ReservationList } from "@/contexts/ReservationsContext";
 import { getReservationAvailability } from "@/lib/utils";
 import { Json } from "@/integrations/supabase/types";
+import { toSearchTerm } from "@/utils/utils";
 
 export interface PublicService {
   id: string;
@@ -40,15 +41,20 @@ export interface PublicService {
 
 export const usePublicServices = ({
   servicesCursor,
+  search,
+  category,
+  location
 }: {
   servicesCursor?: number | null;
+  search?: string;
+  category?: string;
+  location?: string;
 }) => {
   const queryClient = useQueryClient();
+  const term = toSearchTerm(search ?? "");
 
   // Set up real-time subscription
   useEffect(() => {
-    console.log("Setting up real-time subscription for services...");
-
     const channel = supabase
       .channel("public-services-changes")
       .on(
@@ -58,9 +64,7 @@ export const usePublicServices = ({
           schema: "public",
           table: "services",
         },
-        (payload) => {
-          console.log("Real-time service change detected:", payload);
-
+        () => {
           // Invalidate and refetch the services data
           queryClient.invalidateQueries({ queryKey: ["public-services"] });
           queryClient.invalidateQueries({ queryKey: ["home-stats"] });
@@ -69,13 +73,12 @@ export const usePublicServices = ({
       .subscribe();
 
     return () => {
-      console.log("Cleaning up real-time subscription for services");
       supabase.removeChannel(channel);
     };
   }, [queryClient]);
 
   return useQuery({
-    queryKey: ["public-services", servicesCursor],
+    queryKey: ["public-services", servicesCursor, term],
     queryFn: async () => {
       let listQuery = supabase
         .from("services")
@@ -92,6 +95,10 @@ export const usePublicServices = ({
         .eq("status", "published")
         .order("service_index", { ascending: true })
         .limit(PAGE_SIZE + 1);
+      
+      if (term) listQuery.ilike("title", `%${term}%`);
+      if (category.length > 0 && category !== "all") listQuery.ilike("category", `%${category}%`);
+      if (location.length > 0 && location !== "all") listQuery.ilike("location", `%${location}%`);
 
       const { count, error: countError } = await supabase
         .from("services")

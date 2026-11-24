@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Plus, Edit, Trash2, Eye } from 'lucide-react';
-import { Service, useAdminFunctionality, useServices } from '@/hooks/useAdminFunctionality';
+import { useAdminFunctionality, useServices } from '@/hooks/useAdminFunctionality';
 import ServiceForm from './ui/ServiceForm';
 import { NavLink } from 'react-router-dom';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
@@ -15,6 +15,8 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import PaginationComponent from '../PaginationComponent';
 import { truncateString } from '@/lib/utils';
+import SearchComponent from './ui/SearchComponent';
+import { useDebounce } from '@/hooks/useDebounce';
 
 
 export interface UserProfile {
@@ -36,9 +38,20 @@ export const ServiceManagement = ({ count }: ServiceManagementProps) => {
   const [page, setPage] = useState(1);
   const [cursorHistory, setCursorHistory] = useState<number[]>([0]);
   const cursor = cursorHistory[page - 1];
-  const [sortOption, setSortOption] = useState<SortOption>('date-desc');
+  const [sortOption, setSortOption] = useState<SortOption>('date-asc');
 
-  const { servicesList: services, hasNextPage, nextCursor, servicesCount } = useServices({ servicesCursor: cursor, sort: sortOption });
+  const [search, setSearch] = useState<string>("");
+    const debouncedSearch = useDebounce(search, 400);
+  
+    const filterKey = `${sortOption}|${debouncedSearch}`;
+    const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
+    if (prevFilterKey !== filterKey) {
+      setPrevFilterKey(filterKey);
+      setPage(1);
+      setCursorHistory([null]);
+    }
+
+  const { servicesList: services, hasNextPage, nextCursor, servicesCount } = useServices({ servicesCursor: cursor, sort: sortOption, search: debouncedSearch });
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingService, setEditingService] = useState(null);
@@ -79,9 +92,12 @@ export const ServiceManagement = ({ count }: ServiceManagementProps) => {
             </DialogContent>
           </Dialog>
         </div>
-        <Select value={sortOption} onValueChange={(value) => setSortOption(value as SortOption)}>
-          <SelectTrigger>
+        <div className='grid grid-cols-2 gap-4'>
+          <SearchComponent page='services' search={search} setSearch={setSearch} />
+          <Select value={sortOption} onValueChange={(value) => setSortOption(value as SortOption)}>
+          <SelectTrigger disabled={true}>
             <SelectValue placeholder={t("table.service_management.sort_placeholder")} />
+            <span>under fixing</span>
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
@@ -94,6 +110,8 @@ export const ServiceManagement = ({ count }: ServiceManagementProps) => {
             </SelectGroup>
           </SelectContent>
         </Select>
+        </div>
+        
       </CardHeader>
       <CardContent>
         <Table>
